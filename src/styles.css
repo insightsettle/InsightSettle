@@ -157,3 +157,25 @@
     color: var(--color-foreground);
   }
 }
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@utility gradient-mint {
+  background-image: var(--gradient-mint);
+}
+
+@utility glow-mint {
+  box-shadow: var(--glow-mint);
+}
+
+@utility text-gradient-mint {
+  background-image: var(--gradient-mint);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
