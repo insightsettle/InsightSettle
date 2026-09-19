@@ -65,7 +65,7 @@ export const feeTiers = [
 ];
 
 export function calcFee(amount: number) {
-  const tier = feeTiers.find((t) => amount >= t.from && amount <= t.to) ?? feeTiers[0];
+  const tier = feeTiers.find((t) => amount >= t.from && amount <= t.to) ?? feeTiers[0]!;
   const fee = Math.max(amount * tier.rate, tier.min);
   return { fee: Math.round(fee * 100) / 100, rate: tier.rate, tier };
 }
