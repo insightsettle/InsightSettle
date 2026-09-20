@@ -450,7 +450,10 @@ function DealPage() {
                     {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
                   </p>
                 )}
-                <p className="mt-4 text-xs text-warning">Sample payment data</p>
+                <p className="mt-4 text-xs text-warning">
+                  No card provider is connected yet, so transfers are confirmed manually by the
+                  Insight team and every step is recorded above.
+                </p>
               </CardContent>
             </Card>
 
