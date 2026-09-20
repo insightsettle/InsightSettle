@@ -54,8 +54,8 @@ function FeesPage() {
             <div>
               <h2 className="text-lg font-bold">Platform fee rules</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Define each value band yourself: charge a percentage, a fixed amount, or whichever is
-                higher.
+                Define each value band yourself: charge a percentage, a fixed amount, or whichever
+                is higher.
               </p>
             </div>
             <div className="flex gap-2">

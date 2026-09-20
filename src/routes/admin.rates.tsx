@@ -31,9 +31,7 @@ function RatesPage() {
 
   const patch = (code: string, changes: Partial<RateRow>) =>
     setRows(
-      settings.rates.map((r) =>
-        r.code === code ? { ...r, ...changes, updatedAt: today() } : r,
-      ),
+      settings.rates.map((r) => (r.code === code ? { ...r, ...changes, updatedAt: today() } : r)),
     );
 
   const addRow = () => {
@@ -54,8 +52,7 @@ function RatesPage() {
     setDraft({ code: "", name: "", baseRate: "", spread: "1.05" });
   };
 
-  const markAllUpdated = () =>
-    setRows(settings.rates.map((r) => ({ ...r, updatedAt: today() })));
+  const markAllUpdated = () => setRows(settings.rates.map((r) => ({ ...r, updatedAt: today() })));
 
   return (
     <div className="mt-8 space-y-6">
@@ -139,9 +136,7 @@ function RatesPage() {
                           variant="ghost"
                           size="icon"
                           aria-label={`Remove ${row.code}`}
-                          onClick={() =>
-                            setRows(settings.rates.filter((r) => r.code !== row.code))
-                          }
+                          onClick={() => setRows(settings.rates.filter((r) => r.code !== row.code))}
                         >
                           <Trash2 className="size-4" />
                         </Button>
@@ -230,8 +225,8 @@ function RatesPage() {
             </div>
             <p className="mt-4 rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">
               Example: a supplier invoice of 10,000 BHD at a base rate of{" "}
-              {fmtRate(settings.rates.find((r) => r.code === "BHD")?.baseRate ?? 0)} is quoted to the
-              customer at{" "}
+              {fmtRate(settings.rates.find((r) => r.code === "BHD")?.baseRate ?? 0)} is quoted to
+              the customer at{" "}
               {fmtRate(
                 customerRate(
                   settings.rates.find((r) => r.code === "BHD") ?? {

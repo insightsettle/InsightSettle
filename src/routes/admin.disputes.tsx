@@ -39,8 +39,7 @@ function DisputeOpsPage() {
 
   const selected = useMemo(() => cases.find((c) => c.id === selectedId), [cases, selectedId]);
 
-  const setPolicy = (patch: Partial<typeof policy>) =>
-    update({ dispute: { ...policy, ...patch } });
+  const setPolicy = (patch: Partial<typeof policy>) => update({ dispute: { ...policy, ...patch } });
 
   const escalate = (id: string) =>
     setCases((all) =>
@@ -118,8 +117,9 @@ function DisputeOpsPage() {
             <div>
               <h2 className="text-lg font-bold">Resolution policy</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                AI mediation runs for a fixed window. If the parties do not settle, the case moves to
-                an external arbitrator and the arbitration fee is charged to the party you choose.
+                AI mediation runs for a fixed window. If the parties do not settle, the case moves
+                to an external arbitrator and the arbitration fee is charged to the party you
+                choose.
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={reset}>
