@@ -96,6 +96,39 @@ function AdminOverview() {
 
   return (
     <div className="mt-8 space-y-8">
+      <Card className="border-foreground/20 bg-foreground text-background">
+        <CardContent className="p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-background/60">
+            Live platform data
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { label: "Registered members", value: live ? String(live.userCount) : "…" },
+              { label: "Pending identity checks", value: live ? String(live.pendingKyc) : "…" },
+              { label: "Deals created", value: live ? String(live.dealCount) : "…" },
+              { label: "Deal volume", value: live ? formatSAR(live.dealVolume) : "…" },
+              { label: "Deals in dispute", value: live ? String(live.disputed) : "…" },
+            ].map((item) => (
+              <div key={item.label} className="rounded-lg bg-background/10 p-4">
+                <p className="text-xs text-background/70">{item.label}</p>
+                <p className="mt-1 text-xl font-extrabold">{item.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3 text-sm">
+            <Link to="/console/users" className="font-semibold text-primary hover:underline">
+              Manage members →
+            </Link>
+            <Link to="/console/deals" className="font-semibold text-primary hover:underline">
+              Review all deals →
+            </Link>
+            <Link to="/console/risk" className="font-semibold text-primary hover:underline">
+              Run risk screening →
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k) => (
           <Card key={k.label}>
