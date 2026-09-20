@@ -1,9 +1,18 @@
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { Link, Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Lock } from "lucide-react";
 
 import { SiteShell } from "@/components/site/SiteShell";
+import { supabase } from "@/integrations/supabase/client";
+import { getStaffAccess } from "@/lib/staff.functions";
 
 export const Route = createFileRoute("/console")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) throw redirect({ to: "/auth" });
+  },
   head: () => ({
     meta: [
       { title: "Platform console | Insight" },
