@@ -11,9 +11,6 @@ const nav = [
   { to: "/how-it-works", label: "How it works" },
   { to: "/roles", label: "Roles" },
   { to: "/services", label: "Services & fees" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/documents", label: "Document review" },
-  { to: "/disputes", label: "Disputes" },
 ] as const;
 
 export function SiteHeader() {
@@ -41,7 +38,7 @@ export function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link to="/dashboard">New deal</Link>
+            <Link to="/services">Get started</Link>
           </Button>
           <Button
             variant="outline"
@@ -95,16 +92,21 @@ export function SiteFooter() {
           ]}
         />
         <FooterCol
-          title="Account"
+          title="Customer area"
           links={[
-            { to: "/dashboard", label: "Dashboard" },
+            { to: "/dashboard", label: "Client dashboard" },
             { to: "/documents", label: "Document review" },
             { to: "/disputes", label: "Dispute center" },
           ]}
         />
         <div>
-          <h4 className="text-sm font-semibold">Policies</h4>
+          <h4 className="text-sm font-semibold">Insight team</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <li>
+              <Link to="/admin" className="transition-colors hover:text-primary">
+                Platform console (internal)
+              </Link>
+            </li>
             <li>Terms of service</li>
             <li>Privacy policy</li>
             <li>Disputes & refunds</li>

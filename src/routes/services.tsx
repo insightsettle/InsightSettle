@@ -50,25 +50,22 @@ const services = [
   },
   {
     icon: ArrowRightLeft,
-    t: "Currency conversion",
-    d: "Cross-currency deals use a clearly disclosed exchange rate and conversion spread.",
-    points: ["Rate shown before funding", "1.25% indicative spread", "Settlement summary"],
+    t: "Cross-border payments",
+    d: "Pay a supplier abroad in their currency while you pay in Saudi riyals.",
+    points: ["One clear rate before funding", "Riyal total fixed at funding", "Settlement summary"],
   },
 ];
 function Page() {
   const [amount, setAmount] = useState(18000);
-  const [needsFx, setNeedsFx] = useState(false);
   const { fee, rate } = calcFee(amount);
-  const spread = needsFx ? amount * 0.0125 : 0;
-  const total = fee + spread;
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-16">
-        <p className="text-sm font-semibold text-primary">SERVICES & REVENUE</p>
+        <p className="text-sm font-semibold text-primary">SERVICES & FEES</p>
         <h1 className="mt-2 text-4xl font-extrabold">Transparent pricing, before you fund.</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Insight earns a tiered transaction fee and, when currencies differ, a disclosed conversion
-          spread. Mediation has no separate fee.
+          Insight charges a tiered transaction fee. Cross-border deals are converted at the rate
+          shown before you fund, and mediation has no separate fee.
         </p>
         <div className="mt-10 grid gap-5 sm:grid-cols-2">
           {services.map((s) => (
@@ -116,9 +113,9 @@ function Page() {
                   </tr>
                 ))}
                 <tr className="border-t [&>td]:px-4 [&>td]:py-3">
-                  <td>Currency conversion spread</td>
-                  <td className="font-bold text-primary">1.25%</td>
-                  <td>Only for cross-currency deals</td>
+                  <td>Currency conversion</td>
+                  <td className="font-bold text-primary">No extra fee</td>
+                  <td>Rate shown before funding</td>
                 </tr>
                 <tr className="border-t [&>td]:px-4 [&>td]:py-3">
                   <td>Mediation</td>
@@ -130,7 +127,7 @@ function Page() {
           </div>
           <Card className="glow-mint border-primary/25">
             <CardContent className="p-6">
-              <h2 className="font-bold">Revenue calculator</h2>
+              <h2 className="font-bold">Fee calculator</h2>
               <div className="mt-5 space-y-3">
                 <Label htmlFor="amount">Deal value (SAR)</Label>
                 <Input
@@ -147,21 +144,11 @@ function Page() {
                   step={100}
                   onValueChange={(v) => setAmount(v[0] ?? 0)}
                 />
-                <label className="flex items-center gap-3 rounded-md border p-3 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={needsFx}
-                    onChange={(e) => setNeedsFx(e.target.checked)}
-                    className="accent-primary"
-                  />
-                  Buyer and seller use different currencies
-                </label>
               </div>
               <dl className="mt-6 space-y-3 border-t pt-5 text-sm">
-                <Row k="Transaction fee" v={formatSAR(fee)} />
-                <Row k="Conversion spread" v={formatSAR(spread)} />
-                <Row k="Total Insight revenue" v={formatSAR(total)} strong />
-                <Row k="Seller settlement" v={formatSAR(Math.max(0, amount - total))} />
+                <Row k="Deal value" v={formatSAR(amount)} />
+                <Row k="Transaction fee" v={formatSAR(fee)} strong />
+                <Row k="Seller settlement" v={formatSAR(Math.max(0, amount - fee))} />
               </dl>
               <p className="mt-4 text-xs text-warning">
                 Sample pricing for illustration only. The live rate is shown before funding.

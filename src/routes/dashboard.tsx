@@ -9,7 +9,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { FxReport } from "@/components/site/FxReport";
+import { FxCustomerQuote } from "@/components/site/FxCustomerQuote";
 import { SiteShell } from "@/components/site/SiteShell";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -116,16 +116,16 @@ function Dashboard() {
             <Card className="mt-4 border-primary/25 bg-primary/5">
               <CardContent className="p-5">
                 <Banknote className="size-5 text-primary" />
-                <p className="mt-3 font-semibold">Currency spread revenue</p>
+                <p className="mt-3 font-semibold">Paying in another currency?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Cross-currency settlements include a transparent conversion spread shown before
-                  funding.
+                  Your riyal total is fixed at the rate shown when you fund the deal — no surprises
+                  later.
                 </p>
               </CardContent>
             </Card>
           </section>
         </div>
-        <FxReport />
+        <FxCustomerQuote />
       </div>
     </SiteShell>
   );
