@@ -1,6 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { AlertCircle, Banknote, BriefcaseBusiness, Plus, ShieldCheck, Wallet } from "lucide-react";
+import {
+  AlertCircle,
+  Banknote,
+  BriefcaseBusiness,
+  Plus,
+  ShieldAlert,
+  ShieldCheck,
+  Wallet,
+} from "lucide-react";
 
 import { FxCustomerQuote } from "@/components/site/FxCustomerQuote";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -8,6 +16,7 @@ import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSessionUser } from "@/hooks/use-session";
+import { useStaffAccess } from "@/hooks/use-staff";
 import { listMyDeals } from "@/lib/deals";
 import { activity, dashboardStats, formatSAR } from "@/lib/demo-data";
 
@@ -34,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Dashboard() {
   const { user } = useSessionUser();
+  const { isStaff } = useStaffAccess();
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
   const stats = [
     { label: "Available balance", value: formatSAR(dashboardStats.available), icon: Wallet },
@@ -59,6 +69,29 @@ function Dashboard() {
             </Link>
           </Button>
         </div>
+
+        {isStaff && (
+          <Card className="mt-6 border-foreground/20 bg-foreground text-background">
+            <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
+              <div>
+                <p className="flex items-center gap-2 font-semibold">
+                  <ShieldAlert className="size-4" /> You are signed in as Insight staff
+                </p>
+                <p className="mt-1 text-sm text-background/70">
+                  This page is the customer view. Platform-wide members, deals, revenue, rates,
+                  fees, and disputes live in the internal console.
+                </p>
+              </div>
+              <Button
+                asChild
+                variant="outline"
+                className="border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background"
+              >
+                <Link to="/console">Open staff console</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <section className="mt-8">
           <h2 className="text-xl font-bold">Your saved deals</h2>

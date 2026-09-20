@@ -1,12 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
+import { Menu, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 
 import logo from "@/assets/insight-wordmark-transparent.png";
 import { NotificationBell } from "@/components/site/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { useSessionUser } from "@/hooks/use-session";
+import { useStaffAccess } from "@/hooks/use-staff";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ const nav = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useSessionUser();
+  const { isStaff } = useStaffAccess();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -53,6 +55,18 @@ export function SiteHeader() {
           {loading ? null : user ? (
             <>
               <NotificationBell />
+              {isStaff && (
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="hidden border-foreground/25 sm:inline-flex"
+                >
+                  <Link to="/console">
+                    <ShieldAlert className="size-4" /> Staff console
+                  </Link>
+                </Button>
+              )}
               <Button asChild size="sm" className="hidden sm:inline-flex">
                 <Link to="/dashboard">My dashboard</Link>
               </Button>
