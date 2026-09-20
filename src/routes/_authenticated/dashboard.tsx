@@ -175,6 +175,39 @@ function Dashboard() {
         </div>
         <FxCustomerQuote />
       </div>
-    </SiteShell>
+}
+
+function VerificationCard() {
+  const { data } = useQuery({
+    queryKey: ["my-profile"],
+    queryFn: async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("verification_status")
+        .maybeSingle();
+      return profile;
+    },
+  });
+  const status = data?.verification_status ?? "pending";
+  if (status === "verified") return null;
+  return (
+    <Card className="mt-6 border-warning/40 bg-warning/5">
+      <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
+        <div>
+          <p className="flex items-center gap-2 font-semibold">
+            <ShieldCheck className="size-4 text-warning" /> Verify your identity
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {status === "rejected"
+              ? "Your last submission was not accepted. Upload a clearer document to continue."
+              : "Upload an ID or commercial register so you can fund and receive payouts without delays."}
+          </p>
+        </div>
+        <Button asChild variant="outline">
+          <Link to="/verification">Upload documents</Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
+
