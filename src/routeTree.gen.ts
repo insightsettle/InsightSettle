@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -25,6 +26,8 @@ import { Route as AdminRatesRouteImport } from './routes/admin.rates'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
+import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
+import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -38,6 +41,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -106,10 +114,22 @@ const AuthenticatedDealsDealIdRoute =
     path: '/deals/$dealId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDealsNewRoute = AuthenticatedDealsNewRouteImport.update({
+  id: '/deals/new',
+  path: '/deals/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInviteTokenRoute =
+  AuthenticatedInviteTokenRouteImport.update({
+    id: '/invite/$token',
+    path: '/invite/$token',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
@@ -123,9 +143,12 @@ export interface FileRoutesByFullPath {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/admin/': typeof AdminIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
+  '/deals/new': typeof AuthenticatedDealsNewRoute
+  '/invite/$token': typeof AuthenticatedInviteTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
@@ -139,12 +162,15 @@ export interface FileRoutesByTo {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/admin': typeof AdminIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
+  '/deals/new': typeof AuthenticatedDealsNewRoute
+  '/invite/$token': typeof AuthenticatedInviteTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
@@ -158,12 +184,15 @@ export interface FileRoutesById {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/admin/': typeof AdminIndexRoute
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
+  '/_authenticated/deals/new': typeof AuthenticatedDealsNewRoute
+  '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/auth'
     | '/how-it-works'
     | '/roles'
     | '/services'
@@ -177,9 +206,12 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/admin/'
     | '/deals/$dealId'
+    | '/deals/new'
+    | '/invite/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/how-it-works'
     | '/roles'
     | '/services'
@@ -193,11 +225,14 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/admin'
     | '/deals/$dealId'
+    | '/deals/new'
+    | '/invite/$token'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/admin'
+    | '/auth'
     | '/how-it-works'
     | '/roles'
     | '/services'
@@ -211,12 +246,15 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/admin/'
     | '/_authenticated/deals/$dealId'
+    | '/_authenticated/deals/new'
+    | '/_authenticated/invite/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  AuthRoute: typeof AuthRoute
   HowItWorksRoute: typeof HowItWorksRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
@@ -245,6 +283,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -338,6 +383,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDealsDealIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/deals/new': {
+      id: '/_authenticated/deals/new'
+      path: '/deals/new'
+      fullPath: '/deals/new'
+      preLoaderRoute: typeof AuthenticatedDealsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invite/$token': {
+      id: '/_authenticated/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -346,6 +405,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
+  AuthenticatedDealsNewRoute: typeof AuthenticatedDealsNewRoute
+  AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -353,6 +414,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
+  AuthenticatedDealsNewRoute: AuthenticatedDealsNewRoute,
+  AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -378,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  AuthRoute: AuthRoute,
   HowItWorksRoute: HowItWorksRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
