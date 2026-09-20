@@ -92,16 +92,21 @@ export function SiteFooter() {
           ]}
         />
         <FooterCol
-          title="Account"
+          title="Customer area"
           links={[
-            { to: "/dashboard", label: "Dashboard" },
+            { to: "/dashboard", label: "Client dashboard" },
             { to: "/documents", label: "Document review" },
             { to: "/disputes", label: "Dispute center" },
           ]}
         />
         <div>
-          <h4 className="text-sm font-semibold">Policies</h4>
+          <h4 className="text-sm font-semibold">Insight team</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <li>
+              <Link to="/admin" className="transition-colors hover:text-primary">
+                Platform console (internal)
+              </Link>
+            </li>
             <li>Terms of service</li>
             <li>Privacy policy</li>
             <li>Disputes & refunds</li>
