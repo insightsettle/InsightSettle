@@ -13,9 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConsoleRouteImport } from './routes/console'
+import { Route as DisputePolicyRouteImport } from './routes/dispute-policy'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
@@ -55,9 +60,29 @@ const ConsoleRoute = ConsoleRouteImport.update({
   path: '/console',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DisputePolicyRoute = DisputePolicyRouteImport.update({
+  id: '/dispute-policy',
+  path: '/dispute-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RolesRoute = RolesRouteImport.update({
@@ -68,6 +93,11 @@ const RolesRoute = RolesRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -173,9 +203,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/console': typeof ConsoleRouteWithChildren
+  '/dispute-policy': typeof DisputePolicyRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -199,9 +234,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dispute-policy': typeof DisputePolicyRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -228,9 +268,14 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/console': typeof ConsoleRouteWithChildren
+  '/dispute-policy': typeof DisputePolicyRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
@@ -257,9 +302,14 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/console'
+    | '/dispute-policy'
+    | '/help'
     | '/how-it-works'
+    | '/pricing'
+    | '/privacy'
     | '/roles'
     | '/services'
+    | '/terms'
     | '/dashboard'
     | '/disputes'
     | '/documents'
@@ -283,9 +333,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/dispute-policy'
+    | '/help'
     | '/how-it-works'
+    | '/pricing'
+    | '/privacy'
     | '/roles'
     | '/services'
+    | '/terms'
     | '/dashboard'
     | '/disputes'
     | '/documents'
@@ -311,9 +366,14 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/console'
+    | '/dispute-policy'
+    | '/help'
     | '/how-it-works'
+    | '/pricing'
+    | '/privacy'
     | '/roles'
     | '/services'
+    | '/terms'
     | '/_authenticated/dashboard'
     | '/_authenticated/disputes'
     | '/_authenticated/documents'
@@ -340,9 +400,14 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
+  DisputePolicyRoute: typeof DisputePolicyRoute
+  HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
+  TermsRoute: typeof TermsRoute
   ApiDealRiskRoute: typeof ApiDealRiskRoute
   ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
   ApiDocumentReviewRoute: typeof ApiDocumentReviewRoute
@@ -378,11 +443,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dispute-policy': {
+      id: '/dispute-policy'
+      path: '/dispute-policy'
+      fullPath: '/dispute-policy'
+      preLoaderRoute: typeof DisputePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/how-it-works': {
       id: '/how-it-works'
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/roles': {
@@ -397,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -590,9 +690,14 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
+  DisputePolicyRoute: DisputePolicyRoute,
+  HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
+  PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
+  TermsRoute: TermsRoute,
   ApiDealRiskRoute: ApiDealRiskRoute,
   ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,
   ApiDocumentReviewRoute: ApiDocumentReviewRoute,
