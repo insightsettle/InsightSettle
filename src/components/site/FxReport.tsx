@@ -1,4 +1,4 @@
-import { Banknote, TrendingUp } from "lucide-react";
+import { Banknote, Lock, TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,21 +8,27 @@ import { deals, formatSAR } from "@/lib/demo-data";
 import {
   type FxCurrency,
   SPREAD,
+  currencyNames,
   formatForeign,
   formatRate,
   fxCurrencies,
   quoteFx,
 } from "@/lib/fx";
 
+/** Internal only. Shows the rate margin and expected revenue — never render on customer pages. */
 export function FxReport() {
-  const [amount, setAmount] = useState(18000);
-  const [currency, setCurrency] = useState<FxCurrency>("USD");
+  const [amount, setAmount] = useState(10000);
+  const [currency, setCurrency] = useState<FxCurrency>("BHD");
   const [spreadPct, setSpreadPct] = useState(SPREAD * 100);
 
   const spread = Math.min(Math.max(spreadPct, 0), 5) / 100;
   const quote = useMemo(() => quoteFx(amount || 0, currency, spread), [amount, currency, spread]);
   const perDeal = useMemo(
-    () => deals.map((deal) => ({ deal, quote: quoteFx(deal.amount, currency, spread) })),
+    () =>
+      deals.map((deal) => ({
+        deal,
+        quote: quoteFx(deal.amount / quoteFx(1, currency, spread).customerRate, currency, spread),
+      })),
     [currency, spread],
   );
   const totalProfit = perDeal.reduce((sum, row) => sum + row.quote.profitSAR, 0);
@@ -31,19 +37,21 @@ export function FxReport() {
     <section className="mt-10">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold">Currency spread calculator</h2>
+          <h2 className="text-xl font-bold">Currency margin calculator</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Base rate, customer rate, spread margin, and expected profit per deal.
+            Base rate, customer rate, margin, and expected revenue per deal.
           </p>
         </div>
-        <span className="text-xs text-muted-foreground">Sample rates</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-3 py-1 text-xs font-semibold text-warning">
+          <Lock className="size-3.5" /> Internal — not visible to customers
+        </span>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1.1fr]">
         <Card>
           <CardContent className="space-y-4 p-5">
             <div>
-              <Label htmlFor="fx-amount">Deal value (SAR)</Label>
+              <Label htmlFor="fx-amount">Deal value (supplier currency)</Label>
               <Input
                 id="fx-amount"
                 type="number"
@@ -54,7 +62,7 @@ export function FxReport() {
               />
             </div>
             <div>
-              <Label htmlFor="fx-currency">Customer currency</Label>
+              <Label htmlFor="fx-currency">Supplier currency</Label>
               <select
                 id="fx-currency"
                 value={currency}
@@ -63,13 +71,13 @@ export function FxReport() {
               >
                 {fxCurrencies.map((code) => (
                   <option key={code} value={code}>
-                    {code}
+                    {code} — {currencyNames[code]}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <Label htmlFor="fx-spread">Spread margin (%)</Label>
+              <Label htmlFor="fx-spread">Rate margin (%)</Label>
               <Input
                 id="fx-spread"
                 type="number"
@@ -96,14 +104,12 @@ export function FxReport() {
                 label={`Customer rate (SAR per 1 ${currency})`}
                 value={formatRate(quote.customerRate)}
               />
-              <Row label="Spread margin" value={`${(quote.spread * 100).toFixed(2)}%`} />
-              <Row label="Cost at base rate" value={formatForeign(quote.baseCost, currency)} />
-              <Row
-                label="Charged to customer"
-                value={formatForeign(quote.customerCharge, currency)}
-              />
+              <Row label="Rate margin" value={`${(quote.spread * 100).toFixed(2)}%`} />
+              <Row label="Supplier amount" value={formatForeign(quote.amountForeign, currency)} />
+              <Row label="Cost at base rate" value={formatSAR(quote.baseCostSAR)} />
+              <Row label="Charged to customer" value={formatSAR(quote.customerChargeSAR)} />
               <div className="flex items-center justify-between border-t border-primary/20 pt-3">
-                <dt className="font-semibold">Expected spread profit</dt>
+                <dt className="font-semibold">Expected margin revenue</dt>
                 <dd className="text-lg font-extrabold text-primary">
                   {formatSAR(quote.profitSAR)}
                 </dd>
@@ -117,18 +123,18 @@ export function FxReport() {
         <CardContent className="p-0">
           <div className="flex items-center gap-2 border-b border-border px-5 py-4">
             <TrendingUp className="size-4 text-primary" />
-            <h3 className="font-semibold">Expected profit per deal ({currency})</h3>
+            <h3 className="font-semibold">Expected margin per deal (settled in {currency})</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Deal</th>
-                  <th className="px-5 py-3 font-semibold">Value</th>
+                  <th className="px-5 py-3 font-semibold">Charged (SAR)</th>
                   <th className="px-5 py-3 font-semibold">Base rate</th>
                   <th className="px-5 py-3 font-semibold">Customer rate</th>
-                  <th className="px-5 py-3 font-semibold">Charged</th>
-                  <th className="px-5 py-3 text-right font-semibold">Spread profit</th>
+                  <th className="px-5 py-3 font-semibold">Supplier amount</th>
+                  <th className="px-5 py-3 text-right font-semibold">Margin revenue</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -138,10 +144,10 @@ export function FxReport() {
                       <span className="font-medium">{deal.id}</span>
                       <span className="block text-xs text-muted-foreground">{deal.title}</span>
                     </td>
-                    <td className="px-5 py-3">{formatSAR(deal.amount)}</td>
+                    <td className="px-5 py-3">{formatSAR(row.customerChargeSAR)}</td>
                     <td className="px-5 py-3">{formatRate(row.baseRate)}</td>
                     <td className="px-5 py-3">{formatRate(row.customerRate)}</td>
-                    <td className="px-5 py-3">{formatForeign(row.customerCharge, currency)}</td>
+                    <td className="px-5 py-3">{formatForeign(row.amountForeign, currency)}</td>
                     <td className="px-5 py-3 text-right font-semibold text-primary">
                       {formatSAR(row.profitSAR)}
                     </td>
@@ -151,7 +157,7 @@ export function FxReport() {
               <tfoot className="bg-muted/40">
                 <tr>
                   <td className="px-5 py-3 font-semibold" colSpan={5}>
-                    Total expected spread revenue
+                    Total expected margin revenue
                   </td>
                   <td className="px-5 py-3 text-right font-extrabold text-primary">
                     {formatSAR(totalProfit)}
