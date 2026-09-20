@@ -113,9 +113,9 @@ function Page() {
                   </tr>
                 ))}
                 <tr className="border-t [&>td]:px-4 [&>td]:py-3">
-                  <td>Currency conversion spread</td>
-                  <td className="font-bold text-primary">1.25%</td>
-                  <td>Only for cross-currency deals</td>
+                  <td>Currency conversion</td>
+                  <td className="font-bold text-primary">No extra fee</td>
+                  <td>Rate shown before funding</td>
                 </tr>
                 <tr className="border-t [&>td]:px-4 [&>td]:py-3">
                   <td>Mediation</td>
@@ -127,7 +127,7 @@ function Page() {
           </div>
           <Card className="glow-mint border-primary/25">
             <CardContent className="p-6">
-              <h2 className="font-bold">Revenue calculator</h2>
+              <h2 className="font-bold">Fee calculator</h2>
               <div className="mt-5 space-y-3">
                 <Label htmlFor="amount">Deal value (SAR)</Label>
                 <Input
@@ -144,21 +144,11 @@ function Page() {
                   step={100}
                   onValueChange={(v) => setAmount(v[0] ?? 0)}
                 />
-                <label className="flex items-center gap-3 rounded-md border p-3 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={needsFx}
-                    onChange={(e) => setNeedsFx(e.target.checked)}
-                    className="accent-primary"
-                  />
-                  Buyer and seller use different currencies
-                </label>
               </div>
               <dl className="mt-6 space-y-3 border-t pt-5 text-sm">
-                <Row k="Transaction fee" v={formatSAR(fee)} />
-                <Row k="Conversion spread" v={formatSAR(spread)} />
-                <Row k="Total Insight revenue" v={formatSAR(total)} strong />
-                <Row k="Seller settlement" v={formatSAR(Math.max(0, amount - total))} />
+                <Row k="Deal value" v={formatSAR(amount)} />
+                <Row k="Transaction fee" v={formatSAR(fee)} strong />
+                <Row k="Seller settlement" v={formatSAR(Math.max(0, amount - fee))} />
               </dl>
               <p className="mt-4 text-xs text-warning">
                 Sample pricing for illustration only. The live rate is shown before funding.
