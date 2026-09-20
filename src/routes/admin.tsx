@@ -1,13 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import {
-  AlertTriangle,
-  BarChart3,
-  Coins,
-  Lock,
-  Percent,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import { AlertTriangle, BarChart3, Coins, Lock, Percent, ShieldCheck, Users } from "lucide-react";
 
 import { FxReport } from "@/components/site/FxReport";
 import { SiteShell } from "@/components/site/SiteShell";

@@ -5,13 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatSAR } from "@/lib/demo-data";
-import {
-  type FxCurrency,
-  currencyNames,
-  formatForeign,
-  fxCurrencies,
-  quoteFx,
-} from "@/lib/fx";
+import { type FxCurrency, currencyNames, formatForeign, fxCurrencies, quoteFx } from "@/lib/fx";
 
 /** Buyer-facing converter: shows only the quoted rate and the SAR total. No margin, no revenue. */
 export function FxCustomerQuote() {
