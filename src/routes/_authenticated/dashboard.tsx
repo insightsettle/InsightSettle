@@ -78,8 +78,8 @@ function Dashboard() {
                   <ShieldAlert className="size-4" /> You are signed in as Insight staff
                 </p>
                 <p className="mt-1 text-sm text-background/70">
-                  This page is the customer view. Platform-wide members, deals, revenue, rates, fees,
-                  and disputes live in the internal console.
+                  This page is the customer view. Platform-wide members, deals, revenue, rates,
+                  fees, and disputes live in the internal console.
                 </p>
               </div>
               <Button
