@@ -59,9 +59,9 @@ export type Deal = {
 
 /** نموذج العمولات وفق مستند التصميم (بيانات تجريبية) */
 export const feeTiers = [
-  { from: 0, to: 5000, rate: 0.03, min: 15, label: "حتى 5,000 ر.س" },
-  { from: 5001, to: 50000, rate: 0.025, min: 0, label: "من 5,001 إلى 50,000 ر.س" },
-  { from: 50001, to: Infinity, rate: 0.018, min: 0, label: "أكثر من 50,000 ر.س" },
+  { from: 0, to: 5000, rate: 0.03, min: 15, label: "Up to SAR 5,000" },
+  { from: 5001, to: 50000, rate: 0.025, min: 0, label: "SAR 5,001 to 50,000" },
+  { from: 50001, to: Infinity, rate: 0.018, min: 0, label: "Above SAR 50,000" },
 ];
 
 export function calcFee(amount: number) {
