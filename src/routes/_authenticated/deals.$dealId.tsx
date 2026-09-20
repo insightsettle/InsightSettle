@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, CalendarDays, FileText, MessageSquare, Users } from "lucide-react";
 
@@ -5,7 +6,41 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { calcFee, formatDate, formatSAR, getDeal } from "@/lib/demo-data";
+import { getDealByRef, type DealRow } from "@/lib/deals";
+import {
+  calcFee,
+  formatDate,
+  formatSAR,
+  getDeal,
+  statusLabels,
+  type Deal,
+  type DealStatus,
+} from "@/lib/demo-data";
+
+function toDeal(row: DealRow): Deal {
+  const status = (
+    Object.keys(statusLabels).includes(row.status) ? row.status : "pending_funding"
+  ) as DealStatus;
+  return {
+    id: row.ref,
+    title: row.title,
+    description: row.description || "No description was added for this deal.",
+    amount: Number(row.amount),
+    buyer: row.buyer_id ? "You or the invited buyer" : "Awaiting buyer",
+    seller: row.seller_id ? "You or the invited seller" : "Awaiting seller",
+    role: "buyer",
+    status,
+    createdAt: row.created_at,
+    dueAt: row.due_at ?? row.created_at,
+    stages: [{ name: "Full payment", amount: Number(row.amount), status }],
+    timeline: [{ title: "Deal created", at: formatDate(row.created_at) }],
+    attachments: [],
+    messages: [],
+    ...(row.buyer_id && row.seller_id
+      ? {}
+      : { actionRequired: "Share the invitation link so the other party can join" }),
+  };
+}
 
 export const Route = createFileRoute("/_authenticated/deals/$dealId")({
   head: ({ params }) => ({
@@ -26,12 +61,20 @@ export const Route = createFileRoute("/_authenticated/deals/$dealId")({
 
 function DealPage() {
   const { dealId } = Route.useParams();
-  const deal = getDeal(dealId);
+  const demoDeal = getDeal(dealId);
+  const { data: savedDeal, isLoading } = useQuery({
+    queryKey: ["deal", dealId],
+    queryFn: () => getDealByRef(dealId),
+    enabled: !demoDeal,
+  });
+
+  const deal: Deal | undefined = demoDeal ?? (savedDeal ? toDeal(savedDeal) : undefined);
+
   if (!deal)
     return (
       <SiteShell>
         <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-          <h1 className="text-3xl font-bold">Deal not found</h1>
+          <h1 className="text-3xl font-bold">{isLoading ? "Loading deal…" : "Deal not found"}</h1>
           <Button asChild className="mt-6">
             <Link to="/dashboard">Back to dashboard</Link>
           </Button>
