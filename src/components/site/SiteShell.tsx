@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { to: "/", label: "الرئيسية" },
-  { to: "/how-it-works", label: "كيف تعمل المنصة" },
-  { to: "/roles", label: "الأدوار" },
-  { to: "/services", label: "الخدمات والعمولات" },
-  { to: "/dashboard", label: "لوحة التحكم" },
-  { to: "/disputes", label: "مركز النزاعات" },
+  { to: "/", label: "Home" },
+  { to: "/how-it-works", label: "How it works" },
+  { to: "/roles", label: "Roles" },
+  { to: "/services", label: "Services & fees" },
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/disputes", label: "Disputes" },
 ] as const;
 
 export function SiteHeader() {
@@ -22,12 +22,10 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Insight" className="size-9 rounded-lg object-contain" />
-          <span className="text-lg font-bold tracking-tight">
-            إن<span className="text-primary">سايت</span>
-          </span>
+          <span className="text-lg font-extrabold">Insight</span>
         </Link>
 
-        <nav className="mr-auto hidden items-center gap-1 lg:flex">
+        <nav className="ml-auto hidden items-center gap-1 lg:flex">
           {nav.map((item) => (
             <Link
               key={item.to}
@@ -40,15 +38,15 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="mr-auto flex items-center gap-2 lg:mr-0">
+        <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link to="/dashboard">ابدأ صفقة</Link>
+            <Link to="/dashboard">New deal</Link>
           </Button>
           <Button
             variant="outline"
             size="icon"
             className="lg:hidden"
-            aria-label="القائمة"
+            aria-label="Open navigation"
             onClick={() => setOpen((v) => !v)}
           >
             <Menu className="size-4" />
@@ -81,39 +79,38 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-2.5">
             <img src={logo} alt="Insight" className="size-8 rounded-lg object-contain" />
-            <span className="font-bold">إنسايت</span>
+            <span className="font-bold">Insight</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            وسيط موثوق يحتجز الأموال حتى تأكيد الاستلام، مع حلّ نزاعات عادل وسجل موثّق لكل خطوة.
+            Secure escrow that protects every payment until delivery is confirmed.
           </p>
         </div>
         <FooterCol
-          title="المنصة"
+          title="Platform"
           links={[
-            { to: "/how-it-works", label: "كيف تعمل المنصة" },
-            { to: "/services", label: "الخدمات والعمولات" },
-            { to: "/roles", label: "الأدوار والصلاحيات" },
+            { to: "/how-it-works", label: "How it works" },
+            { to: "/services", label: "Services & fees" },
+            { to: "/roles", label: "Roles & access" },
           ]}
         />
         <FooterCol
-          title="الحساب"
+          title="Account"
           links={[
-            { to: "/dashboard", label: "لوحة التحكم" },
-            { to: "/disputes", label: "مركز النزاعات" },
+            { to: "/dashboard", label: "Dashboard" },
+            { to: "/disputes", label: "Dispute center" },
           ]}
         />
         <div>
-          <h4 className="text-sm font-semibold">السياسات</h4>
+          <h4 className="text-sm font-semibold">Policies</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>الشروط والأحكام</li>
-            <li>سياسة الخصوصية</li>
-            <li>سياسة النزاعات والاسترداد</li>
+            <li>Terms of service</li>
+            <li>Privacy policy</li>
+            <li>Disputes & refunds</li>
           </ul>
         </div>
       </div>
       <div className="border-t border-border px-4 py-5 text-center text-xs text-muted-foreground">
-        نسخة تجريبية — جميع المبالغ وبيانات الدفع المعروضة{" "}
-        <span className="text-warning">بيانات تجريبية</span> ولا تُنفّذ أي تحويلات مالية حقيقية.
+        Demo experience — all balances and payment details are <span className="text-warning">sample data</span>. No real funds are moved.
       </div>
     </footer>
   );

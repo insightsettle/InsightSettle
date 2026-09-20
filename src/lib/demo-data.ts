@@ -8,13 +8,13 @@ export type DealStatus =
   | "disputed";
 
 export const statusLabels: Record<DealStatus, string> = {
-  pending_funding: "بانتظار التمويل",
-  held: "الأموال محتجزة",
-  delivered: "تم التسليم",
-  under_review: "قيد المراجعة",
-  released: "تم الإفراج",
-  refunded: "تم الاسترداد",
-  disputed: "نزاع مفتوح",
+  pending_funding: "Pending funding",
+  held: "Funds held",
+  delivered: "Delivered",
+  under_review: "Under review",
+  released: "Released",
+  refunded: "Refunded",
+  disputed: "Disputed",
 };
 
 export const statusTone: Record<DealStatus, "muted" | "primary" | "warning" | "destructive"> = {
@@ -65,13 +65,14 @@ export const feeTiers = [
 ];
 
 export function calcFee(amount: number) {
-  const tier = feeTiers.find((t) => amount >= t.from && amount <= t.to) ?? feeTiers[0]!;
+  const tier = feeTiers.find((t) => amount >= t.from && amount <= t.to) ?? feeTiers[0];
+  if (!tier) return { fee: 0, rate: 0, tier: { from: 0, to: 0, rate: 0, min: 0, label: "Unavailable" } };
   const fee = Math.max(amount * tier.rate, tier.min);
   return { fee: Math.round(fee * 100) / 100, rate: tier.rate, tier };
 }
 
 export function formatSAR(amount: number) {
-  return new Intl.NumberFormat("ar-SA", {
+  return new Intl.NumberFormat("en-SA", {
     style: "currency",
     currency: "SAR",
     maximumFractionDigits: 2,
@@ -79,7 +80,7 @@ export function formatSAR(amount: number) {
 }
 
 export function formatDate(iso: string) {
-  return new Intl.DateTimeFormat("ar-SA", { dateStyle: "medium" }).format(new Date(iso));
+  return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(iso));
 }
 
 export const deals: Deal[] = [
