@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 
 import logo from "@/assets/insight-wordmark-transparent.png";
+import { NotificationBell } from "@/components/site/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { useSessionUser } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +52,7 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
           {loading ? null : user ? (
             <>
+              <NotificationBell />
               <Button asChild size="sm" className="hidden sm:inline-flex">
                 <Link to="/dashboard">My dashboard</Link>
               </Button>

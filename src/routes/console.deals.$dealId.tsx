@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, MessageSquare, Percent, Send, Users } from "lucide-react";
+import { ArrowLeft, MessageSquare, Percent, Receipt, Send, Users } from "lucide-react";
 import { useState } from "react";
 
 import { StatusBadge } from "@/components/site/StatusBadge";
@@ -16,6 +16,7 @@ import {
   setFeeOverride,
 } from "@/lib/admin.functions";
 import { formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
+import { listDealTransactionsForStaff, settleTransaction } from "@/lib/payments.functions";
 import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/console/deals/$dealId")({
@@ -44,8 +45,37 @@ function StaffDealPage() {
   const [flat, setFlat] = useState("");
   const [offerNote, setOfferNote] = useState("");
   const [message, setMessage] = useState("");
+  const [settleRef, setSettleRef] = useState<Record<string, string>>({});
+  const [settleReason, setSettleReason] = useState<Record<string, string>>({});
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["staff-deal", dealId] });
+  const dealUuid = detail.data?.deal.id ?? null;
+  const loadTransactions = useServerFn(listDealTransactionsForStaff);
+  const settle = useServerFn(settleTransaction);
+  const transactions = useQuery({
+    queryKey: ["staff-deal-transactions", dealUuid],
+    queryFn: () => loadTransactions({ data: { dealId: dealUuid! } }),
+    enabled: !!dealUuid,
+  });
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["staff-deal", dealId] });
+    queryClient.invalidateQueries({ queryKey: ["staff-deal-transactions", dealUuid] });
+  };
+
+  const settleMutation = useMutation({
+    mutationFn: (vars: {
+      transactionId: string;
+      outcome: "succeeded" | "failed";
+      providerRef: string | null;
+      reason: string | null;
+    }) => settle({ data: vars }),
+    onSuccess: () => {
+      setSettleRef({});
+      setSettleReason({});
+      refresh();
+      queryClient.invalidateQueries({ queryKey: ["all-deals"] });
+    },
+  });
 
   const statusMutation = useMutation({
     mutationFn: (vars: { dealId: string; status: DealStatus; reason: string }) =>
@@ -242,6 +272,104 @@ function StaffDealPage() {
               {deal.feeOverrideNote && (
                 <p className="mt-1 text-xs text-muted-foreground">Note: {deal.feeOverrideNote}</p>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <Receipt className="size-5 text-primary" />
+                <h3 className="font-bold">Payment records</h3>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Confirm or reject each money movement. The outcome and the reason are shown to both
+                parties.
+              </p>
+              <div className="mt-4 space-y-3">
+                {(transactions.data ?? []).map((t) => (
+                  <div key={t.id} className="rounded-md border border-border p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold capitalize">
+                        {t.kind} · <bdi dir="ltr">{formatSAR(t.amount)}</bdi>
+                      </p>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          t.status === "succeeded"
+                            ? "bg-primary/10 text-primary"
+                            : t.status === "failed"
+                              ? "bg-destructive/10 text-destructive"
+                              : "bg-warning/10 text-warning"
+                        }`}
+                      >
+                        {t.status}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatDate(t.created_at)} · {t.provider}
+                      {t.provider_ref ? ` · ${t.provider_ref}` : ""}
+                    </p>
+                    {t.error_message && (
+                      <p className="mt-2 text-sm text-destructive">{t.error_message}</p>
+                    )}
+                    {(t.status === "pending" || t.status === "processing") && (
+                      <div className="mt-3 space-y-2">
+                        <Input
+                          value={settleRef[t.id] ?? ""}
+                          onChange={(e) =>
+                            setSettleRef((prev) => ({ ...prev, [t.id]: e.target.value }))
+                          }
+                          placeholder="Provider or bank reference (optional)"
+                        />
+                        <Input
+                          value={settleReason[t.id] ?? ""}
+                          onChange={(e) =>
+                            setSettleReason((prev) => ({ ...prev, [t.id]: e.target.value }))
+                          }
+                          placeholder="Reason — required when rejecting"
+                        />
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            disabled={settleMutation.isPending}
+                            onClick={() =>
+                              settleMutation.mutate({
+                                transactionId: t.id,
+                                outcome: "succeeded",
+                                providerRef: settleRef[t.id]?.trim() || null,
+                                reason: settleReason[t.id]?.trim() || null,
+                              })
+                            }
+                          >
+                            Confirm settled
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={
+                              settleMutation.isPending || !(settleReason[t.id] ?? "").trim()
+                            }
+                            onClick={() =>
+                              settleMutation.mutate({
+                                transactionId: t.id,
+                                outcome: "failed",
+                                providerRef: settleRef[t.id]?.trim() || null,
+                                reason: settleReason[t.id]!.trim(),
+                              })
+                            }
+                          >
+                            Mark failed
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {(transactions.data ?? []).length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No payments recorded for this deal yet.
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
 

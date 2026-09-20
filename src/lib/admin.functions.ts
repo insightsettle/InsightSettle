@@ -256,6 +256,12 @@ export const setDealStatus = createServerFn({ method: "POST" })
       title: `Insight support set the status to ${data.status.replace("_", " ")}`,
       note: data.reason,
     });
+    const notify = await import("@/lib/notify.server");
+    await notify.notifyDealParties(admin, data.dealId, {
+      title: `Deal status changed to ${data.status.replace("_", " ")}`,
+      body: data.reason,
+      kind: "status",
+    });
     return { ok: true };
   });
 
@@ -311,6 +317,110 @@ export const postStaffMessage = createServerFn({ method: "POST" })
       body: data.body,
     });
     if (error) throw error;
+    const notify = await import("@/lib/notify.server");
+    await notify.notifyDealParties(admin, data.dealId, {
+      title: "New message from Insight support",
+      body: data.body.slice(0, 200),
+      kind: "message",
+    });
+    return { ok: true };
+  });
+
+export type RiskDeal = {
+  id: string;
+  ref: string;
+  title: string;
+  amount: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+  buyer: string;
+  seller: string;
+  disputedReason: string | null;
+  messages: string[];
+  riskLevel: string | null;
+  riskScore: number | null;
+  riskSummary: string | null;
+  riskCheckedAt: string | null;
+};
+
+/** Deals plus their conversation, for AI risk review in the console. */
+export const listDealsForRisk = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<RiskDeal[]> => {
+    const admin = await assertStaff(context);
+    const dir = await buildDirectory(admin);
+    const { data: deals, error } = await admin
+      .from("deals")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(25);
+    if (error) throw error;
+    const ids = (deals ?? []).map((d: any) => d.id);
+    const { data: messages } = ids.length
+      ? await admin
+          .from("deal_messages")
+          .select("deal_id, author_name, body, created_at")
+          .in("deal_id", ids)
+          .order("created_at", { ascending: true })
+      : { data: [] };
+
+    return (deals ?? []).map((row: any) => {
+      const who = (id: string | null) => (id ? dir.get(id) : undefined);
+      return {
+        id: row.id,
+        ref: row.ref,
+        title: row.title,
+        amount: Number(row.amount),
+        currency: row.currency,
+        status: row.status,
+        createdAt: row.created_at,
+        buyer: who(row.buyer_id)?.email ?? "not joined",
+        seller: who(row.seller_id)?.email ?? "not joined",
+        disputedReason: row.disputed_reason ?? null,
+        messages: (messages ?? [])
+          .filter((m: any) => m.deal_id === row.id)
+          .slice(-20)
+          .map((m: any) => `${m.author_name}: ${String(m.body).slice(0, 600)}`),
+        riskLevel: row.risk_level ?? null,
+        riskScore: row.risk_score === null ? null : Number(row.risk_score),
+        riskSummary: row.risk_summary ?? null,
+        riskCheckedAt: row.risk_checked_at ?? null,
+      };
+    });
+  });
+
+export const setDealRisk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: { dealId: string; level: "low" | "medium" | "high"; score: number; summary: string }) =>
+      z
+        .object({
+          dealId: z.string().uuid(),
+          level: z.enum(["low", "medium", "high"]),
+          score: z.number().min(0).max(100),
+          summary: z.string().max(4000),
+        })
+        .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const admin = await assertStaff(context);
+    const { error } = await admin
+      .from("deals")
+      .update({
+        risk_level: data.level,
+        risk_score: Math.round(data.score),
+        risk_summary: data.summary,
+        risk_checked_at: new Date().toISOString(),
+      })
+      .eq("id", data.dealId);
+    if (error) throw error;
+    await admin.from("deal_events").insert({
+      deal_id: data.dealId,
+      actor_id: context.userId,
+      title: `Insight flagged this deal as ${data.level} risk`,
+      note: null,
+    });
     return { ok: true };
   });
 
