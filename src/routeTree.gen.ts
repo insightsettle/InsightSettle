@@ -17,6 +17,10 @@ import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
+import { Route as AdminFeesRouteImport } from './routes/admin.fees'
+import { Route as AdminRatesRouteImport } from './routes/admin.rates'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
 import { Route as DealsDealIdRouteImport } from './routes/deals.$dealId'
@@ -61,6 +65,26 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDisputesRoute = AdminDisputesRouteImport.update({
+  id: '/disputes',
+  path: '/disputes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFeesRoute = AdminFeesRouteImport.update({
+  id: '/fees',
+  path: '/fees',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRatesRoute = AdminRatesRouteImport.update({
+  id: '/rates',
+  path: '/rates',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiDisputeAnalysisRoute = ApiDisputeAnalysisRouteImport.update({
   id: '/api/dispute-analysis',
   path: '/api/dispute-analysis',
@@ -79,43 +103,54 @@ const DealsDealIdRoute = DealsDealIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disputes': typeof DisputesRoute
   '/documents': typeof DocumentsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/fees': typeof AdminFeesRoute
+  '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/deals/$dealId': typeof DealsDealIdRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/disputes': typeof DisputesRoute
   '/documents': typeof DocumentsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/fees': typeof AdminFeesRoute
+  '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/deals/$dealId': typeof DealsDealIdRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/disputes': typeof DisputesRoute
   '/documents': typeof DocumentsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/admin/disputes': typeof AdminDisputesRoute
+  '/admin/fees': typeof AdminFeesRoute
+  '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/deals/$dealId': typeof DealsDealIdRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,22 +163,29 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/roles'
     | '/services'
+    | '/admin/disputes'
+    | '/admin/fees'
+    | '/admin/rates'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/deals/$dealId'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/dashboard'
     | '/disputes'
     | '/documents'
     | '/how-it-works'
     | '/roles'
     | '/services'
+    | '/admin/disputes'
+    | '/admin/fees'
+    | '/admin/rates'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/deals/$dealId'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -154,14 +196,18 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/roles'
     | '/services'
+    | '/admin/disputes'
+    | '/admin/fees'
+    | '/admin/rates'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/deals/$dealId'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   DisputesRoute: typeof DisputesRoute
   DocumentsRoute: typeof DocumentsRoute
@@ -231,6 +277,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/disputes': {
+      id: '/admin/disputes'
+      path: '/disputes'
+      fullPath: '/admin/disputes'
+      preLoaderRoute: typeof AdminDisputesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/fees': {
+      id: '/admin/fees'
+      path: '/fees'
+      fullPath: '/admin/fees'
+      preLoaderRoute: typeof AdminFeesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rates': {
+      id: '/admin/rates'
+      path: '/rates'
+      fullPath: '/admin/rates'
+      preLoaderRoute: typeof AdminRatesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/dispute-analysis': {
       id: '/api/dispute-analysis'
       path: '/api/dispute-analysis'
@@ -255,9 +329,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminDisputesRoute: typeof AdminDisputesRoute
+  AdminFeesRoute: typeof AdminFeesRoute
+  AdminRatesRoute: typeof AdminRatesRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminDisputesRoute: AdminDisputesRoute,
+  AdminFeesRoute: AdminFeesRoute,
+  AdminRatesRoute: AdminRatesRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   DashboardRoute: DashboardRoute,
   DisputesRoute: DisputesRoute,
   DocumentsRoute: DocumentsRoute,
