@@ -42,6 +42,39 @@ const tabs = [
 ] as const;
 
 function AdminLayout() {
+  const checkStaff = useServerFn(getStaffAccess);
+  const access = useQuery({ queryKey: ["staff-access"], queryFn: () => checkStaff({}) });
+
+  if (access.isLoading) {
+    return (
+      <SiteShell>
+        <div className="mx-auto max-w-xl px-4 py-24 text-center text-muted-foreground">
+          Checking your access…
+        </div>
+      </SiteShell>
+    );
+  }
+
+  if (!access.data?.isStaff) {
+    return (
+      <SiteShell>
+        <div className="mx-auto max-w-xl px-4 py-24 text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-3 py-1.5 text-xs font-semibold text-warning">
+            <Lock className="size-3.5" /> Restricted area
+          </span>
+          <h1 className="mt-5 text-2xl font-extrabold">Insight staff only</h1>
+          <p className="mt-3 text-muted-foreground">
+            This console is reserved for the Insight operations team. Your account does not have
+            staff access.
+          </p>
+          <Link to="/dashboard" className="mt-6 inline-block text-sm text-primary hover:underline">
+            Go to my dashboard
+          </Link>
+        </div>
+      </SiteShell>
+    );
+  }
+
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
