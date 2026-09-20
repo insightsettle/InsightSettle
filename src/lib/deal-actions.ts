@@ -113,15 +113,128 @@ async function setStatus(dealId: string, status: string) {
   if (error) throw error;
 }
 
-export async function confirmDelivery(dealId: string) {
-  await setStatus(dealId, "delivered");
-  await logEvent(dealId, "Seller confirmed delivery");
+export async function confirmDelivery(dealId: string, inspectionDays = 3) {
+  const now = new Date();
+  const autoRelease = new Date(now.getTime() + inspectionDays * 24 * 60 * 60 * 1000);
+  const { error } = await supabase
+    .from("deals")
+    .update({
+      status: "delivered",
+      delivered_at: now.toISOString(),
+      auto_release_at: autoRelease.toISOString(),
+    })
+    .eq("id", dealId);
+  if (error) throw error;
+  await logEvent(
+    dealId,
+    "Seller confirmed delivery",
+    `Buyer inspection period ends ${autoRelease.toISOString().slice(0, 10)}`,
+  );
   await announce(
     dealId,
     "The seller confirmed delivery",
-    "You can now review and release the funds.",
+    `You can review and release the funds. If you take no action the funds release automatically after ${inspectionDays} day(s).`,
   );
 }
+
+export async function agreeToTerms(dealId: string) {
+  const { error } = await supabase
+    .from("deals")
+    .update({ terms_status: "agreed", terms_note: null })
+    .eq("id", dealId);
+  if (error) throw error;
+  await logEvent(dealId, "Deal terms accepted by both parties");
+  await announce(dealId, "The deal terms were accepted", "The buyer can now fund the deal.");
+}
+
+export async function requestTermsChange(dealId: string, note: string) {
+  const { error } = await supabase
+    .from("deals")
+    .update({ terms_status: "changes_requested", terms_note: note })
+    .eq("id", dealId);
+  if (error) throw error;
+  await logEvent(dealId, "Changes requested on the deal terms", note);
+  await announce(dealId, "The other party requested changes to the terms", note);
+}
+
+export async function rejectTerms(dealId: string, note: string) {
+  const { error } = await supabase
+    .from("deals")
+    .update({ terms_status: "rejected", terms_note: note })
+    .eq("id", dealId);
+  if (error) throw error;
+  await logEvent(dealId, "Deal terms rejected", note);
+  await announce(dealId, "The other party rejected the deal terms", note);
+}
+
+export async function updateShipping(
+  dealId: string,
+  input: { carrier: string; tracking: string; status: string },
+) {
+  const { error } = await supabase
+    .from("deals")
+    .update({
+      shipping_carrier: input.carrier || null,
+      shipping_tracking: input.tracking || null,
+      shipping_status: input.status,
+    })
+    .eq("id", dealId);
+  if (error) throw error;
+  await logEvent(
+    dealId,
+    "Shipping details updated",
+    `${input.carrier || "Carrier"} · ${input.tracking || "no tracking number"} · ${input.status}`,
+  );
+  await announce(
+    dealId,
+    "Shipping details were updated",
+    `${input.carrier || "Carrier"} · ${input.tracking || "no tracking number"}`,
+  );
+}
+
+export type DealRating = {
+  id: string;
+  deal_id: string;
+  rater_id: string;
+  ratee_id: string;
+  score: number;
+  comment: string | null;
+  created_at: string;
+};
+
+export async function listDealRatings(dealId: string) {
+  const { data, error } = await supabase.from("deal_ratings").select("*").eq("deal_id", dealId);
+  if (error) throw error;
+  return (data ?? []) as DealRating[];
+}
+
+export async function listRatingsForUser(userId: string) {
+  const { data, error } = await supabase.from("deal_ratings").select("*").eq("ratee_id", userId);
+  if (error) throw error;
+  return (data ?? []) as DealRating[];
+}
+
+export async function submitRating(input: {
+  dealId: string;
+  rateeId: string;
+  score: number;
+  comment: string;
+}) {
+  const user = await currentUser();
+  const { error } = await supabase.from("deal_ratings").upsert(
+    {
+      deal_id: input.dealId,
+      rater_id: user.id,
+      ratee_id: input.rateeId,
+      score: input.score,
+      comment: input.comment || null,
+    },
+    { onConflict: "deal_id,rater_id" },
+  );
+  if (error) throw error;
+  await logEvent(input.dealId, `Counterparty rated ${input.score}/5`, input.comment || null);
+}
+
 
 export async function requestReview(dealId: string, note: string) {
   await setStatus(dealId, "under_review");
