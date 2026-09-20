@@ -65,12 +65,12 @@ function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/dashboard">
-                  Open dashboard <ArrowRight />
+                <Link to="/how-it-works">
+                  See how it works <ArrowRight />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/how-it-works">See how it works</Link>
+                <Link to="/services">Services & fees</Link>
               </Button>
             </div>
             <dl className="mt-10 grid max-w-2xl grid-cols-3 gap-4 border-t border-border pt-6">
