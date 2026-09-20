@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as RolesRouteImport } from './routes/roles'
@@ -28,6 +29,10 @@ import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenti
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -51,19 +56,19 @@ const ServicesRoute = ServicesRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/_authenticated/dashboard',
+  id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDisputesRoute = AuthenticatedDisputesRouteImport.update({
-  id: '/_authenticated/disputes',
+  id: '/disputes',
   path: '/disputes',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
-  id: '/_authenticated/documents',
+  id: '/documents',
   path: '/documents',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -97,9 +102,9 @@ const ApiDocumentReviewRoute = ApiDocumentReviewRouteImport.update({
 } as any)
 const AuthenticatedDealsDealIdRoute =
   AuthenticatedDealsDealIdRouteImport.update({
-    id: '/_authenticated/deals/$dealId',
+    id: '/deals/$dealId',
     path: '/deals/$dealId',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -138,6 +143,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
@@ -190,6 +196,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/admin'
     | '/how-it-works'
     | '/roles'
@@ -208,16 +215,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   HowItWorksRoute: typeof HowItWorksRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
-  AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
   ApiDocumentReviewRoute: typeof ApiDocumentReviewRoute
-  AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -227,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -262,21 +273,21 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/disputes': {
       id: '/_authenticated/disputes'
       path: '/disputes'
       fullPath: '/disputes'
       preLoaderRoute: typeof AuthenticatedDisputesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/documents': {
       id: '/_authenticated/documents'
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -325,10 +336,27 @@ declare module '@tanstack/react-router' {
       path: '/deals/$dealId'
       fullPath: '/deals/$dealId'
       preLoaderRoute: typeof AuthenticatedDealsDealIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
+  AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
+  AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
+  AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
+  AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AdminRouteChildren {
   AdminDisputesRoute: typeof AdminDisputesRoute
@@ -348,16 +376,13 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   HowItWorksRoute: HowItWorksRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
-  AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,
   ApiDocumentReviewRoute: ApiDocumentReviewRoute,
-  AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
