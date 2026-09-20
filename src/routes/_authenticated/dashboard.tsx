@@ -93,8 +93,11 @@ function Dashboard() {
           </Card>
         )}
 
+        <VerificationCard />
+
         <section className="mt-8">
           <h2 className="text-xl font-bold">Your saved deals</h2>
+
           {myDeals.length === 0 ? (
             <Card className="mt-3 border-dashed">
               <CardContent className="p-6 text-sm text-muted-foreground">
