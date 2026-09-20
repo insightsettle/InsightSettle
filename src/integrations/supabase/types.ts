@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      deal_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          note: string | null
+          title: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          note?: string | null
+          title: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          note?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_events_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          amount: number
+          buyer_id: string | null
+          counterparty_email: string | null
+          created_at: string
+          created_by: string
+          currency: string
+          description: string
+          due_at: string | null
+          id: string
+          invite_token: string
+          ref: string
+          seller_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          buyer_id?: string | null
+          counterparty_email?: string | null
+          created_at?: string
+          created_by: string
+          currency?: string
+          description?: string
+          due_at?: string | null
+          id?: string
+          invite_token?: string
+          ref?: string
+          seller_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string | null
+          counterparty_email?: string | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          description?: string
+          due_at?: string | null
+          id?: string
+          invite_token?: string
+          ref?: string
+          seller_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+          verification_status?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
