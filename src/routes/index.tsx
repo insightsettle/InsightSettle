@@ -65,12 +65,15 @@ function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/how-it-works">
-                  See how it works <ArrowRight />
+                <Link to="/auth" search={{ mode: "signup" }}>
+                  Sign up now <ArrowRight />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/services">Services & fees</Link>
+                <Link to="/auth">Sign in</Link>
+              </Button>
+              <Button asChild size="lg" variant="ghost">
+                <Link to="/how-it-works">See how it works</Link>
               </Button>
             </div>
             <dl className="mt-10 grid max-w-2xl grid-cols-3 gap-4 border-t border-border pt-6">
