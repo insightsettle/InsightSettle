@@ -49,6 +49,44 @@ export type Database = {
           },
         ]
       }
+      deal_messages: {
+        Row: {
+          author_id: string | null
+          author_kind: string
+          author_name: string
+          body: string
+          created_at: string
+          deal_id: string
+          id: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_kind?: string
+          author_name?: string
+          body: string
+          created_at?: string
+          deal_id: string
+          id?: string
+        }
+        Update: {
+          author_id?: string | null
+          author_kind?: string
+          author_name?: string
+          body?: string
+          created_at?: string
+          deal_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_messages_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           amount: number
@@ -58,10 +96,16 @@ export type Database = {
           created_by: string
           currency: string
           description: string
+          disputed_reason: string | null
           due_at: string | null
+          fee_override_by: string | null
+          fee_override_flat: number | null
+          fee_override_note: string | null
+          fee_override_percent: number | null
           id: string
           invite_token: string
           ref: string
+          released_at: string | null
           seller_id: string | null
           status: string
           title: string
@@ -75,10 +119,16 @@ export type Database = {
           created_by: string
           currency?: string
           description?: string
+          disputed_reason?: string | null
           due_at?: string | null
+          fee_override_by?: string | null
+          fee_override_flat?: number | null
+          fee_override_note?: string | null
+          fee_override_percent?: number | null
           id?: string
           invite_token?: string
           ref?: string
+          released_at?: string | null
           seller_id?: string | null
           status?: string
           title: string
@@ -92,10 +142,16 @@ export type Database = {
           created_by?: string
           currency?: string
           description?: string
+          disputed_reason?: string | null
           due_at?: string | null
+          fee_override_by?: string | null
+          fee_override_flat?: number | null
+          fee_override_note?: string | null
+          fee_override_percent?: number | null
           id?: string
           invite_token?: string
           ref?: string
+          released_at?: string | null
           seller_id?: string | null
           status?: string
           title?: string

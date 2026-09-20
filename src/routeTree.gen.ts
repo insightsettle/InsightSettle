@@ -25,9 +25,12 @@ import { Route as ConsoleIndexRouteImport } from './routes/console.index'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
 import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
+import { Route as ConsoleUsersRouteImport } from './routes/console.users'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
+import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -108,6 +111,11 @@ const ConsoleRatesRoute = ConsoleRatesRouteImport.update({
   path: '/rates',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const AuthenticatedDealsDealIdRoute =
   AuthenticatedDealsDealIdRouteImport.update({
     id: '/deals/$dealId',
@@ -125,6 +133,16 @@ const AuthenticatedInviteTokenRoute =
     path: '/invite/$token',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ConsoleDealsIndexRoute = ConsoleDealsIndexRouteImport.update({
+  id: '/deals/',
+  path: '/deals/',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleDealsDealIdRoute = ConsoleDealsDealIdRouteImport.update({
+  id: '/deals/$dealId',
+  path: '/deals/$dealId',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -141,10 +159,13 @@ export interface FileRoutesByFullPath {
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/deals/': typeof ConsoleDealsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,10 +181,13 @@ export interface FileRoutesByTo {
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/users': typeof ConsoleUsersRoute
   '/console': typeof ConsoleIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/deals': typeof ConsoleDealsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -182,10 +206,13 @@ export interface FileRoutesById {
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/_authenticated/deals/new': typeof AuthenticatedDealsNewRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/deals/': typeof ConsoleDealsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -204,10 +231,13 @@ export interface FileRouteTypes {
     | '/console/disputes'
     | '/console/fees'
     | '/console/rates'
+    | '/console/users'
     | '/console/'
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
+    | '/console/deals/$dealId'
+    | '/console/deals/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -223,10 +253,13 @@ export interface FileRouteTypes {
     | '/console/disputes'
     | '/console/fees'
     | '/console/rates'
+    | '/console/users'
     | '/console'
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
+    | '/console/deals/$dealId'
+    | '/console/deals'
   id:
     | '__root__'
     | '/'
@@ -244,10 +277,13 @@ export interface FileRouteTypes {
     | '/console/disputes'
     | '/console/fees'
     | '/console/rates'
+    | '/console/users'
     | '/console/'
     | '/_authenticated/deals/$dealId'
     | '/_authenticated/deals/new'
     | '/_authenticated/invite/$token'
+    | '/console/deals/$dealId'
+    | '/console/deals/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -376,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleRatesRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/users': {
+      id: '/console/users'
+      path: '/users'
+      fullPath: '/console/users'
+      preLoaderRoute: typeof ConsoleUsersRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/_authenticated/deals/$dealId': {
       id: '/_authenticated/deals/$dealId'
       path: '/deals/$dealId'
@@ -396,6 +439,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/invite/$token'
       preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/console/deals/': {
+      id: '/console/deals/'
+      path: '/deals'
+      fullPath: '/console/deals/'
+      preLoaderRoute: typeof ConsoleDealsIndexRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/deals/$dealId': {
+      id: '/console/deals/$dealId'
+      path: '/deals/$dealId'
+      fullPath: '/console/deals/$dealId'
+      preLoaderRoute: typeof ConsoleDealsDealIdRouteImport
+      parentRoute: typeof ConsoleRoute
     }
   }
 }
@@ -425,14 +482,20 @@ interface ConsoleRouteChildren {
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
   ConsoleFeesRoute: typeof ConsoleFeesRoute
   ConsoleRatesRoute: typeof ConsoleRatesRoute
+  ConsoleUsersRoute: typeof ConsoleUsersRoute
   ConsoleIndexRoute: typeof ConsoleIndexRoute
+  ConsoleDealsDealIdRoute: typeof ConsoleDealsDealIdRoute
+  ConsoleDealsIndexRoute: typeof ConsoleDealsIndexRoute
 }
 
 const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleDisputesRoute: ConsoleDisputesRoute,
   ConsoleFeesRoute: ConsoleFeesRoute,
   ConsoleRatesRoute: ConsoleRatesRoute,
+  ConsoleUsersRoute: ConsoleUsersRoute,
   ConsoleIndexRoute: ConsoleIndexRoute,
+  ConsoleDealsDealIdRoute: ConsoleDealsDealIdRoute,
+  ConsoleDealsIndexRoute: ConsoleDealsIndexRoute,
 }
 
 const ConsoleRouteWithChildren =
