@@ -35,7 +35,7 @@ export const Route = createFileRoute("/admin")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: AdminConsole;
+  component: AdminConsole,
 });
 
 function AdminConsole() {
