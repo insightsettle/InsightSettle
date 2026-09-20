@@ -21,6 +21,7 @@ const nav = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useSessionUser();
+  const { isStaff } = useStaffAccess();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
