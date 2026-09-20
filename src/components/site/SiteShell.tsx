@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
-import logo from "@/assets/insight-logo.png";
+import logo from "@/assets/insight-wordmark-transparent.png";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +18,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-        <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="Insight" className="size-9 rounded-lg object-contain" />
-          <span className="text-lg font-extrabold">Insight</span>
+        <Link to="/" aria-label="Insight home" className="flex shrink-0 items-center">
+          <img src={logo} alt="Insight" className="h-11 w-auto object-contain" />
         </Link>
 
         <nav className="ml-auto hidden items-center gap-1 lg:flex">
@@ -75,9 +74,8 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-border bg-card/40">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <img src={logo} alt="Insight" className="size-8 rounded-lg object-contain" />
-            <span className="font-bold">Insight</span>
+          <div className="flex items-center">
+            <img src={logo} alt="Insight" className="h-10 w-auto object-contain" />
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Secure escrow that protects every payment until delivery is confirmed.
