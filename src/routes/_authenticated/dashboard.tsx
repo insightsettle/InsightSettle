@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   AlertCircle,
@@ -14,6 +15,8 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useSessionUser } from "@/hooks/use-session";
+import { listMyDeals } from "@/lib/deals";
 import { activity, dashboardStats, deals, formatSAR } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
