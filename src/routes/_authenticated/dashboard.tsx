@@ -43,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Dashboard() {
   const { user } = useSessionUser();
+  const { isStaff } = useStaffAccess();
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
   const stats = [
     { label: "Available balance", value: formatSAR(dashboardStats.available), icon: Wallet },
