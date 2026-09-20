@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { deals } from "@/lib/demo-data";
 
-export const Route = createFileRoute("/disputes")({
+export const Route = createFileRoute("/_authenticated/disputes")({
   head: () => ({
     meta: [
       { title: "AI Dispute Center | Insight" },
