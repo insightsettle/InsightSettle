@@ -38,25 +38,68 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
+  const { user } = useSessionUser();
+  const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
   const stats = [
     { label: "Available balance", value: formatSAR(dashboardStats.available), icon: Wallet },
     { label: "Funds held", value: formatSAR(dashboardStats.held), icon: ShieldCheck },
     { label: "Active deals", value: String(dashboardStats.activeDeals), icon: BriefcaseBusiness },
     { label: "Open disputes", value: String(dashboardStats.openDisputes), icon: AlertCircle },
   ];
+  const firstName = (user?.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0];
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-primary">WORKSPACE OVERVIEW</p>
-            <h1 className="mt-2 text-3xl font-extrabold">Good morning, Alex</h1>
+            <h1 className="mt-2 text-3xl font-extrabold">
+              Welcome back{firstName ? `, ${firstName}` : ""}
+            </h1>
             <p className="mt-2 text-muted-foreground">Here is what needs your attention today.</p>
           </div>
-          <Button>
-            <Plus /> New deal
+          <Button asChild>
+            <Link to="/deals/new">
+              <Plus /> New deal
+            </Link>
           </Button>
         </div>
+
+        <section className="mt-8">
+          <h2 className="text-xl font-bold">Your saved deals</h2>
+          {myDeals.length === 0 ? (
+            <Card className="mt-3 border-dashed">
+              <CardContent className="p-6 text-sm text-muted-foreground">
+                You have no deals yet. Create one and send the invitation link to the other party —
+                or open an invitation link you received.
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="mt-3 space-y-3">
+              {myDeals.map((deal) => (
+                <Link
+                  key={deal.id}
+                  to="/deals/$dealId"
+                  params={{ dealId: deal.ref }}
+                  className="group grid gap-3 rounded-lg border border-border bg-card p-4 transition hover:border-primary/40 sm:grid-cols-[1fr_auto] sm:items-center"
+                >
+                  <div>
+                    <p className="font-semibold group-hover:text-primary">{deal.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {deal.ref} ·{" "}
+                      {deal.buyer_id && deal.seller_id
+                        ? "Both parties joined"
+                        : "Waiting for the other party"}
+                    </p>
+                  </div>
+                  <p className="font-bold sm:text-right">
+                    {deal.currency} {Number(deal.amount).toLocaleString("en-GB")}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
             <Card key={s.label}>
