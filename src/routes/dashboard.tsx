@@ -9,6 +9,7 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { FxReport } from "@/components/site/FxReport";
 import { SiteShell } from "@/components/site/SiteShell";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,7 @@ function Dashboard() {
             </Card>
           </section>
         </div>
+        <FxReport />
       </div>
     </SiteShell>
   );
