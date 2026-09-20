@@ -91,19 +91,13 @@ export function FxReport() {
               <p className="font-semibold">Conversion report</p>
             </div>
             <dl className="mt-4 space-y-3 text-sm">
-              <Row
-                label={`Base rate (SAR per 1 ${currency})`}
-                value={formatRate(quote.baseRate)}
-              />
+              <Row label={`Base rate (SAR per 1 ${currency})`} value={formatRate(quote.baseRate)} />
               <Row
                 label={`Customer rate (SAR per 1 ${currency})`}
                 value={formatRate(quote.customerRate)}
               />
               <Row label="Spread margin" value={`${(quote.spread * 100).toFixed(2)}%`} />
-              <Row
-                label="Cost at base rate"
-                value={formatForeign(quote.baseCost, currency)}
-              />
+              <Row label="Cost at base rate" value={formatForeign(quote.baseCost, currency)} />
               <Row
                 label="Charged to customer"
                 value={formatForeign(quote.customerCharge, currency)}
