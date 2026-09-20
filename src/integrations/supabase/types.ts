@@ -87,6 +87,47 @@ export type Database = {
           },
         ]
       }
+      deal_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          ratee_id: string
+          rater_id: string
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          ratee_id: string
+          rater_id: string
+          score: number
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          ratee_id?: string
+          rater_id?: string
+          score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_ratings_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_transactions: {
         Row: {
           amount: number
@@ -149,11 +190,13 @@ export type Database = {
       deals: {
         Row: {
           amount: number
+          auto_release_at: string | null
           buyer_id: string | null
           counterparty_email: string | null
           created_at: string
           created_by: string
           currency: string
+          delivered_at: string | null
           description: string
           disputed_reason: string | null
           due_at: string | null
@@ -161,26 +204,36 @@ export type Database = {
           fee_override_flat: number | null
           fee_override_note: string | null
           fee_override_percent: number | null
+          fee_payer: string
           id: string
+          inspection_days: number
           invite_token: string
           ref: string
+          refunded_amount: number
           released_at: string | null
           risk_checked_at: string | null
           risk_level: string | null
           risk_score: number | null
           risk_summary: string | null
           seller_id: string | null
+          shipping_carrier: string | null
+          shipping_status: string | null
+          shipping_tracking: string | null
           status: string
+          terms_note: string | null
+          terms_status: string
           title: string
           updated_at: string
         }
         Insert: {
           amount: number
+          auto_release_at?: string | null
           buyer_id?: string | null
           counterparty_email?: string | null
           created_at?: string
           created_by: string
           currency?: string
+          delivered_at?: string | null
           description?: string
           disputed_reason?: string | null
           due_at?: string | null
@@ -188,26 +241,36 @@ export type Database = {
           fee_override_flat?: number | null
           fee_override_note?: string | null
           fee_override_percent?: number | null
+          fee_payer?: string
           id?: string
+          inspection_days?: number
           invite_token?: string
           ref?: string
+          refunded_amount?: number
           released_at?: string | null
           risk_checked_at?: string | null
           risk_level?: string | null
           risk_score?: number | null
           risk_summary?: string | null
           seller_id?: string | null
+          shipping_carrier?: string | null
+          shipping_status?: string | null
+          shipping_tracking?: string | null
           status?: string
+          terms_note?: string | null
+          terms_status?: string
           title: string
           updated_at?: string
         }
         Update: {
           amount?: number
+          auto_release_at?: string | null
           buyer_id?: string | null
           counterparty_email?: string | null
           created_at?: string
           created_by?: string
           currency?: string
+          delivered_at?: string | null
           description?: string
           disputed_reason?: string | null
           due_at?: string | null
@@ -215,18 +278,68 @@ export type Database = {
           fee_override_flat?: number | null
           fee_override_note?: string | null
           fee_override_percent?: number | null
+          fee_payer?: string
           id?: string
+          inspection_days?: number
           invite_token?: string
           ref?: string
+          refunded_amount?: number
           released_at?: string | null
           risk_checked_at?: string | null
           risk_level?: string | null
           risk_score?: number | null
           risk_summary?: string | null
           seller_id?: string | null
+          shipping_carrier?: string | null
+          shipping_status?: string | null
+          shipping_tracking?: string | null
           status?: string
+          terms_note?: string | null
+          terms_status?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      kyc_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          file_name: string
+          file_path: string
+          id: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type?: string
+          file_name?: string
+          file_path: string
+          id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
