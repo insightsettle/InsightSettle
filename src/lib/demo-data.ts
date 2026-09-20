@@ -1,11 +1,5 @@
 export type DealStatus =
-  | "pending_funding"
-  | "held"
-  | "delivered"
-  | "under_review"
-  | "released"
-  | "refunded"
-  | "disputed";
+  "pending_funding" | "held" | "delivered" | "under_review" | "released" | "refunded" | "disputed";
 
 export const statusLabels: Record<DealStatus, string> = {
   pending_funding: "Pending funding",
@@ -57,7 +51,7 @@ export type Deal = {
   actionRequired?: string;
 };
 
-/** نموذج العمولات وفق مستند التصميم (بيانات تجريبية) */
+/** نموذج العمولات وفق مستند التصميم (Sample data) */
 export const feeTiers = [
   { from: 0, to: 5000, rate: 0.03, min: 15, label: "Up to SAR 5,000" },
   { from: 5001, to: 50000, rate: 0.025, min: 0, label: "SAR 5,001 to 50,000" },
@@ -66,7 +60,8 @@ export const feeTiers = [
 
 export function calcFee(amount: number) {
   const tier = feeTiers.find((t) => amount >= t.from && amount <= t.to) ?? feeTiers[0];
-  if (!tier) return { fee: 0, rate: 0, tier: { from: 0, to: 0, rate: 0, min: 0, label: "Unavailable" } };
+  if (!tier)
+    return { fee: 0, rate: 0, tier: { from: 0, to: 0, rate: 0, min: 0, label: "Unavailable" } };
   const fee = Math.max(amount * tier.rate, tier.min);
   return { fee: Math.round(fee * 100) / 100, rate: tier.rate, tier };
 }
@@ -86,127 +81,145 @@ export function formatDate(iso: string) {
 export const deals: Deal[] = [
   {
     id: "DL-10428",
-    title: "تصميم هوية بصرية لمتجر إلكتروني",
+    title: "Brand identity for an online store",
     description:
-      "تصميم شعار، دليل هوية، وقوالب سوشيال ميديا. التسليم على ثلاث مراحل مع مراجعتين لكل مرحلة.",
+      "Logo, brand guide, and social templates delivered across three milestones with two revisions each.",
     amount: 18000,
-    buyer: "متجر رَفَّة",
-    seller: "استوديو نُون",
+    buyer: "Raffa Store",
+    seller: "Noon Studio",
     role: "buyer",
     status: "under_review",
     createdAt: "2026-08-28",
     dueAt: "2026-09-25",
     stages: [
-      { name: "المرحلة 1 — الشعار", amount: 6000, status: "released" },
-      { name: "المرحلة 2 — دليل الهوية", amount: 7000, status: "under_review" },
-      { name: "المرحلة 3 — القوالب", amount: 5000, status: "pending_funding" },
+      { name: "Milestone 1 — Logo", amount: 6000, status: "released" },
+      { name: "Milestone 2 — Brand guide", amount: 7000, status: "under_review" },
+      { name: "Milestone 3 — Templates", amount: 5000, status: "pending_funding" },
     ],
     timeline: [
-      { title: "إنشاء الصفقة", at: "2026-08-28 10:12" },
-      { title: "قبول الطرف الآخر للدعوة", at: "2026-08-28 13:40" },
-      { title: "تمويل المرحلتين الأولى والثانية", at: "2026-08-29 09:05", note: "بيانات تجريبية" },
-      { title: "الإفراج عن المرحلة الأولى", at: "2026-09-06 16:22" },
-      { title: "تأكيد تسليم المرحلة الثانية", at: "2026-09-17 11:48", note: "مرفق 4 ملفات" },
+      { title: "Deal created", at: "2026-08-28 10:12" },
+      { title: "Invitation accepted", at: "2026-08-28 13:40" },
+      { title: "First two milestones funded", at: "2026-08-29 09:05", note: "Sample data" },
+      { title: "First milestone released", at: "2026-09-06 16:22" },
+      { title: "Second milestone delivered", at: "2026-09-17 11:48", note: "4 files attached" },
     ],
     attachments: [
       { name: "brand-guide-v2.pdf", size: "4.2 MB" },
       { name: "logo-final.svg", size: "312 KB" },
     ],
     messages: [
-      { from: "استوديو نُون", at: "2026-09-17 11:50", body: "تم رفع دليل الهوية، في انتظار ملاحظاتك." },
-      { from: "متجر رَفَّة", at: "2026-09-18 08:30", body: "سأراجع اليوم وأؤكد الاستلام." },
+      {
+        from: "Noon Studio",
+        at: "2026-09-17 11:50",
+        body: "The brand guide is uploaded and ready for your review.",
+      },
+      {
+        from: "Raffa Store",
+        at: "2026-09-18 08:30",
+        body: "I will review it today and confirm receipt.",
+      },
     ],
-    actionRequired: "تأكيد استلام المرحلة الثانية أو طلب تعديل",
+    actionRequired: "Approve milestone two or request changes",
   },
   {
     id: "DL-10391",
-    title: "تطوير تطبيق حجز مواعيد",
-    description: "تسليم نسخة أولى قابلة للتشغيل مع لوحة إدارة وربط بوابة دفع.",
+    title: "Appointment booking application",
+    description: "Deliver a working first release with an admin area and payment integration.",
     amount: 62000,
-    buyer: "عيادة صفا",
-    seller: "شركة بِنية التقنية",
+    buyer: "Safa Clinic",
+    seller: "Binyah Technology",
     role: "seller",
     status: "held",
     createdAt: "2026-08-10",
     dueAt: "2026-10-01",
-    stages: [{ name: "دفعة كاملة", amount: 62000, status: "held" }],
+    stages: [{ name: "Full payment", amount: 62000, status: "held" }],
     timeline: [
-      { title: "إنشاء الصفقة", at: "2026-08-10 09:00" },
-      { title: "توثيق الهوية للطرفين", at: "2026-08-11 12:10" },
-      { title: "تمويل الصفقة", at: "2026-08-12 15:31", note: "بيانات تجريبية" },
+      { title: "Deal created", at: "2026-08-10 09:00" },
+      { title: "Both parties verified", at: "2026-08-11 12:10" },
+      { title: "Deal funded", at: "2026-08-12 15:31", note: "Sample data" },
     ],
     attachments: [{ name: "scope-of-work.pdf", size: "1.1 MB" }],
-    messages: [
-      { from: "عيادة صفا", at: "2026-09-12 14:00", body: "هل نستطيع إضافة تقارير أسبوعية؟" },
-    ],
-    actionRequired: "تأكيد التسليم قبل 1 أكتوبر",
+    messages: [{ from: "Safa Clinic", at: "2026-09-12 14:00", body: "Can we add weekly reports?" }],
+    actionRequired: "Confirm delivery before 1 October",
   },
   {
     id: "DL-10355",
-    title: "شراء معدات تصوير مستعملة",
-    description: "كاميرا وعدستان مع فحص فني عند الاستلام.",
+    title: "Purchase of used camera equipment",
+    description: "Camera and two lenses, subject to inspection on receipt.",
     amount: 4200,
-    buyer: "فيصل الحربي",
-    seller: "معرض الضوء",
+    buyer: "Faisal Alharbi",
+    seller: "Al-Daw Studio",
     role: "buyer",
     status: "disputed",
     createdAt: "2026-07-30",
     dueAt: "2026-09-10",
-    stages: [{ name: "دفعة كاملة", amount: 4200, status: "disputed" }],
+    stages: [{ name: "Full payment", amount: 4200, status: "disputed" }],
     timeline: [
-      { title: "تمويل الصفقة", at: "2026-08-01 10:20", note: "بيانات تجريبية" },
-      { title: "تأكيد التسليم من البائع", at: "2026-09-05 17:02" },
-      { title: "فتح نزاع", at: "2026-09-08 09:14", note: "سبب: المنتج غير مطابق للوصف" },
+      { title: "Deal funded", at: "2026-08-01 10:20", note: "Sample data" },
+      { title: "Seller confirmed delivery", at: "2026-09-05 17:02" },
+      {
+        title: "Dispute opened",
+        at: "2026-09-08 09:14",
+        note: "Reason: item differs from listing",
+      },
     ],
     attachments: [
       { name: "damage-photo-1.jpg", size: "2.4 MB" },
       { name: "shipping-receipt.pdf", size: "220 KB" },
     ],
     messages: [
-      { from: "فيصل الحربي", at: "2026-09-08 09:20", body: "العدسة بها خدوش لم تُذكر في الوصف." },
-      { from: "معرض الضوء", at: "2026-09-08 12:05", body: "الخدوش سطحية وموضحة في الصور." },
+      {
+        from: "Faisal Alharbi",
+        at: "2026-09-08 09:20",
+        body: "The lens has scratches that were not disclosed.",
+      },
+      {
+        from: "Al-Daw Studio",
+        at: "2026-09-08 12:05",
+        body: "The scratches are superficial and visible in the listing photos.",
+      },
     ],
-    actionRequired: "رفع مستندات النزاع للوسيط",
+    actionRequired: "Submit dispute evidence for mediation",
   },
   {
     id: "DL-10302",
-    title: "كتابة محتوى تسويقي — 20 مقالة",
-    description: "محتوى عربي محسّن لمحركات البحث مع مراجعة لغوية.",
+    title: "Marketing content — 20 articles",
+    description: "Search-optimized Arabic content with language review.",
     amount: 9600,
-    buyer: "منصة تَجْر",
-    seller: "دانة العتيبي",
+    buyer: "Tajr Platform",
+    seller: "Dana Alotaibi",
     role: "buyer",
     status: "released",
     createdAt: "2026-06-18",
     dueAt: "2026-07-20",
-    stages: [{ name: "دفعة كاملة", amount: 9600, status: "released" }],
+    stages: [{ name: "Full payment", amount: 9600, status: "released" }],
     timeline: [
-      { title: "تمويل الصفقة", at: "2026-06-19 11:00", note: "بيانات تجريبية" },
-      { title: "تأكيد الاستلام", at: "2026-07-18 19:40" },
-      { title: "الإفراج عن المبلغ", at: "2026-07-18 19:41" },
+      { title: "Deal funded", at: "2026-06-19 11:00", note: "Sample data" },
+      { title: "Receipt confirmed", at: "2026-07-18 19:40" },
+      { title: "Funds released", at: "2026-07-18 19:41" },
     ],
     attachments: [{ name: "articles-final.zip", size: "8.7 MB" }],
     messages: [],
   },
   {
     id: "DL-10465",
-    title: "تأثيث مكتب — دفعتان",
-    description: "توريد وتركيب أثاث مكتبي مع ضمان سنة.",
+    title: "Office furniture — two payments",
+    description: "Supply and install office furniture with a one-year warranty.",
     amount: 27500,
-    buyer: "مكتب أفق للاستشارات",
-    seller: "مؤسسة ركن الأثاث",
+    buyer: "Ofuq Consulting",
+    seller: "Rukn Furniture",
     role: "buyer",
     status: "pending_funding",
     createdAt: "2026-09-16",
     dueAt: "2026-10-12",
     stages: [
-      { name: "الدفعة الأولى", amount: 15000, status: "pending_funding" },
-      { name: "الدفعة الثانية عند التركيب", amount: 12500, status: "pending_funding" },
+      { name: "First payment", amount: 15000, status: "pending_funding" },
+      { name: "Second payment on installation", amount: 12500, status: "pending_funding" },
     ],
-    timeline: [{ title: "إنشاء الصفقة وإرسال الدعوة", at: "2026-09-16 08:45" }],
+    timeline: [{ title: "Deal created وإرسال الدعوة", at: "2026-09-16 08:45" }],
     attachments: [],
     messages: [],
-    actionRequired: "تمويل الدفعة الأولى لبدء التنفيذ",
+    actionRequired: "تمويل First payment لبدء التنفيذ",
   },
 ];
 
@@ -224,18 +237,34 @@ export const dashboardStats = {
 };
 
 export const activity = [
-  { at: "2026-09-18 08:30", text: "رسالة جديدة في الصفقة DL-10428", tone: "primary" as const },
-  { at: "2026-09-17 11:48", text: "تأكيد تسليم المرحلة الثانية — DL-10428", tone: "primary" as const },
-  { at: "2026-09-16 08:45", text: "تم إنشاء الصفقة DL-10465 وإرسال الدعوة", tone: "muted" as const },
-  { at: "2026-09-08 09:14", text: "فتح نزاع على الصفقة DL-10355", tone: "destructive" as const },
-  { at: "2026-09-06 16:22", text: "إفراج عن 6,000 ر.س للبائع — DL-10428", tone: "primary" as const },
+  { at: "2026-09-18 08:30", text: "New message in deal DL-10428", tone: "primary" as const },
+  {
+    at: "2026-09-17 11:48",
+    text: "Second milestone delivered — DL-10428",
+    tone: "primary" as const,
+  },
+  {
+    at: "2026-09-16 08:45",
+    text: "تم Deal created DL-10465 وإرسال الدعوة",
+    tone: "muted" as const,
+  },
+  {
+    at: "2026-09-08 09:14",
+    text: "Dispute opened على الصفقة DL-10355",
+    tone: "destructive" as const,
+  },
+  {
+    at: "2026-09-06 16:22",
+    text: "SAR 6,000 released to seller — DL-10428",
+    tone: "primary" as const,
+  },
 ];
 
 export const monthlyVolume = [
-  { month: "أبريل", value: 38000, fees: 950 },
-  { month: "مايو", value: 52000, fees: 1300 },
-  { month: "يونيو", value: 46500, fees: 1160 },
-  { month: "يوليو", value: 71000, fees: 1600 },
-  { month: "أغسطس", value: 88000, fees: 1980 },
-  { month: "سبتمبر", value: 61500, fees: 1420 },
+  { month: "April", value: 38000, fees: 950 },
+  { month: "May", value: 52000, fees: 1300 },
+  { month: "June", value: 46500, fees: 1160 },
+  { month: "July", value: 71000, fees: 1600 },
+  { month: "August", value: 88000, fees: 1980 },
+  { month: "September", value: 61500, fees: 1420 },
 ];

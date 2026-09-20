@@ -110,19 +110,14 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-border px-4 py-5 text-center text-xs text-muted-foreground">
-        Demo experience — all balances and payment details are <span className="text-warning">sample data</span>. No real funds are moved.
+        Demo experience — all balances and payment details are{" "}
+        <span className="text-warning">sample data</span>. No real funds are moved.
       </div>
     </footer>
   );
 }
 
-function FooterCol({
-  title,
-  links,
-}: {
-  title: string;
-  links: { to: string; label: string }[];
-}) {
+function FooterCol({ title, links }: { title: string; links: { to: string; label: string }[] }) {
   return (
     <div>
       <h4 className="text-sm font-semibold">{title}</h4>
@@ -139,7 +134,13 @@ function FooterCol({
   );
 }
 
-export function SiteShell({ children, className }: { children: React.ReactNode; className?: string }) {
+export function SiteShell({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />

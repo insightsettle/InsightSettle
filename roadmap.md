@@ -1,4 +1,5 @@
 ## Current tasks
+
 - [ ] Convert all existing pages and shared navigation to a light English interface
 - [ ] Add dashboard and deal details views
 - [ ] Add AI-assisted dispute analysis with document input
