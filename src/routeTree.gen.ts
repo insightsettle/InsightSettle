@@ -11,20 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
-import { Route as AdminFeesRouteImport } from './routes/admin.fees'
-import { Route as AdminRatesRouteImport } from './routes/admin.rates'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
+import { Route as ConsoleIndexRouteImport } from './routes/console.index'
+import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
+import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
+import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
@@ -38,14 +38,14 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsoleRoute = ConsoleRouteImport.update({
+  id: '/console',
+  path: '/console',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -78,26 +78,6 @@ const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminDisputesRoute = AdminDisputesRouteImport.update({
-  id: '/disputes',
-  path: '/disputes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFeesRoute = AdminFeesRouteImport.update({
-  id: '/fees',
-  path: '/fees',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRatesRoute = AdminRatesRouteImport.update({
-  id: '/rates',
-  path: '/rates',
-  getParentRoute: () => AdminRoute,
-} as any)
 const ApiDisputeAnalysisRoute = ApiDisputeAnalysisRouteImport.update({
   id: '/api/dispute-analysis',
   path: '/api/dispute-analysis',
@@ -107,6 +87,26 @@ const ApiDocumentReviewRoute = ApiDocumentReviewRouteImport.update({
   id: '/api/document-review',
   path: '/api/document-review',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ConsoleIndexRoute = ConsoleIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleDisputesRoute = ConsoleDisputesRouteImport.update({
+  id: '/disputes',
+  path: '/disputes',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleFeesRoute = ConsoleFeesRouteImport.update({
+  id: '/fees',
+  path: '/fees',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleRatesRoute = ConsoleRatesRouteImport.update({
+  id: '/rates',
+  path: '/rates',
+  getParentRoute: () => ConsoleRoute,
 } as any)
 const AuthenticatedDealsDealIdRoute =
   AuthenticatedDealsDealIdRouteImport.update({
@@ -128,20 +128,20 @@ const AuthenticatedInviteTokenRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/console': typeof ConsoleRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
-  '/admin/disputes': typeof AdminDisputesRoute
-  '/admin/fees': typeof AdminFeesRoute
-  '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
-  '/admin/': typeof AdminIndexRoute
+  '/console/disputes': typeof ConsoleDisputesRoute
+  '/console/fees': typeof ConsoleFeesRoute
+  '/console/rates': typeof ConsoleRatesRoute
+  '/console/': typeof ConsoleIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -155,12 +155,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
-  '/admin/disputes': typeof AdminDisputesRoute
-  '/admin/fees': typeof AdminFeesRoute
-  '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
-  '/admin': typeof AdminIndexRoute
+  '/console/disputes': typeof ConsoleDisputesRoute
+  '/console/fees': typeof ConsoleFeesRoute
+  '/console/rates': typeof ConsoleRatesRoute
+  '/console': typeof ConsoleIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -169,20 +169,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/console': typeof ConsoleRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
-  '/admin/disputes': typeof AdminDisputesRoute
-  '/admin/fees': typeof AdminFeesRoute
-  '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
-  '/admin/': typeof AdminIndexRoute
+  '/console/disputes': typeof ConsoleDisputesRoute
+  '/console/fees': typeof ConsoleFeesRoute
+  '/console/rates': typeof ConsoleRatesRoute
+  '/console/': typeof ConsoleIndexRoute
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/_authenticated/deals/new': typeof AuthenticatedDealsNewRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -191,20 +191,20 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
     | '/auth'
+    | '/console'
     | '/how-it-works'
     | '/roles'
     | '/services'
     | '/dashboard'
     | '/disputes'
     | '/documents'
-    | '/admin/disputes'
-    | '/admin/fees'
-    | '/admin/rates'
     | '/api/dispute-analysis'
     | '/api/document-review'
-    | '/admin/'
+    | '/console/disputes'
+    | '/console/fees'
+    | '/console/rates'
+    | '/console/'
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
@@ -218,12 +218,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disputes'
     | '/documents'
-    | '/admin/disputes'
-    | '/admin/fees'
-    | '/admin/rates'
     | '/api/dispute-analysis'
     | '/api/document-review'
-    | '/admin'
+    | '/console/disputes'
+    | '/console/fees'
+    | '/console/rates'
+    | '/console'
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
@@ -231,20 +231,20 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/admin'
     | '/auth'
+    | '/console'
     | '/how-it-works'
     | '/roles'
     | '/services'
     | '/_authenticated/dashboard'
     | '/_authenticated/disputes'
     | '/_authenticated/documents'
-    | '/admin/disputes'
-    | '/admin/fees'
-    | '/admin/rates'
     | '/api/dispute-analysis'
     | '/api/document-review'
-    | '/admin/'
+    | '/console/disputes'
+    | '/console/fees'
+    | '/console/rates'
+    | '/console/'
     | '/_authenticated/deals/$dealId'
     | '/_authenticated/deals/new'
     | '/_authenticated/invite/$token'
@@ -253,8 +253,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConsoleRoute: typeof ConsoleRouteWithChildren
   HowItWorksRoute: typeof HowItWorksRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
@@ -278,18 +278,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/console': {
+      id: '/console'
+      path: '/console'
+      fullPath: '/console'
+      preLoaderRoute: typeof ConsoleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -334,34 +334,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/disputes': {
-      id: '/admin/disputes'
-      path: '/disputes'
-      fullPath: '/admin/disputes'
-      preLoaderRoute: typeof AdminDisputesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/fees': {
-      id: '/admin/fees'
-      path: '/fees'
-      fullPath: '/admin/fees'
-      preLoaderRoute: typeof AdminFeesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/rates': {
-      id: '/admin/rates'
-      path: '/rates'
-      fullPath: '/admin/rates'
-      preLoaderRoute: typeof AdminRatesRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/api/dispute-analysis': {
       id: '/api/dispute-analysis'
       path: '/api/dispute-analysis'
@@ -375,6 +347,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/document-review'
       preLoaderRoute: typeof ApiDocumentReviewRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/console/': {
+      id: '/console/'
+      path: '/'
+      fullPath: '/console/'
+      preLoaderRoute: typeof ConsoleIndexRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/disputes': {
+      id: '/console/disputes'
+      path: '/disputes'
+      fullPath: '/console/disputes'
+      preLoaderRoute: typeof ConsoleDisputesRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/fees': {
+      id: '/console/fees'
+      path: '/fees'
+      fullPath: '/console/fees'
+      preLoaderRoute: typeof ConsoleFeesRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/rates': {
+      id: '/console/rates'
+      path: '/rates'
+      fullPath: '/console/rates'
+      preLoaderRoute: typeof ConsoleRatesRouteImport
+      parentRoute: typeof ConsoleRoute
     }
     '/_authenticated/deals/$dealId': {
       id: '/_authenticated/deals/$dealId'
@@ -421,27 +421,28 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface AdminRouteChildren {
-  AdminDisputesRoute: typeof AdminDisputesRoute
-  AdminFeesRoute: typeof AdminFeesRoute
-  AdminRatesRoute: typeof AdminRatesRoute
-  AdminIndexRoute: typeof AdminIndexRoute
+interface ConsoleRouteChildren {
+  ConsoleDisputesRoute: typeof ConsoleDisputesRoute
+  ConsoleFeesRoute: typeof ConsoleFeesRoute
+  ConsoleRatesRoute: typeof ConsoleRatesRoute
+  ConsoleIndexRoute: typeof ConsoleIndexRoute
 }
 
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminDisputesRoute: AdminDisputesRoute,
-  AdminFeesRoute: AdminFeesRoute,
-  AdminRatesRoute: AdminRatesRoute,
-  AdminIndexRoute: AdminIndexRoute,
+const ConsoleRouteChildren: ConsoleRouteChildren = {
+  ConsoleDisputesRoute: ConsoleDisputesRoute,
+  ConsoleFeesRoute: ConsoleFeesRoute,
+  ConsoleRatesRoute: ConsoleRatesRoute,
+  ConsoleIndexRoute: ConsoleIndexRoute,
 }
 
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+const ConsoleRouteWithChildren =
+  ConsoleRoute._addFileChildren(ConsoleRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConsoleRoute: ConsoleRouteWithChildren,
   HowItWorksRoute: HowItWorksRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,

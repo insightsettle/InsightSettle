@@ -15,7 +15,7 @@ import {
   type FeeRule,
 } from "@/lib/platform-settings";
 
-export const Route = createFileRoute("/admin/fees")({
+export const Route = createFileRoute("/console/fees")({
   component: FeesPage,
 });
 

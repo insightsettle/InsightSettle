@@ -65,12 +65,15 @@ function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/how-it-works">
-                  See how it works <ArrowRight />
+                <Link to="/auth" search={{ mode: "signup" }}>
+                  Sign up now <ArrowRight />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/services">Services & fees</Link>
+                <Link to="/auth">Sign in</Link>
+              </Button>
+              <Button asChild size="lg" variant="ghost">
+                <Link to="/how-it-works">See how it works</Link>
               </Button>
             </div>
             <dl className="mt-10 grid max-w-2xl grid-cols-3 gap-4 border-t border-border pt-6">
@@ -189,52 +192,19 @@ function HomePage() {
           <div>
             <h2 className="text-2xl font-extrabold">Ready for a lower-risk transaction?</h2>
             <p className="mt-2 text-muted-foreground">
-              Create the agreement, invite the other party, and let Insight protect the payment.
+              Create your account, set up the agreement, invite the other party, and let Insight
+              protect the payment.
             </p>
           </div>
-          <Button asChild size="lg" className="sm:ml-auto">
-            <Link to="/services">Services & fees</Link>
-          </Button>
-        </div>
-
-        <div className="mt-14 border-t border-border pt-10">
-          <h2 className="text-xl font-bold">Preview the workspaces</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Two separate experiences: one for customers, one for the Insight team.
-          </p>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <Card className="transition hover:border-primary/40">
-              <CardContent className="p-6">
-                <h3 className="font-bold">Client dashboard</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Balances, deals, milestones, document review, and disputes — what your customers
-                  see.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button asChild size="sm">
-                    <Link to="/dashboard">Open client dashboard</Link>
-                  </Button>
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/documents">Document review</Link>
-                  </Button>
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/disputes">Disputes</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-warning/30 transition hover:border-warning/50">
-              <CardContent className="p-6">
-                <h3 className="font-bold">Insight platform console</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Internal only: total volume, fee revenue, currency margin, disputes, and user
-                  oversight. Customers never see this.
-                </p>
-                <Button asChild size="sm" variant="outline" className="mt-4">
-                  <Link to="/admin">Open platform console</Link>
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="flex flex-wrap gap-3 sm:ml-auto">
+            <Button asChild size="lg">
+              <Link to="/auth" search={{ mode: "signup" }}>
+                Sign up now <ArrowRight />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/auth">Sign in</Link>
+            </Button>
           </div>
         </div>
       </section>

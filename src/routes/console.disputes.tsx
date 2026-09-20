@@ -11,7 +11,7 @@ import { formatSAR } from "@/lib/demo-data";
 import { disputeCases, disputeStageLabels, type DisputeCase } from "@/lib/dispute-cases";
 import { usePlatformSettings } from "@/lib/platform-settings";
 
-export const Route = createFileRoute("/admin/disputes")({
+export const Route = createFileRoute("/console/disputes")({
   component: DisputeOpsPage,
 });
 

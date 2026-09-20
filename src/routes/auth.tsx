@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>): { mode?: "signup" } =>
+    search["mode"] === "signup" ? { mode: "signup" } : {},
   head: () => ({
     meta: [
       { title: "Sign in or create an account | Insight" },
@@ -32,7 +34,10 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const search = Route.useSearch();
+  const [mode, setMode] = useState<"signin" | "signup">(
+    search.mode === "signup" ? "signup" : "signin",
+  );
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
