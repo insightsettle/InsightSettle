@@ -15,7 +15,7 @@ import {
   type RateRow,
 } from "@/lib/platform-settings";
 
-export const Route = createFileRoute("/admin/rates")({
+export const Route = createFileRoute("/console/rates")({
   component: RatesPage,
 });
 

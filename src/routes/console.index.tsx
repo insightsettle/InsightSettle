@@ -25,7 +25,7 @@ import {
 } from "@/lib/platform-settings";
 import { deals, formatSAR, monthlyVolume, statusLabels, type DealStatus } from "@/lib/demo-data";
 
-export const Route = createFileRoute("/admin/")({
+export const Route = createFileRoute("/console/")({
   component: AdminOverview,
 });
 
@@ -256,7 +256,7 @@ function AdminOverview() {
           <div className="flex items-center gap-2">
             <AlertTriangle className="size-4 text-warning" />
             <h2 className="font-semibold">Disputes needing attention</h2>
-            <Link to="/admin/disputes" className="ml-auto text-sm text-primary hover:underline">
+            <Link to="/console/disputes" className="ml-auto text-sm text-primary hover:underline">
               Open dispute resolution
             </Link>
           </div>

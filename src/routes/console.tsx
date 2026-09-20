@@ -3,7 +3,7 @@ import { Lock } from "lucide-react";
 
 import { SiteShell } from "@/components/site/SiteShell";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/console")({
   head: () => ({
     meta: [
       { title: "Platform console | Insight" },
@@ -26,10 +26,10 @@ export const Route = createFileRoute("/admin")({
 });
 
 const tabs = [
-  { to: "/admin", label: "Overview", exact: true },
-  { to: "/admin/rates", label: "Currency rates", exact: false },
-  { to: "/admin/fees", label: "Fee rules", exact: false },
-  { to: "/admin/disputes", label: "Dispute resolution", exact: false },
+  { to: "/console", label: "Overview", exact: true },
+  { to: "/console/rates", label: "Currency rates", exact: false },
+  { to: "/console/fees", label: "Fee rules", exact: false },
+  { to: "/console/disputes", label: "Dispute resolution", exact: false },
 ] as const;
 
 function AdminLayout() {
