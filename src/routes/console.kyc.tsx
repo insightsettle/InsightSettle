@@ -16,7 +16,7 @@ import {
 } from "@/lib/kyc";
 
 export const Route = createFileRoute("/console/kyc")({
-  component: ConsoleKyc;
+  component: ConsoleKyc,
 });
 
 const tone: Record<string, string> = {
