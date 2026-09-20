@@ -10,13 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
+import { Route as DealsDealIdRouteImport } from './routes/deals.$dealId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -34,39 +42,83 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDisputeAnalysisRoute = ApiDisputeAnalysisRouteImport.update({
+  id: '/api/dispute-analysis',
+  path: '/api/dispute-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DealsDealIdRoute = DealsDealIdRouteImport.update({
+  id: '/deals/$dealId',
+  path: '/deals/$dealId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
+  '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
+  '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
+  '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/how-it-works' | '/roles' | '/services'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/how-it-works'
+    | '/roles'
+    | '/services'
+    | '/api/dispute-analysis'
+    | '/deals/$dealId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/how-it-works' | '/roles' | '/services'
-  id: '__root__' | '/' | '/how-it-works' | '/roles' | '/services'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/how-it-works'
+    | '/roles'
+    | '/services'
+    | '/api/dispute-analysis'
+    | '/deals/$dealId'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/how-it-works'
+    | '/roles'
+    | '/services'
+    | '/api/dispute-analysis'
+    | '/deals/$dealId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
   HowItWorksRoute: typeof HowItWorksRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
+  ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
+  DealsDealIdRoute: typeof DealsDealIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -76,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -99,14 +158,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/dispute-analysis': {
+      id: '/api/dispute-analysis'
+      path: '/api/dispute-analysis'
+      fullPath: '/api/dispute-analysis'
+      preLoaderRoute: typeof ApiDisputeAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deals/$dealId': {
+      id: '/deals/$dealId'
+      path: '/deals/$dealId'
+      fullPath: '/deals/$dealId'
+      preLoaderRoute: typeof DealsDealIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
   HowItWorksRoute: HowItWorksRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
+  ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,
+  DealsDealIdRoute: DealsDealIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
