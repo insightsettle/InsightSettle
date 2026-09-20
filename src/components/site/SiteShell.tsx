@@ -1,9 +1,12 @@
-import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
 import logo from "@/assets/insight-wordmark-transparent.png";
 import { Button } from "@/components/ui/button";
+import { useSessionUser } from "@/hooks/use-session";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 const nav = [
