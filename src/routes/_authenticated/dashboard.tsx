@@ -1,14 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import {
-  AlertCircle,
-  ArrowUpRight,
-  Banknote,
-  BriefcaseBusiness,
-  Plus,
-  ShieldCheck,
-  Wallet,
-} from "lucide-react";
+import { AlertCircle, Banknote, BriefcaseBusiness, Plus, ShieldCheck, Wallet } from "lucide-react";
 
 import { FxCustomerQuote } from "@/components/site/FxCustomerQuote";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -17,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSessionUser } from "@/hooks/use-session";
 import { listMyDeals } from "@/lib/deals";
-import { activity, dashboardStats, deals, formatSAR } from "@/lib/demo-data";
+import { activity, dashboardStats, formatSAR } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -87,7 +79,10 @@ function Dashboard() {
                   className="group grid gap-3 rounded-lg border border-border bg-card p-4 transition hover:border-primary/40 sm:grid-cols-[1fr_auto] sm:items-center"
                 >
                   <div>
-                    <p className="font-semibold group-hover:text-primary">{deal.title}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold group-hover:text-primary">{deal.title}</p>
+                      <StatusBadge status={deal.status as never} />
+                    </div>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {deal.ref} ·{" "}
                       {deal.buyer_id && deal.seller_id
@@ -118,35 +113,6 @@ function Dashboard() {
           ))}
         </div>
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-          <section>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold">Your deals</h2>
-              <span className="text-sm text-muted-foreground">{deals.length} total</span>
-            </div>
-            <div className="space-y-3">
-              {deals.map((deal) => (
-                <Link
-                  key={deal.id}
-                  to="/deals/$dealId"
-                  params={{ dealId: deal.id }}
-                  className="group grid gap-3 rounded-lg border border-border bg-card p-4 transition hover:border-primary/40 hover:shadow-sm sm:grid-cols-[1fr_auto_auto] sm:items-center"
-                >
-                  <div>
-                    <p className="font-semibold group-hover:text-primary">{deal.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {deal.id} ·{" "}
-                      {deal.role === "buyer" ? `Seller: ${deal.seller}` : `Buyer: ${deal.buyer}`}
-                    </p>
-                  </div>
-                  <div className="sm:text-right">
-                    <p className="font-bold">{formatSAR(deal.amount)}</p>
-                    <StatusBadge status={deal.status} className="mt-1" />
-                  </div>
-                  <ArrowUpRight className="hidden size-4 text-muted-foreground sm:block" />
-                </Link>
-              ))}
-            </div>
-          </section>
           <section>
             <h2 className="mb-4 text-xl font-bold">Recent activity</h2>
             <Card>

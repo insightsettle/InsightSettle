@@ -15,6 +15,11 @@ export type DealRow = {
   status: string;
   due_at: string | null;
   created_at: string;
+  fee_override_percent: number | null;
+  fee_override_flat: number | null;
+  fee_override_note: string | null;
+  disputed_reason: string | null;
+  released_at: string | null;
 };
 
 export async function listMyDeals() {

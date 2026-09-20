@@ -1,4 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+
+import { getPlatformSummary } from "@/lib/admin.functions";
 import {
   AlertTriangle,
   BarChart3,
@@ -31,6 +35,8 @@ export const Route = createFileRoute("/console/")({
 
 function AdminOverview() {
   const { settings } = usePlatformSettings();
+  const fetchSummary = useServerFn(getPlatformSummary);
+  const summary = useQuery({ queryKey: ["platform-summary"], queryFn: () => fetchSummary({}) });
 
   const totalVolume = deals.reduce((s, d) => s + d.amount, 0);
   const feeRevenue = deals.reduce((s, d) => s + computeFee(d.amount, settings.fees).fee, 0);
@@ -64,13 +70,16 @@ function AdminOverview() {
     { label: "Average release time", value: "3.4 days", icon: Clock },
   ];
 
+  const live = summary.data;
   const secondary = [
+    { label: "Registered members (live)", value: live ? String(live.userCount) : "…" },
+    { label: "Pending identity checks (live)", value: live ? String(live.pendingKyc) : "…" },
+    { label: "Real deals created (live)", value: live ? String(live.dealCount) : "…" },
+    { label: "Real deal volume (live)", value: live ? formatSAR(live.dealVolume) : "…" },
     { label: "Successful releases", value: `${(successRate * 100).toFixed(0)}%` },
     { label: "Dispute rate", value: `${(disputeRate * 100).toFixed(0)}%` },
-    { label: "Open disputes", value: String(openDisputes) },
+    { label: "Open disputes", value: String(openDisputes + (live?.disputed ?? 0)) },
     { label: "With external arbitrator", value: String(escalated) },
-    { label: "Verified accounts", value: "184" },
-    { label: "Pending identity checks", value: "7" },
     { label: "Rates needing a daily update", value: String(staleRates) },
     { label: "Active fee tiers", value: String(settings.fees.length) },
   ];

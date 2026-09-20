@@ -1,46 +1,38 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, CalendarDays, FileText, MessageSquare, Users } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  BadgeCheck,
+  CalendarDays,
+  LifeBuoy,
+  MessageSquare,
+  Scale,
+  Send,
+  Users,
+  Wallet,
+} from "lucide-react";
+import { useState } from "react";
 
 import { SiteShell } from "@/components/site/SiteShell";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDealByRef, type DealRow } from "@/lib/deals";
+import { Textarea } from "@/components/ui/textarea";
+import { useSessionUser } from "@/hooks/use-session";
 import {
-  calcFee,
-  formatDate,
-  formatSAR,
-  getDeal,
-  statusLabels,
-  type Deal,
-  type DealStatus,
-} from "@/lib/demo-data";
-
-function toDeal(row: DealRow): Deal {
-  const status = (
-    Object.keys(statusLabels).includes(row.status) ? row.status : "pending_funding"
-  ) as DealStatus;
-  return {
-    id: row.ref,
-    title: row.title,
-    description: row.description || "No description was added for this deal.",
-    amount: Number(row.amount),
-    buyer: row.buyer_id ? "You or the invited buyer" : "Awaiting buyer",
-    seller: row.seller_id ? "You or the invited seller" : "Awaiting seller",
-    role: "buyer",
-    status,
-    createdAt: row.created_at,
-    dueAt: row.due_at ?? row.created_at,
-    stages: [{ name: "Full payment", amount: Number(row.amount), status }],
-    timeline: [{ title: "Deal created", at: formatDate(row.created_at) }],
-    attachments: [],
-    messages: [],
-    ...(row.buyer_id && row.seller_id
-      ? {}
-      : { actionRequired: "Share the invitation link so the other party can join" }),
-  };
-}
+  confirmDelivery,
+  contactSupport,
+  listDealMessages,
+  listTimeline,
+  markFunded,
+  openDispute,
+  postDealMessage,
+  releaseFunds,
+  requestReview,
+} from "@/lib/deal-actions";
+import { getDealByRef } from "@/lib/deals";
+import { calcFee, formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_authenticated/deals/$dealId")({
   head: ({ params }) => ({
@@ -48,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/deals/$dealId")({
       { title: `Deal ${params.dealId} | Insight` },
       {
         name: "description",
-        content: "Review escrow deal parties, milestones, fees, evidence, messages, and timeline.",
+        content: "Review escrow deal parties, fees, timeline, messages, and available actions.",
       },
       { property: "og:title", content: `Insight deal ${params.dealId}` },
       { property: "og:description", content: "A complete record of an Insight escrow deal." },
@@ -61,27 +53,76 @@ export const Route = createFileRoute("/_authenticated/deals/$dealId")({
 
 function DealPage() {
   const { dealId } = Route.useParams();
-  const demoDeal = getDeal(dealId);
-  const { data: savedDeal, isLoading } = useQuery({
-    queryKey: ["deal", dealId],
-    queryFn: () => getDealByRef(dealId),
-    enabled: !demoDeal,
+  const queryClient = useQueryClient();
+  const { user } = useSessionUser();
+
+  const dealQuery = useQuery({ queryKey: ["deal", dealId], queryFn: () => getDealByRef(dealId) });
+  const deal = dealQuery.data ?? null;
+
+  const timeline = useQuery({
+    queryKey: ["deal-timeline", deal?.id],
+    queryFn: () => listTimeline(deal!.id),
+    enabled: !!deal,
+  });
+  const messages = useQuery({
+    queryKey: ["deal-messages", deal?.id],
+    queryFn: () => listDealMessages(deal!.id),
+    enabled: !!deal,
   });
 
-  const deal: Deal | undefined = demoDeal ?? (savedDeal ? toDeal(savedDeal) : undefined);
+  const [message, setMessage] = useState("");
+  const [reviewNote, setReviewNote] = useState("");
+  const [disputeReason, setDisputeReason] = useState("");
+  const [supportNote, setSupportNote] = useState("");
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["deal", dealId] });
+    queryClient.invalidateQueries({ queryKey: ["deal-timeline", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["deal-messages", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["my-deals"] });
+  };
+
+  const action = useMutation({
+    mutationFn: async (fn: () => Promise<void>) => fn(),
+    onSuccess: () => {
+      setReviewNote("");
+      setDisputeReason("");
+      setSupportNote("");
+      setMessage("");
+      refresh();
+    },
+  });
 
   if (!deal)
     return (
       <SiteShell>
         <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-          <h1 className="text-3xl font-bold">{isLoading ? "Loading deal…" : "Deal not found"}</h1>
+          <h1 className="text-3xl font-bold">
+            {dealQuery.isLoading ? "Loading deal…" : "Deal not found"}
+          </h1>
           <Button asChild className="mt-6">
             <Link to="/dashboard">Back to dashboard</Link>
           </Button>
         </div>
       </SiteShell>
     );
-  const { fee } = calcFee(deal.amount);
+
+  const amount = Number(deal.amount);
+  const status = (
+    Object.keys(statusLabels).includes(deal.status) ? deal.status : "pending_funding"
+  ) as DealStatus;
+  const standardFee = calcFee(amount).fee;
+  const fee =
+    deal.fee_override_flat !== null && deal.fee_override_flat !== undefined
+      ? Number(deal.fee_override_flat)
+      : deal.fee_override_percent !== null && deal.fee_override_percent !== undefined
+        ? (amount * Number(deal.fee_override_percent)) / 100
+        : standardFee;
+
+  const isBuyer = !!user && deal.buyer_id === user.id;
+  const isSeller = !!user && deal.seller_id === user.id;
+  const bothJoined = !!deal.buyer_id && !!deal.seller_id;
+
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
@@ -92,142 +133,301 @@ function DealPage() {
         </Button>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-primary">{deal.id}</p>
+            <p className="text-sm font-semibold text-primary">{deal.ref}</p>
             <h1 className="mt-2 text-3xl font-extrabold">{deal.title}</h1>
-            <p className="mt-2 max-w-3xl text-muted-foreground">{deal.description}</p>
+            <p className="mt-2 max-w-3xl text-muted-foreground">
+              {deal.description || "No description was added for this deal."}
+            </p>
           </div>
-          <StatusBadge status={deal.status} className="px-4 py-2" />
+          <StatusBadge status={status} className="px-4 py-2" />
         </div>
+
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.8fr]">
           <div className="space-y-6">
             <Card>
               <CardContent className="p-6">
-                <h2 className="font-bold">Milestones</h2>
-                <div className="mt-4 space-y-3">
-                  {deal.stages.map((stage) => (
-                    <div
-                      key={stage.name}
-                      className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border p-4"
+                <h2 className="font-bold">What you can do now</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Actions depend on your side of the deal and its current status. Payments are
+                  sample data until the payment provider is connected.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {isBuyer && status === "pending_funding" && (
+                    <Button
+                      onClick={() => action.mutate(() => markFunded(deal.id))}
+                      disabled={!bothJoined || action.isPending}
                     >
-                      <div>
-                        <p className="font-medium">{stage.name}</p>
-                        <p className="text-sm text-muted-foreground">{formatSAR(stage.amount)}</p>
-                      </div>
-                      <StatusBadge status={stage.status} />
-                    </div>
-                  ))}
+                      <Wallet /> Fund the deal
+                    </Button>
+                  )}
+                  {isSeller && status === "held" && (
+                    <Button onClick={() => action.mutate(() => confirmDelivery(deal.id))}>
+                      <BadgeCheck /> Confirm delivery
+                    </Button>
+                  )}
+                  {isBuyer && (status === "delivered" || status === "under_review") && (
+                    <Button onClick={() => action.mutate(() => releaseFunds(deal.id))}>
+                      <Wallet /> Release the funds
+                    </Button>
+                  )}
+                  {status === "released" && (
+                    <p className="text-sm text-muted-foreground">
+                      Funds were released to the seller. This deal is complete.
+                    </p>
+                  )}
+                  {!bothJoined && (
+                    <p className="text-sm text-muted-foreground">
+                      The other party has not joined yet — share the invitation link first.
+                    </p>
+                  )}
                 </div>
+
+                {isBuyer && status === "delivered" && (
+                  <div className="mt-5 rounded-md border border-border p-4">
+                    <p className="text-sm font-semibold">Need a revision before releasing?</p>
+                    <Textarea
+                      value={reviewNote}
+                      onChange={(e) => setReviewNote(e.target.value)}
+                      rows={3}
+                      className="mt-2"
+                      placeholder="Describe what still needs to change"
+                    />
+                    <Button
+                      variant="outline"
+                      className="mt-3"
+                      disabled={reviewNote.trim().length < 3}
+                      onClick={() => action.mutate(() => requestReview(deal.id, reviewNote.trim()))}
+                    >
+                      Ask for a revision
+                    </Button>
+                  </div>
+                )}
+
+                {status !== "released" && status !== "refunded" && status !== "disputed" && (
+                  <div className="mt-4 rounded-md border border-warning/40 bg-warning/5 p-4">
+                    <div className="flex items-center gap-2">
+                      <Scale className="size-4 text-warning" />
+                      <p className="text-sm font-semibold">Request arbitration</p>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Insight reviews the case first; unresolved cases move to an external
+                      arbitrator whose fee is charged per the platform policy.
+                    </p>
+                    <Textarea
+                      value={disputeReason}
+                      onChange={(e) => setDisputeReason(e.target.value)}
+                      rows={3}
+                      className="mt-2"
+                      placeholder="Explain the problem in detail"
+                    />
+                    <Button
+                      variant="outline"
+                      className="mt-3"
+                      disabled={disputeReason.trim().length < 10}
+                      onClick={() =>
+                        action.mutate(() => openDispute(deal.id, disputeReason.trim()))
+                      }
+                    >
+                      Open a dispute
+                    </Button>
+                  </div>
+                )}
+
+                {status === "disputed" && (
+                  <div className="mt-4 flex gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-4">
+                    <AlertCircle className="size-5 text-destructive" />
+                    <div>
+                      <p className="text-sm font-semibold">This deal is under dispute</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {deal.disputed_reason ?? "Insight is reviewing the case."}
+                      </p>
+                      <Link
+                        to="/disputes"
+                        className="mt-2 inline-block text-sm text-primary hover:underline"
+                      >
+                        Open the dispute center
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
+
             <Card>
               <CardContent className="p-6">
                 <h2 className="font-bold">Timeline</h2>
-                <ol className="mt-5 space-y-5 border-l border-border pl-5">
-                  {deal.timeline.map((e) => (
-                    <li key={e.at} className="relative">
-                      <span className="absolute -left-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
-                      <p className="font-medium">{e.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {e.at}
-                        {e.note ? ` · ${e.note}` : ""}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
+                {timeline.isLoading ? (
+                  <p className="mt-3 text-sm text-muted-foreground">Loading activity…</p>
+                ) : (
+                  <ol className="mt-5 space-y-5 border-l border-border pl-5">
+                    {(timeline.data ?? []).map((e) => (
+                      <li key={e.id} className="relative">
+                        <span className="absolute -left-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
+                        <p className="font-medium">{e.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(e.created_at)}
+                          {e.note ? ` · ${e.note}` : ""}
+                        </p>
+                      </li>
+                    ))}
+                    {(timeline.data ?? []).length === 0 && (
+                      <li className="text-sm text-muted-foreground">No activity yet.</li>
+                    )}
+                  </ol>
+                )}
               </CardContent>
             </Card>
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="size-5 text-primary" />
-                  <h2 className="font-bold">Deal messages</h2>
+                  <h2 className="font-bold">Deal conversation</h2>
                 </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Talk to the other party and to Insight support in one place.
+                </p>
                 <div className="mt-4 space-y-3">
-                  {deal.messages.length ? (
-                    deal.messages.map((m) => (
-                      <div key={m.at} className="rounded-md bg-muted p-4">
-                        <div className="flex justify-between gap-3 text-xs">
-                          <b>{m.from}</b>
-                          <span className="text-muted-foreground">{m.at}</span>
-                        </div>
-                        <p className="mt-2 text-sm">{m.body}</p>
+                  {(messages.data ?? []).map((m) => (
+                    <div
+                      key={m.id}
+                      className={`rounded-md p-4 ${m.author_kind === "staff" ? "bg-primary/10" : "bg-muted"}`}
+                    >
+                      <div className="flex justify-between gap-3 text-xs">
+                        <b>{m.author_name}</b>
+                        <span className="text-muted-foreground">{formatDate(m.created_at)}</span>
                       </div>
-                    ))
-                  ) : (
+                      <p className="mt-2 text-sm">{m.body}</p>
+                    </div>
+                  ))}
+                  {(messages.data ?? []).length === 0 && (
                     <p className="text-sm text-muted-foreground">No messages yet.</p>
                   )}
                 </div>
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={3}
+                  className="mt-4"
+                  placeholder="Write a message"
+                />
+                <Button
+                  className="mt-3"
+                  disabled={!message.trim() || action.isPending}
+                  onClick={() => action.mutate(() => postDealMessage(deal.id, message.trim()))}
+                >
+                  <Send /> Send message
+                </Button>
               </CardContent>
             </Card>
           </div>
+
           <aside className="space-y-4">
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-muted-foreground">Deal value</p>
-                <p className="mt-1 text-3xl font-extrabold">{formatSAR(deal.amount)}</p>
+                <p className="mt-1 text-3xl font-extrabold">
+                  {deal.currency} {amount.toLocaleString("en-GB")}
+                </p>
                 <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
                   <Info label="Platform fee" value={formatSAR(fee)} />
-                  <Info label="Seller receives" value={formatSAR(deal.amount - fee)} />
-                  <Info label="Created" value={formatDate(deal.createdAt)} />
-                  <Info label="Due" value={formatDate(deal.dueAt)} />
+                  {fee !== standardFee && (
+                    <Info label="Standard fee" value={formatSAR(standardFee)} />
+                  )}
+                  <Info label="Seller receives" value={formatSAR(amount - fee)} />
+                  <Info label="Created" value={formatDate(deal.created_at)} />
+                  <Info label="Due" value={deal.due_at ? formatDate(deal.due_at) : "No due date"} />
                 </dl>
+                {fee !== standardFee && (
+                  <p className="mt-3 rounded-md bg-primary/10 p-3 text-xs text-primary">
+                    Insight applied a special fee to this deal.
+                    {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
+                  </p>
+                )}
                 <p className="mt-4 text-xs text-warning">Sample payment data</p>
               </CardContent>
             </Card>
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Users className="size-5 text-primary" />
                   <h2 className="font-bold">Parties</h2>
                 </div>
-                <Info label="Buyer" value={deal.buyer} />
-                <Info label="Seller" value={deal.seller} />
+                <Info
+                  label="Buyer"
+                  value={
+                    deal.buyer_id ? (isBuyer ? "You" : "Invited buyer joined") : "Awaiting buyer"
+                  }
+                />
+                <Info
+                  label="Seller"
+                  value={
+                    deal.seller_id
+                      ? isSeller
+                        ? "You"
+                        : "Invited seller joined"
+                      : "Awaiting seller"
+                  }
+                />
+                <Info label="Invited email" value={deal.counterparty_email ?? "—"} />
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <FileText className="size-5 text-primary" />
-                  <h2 className="font-bold">Attachments</h2>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {deal.attachments.length ? (
-                    deal.attachments.map((f) => (
-                      <div key={f.name} className="flex justify-between gap-3 text-sm">
-                        <span>{f.name}</span>
-                        <span className="text-muted-foreground">{f.size}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No files attached.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            {deal.actionRequired && (
+
+            {!bothJoined && (
               <Card className="border-warning/40 bg-warning/5">
                 <CardContent className="p-5">
                   <div className="flex gap-2">
                     <CalendarDays className="size-5 text-warning" />
                     <div>
                       <p className="font-semibold">Action required</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{deal.actionRequired}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Share the invitation link so the other party can join this deal.
+                      </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <LifeBuoy className="size-5 text-primary" />
+                  <h2 className="font-bold">Note for Insight</h2>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Add a note about this deal for the Insight team to review.
+                </p>
+                <Textarea
+                  value={supportNote}
+                  onChange={(e) => setSupportNote(e.target.value)}
+                  rows={3}
+                  className="mt-3"
+                  placeholder="What do you need help with?"
+                />
+                <Button
+                  variant="outline"
+                  className="mt-3"
+                  disabled={supportNote.trim().length < 3}
+                  onClick={() => action.mutate(() => contactSupport(deal.id, supportNote.trim()))}
+                >
+                  Send to Insight
+                </Button>
+              </CardContent>
+            </Card>
           </aside>
         </div>
       </div>
     </SiteShell>
   );
 }
+
 function Info({ label, value }: { label: string; value: string }) {
   return (
     <div className="mt-3 flex items-center justify-between gap-4">
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-semibold text-right">{value}</dd>
+      <dd className="text-right text-sm font-semibold">{value}</dd>
     </div>
   );
 }
