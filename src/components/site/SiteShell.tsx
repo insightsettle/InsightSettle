@@ -14,9 +14,11 @@ import { cn } from "@/lib/utils";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/how-it-works", label: "How it works" },
-  { to: "/roles", label: "Roles" },
-  { to: "/services", label: "Services & fees" },
+  { to: "/services", label: "Services" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/help", label: "Help" },
 ] as const;
+
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
