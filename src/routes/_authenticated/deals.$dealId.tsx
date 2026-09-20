@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { calcFee, formatDate, formatSAR, getDeal } from "@/lib/demo-data";
 
-export const Route = createFileRoute("/deals/$dealId")({
+export const Route = createFileRoute("/_authenticated/deals/$dealId")({
   head: ({ params }) => ({
     meta: [
       { title: `Deal ${params.dealId} | Insight` },
