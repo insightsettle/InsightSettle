@@ -14,9 +14,11 @@ import { cn } from "@/lib/utils";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/how-it-works", label: "How it works" },
-  { to: "/roles", label: "Roles" },
-  { to: "/services", label: "Services & fees" },
+  { to: "/services", label: "Services" },
+  { to: "/pricing", label: "Pricing" },
+  { to: "/help", label: "Help" },
 ] as const;
+
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -165,18 +167,21 @@ export function SiteFooter() {
           title="Platform"
           links={[
             { to: "/how-it-works", label: "How it works" },
-            { to: "/services", label: "Services & fees" },
+            { to: "/services", label: "Services" },
+            { to: "/pricing", label: "Fee calculator" },
             { to: "/roles", label: "Roles & access" },
+            { to: "/help", label: "Help centre" },
           ]}
         />
-        <div>
-          <h4 className="text-sm font-semibold">Legal</h4>
-          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>Terms of service</li>
-            <li>Privacy policy</li>
-            <li>Disputes & refunds</li>
-          </ul>
-        </div>
+        <FooterCol
+          title="Legal"
+          links={[
+            { to: "/terms", label: "Terms of service" },
+            { to: "/privacy", label: "Privacy policy" },
+            { to: "/dispute-policy", label: "Disputes & refunds" },
+          ]}
+        />
+
       </div>
       <div className="border-t border-border px-4 py-5 text-center text-xs text-muted-foreground">
         Demo experience — all balances and payment details are{" "}

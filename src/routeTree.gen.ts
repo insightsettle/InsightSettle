@@ -13,18 +13,25 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConsoleRouteImport } from './routes/console'
+import { Route as DisputePolicyRouteImport } from './routes/dispute-policy'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
+import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
+import { Route as ConsoleKycRouteImport } from './routes/console.kyc'
 import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
 import { Route as ConsoleRiskRouteImport } from './routes/console.risk'
 import { Route as ConsoleUsersRouteImport } from './routes/console.users'
@@ -53,9 +60,29 @@ const ConsoleRoute = ConsoleRouteImport.update({
   path: '/console',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DisputePolicyRoute = DisputePolicyRouteImport.update({
+  id: '/dispute-policy',
+  path: '/dispute-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RolesRoute = RolesRouteImport.update({
@@ -66,6 +93,11 @@ const RolesRoute = RolesRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -83,6 +115,12 @@ const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVerificationRoute =
+  AuthenticatedVerificationRouteImport.update({
+    id: '/verification',
+    path: '/verification',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiDealRiskRoute = ApiDealRiskRouteImport.update({
   id: '/api/deal-risk',
   path: '/api/deal-risk',
@@ -111,6 +149,11 @@ const ConsoleDisputesRoute = ConsoleDisputesRouteImport.update({
 const ConsoleFeesRoute = ConsoleFeesRouteImport.update({
   id: '/fees',
   path: '/fees',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleKycRoute = ConsoleKycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
   getParentRoute: () => ConsoleRoute,
 } as any)
 const ConsoleRatesRoute = ConsoleRatesRouteImport.update({
@@ -160,17 +203,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/console': typeof ConsoleRouteWithChildren
+  '/dispute-policy': typeof DisputePolicyRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
@@ -184,17 +234,24 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dispute-policy': typeof DisputePolicyRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
@@ -211,17 +268,24 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/console': typeof ConsoleRouteWithChildren
+  '/dispute-policy': typeof DisputePolicyRoute
+  '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
+  '/_authenticated/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
@@ -238,17 +302,24 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/console'
+    | '/dispute-policy'
+    | '/help'
     | '/how-it-works'
+    | '/pricing'
+    | '/privacy'
     | '/roles'
     | '/services'
+    | '/terms'
     | '/dashboard'
     | '/disputes'
     | '/documents'
+    | '/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/kyc'
     | '/console/rates'
     | '/console/risk'
     | '/console/users'
@@ -262,17 +333,24 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/dispute-policy'
+    | '/help'
     | '/how-it-works'
+    | '/pricing'
+    | '/privacy'
     | '/roles'
     | '/services'
+    | '/terms'
     | '/dashboard'
     | '/disputes'
     | '/documents'
+    | '/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/kyc'
     | '/console/rates'
     | '/console/risk'
     | '/console/users'
@@ -288,17 +366,24 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/console'
+    | '/dispute-policy'
+    | '/help'
     | '/how-it-works'
+    | '/pricing'
+    | '/privacy'
     | '/roles'
     | '/services'
+    | '/terms'
     | '/_authenticated/dashboard'
     | '/_authenticated/disputes'
     | '/_authenticated/documents'
+    | '/_authenticated/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/kyc'
     | '/console/rates'
     | '/console/risk'
     | '/console/users'
@@ -315,9 +400,14 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
+  DisputePolicyRoute: typeof DisputePolicyRoute
+  HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
+  TermsRoute: typeof TermsRoute
   ApiDealRiskRoute: typeof ApiDealRiskRoute
   ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
   ApiDocumentReviewRoute: typeof ApiDocumentReviewRoute
@@ -353,11 +443,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dispute-policy': {
+      id: '/dispute-policy'
+      path: '/dispute-policy'
+      fullPath: '/dispute-policy'
+      preLoaderRoute: typeof DisputePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/how-it-works': {
       id: '/how-it-works'
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/roles': {
@@ -372,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -393,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/verification': {
+      id: '/_authenticated/verification'
+      path: '/verification'
+      fullPath: '/verification'
+      preLoaderRoute: typeof AuthenticatedVerificationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/deal-risk': {
@@ -435,6 +567,13 @@ declare module '@tanstack/react-router' {
       path: '/fees'
       fullPath: '/console/fees'
       preLoaderRoute: typeof ConsoleFeesRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/kyc': {
+      id: '/console/kyc'
+      path: '/kyc'
+      fullPath: '/console/kyc'
+      preLoaderRoute: typeof ConsoleKycRouteImport
       parentRoute: typeof ConsoleRoute
     }
     '/console/rates': {
@@ -500,6 +639,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
+  AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
   AuthenticatedDealsNewRoute: typeof AuthenticatedDealsNewRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
@@ -509,6 +649,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
+  AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
   AuthenticatedDealsNewRoute: AuthenticatedDealsNewRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
@@ -520,6 +661,7 @@ const AuthenticatedRouteRouteWithChildren =
 interface ConsoleRouteChildren {
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
   ConsoleFeesRoute: typeof ConsoleFeesRoute
+  ConsoleKycRoute: typeof ConsoleKycRoute
   ConsoleRatesRoute: typeof ConsoleRatesRoute
   ConsoleRiskRoute: typeof ConsoleRiskRoute
   ConsoleUsersRoute: typeof ConsoleUsersRoute
@@ -531,6 +673,7 @@ interface ConsoleRouteChildren {
 const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleDisputesRoute: ConsoleDisputesRoute,
   ConsoleFeesRoute: ConsoleFeesRoute,
+  ConsoleKycRoute: ConsoleKycRoute,
   ConsoleRatesRoute: ConsoleRatesRoute,
   ConsoleRiskRoute: ConsoleRiskRoute,
   ConsoleUsersRoute: ConsoleUsersRoute,
@@ -547,9 +690,14 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
+  DisputePolicyRoute: DisputePolicyRoute,
+  HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
+  PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
+  TermsRoute: TermsRoute,
   ApiDealRiskRoute: ApiDealRiskRoute,
   ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,
   ApiDocumentReviewRoute: ApiDocumentReviewRoute,
