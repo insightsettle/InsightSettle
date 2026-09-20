@@ -18,6 +18,7 @@ import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminDisputesRouteImport } from './routes/admin.disputes'
 import { Route as AdminFeesRouteImport } from './routes/admin.fees'
 import { Route as AdminRatesRouteImport } from './routes/admin.rates'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
@@ -69,6 +70,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDisputesRoute = AdminDisputesRouteImport.update({
+  id: '/disputes',
+  path: '/disputes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFeesRoute = AdminFeesRouteImport.update({
   id: '/fees',
   path: '/fees',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/admin/disputes': typeof AdminDisputesRoute
   '/admin/fees': typeof AdminFeesRoute
   '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/admin/disputes': typeof AdminDisputesRoute
   '/admin/fees': typeof AdminFeesRoute
   '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
+  '/admin/disputes': typeof AdminDisputesRoute
   '/admin/fees': typeof AdminFeesRoute
   '/admin/rates': typeof AdminRatesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/roles'
     | '/services'
+    | '/admin/disputes'
     | '/admin/fees'
     | '/admin/rates'
     | '/api/dispute-analysis'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/roles'
     | '/services'
+    | '/admin/disputes'
     | '/admin/fees'
     | '/admin/rates'
     | '/api/dispute-analysis'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/roles'
     | '/services'
+    | '/admin/disputes'
     | '/admin/fees'
     | '/admin/rates'
     | '/api/dispute-analysis'
@@ -272,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/disputes': {
+      id: '/admin/disputes'
+      path: '/disputes'
+      fullPath: '/admin/disputes'
+      preLoaderRoute: typeof AdminDisputesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/fees': {
       id: '/admin/fees'
       path: '/fees'
@@ -311,12 +330,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminDisputesRoute: typeof AdminDisputesRoute
   AdminFeesRoute: typeof AdminFeesRoute
   AdminRatesRoute: typeof AdminRatesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDisputesRoute: AdminDisputesRoute,
   AdminFeesRoute: AdminFeesRoute,
   AdminRatesRoute: AdminRatesRoute,
   AdminIndexRoute: AdminIndexRoute,
