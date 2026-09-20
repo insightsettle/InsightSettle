@@ -97,6 +97,36 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          <div className="mt-2 border-t border-border pt-2">
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary"
+                >
+                  My dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    void handleSignOut();
+                  }}
+                  className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary"
+              >
+                Sign in or create account
+              </Link>
+            )}
+          </div>
         </nav>
       )}
     </header>
