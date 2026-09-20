@@ -27,9 +27,7 @@ export const acceptDealInvite = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "already_joined" as const };
     }
 
-    const patch = deal.buyer_id
-      ? { seller_id: context.userId }
-      : { buyer_id: context.userId };
+    const patch = deal.buyer_id ? { seller_id: context.userId } : { buyer_id: context.userId };
     const { error: updateError } = await supabaseAdmin
       .from("deals")
       .update(patch)
