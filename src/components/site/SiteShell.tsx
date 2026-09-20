@@ -136,7 +136,7 @@ export function SiteHeader() {
 export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-border bg-card/40">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <div className="flex items-center">
             <img src={logo} alt="Insight" className="h-10 w-auto object-contain" />
@@ -153,22 +153,9 @@ export function SiteFooter() {
             { to: "/roles", label: "Roles & access" },
           ]}
         />
-        <FooterCol
-          title="Customer area"
-          links={[
-            { to: "/dashboard", label: "Client dashboard" },
-            { to: "/documents", label: "Document review" },
-            { to: "/disputes", label: "Dispute center" },
-          ]}
-        />
         <div>
-          <h4 className="text-sm font-semibold">Insight team</h4>
+          <h4 className="text-sm font-semibold">Legal</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>
-              <Link to="/admin" className="transition-colors hover:text-primary">
-                Platform console (internal)
-              </Link>
-            </li>
             <li>Terms of service</li>
             <li>Privacy policy</li>
             <li>Disputes & refunds</li>
