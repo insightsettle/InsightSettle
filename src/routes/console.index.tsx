@@ -72,10 +72,6 @@ function AdminOverview() {
 
   const live = summary.data;
   const secondary = [
-    { label: "Registered members (live)", value: live ? String(live.userCount) : "…" },
-    { label: "Pending identity checks (live)", value: live ? String(live.pendingKyc) : "…" },
-    { label: "Real deals created (live)", value: live ? String(live.dealCount) : "…" },
-    { label: "Real deal volume (live)", value: live ? formatSAR(live.dealVolume) : "…" },
     { label: "Successful releases", value: `${(successRate * 100).toFixed(0)}%` },
     { label: "Dispute rate", value: `${(disputeRate * 100).toFixed(0)}%` },
     { label: "Open disputes", value: String(openDisputes + (live?.disputed ?? 0)) },
