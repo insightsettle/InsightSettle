@@ -51,7 +51,7 @@ export type Deal = {
   actionRequired?: string;
 };
 
-/** نموذج العمولات وفق مستند التصميم (Sample data) */
+/** Fee model from the design document (sample data) */
 export const feeTiers = [
   { from: 0, to: 5000, rate: 0.03, min: 15, label: "Up to SAR 5,000" },
   { from: 5001, to: 50000, rate: 0.025, min: 0, label: "SAR 5,001 to 50,000" },
@@ -216,10 +216,10 @@ export const deals: Deal[] = [
       { name: "First payment", amount: 15000, status: "pending_funding" },
       { name: "Second payment on installation", amount: 12500, status: "pending_funding" },
     ],
-    timeline: [{ title: "Deal created وإرسال الدعوة", at: "2026-09-16 08:45" }],
+    timeline: [{ title: "Deal created and invitation sent", at: "2026-09-16 08:45" }],
     attachments: [],
     messages: [],
-    actionRequired: "تمويل First payment لبدء التنفيذ",
+    actionRequired: "Fund the first payment to start delivery",
   },
 ];
 
@@ -245,12 +245,12 @@ export const activity = [
   },
   {
     at: "2026-09-16 08:45",
-    text: "تم Deal created DL-10465 وإرسال الدعوة",
+    text: "Deal DL-10465 created and invitation sent",
     tone: "muted" as const,
   },
   {
     at: "2026-09-08 09:14",
-    text: "Dispute opened على الصفقة DL-10355",
+    text: "Dispute opened on deal DL-10355",
     tone: "destructive" as const,
   },
   {

@@ -12,6 +12,7 @@ const nav = [
   { to: "/roles", label: "Roles" },
   { to: "/services", label: "Services & fees" },
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/documents", label: "Document review" },
   { to: "/disputes", label: "Disputes" },
 ] as const;
 
@@ -97,6 +98,7 @@ export function SiteFooter() {
           title="Account"
           links={[
             { to: "/dashboard", label: "Dashboard" },
+            { to: "/documents", label: "Document review" },
             { to: "/disputes", label: "Dispute center" },
           ]}
         />

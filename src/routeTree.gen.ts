@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DisputesRouteImport } from './routes/disputes'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
+import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
 import { Route as DealsDealIdRouteImport } from './routes/deals.$dealId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,6 +33,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const DisputesRoute = DisputesRouteImport.update({
   id: '/disputes',
   path: '/disputes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -53,6 +60,11 @@ const ApiDisputeAnalysisRoute = ApiDisputeAnalysisRouteImport.update({
   path: '/api/dispute-analysis',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDocumentReviewRoute = ApiDocumentReviewRouteImport.update({
+  id: '/api/document-review',
+  path: '/api/document-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DealsDealIdRoute = DealsDealIdRouteImport.update({
   id: '/deals/$dealId',
   path: '/deals/$dealId',
@@ -63,20 +75,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/disputes': typeof DisputesRoute
+  '/documents': typeof DocumentsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
+  '/api/document-review': typeof ApiDocumentReviewRoute
   '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/disputes': typeof DisputesRoute
+  '/documents': typeof DocumentsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
+  '/api/document-review': typeof ApiDocumentReviewRoute
   '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRoutesById {
@@ -84,10 +100,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/disputes': typeof DisputesRoute
+  '/documents': typeof DocumentsRoute
   '/how-it-works': typeof HowItWorksRoute
   '/roles': typeof RolesRoute
   '/services': typeof ServicesRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
+  '/api/document-review': typeof ApiDocumentReviewRoute
   '/deals/$dealId': typeof DealsDealIdRoute
 }
 export interface FileRouteTypes {
@@ -96,30 +114,36 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/disputes'
+    | '/documents'
     | '/how-it-works'
     | '/roles'
     | '/services'
     | '/api/dispute-analysis'
+    | '/api/document-review'
     | '/deals/$dealId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
     | '/disputes'
+    | '/documents'
     | '/how-it-works'
     | '/roles'
     | '/services'
     | '/api/dispute-analysis'
+    | '/api/document-review'
     | '/deals/$dealId'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/disputes'
+    | '/documents'
     | '/how-it-works'
     | '/roles'
     | '/services'
     | '/api/dispute-analysis'
+    | '/api/document-review'
     | '/deals/$dealId'
   fileRoutesById: FileRoutesById
 }
@@ -127,10 +151,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   DisputesRoute: typeof DisputesRoute
+  DocumentsRoute: typeof DocumentsRoute
   HowItWorksRoute: typeof HowItWorksRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
   ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
+  ApiDocumentReviewRoute: typeof ApiDocumentReviewRoute
   DealsDealIdRoute: typeof DealsDealIdRoute
 }
 
@@ -155,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/disputes'
       fullPath: '/disputes'
       preLoaderRoute: typeof DisputesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -185,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDisputeAnalysisRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/document-review': {
+      id: '/api/document-review'
+      path: '/api/document-review'
+      fullPath: '/api/document-review'
+      preLoaderRoute: typeof ApiDocumentReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/deals/$dealId': {
       id: '/deals/$dealId'
       path: '/deals/$dealId'
@@ -199,10 +239,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   DisputesRoute: DisputesRoute,
+  DocumentsRoute: DocumentsRoute,
   HowItWorksRoute: HowItWorksRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
   ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,
+  ApiDocumentReviewRoute: ApiDocumentReviewRoute,
   DealsDealIdRoute: DealsDealIdRoute,
 }
 export const routeTree = rootRouteImport
