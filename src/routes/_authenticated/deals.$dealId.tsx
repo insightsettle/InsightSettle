@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import {
   AlertCircle,
   ArrowLeft,
@@ -7,6 +8,7 @@ import {
   CalendarDays,
   LifeBuoy,
   MessageSquare,
+  Receipt,
   Scale,
   Send,
   Users,
@@ -24,15 +26,19 @@ import {
   confirmDelivery,
   contactSupport,
   listDealMessages,
+  listDealTransactions,
   listTimeline,
-  markFunded,
   openDispute,
   postDealMessage,
-  releaseFunds,
   requestReview,
 } from "@/lib/deal-actions";
 import { getDealByRef } from "@/lib/deals";
 import { calcFee, formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
+import {
+  requestFundsRelease,
+  startDealFunding,
+  type PaymentResult,
+} from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/deals/$dealId")({
   head: ({ params }) => ({
@@ -70,16 +76,25 @@ function DealPage() {
     enabled: !!deal,
   });
 
+  const transactions = useQuery({
+    queryKey: ["deal-transactions", deal?.id],
+    queryFn: () => listDealTransactions(deal!.id),
+    enabled: !!deal,
+  });
+
   const [message, setMessage] = useState("");
   const [reviewNote, setReviewNote] = useState("");
   const [disputeReason, setDisputeReason] = useState("");
   const [supportNote, setSupportNote] = useState("");
+  const [paymentNotice, setPaymentNotice] = useState<PaymentResult | null>(null);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["deal", dealId] });
     queryClient.invalidateQueries({ queryKey: ["deal-timeline", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-messages", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["deal-transactions", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["my-deals"] });
+    queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
 
   const action = useMutation({
@@ -90,6 +105,28 @@ function DealPage() {
       setSupportNote("");
       setMessage("");
       refresh();
+    },
+  });
+
+  const fund = useServerFn(startDealFunding);
+  const release = useServerFn(requestFundsRelease);
+  const payment = useMutation({
+    mutationFn: async (fn: () => Promise<PaymentResult>) => fn(),
+    onSuccess: (result) => {
+      setPaymentNotice(result);
+      refresh();
+    },
+    onError: (error: unknown) => {
+      setPaymentNotice({
+        ok: false,
+        status: "failed",
+        provider: "unknown",
+        providerLabel: "Payments",
+        message:
+          error instanceof Error
+            ? error.message
+            : "The payment could not be started. Please try again or contact Insight support.",
+      });
     },
   });
 
@@ -148,16 +185,16 @@ function DealPage() {
               <CardContent className="p-6">
                 <h2 className="font-bold">What you can do now</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Actions depend on your side of the deal and its current status. Payments are
-                  sample data until the payment provider is connected.
+                  Actions depend on your side of the deal and its current status. Every money
+                  movement is recorded below with its status.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {isBuyer && status === "pending_funding" && (
                     <Button
-                      onClick={() => action.mutate(() => markFunded(deal.id))}
-                      disabled={!bothJoined || action.isPending}
+                      onClick={() => payment.mutate(() => fund({ data: { dealId: deal.id, fee } }))}
+                      disabled={!bothJoined || payment.isPending}
                     >
-                      <Wallet /> Fund the deal
+                      <Wallet /> {payment.isPending ? "Starting payment…" : "Fund the deal"}
                     </Button>
                   )}
                   {isSeller && status === "held" && (
@@ -166,8 +203,13 @@ function DealPage() {
                     </Button>
                   )}
                   {isBuyer && (status === "delivered" || status === "under_review") && (
-                    <Button onClick={() => action.mutate(() => releaseFunds(deal.id))}>
-                      <Wallet /> Release the funds
+                    <Button
+                      onClick={() =>
+                        payment.mutate(() => release({ data: { dealId: deal.id, fee } }))
+                      }
+                      disabled={payment.isPending}
+                    >
+                      <Wallet /> {payment.isPending ? "Sending payout…" : "Release the funds"}
                     </Button>
                   )}
                   {status === "released" && (
@@ -181,6 +223,21 @@ function DealPage() {
                     </p>
                   )}
                 </div>
+
+                {paymentNotice && (
+                  <div
+                    className={`mt-4 rounded-md border p-4 text-sm ${
+                      paymentNotice.ok
+                        ? "border-primary/40 bg-primary/5"
+                        : "border-destructive/40 bg-destructive/5"
+                    }`}
+                  >
+                    <p className="font-semibold">
+                      {paymentNotice.ok ? "Payment recorded" : "Payment could not be completed"}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">{paymentNotice.message}</p>
+                  </div>
+                )}
 
                 {isBuyer && status === "delivered" && (
                   <div className="mt-5 rounded-md border border-border p-4">
@@ -250,6 +307,55 @@ function DealPage() {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2">
+                  <Receipt className="size-5 text-primary" />
+                  <h2 className="font-bold">Payment records</h2>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Funding, payouts, and refunds with the exact status both parties can see.
+                </p>
+                <div className="mt-4 space-y-3">
+                  {(transactions.data ?? []).map((t) => (
+                    <div key={t.id} className="rounded-md border border-border p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-semibold capitalize">
+                          {t.kind} · <bdi dir="ltr">{formatSAR(t.amount)}</bdi>
+                        </p>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            t.status === "succeeded"
+                              ? "bg-primary/10 text-primary"
+                              : t.status === "failed"
+                                ? "bg-destructive/10 text-destructive"
+                                : "bg-warning/10 text-warning"
+                          }`}
+                        >
+                          {t.status}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {formatDate(t.created_at)} · {t.provider}
+                        {t.provider_ref ? ` · ${t.provider_ref}` : ""}
+                      </p>
+                      {t.error_message && (
+                        <p className="mt-2 text-sm text-destructive">{t.error_message}</p>
+                      )}
+                      {!t.error_message && t.note && (
+                        <p className="mt-2 text-sm text-muted-foreground">{t.note}</p>
+                      )}
+                    </div>
+                  ))}
+                  {(transactions.data ?? []).length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      No payments have been recorded for this deal yet.
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
@@ -344,7 +450,10 @@ function DealPage() {
                     {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
                   </p>
                 )}
-                <p className="mt-4 text-xs text-warning">Sample payment data</p>
+                <p className="mt-4 text-xs text-warning">
+                  No card provider is connected yet, so transfers are confirmed manually by the
+                  Insight team and every step is recorded above.
+                </p>
               </CardContent>
             </Card>
 

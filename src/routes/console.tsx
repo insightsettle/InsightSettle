@@ -38,6 +38,7 @@ const tabs = [
   { to: "/console", label: "Overview", exact: true },
   { to: "/console/deals", label: "All deals", exact: false },
   { to: "/console/users", label: "Members", exact: false },
+  { to: "/console/risk", label: "Risk review", exact: false },
   { to: "/console/rates", label: "Currency rates", exact: false },
   { to: "/console/fees", label: "Fee rules", exact: false },
   { to: "/console/disputes", label: "Dispute resolution", exact: false },

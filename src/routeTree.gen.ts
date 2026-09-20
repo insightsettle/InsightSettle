@@ -19,12 +19,14 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
+import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
 import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
+import { Route as ConsoleRiskRouteImport } from './routes/console.risk'
 import { Route as ConsoleUsersRouteImport } from './routes/console.users'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
@@ -81,6 +83,11 @@ const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiDealRiskRoute = ApiDealRiskRouteImport.update({
+  id: '/api/deal-risk',
+  path: '/api/deal-risk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDisputeAnalysisRoute = ApiDisputeAnalysisRouteImport.update({
   id: '/api/dispute-analysis',
   path: '/api/dispute-analysis',
@@ -109,6 +116,11 @@ const ConsoleFeesRoute = ConsoleFeesRouteImport.update({
 const ConsoleRatesRoute = ConsoleRatesRouteImport.update({
   id: '/rates',
   path: '/rates',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleRiskRoute = ConsoleRiskRouteImport.update({
+  id: '/risk',
+  path: '/risk',
   getParentRoute: () => ConsoleRoute,
 } as any)
 const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
@@ -154,11 +166,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
@@ -176,11 +190,13 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console': typeof ConsoleIndexRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
@@ -201,11 +217,13 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
+  '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
@@ -226,11 +244,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disputes'
     | '/documents'
+    | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/console/disputes'
     | '/console/fees'
     | '/console/rates'
+    | '/console/risk'
     | '/console/users'
     | '/console/'
     | '/deals/$dealId'
@@ -248,11 +268,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disputes'
     | '/documents'
+    | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/console/disputes'
     | '/console/fees'
     | '/console/rates'
+    | '/console/risk'
     | '/console/users'
     | '/console'
     | '/deals/$dealId'
@@ -272,11 +294,13 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/disputes'
     | '/_authenticated/documents'
+    | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
     | '/console/disputes'
     | '/console/fees'
     | '/console/rates'
+    | '/console/risk'
     | '/console/users'
     | '/console/'
     | '/_authenticated/deals/$dealId'
@@ -294,6 +318,7 @@ export interface RootRouteChildren {
   HowItWorksRoute: typeof HowItWorksRoute
   RolesRoute: typeof RolesRoute
   ServicesRoute: typeof ServicesRoute
+  ApiDealRiskRoute: typeof ApiDealRiskRoute
   ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
   ApiDocumentReviewRoute: typeof ApiDocumentReviewRoute
 }
@@ -370,6 +395,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/deal-risk': {
+      id: '/api/deal-risk'
+      path: '/api/deal-risk'
+      fullPath: '/api/deal-risk'
+      preLoaderRoute: typeof ApiDealRiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/dispute-analysis': {
       id: '/api/dispute-analysis'
       path: '/api/dispute-analysis'
@@ -410,6 +442,13 @@ declare module '@tanstack/react-router' {
       path: '/rates'
       fullPath: '/console/rates'
       preLoaderRoute: typeof ConsoleRatesRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/risk': {
+      id: '/console/risk'
+      path: '/risk'
+      fullPath: '/console/risk'
+      preLoaderRoute: typeof ConsoleRiskRouteImport
       parentRoute: typeof ConsoleRoute
     }
     '/console/users': {
@@ -482,6 +521,7 @@ interface ConsoleRouteChildren {
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
   ConsoleFeesRoute: typeof ConsoleFeesRoute
   ConsoleRatesRoute: typeof ConsoleRatesRoute
+  ConsoleRiskRoute: typeof ConsoleRiskRoute
   ConsoleUsersRoute: typeof ConsoleUsersRoute
   ConsoleIndexRoute: typeof ConsoleIndexRoute
   ConsoleDealsDealIdRoute: typeof ConsoleDealsDealIdRoute
@@ -492,6 +532,7 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleDisputesRoute: ConsoleDisputesRoute,
   ConsoleFeesRoute: ConsoleFeesRoute,
   ConsoleRatesRoute: ConsoleRatesRoute,
+  ConsoleRiskRoute: ConsoleRiskRoute,
   ConsoleUsersRoute: ConsoleUsersRoute,
   ConsoleIndexRoute: ConsoleIndexRoute,
   ConsoleDealsDealIdRoute: ConsoleDealsDealIdRoute,
@@ -509,6 +550,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowItWorksRoute: HowItWorksRoute,
   RolesRoute: RolesRoute,
   ServicesRoute: ServicesRoute,
+  ApiDealRiskRoute: ApiDealRiskRoute,
   ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,
   ApiDocumentReviewRoute: ApiDocumentReviewRoute,
 }

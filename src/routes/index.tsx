@@ -167,9 +167,7 @@ function HomePage() {
                   <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     {s.k}
                   </dt>
-                  <dd className="mt-1.5 text-2xl font-extrabold">
-                    {s.v}
-                  </dd>
+                  <dd className="mt-1.5 text-2xl font-extrabold">{s.v}</dd>
                 </div>
               ))}
             </dl>
@@ -316,8 +314,8 @@ function HomePage() {
               Protection built into every layer
             </h2>
             <p className="mt-4 text-background/70">
-              Identity checks, encrypted documents, and a full audit trail — designed for
-              high-value transactions.
+              Identity checks, encrypted documents, and a full audit trail — designed for high-value
+              transactions.
             </p>
           </div>
           <ul className="grid gap-4 sm:grid-cols-2">
@@ -327,10 +325,7 @@ function HomePage() {
               { t: "Encrypted documents", d: "Contracts and evidence stored securely per deal." },
               { t: "Full audit log", d: "Every action timestamped and downloadable." },
             ].map((i) => (
-              <li
-                key={i.t}
-                className="rounded-2xl border border-background/10 bg-background/5 p-5"
-              >
+              <li key={i.t} className="rounded-2xl border border-background/10 bg-background/5 p-5">
                 <CheckCircle2 className="size-5 text-primary" />
                 <h3 className="mt-3 text-sm font-bold">{i.t}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-background/60">{i.d}</p>
@@ -387,8 +382,20 @@ function HomePage() {
             preserveAspectRatio="none"
             className="pointer-events-none absolute inset-0 size-full opacity-10"
           >
-            <path d="M0 50 Q25 0 50 50 T100 50" stroke="currentColor" fill="none" className="text-primary" strokeWidth="0.5" />
-            <path d="M0 70 Q25 20 50 70 T100 70" stroke="currentColor" fill="none" className="text-primary" strokeWidth="0.5" />
+            <path
+              d="M0 50 Q25 0 50 50 T100 50"
+              stroke="currentColor"
+              fill="none"
+              className="text-primary"
+              strokeWidth="0.5"
+            />
+            <path
+              d="M0 70 Q25 20 50 70 T100 70"
+              stroke="currentColor"
+              fill="none"
+              className="text-primary"
+              strokeWidth="0.5"
+            />
           </svg>
           <div className="relative">
             <BadgeCheck className="mx-auto size-10 text-primary" />

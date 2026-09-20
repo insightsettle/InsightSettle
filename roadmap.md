@@ -1,20 +1,19 @@
-## Current tasks
+# Insight roadmap
 
-- [x] Light English interface across all pages and shared navigation
-- [x] Client dashboard and deal details (sign-in required)
-- [x] AI dispute analysis and document review
-- [x] Currency spread as a revenue source (internal only)
-- [x] Marketing home page with clear Sign up / Sign in actions, no internal links
-- [x] Accounts: email/password + Google sign-in, profile records, protected pages
-- [x] Real saved deals: create a deal, invite the other party by link, accept the invite
-- [x] Internal console moved to /console, staff-role gated, hidden from public pages
-- [x] Admin: members list with identity approve/reject and team access
-- [x] Admin: all real deals, search and filters, full deal detail, status change with logged reason, special fee offers, staff messaging
-- [x] Client deal page: timeline, fund / confirm delivery / release / revision / dispute actions, conversation, note for Insight
+## Done
 
-## Next (not started)
+- Marketing home page, how-it-works, roles, services pages
+- Auth (email/password + Google), profiles, KYC status, staff roles
+- Client dashboard, deal creation, invite links, deal page (timeline, actions, conversation, note for Insight)
+- Staff console at /console: overview KPIs, all deals, members, currency rates, fee rules, dispute resolution
+- AI dispute mediation, document review, FX spread reporting (internal)
+- AI risk review tab (/console/risk): screens selected deals + pasted messages, ranks deals needing review, saves risk flags
+- Payment records: every funding / release / refund recorded with status, provider, reference and error message; buyer starts funding and release, staff confirms or rejects with a reason; both parties see the outcome
+- In-app notifications with header bell: status changes, messages, arbitration requests, payment outcomes
 
-- [ ] Grant staff access to the owner's account once they register
-- [ ] Payment provider integration (funding, release, refunds, withdrawals)
-- [ ] KYC document upload from the client side
-- [ ] Email / in-app notifications for deal events
+## Open
+
+- [ ] Email notifications — blocked: requires a verified sender domain (insightpayx.com) set up by the owner
+- [ ] Live payment provider (Stripe or Paddle) — blocked: owner will choose the provider later; the ledger and UI are provider-ready
+- [ ] Grant staff access to the owner's own account once they register
+- [ ] KYC document uploads from the client side
