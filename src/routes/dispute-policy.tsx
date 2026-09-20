@@ -1,0 +1,98 @@
+import { Link, createFileRoute } from "@tanstack/react-router";
+
+import { SiteShell } from "@/components/site/SiteShell";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+export const Route = createFileRoute("/dispute-policy")({
+  head: () => ({
+    meta: [
+      { title: "Disputes & refunds policy | Insight" },
+      {
+        name: "description",
+        content:
+          "How Insight reviews disputes, the review window, partial refunds, and when a case goes to an external arbitrator.",
+      },
+      { property: "og:title", content: "Insight disputes and refunds policy" },
+      { property: "og:description", content: "A clear path from disagreement to decision." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: DisputePolicyPage,
+});
+
+const steps = [
+  {
+    h: "1. Raise the case",
+    p: "Either party can open a dispute from the deal page while the funds are still held. The reason is recorded and both sides are notified immediately. The money stays locked until the case closes.",
+  },
+  {
+    h: "2. Evidence window",
+    p: "Both parties upload evidence — files, screenshots, delivery proof, shipping tracking — and answer Insight's questions inside the deal conversation.",
+  },
+  {
+    h: "3. Insight review",
+    p: "Insight reviews the case within the review window published in the dispute centre (3 days by default) and proposes an outcome: release, full refund, or a partial settlement split between the parties.",
+  },
+  {
+    h: "4. External arbitration",
+    p: "If a party rejects the proposal, or the case is too complex, it is escalated to an independent arbitrator. The arbitrator's fee is charged according to the deal's dispute settings and is stated before escalation.",
+  },
+  {
+    h: "5. Decision and payout",
+    p: "The final outcome is applied to the held funds and recorded in the deal's payment records with the amount, reason, and reference, visible to both parties.",
+  },
+];
+
+function DisputePolicyPage() {
+  return (
+    <SiteShell>
+      <div className="mx-auto max-w-3xl px-4 py-14">
+        <h1 className="text-4xl font-extrabold">Disputes & refunds</h1>
+        <p className="mt-3 text-muted-foreground">
+          Held funds are never released while a dispute is open. This is the exact path a case
+          follows.
+        </p>
+
+        <div className="mt-8 space-y-7">
+          {steps.map((s) => (
+            <section key={s.h}>
+              <h2 className="text-lg font-bold">{s.h}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.p}</p>
+            </section>
+          ))}
+        </div>
+
+        <Card className="mt-10">
+          <CardContent className="p-6">
+            <h2 className="font-bold">Refund types</h2>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li>
+                <b className="text-foreground">Full refund</b> — the buyer receives the funded amount
+                back when delivery did not happen or was materially different from the terms.
+              </li>
+              <li>
+                <b className="text-foreground">Partial refund</b> — the parties agree, or Insight
+                decides, a split of the held amount; the rest is released to the seller.
+              </li>
+              <li>
+                <b className="text-foreground">Cancellation before delivery</b> — if both sides
+                cancel before delivery, the funded amount is returned.
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Button asChild>
+            <Link to="/help">Visit the help centre</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/terms">Read the terms</Link>
+          </Button>
+        </div>
+      </div>
+    </SiteShell>
+  );
+}
