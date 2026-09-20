@@ -11,7 +11,7 @@ import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { mode?: "signup" } =>
-    search['mode'] === "signup" ? { mode: "signup" } : {},
+    search["mode"] === "signup" ? { mode: "signup" } : {},
   head: () => ({
     meta: [
       { title: "Sign in or create an account | Insight" },
