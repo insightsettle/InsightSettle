@@ -8,10 +8,13 @@
 - [x] Accounts: email/password + Google sign-in, profile records, protected pages
 - [x] Real saved deals: create a deal, invite the other party by link, accept the invite
 - [x] Internal console moved to /console, staff-role gated, hidden from public pages
+- [x] Admin: members list with identity approve/reject and team access
+- [x] Admin: all real deals, search and filters, full deal detail, status change with logged reason, special fee offers, staff messaging
+- [x] Client deal page: timeline, fund / confirm delivery / release / revision / dispute actions, conversation, note for Insight
 
 ## Next (not started)
 
 - [ ] Grant staff access to the owner's account once they register
 - [ ] Payment provider integration (funding, release, refunds, withdrawals)
-- [ ] KYC verification workflow and admin user management on real data
-- [ ] Deal chat, attachments, and notifications on real data
+- [ ] KYC document upload from the client side
+- [ ] Email / in-app notifications for deal events
