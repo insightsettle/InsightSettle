@@ -49,9 +49,30 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
-          <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link to="/services">Get started</Link>
-          </Button>
+          {loading ? null : user ? (
+            <>
+              <Button asChild size="sm" className="hidden sm:inline-flex">
+                <Link to="/dashboard">My dashboard</Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden sm:inline-flex"
+                onClick={handleSignOut}
+              >
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link to="/auth">Sign in</Link>
+              </Button>
+              <Button asChild size="sm" className="hidden sm:inline-flex">
+                <Link to="/auth">Create account</Link>
+              </Button>
+            </>
+          )}
           <Button
             variant="outline"
             size="icon"
