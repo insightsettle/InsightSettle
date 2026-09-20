@@ -11,9 +11,6 @@ const nav = [
   { to: "/how-it-works", label: "How it works" },
   { to: "/roles", label: "Roles" },
   { to: "/services", label: "Services & fees" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/documents", label: "Document review" },
-  { to: "/disputes", label: "Disputes" },
 ] as const;
 
 export function SiteHeader() {
