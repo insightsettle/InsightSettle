@@ -497,12 +497,12 @@ function DealPage() {
                         variant="outline"
                         onClick={() =>
                           action.mutate(() =>
-                            updateShipping({
-                              dealId: deal.id,
-                              carrier: carrier.trim() || null,
-                              tracking: tracking.trim() || null,
+                            updateShipping(deal.id, {
+                              carrier: carrier.trim(),
+                              tracking: tracking.trim(),
                               status: shippingState,
                             }),
+
                           )
                         }
                       >
