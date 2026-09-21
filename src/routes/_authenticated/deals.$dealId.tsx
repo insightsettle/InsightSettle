@@ -94,11 +94,24 @@ function DealPage() {
     enabled: !!deal,
   });
 
+  const ratings = useQuery({
+    queryKey: ["deal-ratings", deal?.id],
+    queryFn: () => listDealRatings(deal!.id),
+    enabled: !!deal,
+  });
+
   const [message, setMessage] = useState("");
   const [reviewNote, setReviewNote] = useState("");
   const [disputeReason, setDisputeReason] = useState("");
   const [supportNote, setSupportNote] = useState("");
+  const [termsNote, setTermsNote] = useState("");
+  const [carrier, setCarrier] = useState("");
+  const [tracking, setTracking] = useState("");
+  const [shippingState, setShippingState] = useState("shipped");
+  const [ratingScore, setRatingScore] = useState("5");
+  const [ratingComment, setRatingComment] = useState("");
   const [paymentNotice, setPaymentNotice] = useState<PaymentResult | null>(null);
+
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["deal", dealId] });
