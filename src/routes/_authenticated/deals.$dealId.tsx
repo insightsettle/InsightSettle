@@ -226,6 +226,66 @@ function DealPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.8fr]">
           <div className="space-y-6">
+            {!termsAgreed && (
+              <Card className="border-warning/40 bg-warning/5">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <FileSignature className="size-5 text-warning" />
+                    <h2 className="font-bold">Deal terms need agreement</h2>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    No money can be funded until both sides accept the terms: value{" "}
+                    {formatSAR(amount)}, {feePayerLabels[deal.fee_payer] ?? "buyer pays the fee"},
+                    buyer inspection period of {deal.inspection_days} day(s)
+                    {deal.due_at ? `, delivery by ${formatDate(deal.due_at)}` : ""}.
+                  </p>
+                  {deal.terms_note && (
+                    <p className="mt-2 rounded-md bg-background p-3 text-sm">
+                      <b>Note from the other party:</b> {deal.terms_note}
+                    </p>
+                  )}
+                  {canDecideTerms ? (
+                    <>
+                      <Textarea
+                        value={termsNote}
+                        onChange={(e) => setTermsNote(e.target.value)}
+                        rows={2}
+                        className="mt-3"
+                        placeholder="Optional: what should change before you accept?"
+                      />
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button onClick={() => action.mutate(() => agreeToTerms(deal.id))}>
+                          <BadgeCheck /> Accept the terms
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={termsNote.trim().length < 3}
+                          onClick={() =>
+                            action.mutate(() => requestTermsChange(deal.id, termsNote.trim()))
+                          }
+                        >
+                          Request a change
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          disabled={termsNote.trim().length < 3}
+                          onClick={() => action.mutate(() => rejectTerms(deal.id, termsNote.trim()))}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      {bothJoined
+                        ? "Waiting for the other party to review and accept the terms."
+                        : "Share the invitation link so the other party can review the terms."}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardContent className="p-6">
                 <h2 className="font-bold">What you can do now</h2>
@@ -237,13 +297,17 @@ function DealPage() {
                   {isBuyer && status === "pending_funding" && (
                     <Button
                       onClick={() => payment.mutate(() => fund({ data: { dealId: deal.id, fee } }))}
-                      disabled={!bothJoined || payment.isPending}
+                      disabled={!bothJoined || !termsAgreed || payment.isPending}
                     >
                       <Wallet /> {payment.isPending ? "Starting payment…" : "Fund the deal"}
                     </Button>
                   )}
                   {isSeller && status === "held" && (
-                    <Button onClick={() => action.mutate(() => confirmDelivery(deal.id))}>
+                    <Button
+                      onClick={() =>
+                        action.mutate(() => confirmDelivery(deal.id, deal.inspection_days))
+                      }
+                    >
                       <BadgeCheck /> Confirm delivery
                     </Button>
                   )}
@@ -268,6 +332,25 @@ function DealPage() {
                     </p>
                   )}
                 </div>
+
+                {status === "delivered" && inspectionEnds && (
+                  <div className="mt-4 flex gap-2 rounded-md border border-primary/30 bg-primary/5 p-4">
+                    <Timer className="size-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {inspectionExpired
+                          ? "The inspection period has ended"
+                          : `Inspection period ends in ${hoursLeft} hour(s)`}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {inspectionExpired
+                          ? "The funds can now be released to the seller. If something is wrong, open a dispute before releasing."
+                          : `Ends ${formatDate(deal.auto_release_at!)}. If the buyer takes no action, the funds are released to the seller.`}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
 
                 {paymentNotice && (
                   <div
