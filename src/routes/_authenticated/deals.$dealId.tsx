@@ -189,6 +189,22 @@ function DealPage() {
   const isSeller = !!user && deal.seller_id === user.id;
   const bothJoined = !!deal.buyer_id && !!deal.seller_id;
 
+  const sides = splitFee(amount, fee, deal.fee_payer);
+  const termsAgreed = deal.terms_status === "agreed";
+  const isCreator = !!user && deal.created_by === user.id;
+  const canDecideTerms = !termsAgreed && bothJoined && !isCreator;
+  const inspectionEnds = deal.auto_release_at ? new Date(deal.auto_release_at) : null;
+  const hoursLeft = inspectionEnds
+    ? Math.max(0, Math.round((inspectionEnds.getTime() - Date.now()) / 3600000))
+    : null;
+  const inspectionExpired = !!inspectionEnds && inspectionEnds.getTime() <= Date.now();
+  const shippingNeeded = !!deal.shipping_status && deal.shipping_status !== "not_required";
+  const counterpartyId = isBuyer ? deal.seller_id : deal.buyer_id;
+  const myRating = (ratings.data ?? []).find((r) => r.rater_id === user?.id);
+  const ratingAboutMe = (ratings.data ?? []).find((r) => r.ratee_id === user?.id);
+  const dealClosed = status === "released" || status === "refunded";
+
+
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
