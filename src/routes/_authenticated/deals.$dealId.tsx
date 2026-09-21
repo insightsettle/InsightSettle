@@ -443,6 +443,135 @@ function DealPage() {
               </CardContent>
             </Card>
 
+            {shippingNeeded && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <Truck className="size-5 text-primary" />
+                    <h2 className="font-bold">Shipping and tracking</h2>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+                    <p>
+                      <span className="text-muted-foreground">Status: </span>
+                      {shippingStatusLabels[deal.shipping_status ?? "preparing"] ??
+                        deal.shipping_status}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Carrier: </span>
+                      {deal.shipping_carrier || "—"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Tracking: </span>
+                      <bdi dir="ltr">{deal.shipping_tracking || "—"}</bdi>
+                    </p>
+                  </div>
+                  {isSeller && status !== "released" && status !== "refunded" && (
+                    <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                      <Input
+                        value={carrier}
+                        onChange={(e) => setCarrier(e.target.value)}
+                        placeholder="Carrier (e.g. Aramex)"
+                      />
+                      <Input
+                        value={tracking}
+                        onChange={(e) => setTracking(e.target.value)}
+                        placeholder="Tracking number"
+                      />
+                      <select
+                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={shippingState}
+                        onChange={(e) => setShippingState(e.target.value)}
+                      >
+                        {Object.entries(shippingStatusLabels)
+                          .filter(([key]) => key !== "not_required")
+                          .map(([key, label]) => (
+                            <option key={key} value={key}>
+                              {label}
+                            </option>
+                          ))}
+                      </select>
+                      <Button
+                        className="sm:col-span-3"
+                        variant="outline"
+                        onClick={() =>
+                          action.mutate(() =>
+                            updateShipping({
+                              dealId: deal.id,
+                              carrier: carrier.trim() || null,
+                              tracking: tracking.trim() || null,
+                              status: shippingState,
+                            }),
+                          )
+                        }
+                      >
+                        Update shipping
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {dealClosed && bothJoined && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <Star className="size-5 text-primary" />
+                    <h2 className="font-bold">Rate the other party</h2>
+                  </div>
+                  {myRating ? (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      You rated this deal <bdi dir="ltr">{myRating.score}/5</bdi>
+                      {myRating.comment ? ` — “${myRating.comment}”` : ""}
+                    </p>
+                  ) : counterpartyId ? (
+                    <div className="mt-3 space-y-2">
+                      <select
+                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={ratingScore}
+                        onChange={(e) => setRatingScore(e.target.value)}
+                      >
+                        {[5, 4, 3, 2, 1].map((n) => (
+                          <option key={n} value={String(n)}>
+                            {n} / 5
+                          </option>
+                        ))}
+                      </select>
+                      <Textarea
+                        value={ratingComment}
+                        onChange={(e) => setRatingComment(e.target.value)}
+                        rows={2}
+                        placeholder="Optional comment about this trade"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          action.mutate(() =>
+                            submitRating({
+                              dealId: deal.id,
+                              rateeId: counterpartyId,
+                              score: Number(ratingScore),
+                              comment: ratingComment.trim() || null,
+                            }),
+                          )
+                        }
+                      >
+                        Submit rating
+                      </Button>
+                    </div>
+                  ) : null}
+                  {ratingAboutMe && (
+                    <p className="mt-4 rounded-md bg-muted p-3 text-sm">
+                      The other party rated you <bdi dir="ltr">{ratingAboutMe.score}/5</bdi>
+                      {ratingAboutMe.comment ? ` — “${ratingAboutMe.comment}”` : ""}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
