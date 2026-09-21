@@ -6,7 +6,11 @@ import {
   ArrowLeft,
   BadgeCheck,
   CalendarDays,
+  FileSignature,
   LifeBuoy,
+  Star,
+  Timer,
+  Truck,
   MessageSquare,
   Receipt,
   Scale,
@@ -20,19 +24,27 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
 import { useSessionUser } from "@/hooks/use-session";
 import {
+  agreeToTerms,
   confirmDelivery,
   contactSupport,
   listDealMessages,
+  listDealRatings,
   listDealTransactions,
   listTimeline,
   openDispute,
   postDealMessage,
+  rejectTerms,
   requestReview,
+  requestTermsChange,
+  submitRating,
+  updateShipping,
 } from "@/lib/deal-actions";
-import { getDealByRef } from "@/lib/deals";
+import { feePayerLabels, getDealByRef, shippingStatusLabels, splitFee } from "@/lib/deals";
 import { calcFee, formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
 import {
   requestFundsRelease,
@@ -82,10 +94,22 @@ function DealPage() {
     enabled: !!deal,
   });
 
+  const ratings = useQuery({
+    queryKey: ["deal-ratings", deal?.id],
+    queryFn: () => listDealRatings(deal!.id),
+    enabled: !!deal,
+  });
+
   const [message, setMessage] = useState("");
   const [reviewNote, setReviewNote] = useState("");
   const [disputeReason, setDisputeReason] = useState("");
   const [supportNote, setSupportNote] = useState("");
+  const [termsNote, setTermsNote] = useState("");
+  const [carrier, setCarrier] = useState("");
+  const [tracking, setTracking] = useState("");
+  const [shippingState, setShippingState] = useState("shipped");
+  const [ratingScore, setRatingScore] = useState("5");
+  const [ratingComment, setRatingComment] = useState("");
   const [paymentNotice, setPaymentNotice] = useState<PaymentResult | null>(null);
 
   const refresh = () => {
@@ -93,6 +117,7 @@ function DealPage() {
     queryClient.invalidateQueries({ queryKey: ["deal-timeline", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-messages", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-transactions", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["deal-ratings", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["my-deals"] });
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
@@ -104,6 +129,8 @@ function DealPage() {
       setDisputeReason("");
       setSupportNote("");
       setMessage("");
+      setTermsNote("");
+      setRatingComment("");
       refresh();
     },
   });
@@ -160,6 +187,21 @@ function DealPage() {
   const isSeller = !!user && deal.seller_id === user.id;
   const bothJoined = !!deal.buyer_id && !!deal.seller_id;
 
+  const sides = splitFee(amount, fee, deal.fee_payer);
+  const termsAgreed = deal.terms_status === "agreed";
+  const isCreator = !!user && deal.created_by === user.id;
+  const canDecideTerms = !termsAgreed && bothJoined && !isCreator;
+  const inspectionEnds = deal.auto_release_at ? new Date(deal.auto_release_at) : null;
+  const hoursLeft = inspectionEnds
+    ? Math.max(0, Math.round((inspectionEnds.getTime() - Date.now()) / 3600000))
+    : null;
+  const inspectionExpired = !!inspectionEnds && inspectionEnds.getTime() <= Date.now();
+  const shippingNeeded = !!deal.shipping_status && deal.shipping_status !== "not_required";
+  const counterpartyId = isBuyer ? deal.seller_id : deal.buyer_id;
+  const myRating = (ratings.data ?? []).find((r) => r.rater_id === user?.id);
+  const ratingAboutMe = (ratings.data ?? []).find((r) => r.ratee_id === user?.id);
+  const dealClosed = status === "released" || status === "refunded";
+
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
@@ -181,6 +223,68 @@ function DealPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.8fr]">
           <div className="space-y-6">
+            {!termsAgreed && (
+              <Card className="border-warning/40 bg-warning/5">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <FileSignature className="size-5 text-warning" />
+                    <h2 className="font-bold">Deal terms need agreement</h2>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    No money can be funded until both sides accept the terms: value{" "}
+                    {formatSAR(amount)}, {feePayerLabels[deal.fee_payer] ?? "buyer pays the fee"},
+                    buyer inspection period of {deal.inspection_days} day(s)
+                    {deal.due_at ? `, delivery by ${formatDate(deal.due_at)}` : ""}.
+                  </p>
+                  {deal.terms_note && (
+                    <p className="mt-2 rounded-md bg-background p-3 text-sm">
+                      <b>Note from the other party:</b> {deal.terms_note}
+                    </p>
+                  )}
+                  {canDecideTerms ? (
+                    <>
+                      <Textarea
+                        value={termsNote}
+                        onChange={(e) => setTermsNote(e.target.value)}
+                        rows={2}
+                        className="mt-3"
+                        placeholder="Optional: what should change before you accept?"
+                      />
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button onClick={() => action.mutate(() => agreeToTerms(deal.id))}>
+                          <BadgeCheck /> Accept the terms
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={termsNote.trim().length < 3}
+                          onClick={() =>
+                            action.mutate(() => requestTermsChange(deal.id, termsNote.trim()))
+                          }
+                        >
+                          Request a change
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          disabled={termsNote.trim().length < 3}
+                          onClick={() =>
+                            action.mutate(() => rejectTerms(deal.id, termsNote.trim()))
+                          }
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      {bothJoined
+                        ? "Waiting for the other party to review and accept the terms."
+                        : "Share the invitation link so the other party can review the terms."}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardContent className="p-6">
                 <h2 className="font-bold">What you can do now</h2>
@@ -192,13 +296,17 @@ function DealPage() {
                   {isBuyer && status === "pending_funding" && (
                     <Button
                       onClick={() => payment.mutate(() => fund({ data: { dealId: deal.id, fee } }))}
-                      disabled={!bothJoined || payment.isPending}
+                      disabled={!bothJoined || !termsAgreed || payment.isPending}
                     >
                       <Wallet /> {payment.isPending ? "Starting payment…" : "Fund the deal"}
                     </Button>
                   )}
                   {isSeller && status === "held" && (
-                    <Button onClick={() => action.mutate(() => confirmDelivery(deal.id))}>
+                    <Button
+                      onClick={() =>
+                        action.mutate(() => confirmDelivery(deal.id, deal.inspection_days))
+                      }
+                    >
                       <BadgeCheck /> Confirm delivery
                     </Button>
                   )}
@@ -223,6 +331,24 @@ function DealPage() {
                     </p>
                   )}
                 </div>
+
+                {status === "delivered" && inspectionEnds && (
+                  <div className="mt-4 flex gap-2 rounded-md border border-primary/30 bg-primary/5 p-4">
+                    <Timer className="size-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {inspectionExpired
+                          ? "The inspection period has ended"
+                          : `Inspection period ends in ${hoursLeft} hour(s)`}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {inspectionExpired
+                          ? "The funds can now be released to the seller. If something is wrong, open a dispute before releasing."
+                          : `Ends ${formatDate(deal.auto_release_at!)}. If the buyer takes no action, the funds are released to the seller.`}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {paymentNotice && (
                   <div
@@ -309,6 +435,132 @@ function DealPage() {
                 )}
               </CardContent>
             </Card>
+
+            {shippingNeeded && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <Truck className="size-5 text-primary" />
+                    <h2 className="font-bold">Shipping and tracking</h2>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+                    <p>
+                      <span className="text-muted-foreground">Status: </span>
+                      {shippingStatusLabels[deal.shipping_status ?? "preparing"] ??
+                        deal.shipping_status}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Carrier: </span>
+                      {deal.shipping_carrier || "—"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Tracking: </span>
+                      <bdi dir="ltr">{deal.shipping_tracking || "—"}</bdi>
+                    </p>
+                  </div>
+                  {isSeller && status !== "released" && status !== "refunded" && (
+                    <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                      <Input
+                        value={carrier}
+                        onChange={(e) => setCarrier(e.target.value)}
+                        placeholder="Carrier (e.g. Aramex)"
+                      />
+                      <Input
+                        value={tracking}
+                        onChange={(e) => setTracking(e.target.value)}
+                        placeholder="Tracking number"
+                      />
+                      <select
+                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={shippingState}
+                        onChange={(e) => setShippingState(e.target.value)}
+                      >
+                        {Object.entries(shippingStatusLabels)
+                          .filter(([key]) => key !== "not_required")
+                          .map(([key, label]) => (
+                            <option key={key} value={key}>
+                              {label}
+                            </option>
+                          ))}
+                      </select>
+                      <Button
+                        className="sm:col-span-3"
+                        variant="outline"
+                        onClick={() =>
+                          action.mutate(() =>
+                            updateShipping(deal.id, {
+                              carrier: carrier.trim(),
+                              tracking: tracking.trim(),
+                              status: shippingState,
+                            }),
+                          )
+                        }
+                      >
+                        Update shipping
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {dealClosed && bothJoined && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <Star className="size-5 text-primary" />
+                    <h2 className="font-bold">Rate the other party</h2>
+                  </div>
+                  {myRating ? (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      You rated this deal <bdi dir="ltr">{myRating.score}/5</bdi>
+                      {myRating.comment ? ` — “${myRating.comment}”` : ""}
+                    </p>
+                  ) : counterpartyId ? (
+                    <div className="mt-3 space-y-2">
+                      <select
+                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={ratingScore}
+                        onChange={(e) => setRatingScore(e.target.value)}
+                      >
+                        {[5, 4, 3, 2, 1].map((n) => (
+                          <option key={n} value={String(n)}>
+                            {n} / 5
+                          </option>
+                        ))}
+                      </select>
+                      <Textarea
+                        value={ratingComment}
+                        onChange={(e) => setRatingComment(e.target.value)}
+                        rows={2}
+                        placeholder="Optional comment about this trade"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          action.mutate(() =>
+                            submitRating({
+                              dealId: deal.id,
+                              rateeId: counterpartyId,
+                              score: Number(ratingScore),
+                              comment: ratingComment.trim(),
+                            }),
+                          )
+                        }
+                      >
+                        Submit rating
+                      </Button>
+                    </div>
+                  ) : null}
+                  {ratingAboutMe && (
+                    <p className="mt-4 rounded-md bg-muted p-3 text-sm">
+                      The other party rated you <bdi dir="ltr">{ratingAboutMe.score}/5</bdi>
+                      {ratingAboutMe.comment ? ` — “${ratingAboutMe.comment}”` : ""}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardContent className="p-6">
