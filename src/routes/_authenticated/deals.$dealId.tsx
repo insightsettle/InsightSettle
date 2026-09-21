@@ -553,7 +553,7 @@ function DealPage() {
                               dealId: deal.id,
                               rateeId: counterpartyId,
                               score: Number(ratingScore),
-                              comment: ratingComment.trim() || null,
+                              comment: ratingComment.trim(),
                             }),
                           )
                         }
