@@ -23,22 +23,34 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useSessionUser } from "@/hooks/use-session";
 import {
+  agreeToTerms,
   confirmDelivery,
   contactSupport,
   listDealMessages,
+  listDealRatings,
   listDealTransactions,
   listTimeline,
   openDispute,
   postDealMessage,
+  rejectTerms,
   requestReview,
+  requestTermsChange,
+  submitRating,
+  updateShipping,
 } from "@/lib/deal-actions";
-import { getDealByRef } from "@/lib/deals";
+import {
+  feePayerLabels,
+  getDealByRef,
+  shippingStatusLabels,
+  splitFee,
+} from "@/lib/deals";
 import { calcFee, formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
 import {
   requestFundsRelease,
   startDealFunding,
   type PaymentResult,
 } from "@/lib/payments.functions";
+
 
 export const Route = createFileRoute("/_authenticated/deals/$dealId")({
   head: ({ params }) => ({
