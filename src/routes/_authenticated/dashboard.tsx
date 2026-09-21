@@ -175,7 +175,10 @@ function Dashboard() {
         </div>
         <FxCustomerQuote />
       </div>
+    </SiteShell>
+  );
 }
+
 
 function VerificationCard() {
   const { data } = useQuery({
