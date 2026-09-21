@@ -118,6 +118,7 @@ function DealPage() {
     queryClient.invalidateQueries({ queryKey: ["deal-timeline", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-messages", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-transactions", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["deal-ratings", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["my-deals"] });
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
@@ -129,9 +130,12 @@ function DealPage() {
       setDisputeReason("");
       setSupportNote("");
       setMessage("");
+      setTermsNote("");
+      setRatingComment("");
       refresh();
     },
   });
+
 
   const fund = useServerFn(startDealFunding);
   const release = useServerFn(requestFundsRelease);
