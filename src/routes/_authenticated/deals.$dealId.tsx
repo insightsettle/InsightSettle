@@ -6,7 +6,12 @@ import {
   ArrowLeft,
   BadgeCheck,
   CalendarDays,
+  FileSignature,
   LifeBuoy,
+  Star,
+  Timer,
+  Truck,
+
   MessageSquare,
   Receipt,
   Scale,
