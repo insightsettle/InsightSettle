@@ -181,7 +181,6 @@ function Dashboard() {
   );
 }
 
-
 function VerificationCard() {
   const { data } = useQuery({
     queryKey: ["my-profile"],
@@ -215,4 +214,3 @@ function VerificationCard() {
     </Card>
   );
 }
-

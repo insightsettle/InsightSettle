@@ -11,7 +11,6 @@ import {
   Star,
   Timer,
   Truck,
-
   MessageSquare,
   Receipt,
   Scale,
@@ -45,19 +44,13 @@ import {
   submitRating,
   updateShipping,
 } from "@/lib/deal-actions";
-import {
-  feePayerLabels,
-  getDealByRef,
-  shippingStatusLabels,
-  splitFee,
-} from "@/lib/deals";
+import { feePayerLabels, getDealByRef, shippingStatusLabels, splitFee } from "@/lib/deals";
 import { calcFee, formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
 import {
   requestFundsRelease,
   startDealFunding,
   type PaymentResult,
 } from "@/lib/payments.functions";
-
 
 export const Route = createFileRoute("/_authenticated/deals/$dealId")({
   head: ({ params }) => ({
@@ -119,7 +112,6 @@ function DealPage() {
   const [ratingComment, setRatingComment] = useState("");
   const [paymentNotice, setPaymentNotice] = useState<PaymentResult | null>(null);
 
-
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["deal", dealId] });
     queryClient.invalidateQueries({ queryKey: ["deal-timeline", deal?.id] });
@@ -142,7 +134,6 @@ function DealPage() {
       refresh();
     },
   });
-
 
   const fund = useServerFn(startDealFunding);
   const release = useServerFn(requestFundsRelease);
@@ -211,7 +202,6 @@ function DealPage() {
   const ratingAboutMe = (ratings.data ?? []).find((r) => r.ratee_id === user?.id);
   const dealClosed = status === "released" || status === "refunded";
 
-
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
@@ -276,7 +266,9 @@ function DealPage() {
                         <Button
                           variant="ghost"
                           disabled={termsNote.trim().length < 3}
-                          onClick={() => action.mutate(() => rejectTerms(deal.id, termsNote.trim()))}
+                          onClick={() =>
+                            action.mutate(() => rejectTerms(deal.id, termsNote.trim()))
+                          }
                         >
                           Reject
                         </Button>
@@ -357,7 +349,6 @@ function DealPage() {
                     </div>
                   </div>
                 )}
-
 
                 {paymentNotice && (
                   <div
@@ -502,7 +493,6 @@ function DealPage() {
                               tracking: tracking.trim(),
                               status: shippingState,
                             }),
-
                           )
                         }
                       >
@@ -571,8 +561,6 @@ function DealPage() {
                 </CardContent>
               </Card>
             )}
-
-
 
             <Card>
               <CardContent className="p-6">
