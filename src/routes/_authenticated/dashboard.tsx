@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSessionUser } from "@/hooks/use-session";
 import { useStaffAccess } from "@/hooks/use-staff";
+import { supabase } from "@/integrations/supabase/client";
+
 import { listMyDeals } from "@/lib/deals";
 import { activity, dashboardStats, formatSAR } from "@/lib/demo-data";
 
