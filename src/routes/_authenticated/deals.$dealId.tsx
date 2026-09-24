@@ -692,9 +692,16 @@ function DealPage() {
                   {fee !== standardFee && (
                     <Info label="Standard fee" value={formatSAR(standardFee)} />
                   )}
-                  <Info label="Seller receives" value={formatSAR(amount - fee)} />
+                  <Info
+                    label="Fee paid by"
+                    value={feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee"}
+                  />
+                  <Info label="Buyer pays" value={formatSAR(sides.buyerPays)} />
+                  <Info label="Seller receives" value={formatSAR(sides.sellerReceives)} />
+                  <Info label="Inspection period" value={`${deal.inspection_days} day(s)`} />
                   <Info label="Created" value={formatDate(deal.created_at)} />
                   <Info label="Due" value={deal.due_at ? formatDate(deal.due_at) : "No due date"} />
+
                 </dl>
                 {fee !== standardFee && (
                   <p className="mt-3 rounded-md bg-primary/10 p-3 text-xs text-primary">
