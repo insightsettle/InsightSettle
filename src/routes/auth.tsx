@@ -48,6 +48,10 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    setMode(search.mode === "signup" ? "signup" : "signin");
+  }, [search.mode]);
+
+  useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/dashboard", replace: true });
     });
@@ -81,6 +85,15 @@ function AuthPage() {
         navigate({ to: "/dashboard", replace: true });
       }
     } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (/email not confirmed/i.test(msg)) {
+        setError("Your email isn't confirmed yet. Open the confirmation link we sent to your inbox, then sign in.");
+        return;
+      }
+      if (/invalid login credentials/i.test(msg)) {
+        setError("The email or password is incorrect. Check them or create a new account.");
+        return;
+      }
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setBusy(false);
