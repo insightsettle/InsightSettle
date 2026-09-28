@@ -137,6 +137,14 @@ function DealPage() {
 
   const fund = useServerFn(startDealFunding);
   const release = useServerFn(requestFundsRelease);
+  const getQuote = useServerFn(requestFxQuote);
+  const [quote, setQuote] = useState<FxQuote | null>(null);
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowTick(Date.now()), 15000);
+    return () => clearInterval(t);
+  }, []);
+  const quoteExpired = !!quote && new Date(quote.expires_at).getTime() <= nowTick;
   const payment = useMutation({
     mutationFn: async (fn: () => Promise<PaymentResult>) => fn(),
     onSuccess: (result) => {
@@ -293,10 +301,72 @@ function DealPage() {
                   movement is recorded below with its status.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {isBuyer && status === "pending_funding" && deal.currency !== "SAR" && (
+                    <div className="w-full rounded-lg border p-4 text-sm">
+                      {quote && !quoteExpired ? (
+                        <div className="space-y-1" dir="ltr">
+                          <div>
+                            {deal.currency} {quote.source_amount.toLocaleString()} × {quote.customer_rate} ={" "}
+                            SAR {quote.customer_amount.toLocaleString()}
+                          </div>
+                          <div>
+                            Insight fee SAR {quote.fee.toLocaleString()} · VAT SAR {quote.vat.toLocaleString()}
+                          </div>
+                          <div className="font-bold">Total SAR {quote.total.toLocaleString()}</div>
+                          <div className="text-muted-foreground">
+                            Rate locked until {new Date(quote.expires_at).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-muted-foreground">
+                            {quoteExpired
+                              ? "Your exchange rate has expired. Please request a new quote."
+                              : "Lock an exchange rate for 15 minutes before paying."}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!termsAgreed}
+                            onClick={async () => {
+                              try {
+                                setQuote(await getQuote({ data: { dealId: deal.id } }));
+                              } catch (e) {
+                                setPaymentNotice({
+                                  ok: false,
+                                  status: "failed",
+                                  provider: "fx",
+                                  providerLabel: "FX",
+                                  message: e instanceof Error ? e.message : "Quote unavailable.",
+                                });
+                              }
+                            }}
+                          >
+                            Get exchange-rate quote
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {isBuyer && status === "pending_funding" && (
                     <Button
-                      onClick={() => payment.mutate(() => fund({ data: { dealId: deal.id, fee } }))}
-                      disabled={!bothJoined || !termsAgreed || payment.isPending}
+                      onClick={() =>
+                        payment.mutate(() =>
+                          fund({
+                            data: {
+                              dealId: deal.id,
+                              fee,
+                              ...(quote && !quoteExpired ? { quoteId: quote.id } : {}),
+                            },
+                          }),
+                        )
+                      }
+                      disabled={
+                        !bothJoined ||
+                        !termsAgreed ||
+                        payment.isPending ||
+                        (deal.currency !== "SAR" && (!quote || quoteExpired))
+                      }
                     >
                       <Wallet /> {payment.isPending ? "Starting payment…" : "Fund the deal"}
                     </Button>
