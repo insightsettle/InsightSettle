@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createDeal, splitFee, type DealRow, type FeePayer } from "@/lib/deals";
+import { createDeal, gccCountries, splitFee, type DealRow, type FeePayer } from "@/lib/deals";
 import { calcFee, formatSAR } from "@/lib/demo-data";
 import { fxCurrencies } from "@/lib/fx";
 
@@ -84,6 +84,14 @@ function NewDeal() {
   const [feePayer, setFeePayer] = useState<FeePayer>("buyer");
   const [inspectionDays, setInspectionDays] = useState("3");
   const [shippingRequired, setShippingRequired] = useState(false);
+  const [quantity, setQuantity] = useState("1");
+  const [supplierCountry, setSupplierCountry] = useState("SA");
+  const [deliveryCountry, setDeliveryCountry] = useState("SA");
+  const [shippingResponsibility, setShippingResponsibility] = useState<"seller" | "buyer" | "none">("seller");
+  const [acceptanceCriteria, setAcceptanceCriteria] = useState("");
+  const [refundConditions, setRefundConditions] = useState("");
+  const [cancellationConditions, setCancellationConditions] = useState("");
+  const [autoRelease, setAutoRelease] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<DealRow | null>(null);
@@ -118,6 +126,15 @@ function NewDeal() {
         feePayer,
         inspectionDays: Math.min(60, Math.max(0, Number(inspectionDays) || 0)),
         shippingRequired,
+        quantity: Math.max(1, Number(quantity) || 1),
+        unitPrice: numericAmount / Math.max(1, Number(quantity) || 1),
+        supplierCountry,
+        deliveryCountry,
+        shippingResponsibility,
+        acceptanceCriteria,
+        refundConditions,
+        cancellationConditions,
+        autoRelease,
       });
       setCreated(deal);
     } catch (err) {
@@ -230,6 +247,27 @@ function NewDeal() {
               </select>
             </div>
           </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="quantity">Quantity</Label>
+              <Input id="quantity" type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+              <p className="text-xs text-muted-foreground" dir="ltr">
+                Unit price: {(numericAmount / Math.max(1, Number(quantity) || 1)).toFixed(2)} {currency}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="supplierCountry">Supplier country</Label>
+              <select id="supplierCountry" value={supplierCountry} onChange={(e) => setSupplierCountry(e.target.value)} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
+                {gccCountries.map((c) => (<option key={c.code} value={c.code}>{c.name}</option>))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="deliveryCountry">Delivery country</Label>
+              <select id="deliveryCountry" value={deliveryCountry} onChange={(e) => setDeliveryCountry(e.target.value)} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
+                {gccCountries.map((c) => (<option key={c.code} value={c.code}>{c.name}</option>))}
+              </select>
+            </div>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="role">Your side of the deal</Label>
@@ -294,6 +332,37 @@ function NewDeal() {
               <b>This deal needs shipping</b>
               <span className="mt-1 block text-muted-foreground">
                 The seller adds the carrier and tracking number before confirming delivery.
+              </span>
+            </span>
+          </label>
+          <div className="space-y-2">
+            <Label htmlFor="shipResp">Shipping responsibility</Label>
+            <select id="shipResp" value={shippingResponsibility} onChange={(e) => setShippingResponsibility(e.target.value as "seller" | "buyer" | "none")} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
+              <option value="seller">Seller arranges and pays shipping</option>
+              <option value="buyer">Buyer arranges shipping</option>
+              <option value="none">No shipping (service or digital)</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="acceptance">Acceptance criteria</Label>
+            <Textarea id="acceptance" rows={2} value={acceptanceCriteria} onChange={(e) => setAcceptanceCriteria(e.target.value)} placeholder="What must be true for the buyer to accept the delivery." />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="refundCond">Refund conditions</Label>
+              <Textarea id="refundCond" rows={2} value={refundConditions} onChange={(e) => setRefundConditions(e.target.value)} placeholder="When the buyer gets the money back." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cancelCond">Cancellation conditions</Label>
+              <Textarea id="cancelCond" rows={2} value={cancellationConditions} onChange={(e) => setCancellationConditions(e.target.value)} placeholder="What happens if either side cancels before shipment." />
+            </div>
+          </div>
+          <label className="flex items-start gap-3 rounded-md border border-border p-4 text-sm">
+            <input type="checkbox" checked={autoRelease} onChange={(e) => setAutoRelease(e.target.checked)} className="mt-0.5 size-4" />
+            <span>
+              <b>Release automatically when the inspection period ends</b>
+              <span className="mt-1 block text-muted-foreground">
+                Turn off if the buyer must always accept manually.
               </span>
             </span>
           </label>
