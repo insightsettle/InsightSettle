@@ -12,13 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as DisputePolicyRouteImport } from './routes/dispute-policy'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as ForBuyersRouteImport } from './routes/for-buyers'
+import { Route as ForSuppliersRouteImport } from './routes/for-suppliers'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RolesRouteImport } from './routes/roles'
+import { Route as SecurityRouteImport } from './routes/security'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -56,6 +61,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessRoute = BusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/console',
   path: '/console',
@@ -64,6 +74,21 @@ const ConsoleRoute = ConsoleRouteImport.update({
 const DisputePolicyRoute = DisputePolicyRouteImport.update({
   id: '/dispute-policy',
   path: '/dispute-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForBuyersRoute = ForBuyersRouteImport.update({
+  id: '/for-buyers',
+  path: '/for-buyers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForSuppliersRoute = ForSuppliersRouteImport.update({
+  id: '/for-suppliers',
+  path: '/for-suppliers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -89,6 +114,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const RolesRoute = RolesRouteImport.update({
   id: '/roles',
   path: '/roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -208,13 +238,18 @@ const ConsoleDealsDealIdRoute = ConsoleDealsDealIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
   '/dispute-policy': typeof DisputePolicyRoute
+  '/faq': typeof FaqRoute
+  '/for-buyers': typeof ForBuyersRoute
+  '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
+  '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -241,12 +276,17 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRoute
   '/dispute-policy': typeof DisputePolicyRoute
+  '/faq': typeof FaqRoute
+  '/for-buyers': typeof ForBuyersRoute
+  '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
+  '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -275,13 +315,18 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
   '/dispute-policy': typeof DisputePolicyRoute
+  '/faq': typeof FaqRoute
+  '/for-buyers': typeof ForBuyersRoute
+  '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
+  '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -310,13 +355,18 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/business'
     | '/console'
     | '/dispute-policy'
+    | '/faq'
+    | '/for-buyers'
+    | '/for-suppliers'
     | '/help'
     | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/roles'
+    | '/security'
     | '/services'
     | '/terms'
     | '/dashboard'
@@ -343,12 +393,17 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/business'
     | '/dispute-policy'
+    | '/faq'
+    | '/for-buyers'
+    | '/for-suppliers'
     | '/help'
     | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/roles'
+    | '/security'
     | '/services'
     | '/terms'
     | '/dashboard'
@@ -376,13 +431,18 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/business'
     | '/console'
     | '/dispute-policy'
+    | '/faq'
+    | '/for-buyers'
+    | '/for-suppliers'
     | '/help'
     | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/roles'
+    | '/security'
     | '/services'
     | '/terms'
     | '/_authenticated/dashboard'
@@ -411,13 +471,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BusinessRoute: typeof BusinessRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
   DisputePolicyRoute: typeof DisputePolicyRoute
+  FaqRoute: typeof FaqRoute
+  ForBuyersRoute: typeof ForBuyersRoute
+  ForSuppliersRoute: typeof ForSuppliersRoute
   HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RolesRoute: typeof RolesRoute
+  SecurityRoute: typeof SecurityRoute
   ServicesRoute: typeof ServicesRoute
   TermsRoute: typeof TermsRoute
   ApiDealRiskRoute: typeof ApiDealRiskRoute
@@ -448,6 +513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business': {
+      id: '/business'
+      path: '/business'
+      fullPath: '/business'
+      preLoaderRoute: typeof BusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/console': {
       id: '/console'
       path: '/console'
@@ -460,6 +532,27 @@ declare module '@tanstack/react-router' {
       path: '/dispute-policy'
       fullPath: '/dispute-policy'
       preLoaderRoute: typeof DisputePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-buyers': {
+      id: '/for-buyers'
+      path: '/for-buyers'
+      fullPath: '/for-buyers'
+      preLoaderRoute: typeof ForBuyersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-suppliers': {
+      id: '/for-suppliers'
+      path: '/for-suppliers'
+      fullPath: '/for-suppliers'
+      preLoaderRoute: typeof ForSuppliersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -495,6 +588,13 @@ declare module '@tanstack/react-router' {
       path: '/roles'
       fullPath: '/roles'
       preLoaderRoute: typeof RolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -710,13 +810,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  BusinessRoute: BusinessRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
   DisputePolicyRoute: DisputePolicyRoute,
+  FaqRoute: FaqRoute,
+  ForBuyersRoute: ForBuyersRoute,
+  ForSuppliersRoute: ForSuppliersRoute,
   HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RolesRoute: RolesRoute,
+  SecurityRoute: SecurityRoute,
   ServicesRoute: ServicesRoute,
   TermsRoute: TermsRoute,
   ApiDealRiskRoute: ApiDealRiskRoute,
