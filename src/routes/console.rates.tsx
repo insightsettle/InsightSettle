@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { SaveBar } from "@/components/site/SaveBar";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,44 @@ function RatesPage() {
     setDraft({ code: "", name: "", baseRate: "", spread: "1.05" });
   };
 
-  const markAllUpdated = () => setRows(settings.rates.map((r) => ({ ...r, updatedAt: today() })));
+  const COOLDOWN = 60 * 60 * 1000;
+  const LS = "insight.fx-live-fetch";
+  const [nextAt, setNextAt] = useState(0);
+  const [now, setNow] = useState(Date.now());
+  const [fetching, setFetching] = useState(false);
+  useEffect(() => {
+    setNextAt(Number(localStorage.getItem(LS) || 0));
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const left = Math.max(0, nextAt - now);
+  const countdown = `${String(Math.floor(left / 60000)).padStart(2, "0")}:${String(Math.floor((left % 60000) / 1000)).padStart(2, "0")}`;
+
+  const fetchLive = async () => {
+    setFetching(true);
+    try {
+      const res = await fetch("https://open.er-api.com/v6/latest/SAR");
+      const json = await res.json();
+      if (json.result !== "success") throw new Error("Rate source unavailable");
+      let n = 0;
+      setRows(
+        settings.rates.map((r) => {
+          const perSar = Number(json.rates?.[r.code]);
+          if (!perSar) return r;
+          n++;
+          return { ...r, baseRate: +(1 / perSar).toFixed(6), updatedAt: today() };
+        }),
+      );
+      const at = Date.now() + COOLDOWN;
+      localStorage.setItem(LS, String(at));
+      setNextAt(at);
+      toast.success(`${n} live rates loaded — press Save changes to publish`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not load live rates");
+    } finally {
+      setFetching(false);
+    }
+  };
 
   return (
     <div className="mt-8 space-y-6">
@@ -68,8 +106,18 @@ function RatesPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={markAllUpdated}>
-                <RefreshCw className="size-4" /> Mark all updated today
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchLive}
+                disabled={fetching || left > 0}
+              >
+                <RefreshCw className={`size-4 ${fetching ? "animate-spin" : ""}`} />
+                {fetching
+                  ? "Loading live rates…"
+                  : left > 0
+                    ? `Next live update in ${countdown}`
+                    : "Update from live market"}
               </Button>
               <SaveBar dirty={dirty} save={save} discard={discard} />
             </div>
