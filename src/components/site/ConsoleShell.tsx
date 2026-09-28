@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 
 import { NotificationBell } from "@/components/site/NotificationBell";
+import { LanguageToggle } from "@/components/site/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { useSessionUser } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocale } from "@/lib/locale";
 
 const tabs = [
   { to: "/console", label: "Overview", exact: true, icon: LayoutDashboard },
@@ -42,6 +44,7 @@ export function ConsoleShell({
   const { user } = useSessionUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { text } = useLocale();
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -58,21 +61,22 @@ export function ConsoleShell({
             <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
               <ShieldAlert className="size-4" />
             </span>
-            Insight Operations
+            {text("Insight Operations")}
           </Link>
           <span className="hidden rounded-full border border-background/25 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-background/70 sm:inline-block">
-            Internal staff console
+            {text("Internal staff console")}
           </span>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-2">
             <span className="hidden text-xs text-background/70 md:inline">{user?.email}</span>
             <NotificationBell />
+            <LanguageToggle className="border-background/25 bg-transparent text-background hover:bg-background/10 hover:text-background" />
             <Button
               asChild
               size="sm"
               variant="outline"
               className="border-background/25 bg-transparent text-background hover:bg-background/10 hover:text-background"
             >
-              <Link to="/dashboard">Customer view</Link>
+              <Link to="/dashboard">{text("Customer view")}</Link>
             </Button>
             <Button
               size="sm"
@@ -98,7 +102,7 @@ export function ConsoleShell({
                 className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-foreground data-[status=active]:text-background"
               >
                 <tab.icon className="size-4" />
-                {tab.label}
+                {text(tab.label)}
               </Link>
             ))}
           </nav>
@@ -108,10 +112,10 @@ export function ConsoleShell({
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                Platform console
+                {text("Platform console")}
               </p>
-              <h1 className="mt-1.5 text-2xl font-extrabold sm:text-3xl">{title}</h1>
-              <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
+              <h1 className="mt-1.5 text-2xl font-extrabold sm:text-3xl">{text(title)}</h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">{text(subtitle)}</p>
             </div>
           </div>
           {children}

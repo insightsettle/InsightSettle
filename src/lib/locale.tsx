@@ -301,6 +301,17 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
     window.localStorage.setItem(STORAGE_KEY, locale);
+    let translating = false;
+    const apply = () => {
+      if (translating) return;
+      translating = true;
+      localizeDocument(locale);
+      translating = false;
+    };
+    apply();
+    const observer = new MutationObserver(() => apply());
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [locale]);
 
   const value = useMemo<LocaleContextValue>(
