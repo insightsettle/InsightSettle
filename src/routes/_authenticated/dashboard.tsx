@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { listMyDeals } from "@/lib/deals";
 import { activity, dashboardStats, formatSAR } from "@/lib/demo-data";
+import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
+  const { locale } = useLocale();
   const { user } = useSessionUser();
   const { isStaff } = useStaffAccess();
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
@@ -129,7 +131,7 @@ function Dashboard() {
                     </p>
                   </div>
                   <p className="font-bold sm:text-right">
-                    {deal.currency} {Number(deal.amount).toLocaleString("en-GB")}
+                    {deal.currency} {Number(deal.amount).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB")}
                   </p>
                 </Link>
               ))}

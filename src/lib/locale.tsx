@@ -33,6 +33,8 @@ const translations: Record<string, string> = {
     "نسخة تجريبية — جميع الأرصدة وتفاصيل الدفع بيانات نموذجية، ولا تُنقل أموال حقيقية.",
   "Secure escrow · Demo environment": "ضمان آمن · بيئة تجريبية",
   "The safer way to close every deal": "الطريقة الأكثر أمانًا لإتمام كل صفقة",
+  "The safer way to": "الطريقة الأكثر أمانًا",
+  "close every deal": "لإتمام كل صفقة",
   "Insight holds funds until the buyer confirms delivery. Every milestone, message, and decision stays documented from agreement to settlement.":
     "تحتفظ إنسايت بالأموال حتى يؤكد المشتري الاستلام، وتوثّق كل مرحلة ورسالة وقرار من الاتفاق حتى التسوية.",
   "Get started now": "ابدأ الآن",
@@ -556,6 +558,7 @@ export function localizeDocument(locale: Locale) {
   while (node) {
     if (
       node.parentElement &&
+      !node.parentElement.closest("[data-no-localize]") &&
       !["SCRIPT", "STYLE", "TEXTAREA"].includes(node.parentElement.tagName)
     ) {
       const original = originalText.get(node) ?? node.textContent ?? "";
@@ -568,6 +571,7 @@ export function localizeDocument(locale: Locale) {
   for (const element of document.body.querySelectorAll<HTMLElement>(
     "[placeholder], [aria-label], [title]",
   )) {
+    if (element.closest("[data-no-localize]")) continue;
     for (const attribute of ["placeholder", "aria-label", "title"] as const) {
       const current = element.getAttribute(attribute);
       if (!current) continue;

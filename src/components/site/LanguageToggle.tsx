@@ -10,6 +10,7 @@ export function LanguageToggle({ className }: { className?: string }) {
 
   return (
     <Button
+      data-no-localize
       type="button"
       variant="outline"
       size="sm"
