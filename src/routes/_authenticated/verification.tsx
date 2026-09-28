@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BadgeCheck, FileUp, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { BusinessDetailsCard, PayoutAccountCard, PersonalDetailsCard } from "@/components/site/KycForms";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -116,6 +117,10 @@ function VerificationPage() {
             </span>
           </CardContent>
         </Card>
+
+        <PersonalDetailsCard />
+        <BusinessDetailsCard />
+        <PayoutAccountCard />
 
         <Card className="mt-4">
           <CardContent className="p-6">
