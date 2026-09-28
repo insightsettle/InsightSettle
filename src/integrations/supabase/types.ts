@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity: string
+          entity_id: string | null
+          id: string
+          ip: string | null
+          new_value: Json | null
+          old_value: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity: string
+          entity_id?: string | null
+          id?: string
+          ip?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          ip?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       deal_events: {
         Row: {
           actor_id: string | null
@@ -137,9 +173,12 @@ export type Database = {
           deal_id: string
           error_message: string | null
           fee: number
+          fx_quote_id: string | null
           id: string
+          idempotency_key: string | null
           kind: string
           note: string | null
+          original_transaction_id: string | null
           provider: string
           provider_ref: string | null
           status: string
@@ -153,9 +192,12 @@ export type Database = {
           deal_id: string
           error_message?: string | null
           fee?: number
+          fx_quote_id?: string | null
           id?: string
+          idempotency_key?: string | null
           kind: string
           note?: string | null
+          original_transaction_id?: string | null
           provider?: string
           provider_ref?: string | null
           status?: string
@@ -169,9 +211,12 @@ export type Database = {
           deal_id?: string
           error_message?: string | null
           fee?: number
+          fx_quote_id?: string | null
           id?: string
+          idempotency_key?: string | null
           kind?: string
           note?: string | null
+          original_transaction_id?: string | null
           provider?: string
           provider_ref?: string | null
           status?: string
@@ -183,6 +228,20 @@ export type Database = {
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_fx_quote_id_fkey"
+            columns: ["fx_quote_id"]
+            isOneToOne: false
+            referencedRelation: "fx_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_original_transaction_id_fkey"
+            columns: ["original_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "deal_transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -301,6 +360,146 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_rules: {
+        Row: {
+          amount_from: number
+          amount_to: number | null
+          country: string | null
+          id: string
+          label: string
+          max_fee: number | null
+          min_fee: number
+          percent: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          amount_from?: number
+          amount_to?: number | null
+          country?: string | null
+          id?: string
+          label: string
+          max_fee?: number | null
+          min_fee?: number
+          percent?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_from?: number
+          amount_to?: number | null
+          country?: string | null
+          id?: string
+          label?: string
+          max_fee?: number | null
+          min_fee?: number
+          percent?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fx_quotes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_amount: number
+          customer_rate: number
+          deal_id: string
+          expires_at: string
+          fee: number
+          fx_spread: number
+          id: string
+          provider_amount: number
+          provider_rate: number
+          source_amount: number
+          source_currency: string
+          target_currency: string
+          total: number
+          used_at: string | null
+          vat: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_amount: number
+          customer_rate: number
+          deal_id: string
+          expires_at: string
+          fee?: number
+          fx_spread: number
+          id?: string
+          provider_amount: number
+          provider_rate: number
+          source_amount: number
+          source_currency: string
+          target_currency?: string
+          total: number
+          used_at?: string | null
+          vat?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_amount?: number
+          customer_rate?: number
+          deal_id?: string
+          expires_at?: string
+          fee?: number
+          fx_spread?: number
+          id?: string
+          provider_amount?: number
+          provider_rate?: number
+          source_amount?: number
+          source_currency?: string
+          target_currency?: string
+          total?: number
+          used_at?: string | null
+          vat?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fx_quotes_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fx_rates: {
+        Row: {
+          active: boolean
+          code: string
+          minor_units: number
+          name: string
+          provider_rate: number
+          spread: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          minor_units?: number
+          name: string
+          provider_rate: number
+          spread?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          minor_units?: number
+          name?: string
+          provider_rate?: number
+          spread?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       kyc_documents: {
         Row: {
           created_at: string
@@ -342,6 +541,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      ledger_entries: {
+        Row: {
+          account: string
+          created_at: string
+          credit: number
+          currency: string
+          deal_id: string
+          debit: number
+          id: string
+          reference: string | null
+          transaction_id: string | null
+        }
+        Insert: {
+          account: string
+          created_at?: string
+          credit?: number
+          currency: string
+          deal_id: string
+          debit?: number
+          id?: string
+          reference?: string | null
+          transaction_id?: string | null
+        }
+        Update: {
+          account?: string
+          created_at?: string
+          credit?: number
+          currency?: string
+          deal_id?: string
+          debit?: number
+          id?: string
+          reference?: string | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "deal_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
