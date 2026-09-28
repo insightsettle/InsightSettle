@@ -87,11 +87,11 @@ export function SiteHeader() {
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Button asChild variant="outline" size="sm">
                 <Link to="/auth">{text("Sign in")}</Link>
               </Button>
-              <Button asChild size="sm" className="hidden sm:inline-flex">
-                <Link to="/auth">{text("Create account")}</Link>
+              <Button asChild size="sm">
+                <Link to="/auth" search={{ mode: "signup" }}>{text("Create account")}</Link>
               </Button>
             </>
           )}
