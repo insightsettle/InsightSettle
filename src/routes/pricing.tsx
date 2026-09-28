@@ -8,7 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { splitFee, type FeePayer } from "@/lib/deals";
-import { calcFee, feeTiers, formatSAR } from "@/lib/demo-data";
+import { formatSAR } from "@/lib/demo-data";
+import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -35,8 +36,10 @@ function PricingPage() {
   const [amount, setAmount] = useState("25000");
   const [payer, setPayer] = useState<FeePayer>("buyer");
   const value = Number(amount) || 0;
-  const fee = calcFee(value);
+  const { settings } = usePlatformSettings();
+  const fee = computeFee(value, settings.fees);
   const sides = splitFee(value, fee.fee, payer);
+  const bands = [...settings.fees].sort((a, b) => a.from - b.from);
 
   return (
     <SiteShell>
@@ -76,7 +79,7 @@ function PricingPage() {
               </select>
             </div>
             <div className="sm:col-span-2 grid gap-3 rounded-lg bg-secondary p-5 sm:grid-cols-3">
-              <Figure label="Escrow fee" value={formatSAR(fee.fee)} note={fee.tier.label} />
+              <Figure label="Escrow fee" value={formatSAR(fee.fee)} note={fee.rule?.label ?? ""} />
               <Figure
                 label="Buyer pays"
                 value={formatSAR(sides.buyerPays)}
@@ -102,13 +105,13 @@ function PricingPage() {
               </tr>
             </thead>
             <tbody>
-              {feeTiers.map((t) => (
-                <tr key={t.label} className="border-t border-border">
+              {bands.map((t) => (
+                <tr key={t.id} className="border-t border-border">
                   <td className="px-4 py-3">{t.label}</td>
                   <td className="px-4 py-3" dir="ltr">
-                    {(t.rate * 100).toFixed(1)}%
+                    {t.mode === "flat" ? "—" : `${(t.percent * 100).toFixed(2)}%`}
                   </td>
-                  <td className="px-4 py-3">{t.min ? formatSAR(t.min) : "—"}</td>
+                  <td className="px-4 py-3">{t.mode === "percent" ? "—" : formatSAR(t.flat)}</td>
                 </tr>
               ))}
             </tbody>

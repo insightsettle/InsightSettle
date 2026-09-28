@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { SaveBar } from "@/components/site/SaveBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/console/fees")({
 const modes: FeeMode[] = ["percent", "flat", "higher_of"];
 
 function FeesPage() {
-  const { settings, update, reset } = usePlatformSettings();
+  const { settings, update, save, discard, dirty } = usePlatformSettings();
   const [test, setTest] = useState(1200);
 
   const setRules = (rules: FeeRule[]) => update({ fees: rules });
@@ -58,13 +59,11 @@ function FeesPage() {
                 is higher.
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={addRule}>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={addRule}>
                 <Plus className="size-4" /> Add band
               </Button>
-              <Button variant="ghost" size="sm" onClick={reset}>
-                <RotateCcw className="size-4" /> Reset
-              </Button>
+              <SaveBar dirty={dirty} save={save} discard={discard} />
             </div>
           </div>
 

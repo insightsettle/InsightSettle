@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createDeal, gccCountries, splitFee, type DealRow, type FeePayer } from "@/lib/deals";
-import { calcFee, formatSAR } from "@/lib/demo-data";
+import { formatSAR } from "@/lib/demo-data";
+import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
+
 import { fxCurrencies } from "@/lib/fx";
 
 export const Route = createFileRoute("/_authenticated/deals/new")({
@@ -97,7 +99,8 @@ function NewDeal() {
   const [created, setCreated] = useState<DealRow | null>(null);
 
   const numericAmount = Number(amount) || 0;
-  const fee = calcFee(numericAmount);
+  const { settings: platform } = usePlatformSettings();
+  const fee = computeFee(numericAmount, platform.fees);
   const sides = splitFee(numericAmount, fee.fee, feePayer);
 
   function applyTemplate(id: string) {
@@ -381,7 +384,7 @@ function NewDeal() {
             <CardContent className="p-5 text-sm">
               <p className="font-semibold">Escrow fee on this value</p>
               <p className="mt-1 text-muted-foreground">
-                {formatSAR(fee.fee)} ({(fee.rate * 100).toFixed(1)}% — {fee.tier.label})
+                {formatSAR(fee.fee)} ({(fee.effectiveRate * 100).toFixed(2)}% — {fee.rule?.label})
               </p>
               <div className="mt-3 grid gap-1 border-t border-primary/20 pt-3 text-muted-foreground">
                 <p>

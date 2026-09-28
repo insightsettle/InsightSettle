@@ -7,7 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { calcFee, feeTiers, formatSAR } from "@/lib/demo-data";
+import { formatSAR } from "@/lib/demo-data";
+import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
+
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -57,7 +59,9 @@ const services = [
 ];
 function Page() {
   const [amount, setAmount] = useState(18000);
-  const { fee, rate } = calcFee(amount);
+  const { settings } = usePlatformSettings();
+  const { fee, effectiveRate: rate } = computeFee(amount, settings.fees);
+  const bands = [...settings.fees].sort((a, b) => a.from - b.from);
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-16">
@@ -99,17 +103,13 @@ function Page() {
                 </tr>
               </thead>
               <tbody>
-                {feeTiers.map((t) => (
-                  <tr key={t.label} className="border-t [&>td]:px-4 [&>td]:py-3">
-                    <td className="text-muted-foreground">
-                      {t.from === 0
-                        ? "Up to SAR 5,000"
-                        : t.to === 50000
-                          ? "SAR 5,001–50,000"
-                          : "Above SAR 50,000"}
+                {bands.map((t) => (
+                  <tr key={t.id} className="border-t [&>td]:px-4 [&>td]:py-3">
+                    <td className="text-muted-foreground">{t.label}</td>
+                    <td className="font-bold text-primary">
+                      {t.mode === "flat" ? "—" : `${(t.percent * 100).toFixed(2)}%`}
                     </td>
-                    <td className="font-bold text-primary">{(t.rate * 100).toFixed(1)}%</td>
-                    <td>{t.min ? formatSAR(t.min) : "—"}</td>
+                    <td>{t.mode === "percent" ? "—" : formatSAR(t.flat)}</td>
                   </tr>
                 ))}
                 <tr className="border-t [&>td]:px-4 [&>td]:py-3">

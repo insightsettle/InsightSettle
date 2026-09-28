@@ -179,31 +179,38 @@ async function load() {
 async function persist(prev: PlatformSettings, next: PlatformSettings) {
   const { supabase } = await import("@/integrations/supabase/client");
   const db = supabase as any;
+  const check = (r: { error: { message: string } | null }) => {
+    if (r?.error) throw new Error(r.error.message);
+  };
   if (next.rates !== prev.rates) {
     const removed = prev.rates.filter((p) => !next.rates.some((n) => n.code === p.code));
-    if (removed.length) await db.from("fx_rates").delete().in("code", removed.map((r) => r.code));
-    await db.from("fx_rates").upsert(
-      next.rates.map((r) => ({ code: r.code, name: r.name, provider_rate: r.baseRate, spread: r.spread })),
+    if (removed.length) check(await db.from("fx_rates").delete().in("code", removed.map((r) => r.code)));
+    check(
+      await db.from("fx_rates").upsert(
+        next.rates.map((r) => ({ code: r.code, name: r.name, provider_rate: r.baseRate, spread: r.spread })),
+      ),
     );
   }
   if (next.fees !== prev.fees) {
     const keep = next.fees.map((f) => f.id);
     const removed = prev.fees.filter((p) => !keep.includes(p.id) && p.id.length === 36);
-    if (removed.length) await db.from("fee_rules").delete().in("id", removed.map((r) => r.id));
+    if (removed.length) check(await db.from("fee_rules").delete().in("id", removed.map((r) => r.id)));
     const rows = next.fees.map(fromRule);
     const existing = rows.filter((r: any) => r.id);
     const fresh = rows.filter((r: any) => !r.id);
-    if (existing.length) await db.from("fee_rules").upsert(existing);
-    if (fresh.length) await db.from("fee_rules").insert(fresh);
+    if (existing.length) check(await db.from("fee_rules").upsert(existing));
+    if (fresh.length) check(await db.from("fee_rules").insert(fresh));
     await load();
   }
 }
 
-let saveTimer: ReturnType<typeof setTimeout> | null = null;
-let pendingPrev: PlatformSettings | null = null;
+let saved: PlatformSettings = defaultSettings;
+
+function notify() {
+  listeners.forEach((l) => l());
+}
 
 function commit(next: PlatformSettings) {
-  const prev = current;
   current = next;
   if (typeof window !== "undefined") {
     try {
@@ -212,25 +219,35 @@ function commit(next: PlatformSettings) {
       /* storage unavailable */
     }
   }
-  listeners.forEach((l) => l());
-  pendingPrev = pendingPrev ?? prev;
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const base = pendingPrev ?? prev;
-    pendingPrev = null;
-    void persist(base, current);
-  }, 600);
+  notify();
 }
 
-/** Reactive access to the shared platform settings. */
+function isDirty() {
+  return current.rates !== saved.rates || current.fees !== saved.fees;
+}
+
+async function saveAll() {
+  const prev = saved;
+  const next = current;
+  await persist(prev, next);
+  if (next.rates !== prev.rates && next.fees === prev.fees) await load();
+  saved = current;
+  notify();
+}
+
+/** Reactive access to the shared platform settings. Rate/fee edits stay as a draft until save(). */
 export function usePlatformSettings() {
   const [settings, setSettings] = useState<PlatformSettings>(current);
+  const [dirty, setDirty] = useState(isDirty());
 
   useEffect(() => {
-    const listener = () => setSettings(current);
+    const listener = () => {
+      setSettings(current);
+      setDirty(isDirty());
+    };
     listeners.add(listener);
-    if (!loaded) void load();
-    else setSettings(current);
+    if (!loaded) void load().then(() => { saved = current; notify(); });
+    else listener();
     return () => listeners.delete(listener) as unknown as void;
   }, []);
 
@@ -239,8 +256,10 @@ export function usePlatformSettings() {
   }, []);
 
   const reset = useCallback(() => commit({ ...current, dispute: defaultSettings.dispute }), []);
+  const save = useCallback(() => saveAll(), []);
+  const discard = useCallback(() => commit({ ...current, rates: saved.rates, fees: saved.fees }), []);
 
-  return { settings, update, reset };
+  return { settings, update, reset, save, discard, dirty };
 }
 
 /* ----------------------------- fee engine ----------------------------- */
