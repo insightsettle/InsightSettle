@@ -3,7 +3,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Coins,
+  FileBarChart,
   FileCheck,
+  History,
   LayoutDashboard,
   LogOut,
   Percent,
@@ -29,6 +31,8 @@ const tabs = [
   { to: "/console/rates", label: "Currency rates", exact: false, icon: Coins },
   { to: "/console/fees", label: "Fee rules", exact: false, icon: Percent },
   { to: "/console/disputes", label: "Disputes", exact: false, icon: AlertTriangle },
+  { to: "/console/reports", label: "Reports", exact: false, icon: FileBarChart },
+  { to: "/console/audit", label: "Staff history", exact: false, icon: History },
 ] as const;
 
 export function ConsoleShell({
