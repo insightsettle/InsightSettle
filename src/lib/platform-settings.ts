@@ -104,60 +104,141 @@ export const defaultSettings: PlatformSettings = {
   },
 };
 
+/*
+ * Rates and fee rules are shared platform data stored on the server
+ * (fx_rates / fee_rules). Only the dispute policy is still kept locally.
+ */
 const KEY = "insight.platform-settings.v1";
 
-function read(): PlatformSettings {
-  if (typeof window === "undefined") return defaultSettings;
+function readDispute(): DisputePolicy {
+  if (typeof window === "undefined") return defaultSettings.dispute;
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return defaultSettings;
-    const parsed = JSON.parse(raw) as Partial<PlatformSettings>;
-    return {
-      rates: parsed.rates?.length ? parsed.rates : defaultSettings.rates,
-      fees: parsed.fees?.length ? parsed.fees : defaultSettings.fees,
-      dispute: { ...defaultSettings.dispute, ...parsed.dispute },
-    };
+    const parsed = raw ? (JSON.parse(raw) as Partial<PlatformSettings>) : {};
+    return { ...defaultSettings.dispute, ...parsed.dispute };
   } catch {
-    return defaultSettings;
+    return defaultSettings.dispute;
   }
+}
+
+function toRule(r: any): FeeRule {
+  const percent = Number(r.percent) / 100;
+  const min = Number(r.min_fee ?? 0);
+  const mode: FeeMode = percent === 0 ? "flat" : min > 0 ? "higher_of" : "percent";
+  return {
+    id: r.id,
+    label: r.label,
+    from: Math.floor(Number(r.amount_from)),
+    to: r.amount_to == null ? null : Number(r.amount_to),
+    mode,
+    percent,
+    flat: mode === "flat" ? Number(r.max_fee ?? r.min_fee ?? 0) : min,
+  };
+}
+
+function fromRule(rule: FeeRule, i: number) {
+  return {
+    ...(rule.id && rule.id.length === 36 ? { id: rule.id } : {}),
+    label: rule.label,
+    amount_from: rule.from,
+    amount_to: rule.to,
+    percent: rule.mode === "flat" ? 0 : +(rule.percent * 100).toFixed(4),
+    min_fee: rule.mode === "percent" ? 0 : rule.flat,
+    max_fee: rule.mode === "flat" ? rule.flat : null,
+    sort_order: i + 1,
+  };
 }
 
 const listeners = new Set<() => void>();
-let current: PlatformSettings | null = null;
+let current: PlatformSettings = defaultSettings;
+let loaded = false;
 
-function snapshot() {
-  if (!current) current = read();
-  return current;
-}
-
-function commit(next: PlatformSettings) {
-  current = next;
-  if (typeof window !== "undefined") {
-    try {
-      window.localStorage.setItem(KEY, JSON.stringify(next));
-    } catch {
-      /* storage unavailable — keep in-memory only */
-    }
-  }
+async function load() {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const [rates, fees] = await Promise.all([
+    supabase.from("fx_rates").select("*").neq("code", "SAR").order("code"),
+    supabase.from("fee_rules").select("*").order("sort_order"),
+  ]);
+  current = {
+    rates: rates.data?.length
+      ? rates.data.map((r: any) => ({
+          code: r.code,
+          name: r.name,
+          baseRate: Number(r.provider_rate),
+          spread: Number(r.spread),
+          updatedAt: String(r.updated_at).slice(0, 10),
+        }))
+      : defaultSettings.rates,
+    fees: fees.data?.length ? fees.data.map(toRule) : defaultSettings.fees,
+    dispute: readDispute(),
+  };
+  loaded = true;
   listeners.forEach((l) => l());
 }
 
-/** Reactive access to the editable platform settings. */
+async function persist(prev: PlatformSettings, next: PlatformSettings) {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const db = supabase as any;
+  if (next.rates !== prev.rates) {
+    const removed = prev.rates.filter((p) => !next.rates.some((n) => n.code === p.code));
+    if (removed.length) await db.from("fx_rates").delete().in("code", removed.map((r) => r.code));
+    await db.from("fx_rates").upsert(
+      next.rates.map((r) => ({ code: r.code, name: r.name, provider_rate: r.baseRate, spread: r.spread })),
+    );
+  }
+  if (next.fees !== prev.fees) {
+    const keep = next.fees.map((f) => f.id);
+    const removed = prev.fees.filter((p) => !keep.includes(p.id) && p.id.length === 36);
+    if (removed.length) await db.from("fee_rules").delete().in("id", removed.map((r) => r.id));
+    const rows = next.fees.map(fromRule);
+    const existing = rows.filter((r: any) => r.id);
+    const fresh = rows.filter((r: any) => !r.id);
+    if (existing.length) await db.from("fee_rules").upsert(existing);
+    if (fresh.length) await db.from("fee_rules").insert(fresh);
+    await load();
+  }
+}
+
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingPrev: PlatformSettings | null = null;
+
+function commit(next: PlatformSettings) {
+  const prev = current;
+  current = next;
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(KEY, JSON.stringify({ dispute: next.dispute }));
+    } catch {
+      /* storage unavailable */
+    }
+  }
+  listeners.forEach((l) => l());
+  pendingPrev = pendingPrev ?? prev;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const base = pendingPrev ?? prev;
+    pendingPrev = null;
+    void persist(base, current);
+  }, 600);
+}
+
+/** Reactive access to the shared platform settings. */
 export function usePlatformSettings() {
-  const [settings, setSettings] = useState<PlatformSettings>(defaultSettings);
+  const [settings, setSettings] = useState<PlatformSettings>(current);
 
   useEffect(() => {
-    setSettings(snapshot());
-    const listener = () => setSettings(snapshot());
+    const listener = () => setSettings(current);
     listeners.add(listener);
+    if (!loaded) void load();
+    else setSettings(current);
     return () => listeners.delete(listener) as unknown as void;
   }, []);
 
   const update = useCallback((patch: Partial<PlatformSettings>) => {
-    commit({ ...snapshot(), ...patch });
+    commit({ ...current, ...patch });
   }, []);
 
-  const reset = useCallback(() => commit(defaultSettings), []);
+  const reset = useCallback(() => commit({ ...current, dispute: defaultSettings.dispute }), []);
 
   return { settings, update, reset };
 }
