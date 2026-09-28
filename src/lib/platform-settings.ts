@@ -1,7 +1,6 @@
 /**
- * Editable platform settings (demo prototype).
- * Stored in the browser so Insight staff can tune currency rates, fee rules,
- * and dispute policy without a backend. All values are sample data.
+ * Platform settings: currency rates and fee rules are shared server data
+ * edited by Insight staff; defaults below are only a fallback while loading.
  */
 import { useCallback, useEffect, useState } from "react";
 
@@ -56,7 +55,8 @@ export const defaultSettings: PlatformSettings = {
     { code: "GBP", name: "British pound", baseRate: 4.78, spread: 0.0125, updatedAt: today() },
     { code: "AED", name: "UAE dirham", baseRate: 1.021, spread: 0.009, updatedAt: today() },
     { code: "KWD", name: "Kuwaiti dinar", baseRate: 12.2185, spread: 0.0105, updatedAt: today() },
-    { code: "EGP", name: "Egyptian pound", baseRate: 0.078, spread: 0.018, updatedAt: today() },
+    { code: "QAR", name: "Qatari riyal", baseRate: 1.03, spread: 0.008, updatedAt: today() },
+    { code: "OMR", name: "Omani rial", baseRate: 9.74, spread: 0.01, updatedAt: today() },
   ],
   fees: [
     {

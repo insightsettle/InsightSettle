@@ -7,26 +7,28 @@
  */
 export const SPREAD = 0.0105;
 
-export type FxCurrency = "BHD" | "USD" | "EUR" | "GBP" | "AED" | "KWD" | "EGP";
+export type FxCurrency = "AED" | "BHD" | "QAR" | "KWD" | "OMR" | "USD" | "EUR" | "GBP";
 
 export const baseRates: Record<FxCurrency, number> = {
+  AED: 1.021,
   BHD: 9.94563,
+  QAR: 1.03,
+  KWD: 12.2185,
+  OMR: 9.74,
   USD: 3.75,
   EUR: 4.09,
   GBP: 4.78,
-  AED: 1.021,
-  KWD: 12.2185,
-  EGP: 0.078,
 };
 
 export const currencyNames: Record<FxCurrency, string> = {
+  AED: "UAE dirham",
   BHD: "Bahraini dinar",
+  QAR: "Qatari riyal",
+  KWD: "Kuwaiti dinar",
+  OMR: "Omani rial",
   USD: "US dollar",
   EUR: "Euro",
   GBP: "British pound",
-  AED: "UAE dirham",
-  KWD: "Kuwaiti dinar",
-  EGP: "Egyptian pound",
 };
 
 export const fxCurrencies = Object.keys(baseRates) as FxCurrency[];
@@ -69,7 +71,7 @@ export function formatForeign(amount: number, currency: FxCurrency) {
   return new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: ["BHD", "KWD", "OMR"].includes(currency) ? 3 : 2,
   }).format(amount);
 }
 
