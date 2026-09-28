@@ -9,8 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { listNotifications, markAllNotificationsRead } from "@/lib/notifications";
 import { formatDate } from "@/lib/demo-data";
+import { useLocale } from "@/lib/locale";
 
 export function NotificationBell() {
+  const { text } = useLocale();
   const queryClient = useQueryClient();
   const notifications = useQuery({
     queryKey: ["notifications"],
@@ -28,7 +30,7 @@ export function NotificationBell() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+        <Button variant="ghost" size="icon" className="relative" aria-label={text("Notifications")}>
           <Bell className="size-4" />
           {unread > 0 && (
             <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
@@ -39,20 +41,20 @@ export function NotificationBell() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <p className="text-sm font-semibold">Notifications</p>
+          <p className="text-sm font-semibold">{text("Notifications")}</p>
           {unread > 0 && (
             <button
               className="text-xs text-primary hover:underline"
               onClick={() => markRead.mutate()}
             >
-              Mark all read
+              {text("Mark all read")}
             </button>
           )}
         </div>
         <div className="max-h-80 overflow-y-auto">
           {items.length === 0 && (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-              You have no notifications yet.
+              {text("You have no notifications yet.")}
             </p>
           )}
           {items.map((n) => (

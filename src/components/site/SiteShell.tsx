@@ -5,11 +5,13 @@ import { useState } from "react";
 
 import logo from "@/assets/insight-wordmark-transparent.png";
 import { NotificationBell } from "@/components/site/NotificationBell";
+import { LanguageToggle } from "@/components/site/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { useSessionUser } from "@/hooks/use-session";
 import { useStaffAccess } from "@/hooks/use-staff";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/locale";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -19,13 +21,13 @@ const nav = [
   { to: "/help", label: "Help" },
 ] as const;
 
-
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useSessionUser();
   const { isStaff } = useStaffAccess();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { text } = useLocale();
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -40,7 +42,7 @@ export function SiteHeader() {
           <img src={logo} alt="Insight" className="h-11 w-auto object-contain" />
         </Link>
 
-        <nav className="ml-auto hidden items-center gap-1 lg:flex">
+        <nav className="ms-auto hidden items-center gap-1 lg:flex">
           {nav.map((item) => (
             <Link
               key={item.to}
@@ -48,12 +50,13 @@ export function SiteHeader() {
               activeOptions={{ exact: item.to === "/" }}
               className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground"
             >
-              {item.label}
+              {text(item.label)}
             </Link>
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-0">
+        <div className="ms-auto flex items-center gap-2 lg:ms-0">
+          <LanguageToggle className="px-2 sm:px-3" />
           {loading ? null : user ? (
             <>
               <NotificationBell />
@@ -65,12 +68,12 @@ export function SiteHeader() {
                   className="hidden border-foreground/25 sm:inline-flex"
                 >
                   <Link to="/console">
-                    <ShieldAlert className="size-4" /> Staff console
+                    <ShieldAlert className="size-4" /> {text("Staff console")}
                   </Link>
                 </Button>
               )}
               <Button asChild size="sm" className="hidden sm:inline-flex">
-                <Link to="/dashboard">My dashboard</Link>
+                <Link to="/dashboard">{text("My dashboard")}</Link>
               </Button>
               <Button
                 variant="ghost"
@@ -78,16 +81,16 @@ export function SiteHeader() {
                 className="hidden sm:inline-flex"
                 onClick={handleSignOut}
               >
-                Sign out
+                {text("Sign out")}
               </Button>
             </>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link to="/auth">Sign in</Link>
+                <Link to="/auth">{text("Sign in")}</Link>
               </Button>
               <Button asChild size="sm" className="hidden sm:inline-flex">
-                <Link to="/auth">Create account</Link>
+                <Link to="/auth">{text("Create account")}</Link>
               </Button>
             </>
           )}
@@ -112,7 +115,7 @@ export function SiteHeader() {
               onClick={() => setOpen(false)}
               className="block rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
-              {item.label}
+              {text(item.label)}
             </Link>
           ))}
           <div className="mt-2 border-t border-border pt-2">
@@ -123,7 +126,7 @@ export function SiteHeader() {
                   onClick={() => setOpen(false)}
                   className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary"
                 >
-                  My dashboard
+                  {text("My dashboard")}
                 </Link>
                 <button
                   onClick={() => {
@@ -132,7 +135,7 @@ export function SiteHeader() {
                   }}
                   className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground"
                 >
-                  Sign out
+                  {text("Sign out")}
                 </button>
               </>
             ) : (
@@ -141,7 +144,7 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
                 className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary"
               >
-                Sign in or create account
+                {text("Sign in")} / {text("Create account")}
               </Link>
             )}
           </div>
@@ -152,6 +155,7 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const { text } = useLocale();
   return (
     <footer className="mt-24 border-t border-border bg-card/40">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-3">
@@ -160,32 +164,32 @@ export function SiteFooter() {
             <img src={logo} alt="Insight" className="h-10 w-auto object-contain" />
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Secure escrow that protects every payment until delivery is confirmed.
+            {text("Secure escrow that protects every payment until delivery is confirmed.")}
           </p>
         </div>
         <FooterCol
-          title="Platform"
+          title={text("Platform")}
           links={[
-            { to: "/how-it-works", label: "How it works" },
-            { to: "/services", label: "Services" },
-            { to: "/pricing", label: "Fee calculator" },
-            { to: "/roles", label: "Roles & access" },
-            { to: "/help", label: "Help centre" },
+            { to: "/how-it-works", label: text("How it works") },
+            { to: "/services", label: text("Services") },
+            { to: "/pricing", label: text("Fee calculator") },
+            { to: "/roles", label: text("Roles & access") },
+            { to: "/help", label: text("Help centre") },
           ]}
         />
         <FooterCol
-          title="Legal"
+          title={text("Legal")}
           links={[
-            { to: "/terms", label: "Terms of service" },
-            { to: "/privacy", label: "Privacy policy" },
-            { to: "/dispute-policy", label: "Disputes & refunds" },
+            { to: "/terms", label: text("Terms of service") },
+            { to: "/privacy", label: text("Privacy policy") },
+            { to: "/dispute-policy", label: text("Disputes & refunds") },
           ]}
         />
-
       </div>
       <div className="border-t border-border px-4 py-5 text-center text-xs text-muted-foreground">
-        Demo experience — all balances and payment details are{" "}
-        <span className="text-warning">sample data</span>. No real funds are moved.
+        {text(
+          "Demo experience — all balances and payment details are sample data. No real funds are moved.",
+        )}
       </div>
     </footer>
   );

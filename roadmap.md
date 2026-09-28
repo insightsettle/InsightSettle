@@ -10,6 +10,7 @@
 - AI risk review tab (/console/risk): screens selected deals + pasted messages, ranks deals needing review, saves risk flags
 - Payment records: every funding / release / refund recorded with status, provider, reference and error message; buyer starts funding and release, staff confirms or rejects with a reason; both parties see the outcome
 - In-app notifications with header bell: status changes, messages, arbitration requests, payment outcomes
+- Arabic and English interface with a persistent language switch across public, customer, and staff pages
 
 ## Open
 
