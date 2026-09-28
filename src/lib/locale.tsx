@@ -261,6 +261,218 @@ const translations: Record<string, string> = {
   Fee: "الرسم",
   Revenue: "الإيراد",
   "No due date": "دون تاريخ استحقاق",
+  "Insight | Secure Escrow": "إنسايت | ضمان آمن",
+  "Secure escrow for buyers, sellers, freelancers, and growing teams.":
+    "ضمان آمن للمشترين والبائعين والمستقلين والفرق المتنامية.",
+  "Protected payments, clear milestones, and fair dispute resolution.":
+    "المدفوعات المحمية، والمعالم الواضحة، والتسوية العادلة للنزاعات.",
+  "Sign in or create an account | Insight": "تسجيل الدخول أو إنشاء حساب",
+  "Create your Insight account or sign in to open escrow deals, fund them, and track delivery.":
+    "أنشئ حساب إنسايت الخاص بك أو سجّل الدخول لفتح صفقات الضمان، وتمويلها، وتتبع التسليم.",
+  "Sign in to Insight": "تسجيل الدخول إلى إنسايت",
+  "Accounts for buyers and sellers using Insight escrow.":
+    "حسابات المشترين والبائعين باستخدام ضمان إنسايت.",
+  "Loading deal…": "جارٍ تحميل الصفقة...",
+  "This deal reference does not exist.": "مرجع الصفقة هذا غير موجود.",
+  "Back to all deals": "العودة إلى جميع الصفقات",
+  "Change deal status": "تغيير حالة الصفقة",
+  "The reason is written into the deal log and is visible to both parties.":
+    "يتم كتابة السبب في سجل الصفقة ويكون مرئيًا لكلا الطرفين.",
+  "Special fee offer": "عرض الرسوم الخاصة",
+  "Fee percentage": "نسبة الرسوم",
+  "Fixed fee (SAR)": "الرسوم الثابتة (ريال سعودي)",
+  "Confirm or reject each money movement. The outcome and the reason are shown to both parties.":
+    "قم بتأكيد أو رفض كل حركة أموال. يتم عرض النتيجة والسبب لكلا الطرفين.",
+  "No payments recorded for this deal yet.": "لا توجد مدفوعات مسجلة لهذه الصفقة حتى الآن.",
+  "No messages on this deal yet.": "لا توجد رسائل حول هذه الصفقة حتى الآن.",
+  "Send as Insight support": "إرسال كدعم إنسايت",
+  "Deal value": "قيمة الصفقة",
+  Parties: "الأطراف",
+  "Dispute reason": "سبب الخلاف",
+  "No activity recorded.": "لم يتم تسجيل أي نشاط.",
+  "All platform deals": "جميع عروض المنصات",
+  "Loading deals…": "جارٍ تحميل الصفقات...",
+  "Could not load deals.": "تعذر تحميل الصفقات.",
+  "No deals match this view yet.": "لا توجد عروض تطابق هذا الصفقة حتى الآن.",
+  "Resolution policy": "سياسة الحل",
+  "AI mediation runs for a fixed window. If the parties do not settle, the case moves to an external arbitrator and the arbitration fee is charged to the party you choose.":
+    "تعمل وساطة الذكاء الاصطناعي لنافذة ثابتة. إذا لم يقم الطرفان بالتسوية، تنتقل القضية إلى محكم خارجي ويتم فرض رسوم التحكيم على الطرف الذي تختاره.",
+  Reset: "إعادة ضبط",
+  "AI mediation window (days)": "نافذة وساطة الذكاء الاصطناعي (أيام)",
+  "Arbitration fee (SAR)": "رسوم التحكيم (ريال سعودي)",
+  "Arbitration fee charged to": "رسوم التحكيم المفروضة على",
+  "Escalate automatically": "التصعيد تلقائيًا",
+  "Yes, when the window expires": "نعم، عند انتهاء صلاحية النافذة",
+  "No, staff decide": "لا، الموظفون يقررون",
+  "Dispute queue": "قائمة انتظار النزاعات",
+  Case: "القضية",
+  Stage: "المرحلة",
+  "AI window": "نافذة الذكاء الاصطناعي",
+  Closed: "مغلق",
+  "With arbitrator": "مع المحكم",
+  "No action needed": "لا  اجراء مطلوب",
+  "Current AI recommendation:": "التوصية الحالية للذكاء الاصطناعي:",
+  "Analyzing…": "التحليل",
+  "Run AI mediation plan": "تشغيل خطة وساطة الذكاء الاصطناعي",
+  "AI mediation plan": "خطة وساطة الذكاء الاصطناعي",
+  "AI-generated guidance for mediation. Not a binding decision or legal advice.":
+    "إرشادات تم إنشاؤها بواسطة الذكاء الاصطناعي للوساطة. ليس قرارًا ملزمًا أو مشورة قانونية.",
+  "Platform fee rules": "قواعد رسوم المنصة",
+  "Define each value band yourself: charge a percentage, a fixed amount, or whichever is higher.":
+    "حدد كل نطاق قيمة بنفسك: قم بتحصيل نسبة مئوية أو مبلغ ثابت أو أيهما أعلى.",
+  "Add band": "إضافة شريط",
+  "Band label": "تسمية الفرقة",
+  "From (SAR)": "من (ريال سعودي)",
+  "To (SAR)": "إلى (ريال سعودي)",
+  Rule: "القاعدة",
+  "Percent %": "النسبة",
+  "Amount (SAR)": "الإجمالي (بالريال السعودي)",
+  "Test a deal value": "اختبر قيمة الصفقة",
+  "Deal value (SAR)": "القيمة (بالريال السعودي)",
+  "Fee revenue on current deals": "إيرادات الرسوم على الصفقات الحالية",
+  "New band": "سوار جديد",
+  "Live platform data": "بيانات المنصة",
+  "Manage members →": "إدارة الأعضاء",
+  "Review all deals →": "مراجعة جميع الصفقات →",
+  "Run risk screening →": "إجراء فحص المخاطر →",
+  "Monthly volume and fee revenue": "الحجم الشهري وإيرادات الرسوم",
+  "Deal status distribution": "توزيع حالة الصفقة",
+  "Revenue mix": "مزيج الإيرادات",
+  "Controls are editable": "الضوابط قابلة للتعديل",
+  "Update currency rates daily and define fee tiers by percentage, fixed amount, or whichever is higher.":
+    "قم بتحديث أسعار العملات يوميًا وحدد مستويات الرسوم حسب النسبة المئوية أو المبلغ الثابت أو أيهما أعلى.",
+  "All deals across the platform": "جميع الصفقات عبر المنصة",
+  "Fees calculated with the current rules": "الرسوم المحسوبة وفقًا للقواعد الحالية",
+  Effective: "فعال",
+  "Disputes needing attention": "النزاعات التي تحتاج إلى عناية",
+  "Open dispute resolution": "حل النزاعات",
+  "Total transaction volume": "إجمالي حجم المعاملات",
+  "Total revenue": "إجمالي الإيرادات",
+  "Escrow fee revenue": "إيرادات رسوم الضمان",
+  "Currency margin revenue": "إيرادات هامش العملة",
+  "Funds currently held": "الأموال المحتفظ بها حاليًا",
+  "Blended take rate": "معدل الالتقاط المختلط",
+  "Average deal value": "متوسط قيمة الصفقة",
+  "Average release time": "متوسط وقت الإصدار",
+  "Successful releases": "الإصدارات الناجحة",
+  "Dispute rate": "معدل النزاع",
+  "With external arbitrator": "مع محكم خارجي",
+  "Rates needing a daily update": "الأسعار التي تحتاج إلى تحديث يومي",
+  "Active fee tiers": "مستويات الرسوم النشطة",
+  "Registered members": "الأعضاء المسجلين",
+  "Pending identity checks": "في انتظار التحقق من الهوية",
+  "Deals created": "تم إنشاء الصفقات",
+  "Deal volume": "حجم الصفقة",
+  "Deals in dispute": "الصفقات المتنازع عليها",
+  "Loading documents…": "جارٍ تحميل المستندات...",
+  "No documents have been submitted yet.": "لم يتم تقديم أي مستندات حتى الآن.",
+  "Base rate is the mid-market rate in SAR per 1 unit. The customer rate adds the margin you set here — customers never see the margin.":
+    "السعر الأساسي هو سعر السوق المتوسط بالريال السعودي لكل وحدة. يضيف سعر العميل الهامش الذي تحدده هنا — لا يرى العملاء الهامش أبدًا.",
+  "Mark all updated today": "وضع علامة على كل ما تم تحديثه اليوم",
+  "Base rate (SAR)": "السعر الأساسي (ريال سعودي)",
+  "Margin %": "الهامش %",
+  "Customer rate": "سعر العميل",
+  Updated: "محدث",
+  "Add a currency": "إضافة عملة",
+  Name: "الاسم",
+  "Base rate (SAR per unit)": "السعر الأساسي (ريال سعودي لكل وحدة)",
+  "Add currency": "إضافة عملة",
+  "Margin preview": "معاينة الهامش",
+  "Change the sample deal value to see the expected margin per currency in the table.":
+    "قم بتغيير قيمة نموذج الصفقة لرؤية الهامش المتوقع لكل عملة في الجدول.",
+  "Sample deal value (SAR)": "نموذج لقيمة الصفقة (ريال سعودي)",
+  "AI risk review": "مراجعة المخاطر",
+  "Pick the deals to screen, add anything members sent you outside the platform, and the model ranks which deals need a manual review.":
+    "اختر الصفقات المراد فرزها، وأضف أي شيء يرسله لك الأعضاء خارج المنصة، وتحتاج رتب النماذج التي تتعامل معها إلى مراجعة يدوية.",
+  "No deals yet.": "لا توجد صفقات حتى الآن.",
+  Stop: "التوقف عن استخدام الرد",
+  "Save a risk flag from this analysis": "احفظ علامة خطر من هذا التحليل",
+  "Deals flagged for review": "تم وضع علامة على الصفقات للمراجعة",
+  "Everything you marked medium or high risk, newest score first.":
+    "كل شيء وضعت علامة عليه مخاطر متوسطة أو عالية، أحدث درجة أولاً.",
+  "No deals are flagged right now.": "لم يتم الإبلاغ عن أي صفقات في الوقت الحالي.",
+  "Platform console | Insight": "وحدة تحكم المنصة | نظرة ثاقبة",
+  "Internal Insight console: KPIs, revenue analytics, currency rates, fee rules, and dispute resolution.":
+    "وحدة تحكم INSIGHT الداخلية: مؤشرات الأداء الرئيسية وتحليلات الإيرادات وأسعار العملات وقواعد الرسوم وحل النزاعات.",
+  "Insight platform console": "وحدة تحكم منصة إنسايت",
+  "Internal oversight of volume, revenue, rates, fees, and disputes.":
+    "الرقابة الداخلية على الحجم والإيرادات والمعدلات والرسوم والنزاعات.",
+  "Everyone who signed up on Insight, with identity checks and team access.":
+    "كل من اشترك في إنسايت، من خلال التحقق من الهوية والوصول إلى الفريق.",
+  "Loading members…": "جارٍ تحميل الأعضاء...",
+  "Could not load members.": "تعذر تحميل الأعضاء.",
+  "Insight team": "فريق INSIGHT",
+  "Approve identity": "الموافقة على الهوية",
+  "No members match that search.": "لا يوجد أعضاء يطابقون هذا البحث.",
+  "Held funds are never released while a dispute is open. This is the exact path a case follows.":
+    "لا يتم إطلاق الأموال المحتفظ بها أبدًا أثناء وجود نزاع مفتوح. هذا هو المسار الدقيق الذي تتبعه الحالة.",
+  "Refund types": "أنواع رد الأموال",
+  "Full refund": "الاسترداد الكامل ",
+  "— the buyer receives the funded amount back when delivery did not happen or was materially different from the terms.":
+    "— يسترد المشتري المبلغ الممول عندما لم يحدث التسليم أو كان مختلفًا جوهريًا عن الشروط.",
+  "Partial refund": "استرداد جزئي للمال",
+  "— the parties agree, or Insight decides, a split of the held amount; the rest is released to the seller.":
+    "— يتفق الطرفان، أو تقرر إنسايت، تقسيم المبلغ المحتفظ به ؛ يتم الإفراج عن الباقي للبائع.",
+  "Cancellation before delivery": "الإلغاء قبل التوصيل",
+  "— if both sides cancel before delivery, the funded amount is returned.":
+    "— إذا قام كلا الجانبين بالإلغاء قبل التسليم، فسيتم إرجاع المبلغ الممول.",
+  "Visit the help centre": "زيارة مركز المساعدة",
+  "Read the terms": "قراءة الشروط",
+  "Disputes & refunds policy | Insight": "سياسة المنازعات والمبالغ المستردة | إنسايت",
+  "How Insight reviews disputes, the review window, partial refunds, and when a case goes to an external arbitrator.":
+    "كيف تستعرض إنسايت النزاعات، ونافذة المراجعة، والمبالغ المستردة الجزئية، وعندما تذهب القضية إلى محكم خارجي.",
+  "Insight disputes and refunds policy": "سياسة نزاعات البصيرة واسترداد الأموال",
+  "A clear path from disagreement to decision.": "مسار واضح من الخلاف إلى القرار.",
+  "1. Raise the case": "1. رفع الدعوى",
+  "Either party can open a dispute from the deal page while the funds are still held. The reason is recorded and both sides are notified immediately. The money stays locked until the case closes.":
+    "يمكن لأي من الطرفين فتح نزاع من صفحة الصفقة بينما لا تزال الأموال محتجزة. يتم تسجيل السبب ويتم إخطار كلا الجانبين على الفور. يبقى المال مغلقًا حتى تغلق القضية.",
+  "2. Evidence window": "2. نافذة الأدلة",
+  "Both parties upload evidence — files, screenshots, delivery proof, shipping tracking — and answer Insight's questions inside the deal conversation.":
+    "يقوم كلا الطرفين بتحميل الأدلة — الملفات ولقطات الشاشة وإثبات التسليم وتتبع الشحن — والإجابة على أسئلة إنسايت داخل محادثة الصفقة.",
+  "3. Insight review": "3. مراجعة البصيرة",
+  "Insight reviews the case within the review window published in the dispute centre (3 days by default) and proposes an outcome: release, full refund, or a partial settlement split between the parties.":
+    "تستعرض إنسايت الحالة ضمن نافذة المراجعة المنشورة في مركز المنازعات (3 أيام افتراضيًا) وتقترح نتيجة: الإفراج أو رد الأموال بالكامل أو تقسيم التسوية الجزئية بين الطرفين.",
+  "4. External arbitration": "4. التحكيم الخارجي",
+  "If a party rejects the proposal, or the case is too complex, it is escalated to an independent arbitrator. The arbitrator's fee is charged according to the deal's dispute settings and is stated before escalation.":
+    "إذا رفض أحد الأطراف الاقتراح، أو كانت القضية معقدة للغاية، يتم تصعيدها إلى محكم مستقل. يتم فرض رسوم المحكم وفقًا لإعدادات النزاع الخاصة بالصفقة ويتم ذكرها قبل التصعيد.",
+  "5. Decision and payout": "5. القرار والعائد",
+  "The final outcome is applied to the held funds and recorded in the deal's payment records with the amount, reason, and reference, visible to both parties.":
+    "يتم تطبيق النتيجة النهائية على الأموال المحتفظ بها وتسجيلها في سجلات الدفع الخاصة بالصفقة مع المبلغ والسبب والمرجعية المرئية لكلا الطرفين.",
+  "Questions, answered": "الأسئلة التي تم الإجابة عليها",
+  "Everything you need to know before opening your first deal.":
+    "كل ما تحتاج إلى معرفته قبل فتح صفقتك الأولى.",
+  "Still stuck?": "هل ما زلت لا تستطيع تحميل الفيديو؟",
+  "Open the deal and use the note box for the Insight team, or create an account to start a conversation.":
+    "افتح الصفقة واستخدم مربع الملاحظات لفريق إنسايت، أو أنشئ حسابًا لبدء محادثة.",
+  "Help centre | Insight": "مركز المساعدة | نظرة ثاقبة",
+  "Answers about funding, inspection periods, releasing funds, refunds, disputes and verification on Insight.":
+    "إجابات حول التمويل وفترات التفتيش والإفراج عن الأموال والمبالغ المستردة والنزاعات والتحقق من إنسايت.",
+  "Insight help centre": "مركز مساعدة INSIGHT",
+  "How escrow works, step by step.": "كيف يعمل الضمان، خطوة بخطوة.",
+  "THE ESCROW JOURNEY": "رحلة الضمان",
+  "From agreement to settlement": "من الاتفاق إلى التسوية",
+  "Seven transparent steps, each recorded in the deal timeline.":
+    "سبع خطوات شفافة، تم تسجيل كل منها في الجدول الزمني للصفقة.",
+  "Deal statuses": "حالات الصفقة",
+  "Review fees": "مراجعة الرسوم",
+  "Explore dashboard": "استكشف لوحة البيانات",
+  "How Insight works | Secure escrow steps": "كيفية عمل إنسايت | خطوات الضمان الآمنة",
+  "Follow an Insight deal from account verification and funding through delivery, release, refund, or dispute.":
+    "اتبع صفقة إنسايت من التحقق من الحساب والتمويل من خلال التسليم أو الإصدار أو رد الأموال أو النزاع.",
+  "How Insight works": "كيف تعمل إنسايت",
+  "Seven clear steps from agreement to settlement.": "سبع خطوات واضحة من الاتفاق إلى التسوية.",
+  article: "مقالة",
+  "Create and verify your account": "إنشاء حسابك والتحقق منه",
+  "Confirm your email and phone. Identity checks apply when required.":
+    "قم بتأكيد بريدك الإلكتروني وهاتفك. يتم تطبيق عمليات التحقق من الهوية عند الحاجة.",
+  "Define the deal": "تحديد الصفقة",
+  "Set the scope, value, currency, parties, delivery window, and release conditions.":
+    "حدد النطاق والقيمة والعملة والأطراف ونافذة التسليم وشروط الإصدار.",
+  "Send a secure, time-limited invitation for review and acceptance.":
+    "أرسل دعوة آمنة ومحدودة المدة للمراجعة والقبول.",
+  "Fund the agreement": "العقد",
+  "The buyer funds the deal and the amount moves into protected escrow.":
+    "يقوم المشتري بتمويل الصفقة وينتقل المبلغ إلى الضمان المحمي.",
 };
 
 const dynamicTranslations: Array<[RegExp, (...matches: string[]) => string]> = [
@@ -322,7 +534,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       direction: locale === "ar" ? "rtl" : "ltr",
       setLocale: setLocaleState,
       toggleLocale: () => setLocaleState((current) => (current === "en" ? "ar" : "en")),
-      text: (english, arabic) => (locale === "ar" ? (arabic ?? translations[english] ?? english) : english),
+      text: (english, arabic) =>
+        locale === "ar" ? (arabic ?? translations[english] ?? english) : english,
     }),
     [locale],
   );
@@ -341,7 +554,10 @@ export function localizeDocument(locale: Locale) {
   const textNodes = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node = textNodes.nextNode();
   while (node) {
-    if (node.parentElement && !["SCRIPT", "STYLE", "TEXTAREA"].includes(node.parentElement.tagName)) {
+    if (
+      node.parentElement &&
+      !["SCRIPT", "STYLE", "TEXTAREA"].includes(node.parentElement.tagName)
+    ) {
       const original = originalText.get(node) ?? node.textContent ?? "";
       if (!originalText.has(node) && original.trim()) originalText.set(node, original);
       const localized = locale === "ar" ? translateText(original) : original;
@@ -349,7 +565,9 @@ export function localizeDocument(locale: Locale) {
     }
     node = textNodes.nextNode();
   }
-  for (const element of document.body.querySelectorAll<HTMLElement>("[placeholder], [aria-label], [title]")) {
+  for (const element of document.body.querySelectorAll<HTMLElement>(
+    "[placeholder], [aria-label], [title]",
+  )) {
     for (const attribute of ["placeholder", "aria-label", "title"] as const) {
       const current = element.getAttribute(attribute);
       if (!current) continue;

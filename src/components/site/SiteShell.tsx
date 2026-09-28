@@ -21,7 +21,6 @@ const nav = [
   { to: "/help", label: "Help" },
 ] as const;
 
-
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useSessionUser();
@@ -171,25 +170,26 @@ export function SiteFooter() {
         <FooterCol
           title={text("Platform")}
           links={[
-             { to: "/how-it-works", label: text("How it works") },
-             { to: "/services", label: text("Services") },
-             { to: "/pricing", label: text("Fee calculator") },
-             { to: "/roles", label: text("Roles & access") },
-             { to: "/help", label: text("Help centre") },
+            { to: "/how-it-works", label: text("How it works") },
+            { to: "/services", label: text("Services") },
+            { to: "/pricing", label: text("Fee calculator") },
+            { to: "/roles", label: text("Roles & access") },
+            { to: "/help", label: text("Help centre") },
           ]}
         />
         <FooterCol
           title={text("Legal")}
           links={[
-             { to: "/terms", label: text("Terms of service") },
-             { to: "/privacy", label: text("Privacy policy") },
-             { to: "/dispute-policy", label: text("Disputes & refunds") },
+            { to: "/terms", label: text("Terms of service") },
+            { to: "/privacy", label: text("Privacy policy") },
+            { to: "/dispute-policy", label: text("Disputes & refunds") },
           ]}
         />
-
       </div>
       <div className="border-t border-border px-4 py-5 text-center text-xs text-muted-foreground">
-        {text("Demo experience — all balances and payment details are sample data. No real funds are moved.")}
+        {text(
+          "Demo experience — all balances and payment details are sample data. No real funds are moved.",
+        )}
       </div>
     </footer>
   );

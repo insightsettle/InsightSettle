@@ -31,7 +31,6 @@ const tabs = [
   { to: "/console/disputes", label: "Disputes", exact: false, icon: AlertTriangle },
 ] as const;
 
-
 export function ConsoleShell({
   children,
   title,
