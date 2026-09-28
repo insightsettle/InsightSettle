@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import {
   AlertCircle,
   Banknote,
@@ -48,6 +49,10 @@ function Dashboard() {
   const { locale } = useLocale();
   const { user } = useSessionUser();
   const { isStaff } = useStaffAccess();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isStaff) navigate({ to: "/console", replace: true });
+  }, [isStaff, navigate]);
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
   const uid = user?.id;
   const sum = (xs: typeof myDeals) => xs.reduce((a, d) => a + Number(d.amount ?? 0), 0);

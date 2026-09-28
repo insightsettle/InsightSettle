@@ -70,14 +70,6 @@ export function ConsoleShell({
             <NotificationBell />
             <LanguageToggle className="border-background/25 bg-transparent text-background hover:bg-background/10 hover:text-background" />
             <Button
-              asChild
-              size="sm"
-              variant="outline"
-              className="border-background/25 bg-transparent text-background hover:bg-background/10 hover:text-background"
-            >
-              <Link to="/dashboard">{text("Customer view")}</Link>
-            </Button>
-            <Button
               size="sm"
               variant="ghost"
               className="text-background/80 hover:bg-background/10 hover:text-background"
