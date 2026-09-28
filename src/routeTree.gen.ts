@@ -38,6 +38,7 @@ import { Route as ConsoleUsersRouteImport } from './routes/console.users'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as AuthenticatedInvoiceRefRouteImport } from './routes/_authenticated/invoice.$ref'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
 
@@ -188,6 +189,11 @@ const AuthenticatedInviteTokenRoute =
     path: '/invite/$token',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedInvoiceRefRoute = AuthenticatedInvoiceRefRouteImport.update({
+  id: '/invoice/$ref',
+  path: '/invoice/$ref',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ConsoleDealsIndexRoute = ConsoleDealsIndexRouteImport.update({
   id: '/deals/',
   path: '/deals/',
@@ -228,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
 }
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals': typeof ConsoleDealsIndexRoute
 }
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/_authenticated/deals/new': typeof AuthenticatedDealsNewRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/_authenticated/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
 }
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
+    | '/invoice/$ref'
     | '/console/deals/$dealId'
     | '/console/deals/'
   fileRoutesByTo: FileRoutesByTo
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
+    | '/invoice/$ref'
     | '/console/deals/$dealId'
     | '/console/deals'
   id:
@@ -391,6 +402,7 @@ export interface FileRouteTypes {
     | '/_authenticated/deals/$dealId'
     | '/_authenticated/deals/new'
     | '/_authenticated/invite/$token'
+    | '/_authenticated/invoice/$ref'
     | '/console/deals/$dealId'
     | '/console/deals/'
   fileRoutesById: FileRoutesById
@@ -618,6 +630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/invoice/$ref': {
+      id: '/_authenticated/invoice/$ref'
+      path: '/invoice/$ref'
+      fullPath: '/invoice/$ref'
+      preLoaderRoute: typeof AuthenticatedInvoiceRefRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/console/deals/': {
       id: '/console/deals/'
       path: '/deals'
@@ -643,6 +662,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
   AuthenticatedDealsNewRoute: typeof AuthenticatedDealsNewRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
+  AuthenticatedInvoiceRefRoute: typeof AuthenticatedInvoiceRefRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -653,6 +673,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
   AuthenticatedDealsNewRoute: AuthenticatedDealsNewRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
+  AuthenticatedInvoiceRefRoute: AuthenticatedInvoiceRefRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
