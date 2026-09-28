@@ -1,3 +1,4 @@
+import { StaffDealActions } from "@/components/site/StaffOps";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -145,6 +146,10 @@ function StaffDealPage() {
           </p>
         </div>
         <StatusBadge status={deal.status as DealStatus} className="px-4 py-2" />
+      </div>
+
+      <div className="mt-5">
+        <StaffDealActions dealId={deal.id} frozen={!!deal.frozen} />
       </div>
 
       <div className="mt-7 grid gap-5 lg:grid-cols-[1.3fr_.9fr]">

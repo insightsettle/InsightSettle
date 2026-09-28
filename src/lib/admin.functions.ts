@@ -30,6 +30,7 @@ export type PlatformUser = {
   fullName: string | null;
   phone: string | null;
   verificationStatus: string;
+  accountState?: string;
   createdAt: string;
   lastSignInAt: string | null;
   isStaff: boolean;
@@ -59,6 +60,7 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
         fullName: profile?.full_name ?? (u.user_metadata?.["full_name"] as string) ?? null,
         phone: profile?.phone ?? null,
         verificationStatus: profile?.verification_status ?? "pending",
+        accountState: (profile as { account_state?: string } | undefined)?.account_state ?? "active",
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at ?? null,
         isStaff: (roles ?? []).some((r) => r.user_id === u.id && r.role === "admin"),
@@ -129,6 +131,7 @@ export type AdminDeal = {
   feeOverrideFlat: number | null;
   feeOverrideNote: string | null;
   disputedReason: string | null;
+  frozen?: boolean;
 };
 
 type Directory = Map<string, { name: string | null; email: string | null }>;
@@ -170,6 +173,7 @@ function mapDeal(row: any, dir: Directory): AdminDeal {
     feeOverrideFlat: row.fee_override_flat === null ? null : Number(row.fee_override_flat),
     feeOverrideNote: row.fee_override_note ?? null,
     disputedReason: row.disputed_reason ?? null,
+    frozen: !!row.frozen,
   };
 }
 

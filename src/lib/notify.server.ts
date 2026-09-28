@@ -3,7 +3,7 @@ type AdminClient = {
 };
 
 export type NotifyInput = {
-  dealId: string;
+  dealId?: string | null;
   dealRef?: string | null;
   title: string;
   body?: string | null;
@@ -27,7 +27,7 @@ export async function notifyUsers(admin: AdminClient, input: NotifyInput) {
   if (unique.length === 0) return { delivered: 0 };
   const rows = unique.map((userId) => ({
     user_id: userId,
-    deal_id: input.dealId,
+    deal_id: input.dealId ?? null,
     kind: input.kind ?? "deal",
     title: input.title,
     body: input.body ?? null,

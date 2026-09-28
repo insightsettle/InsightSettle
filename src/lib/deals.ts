@@ -32,7 +32,32 @@ export type DealRow = {
   shipping_tracking: string | null;
   shipping_status: string | null;
   refunded_amount: number;
+  quantity: number;
+  unit_price: number | null;
+  supplier_country: string | null;
+  delivery_country: string | null;
+  shipping_responsibility: string;
+  acceptance_criteria: string | null;
+  refund_conditions: string | null;
+  cancellation_conditions: string | null;
+  shipped_at: string | null;
+  estimated_delivery_at: string | null;
+  auto_release_enabled: boolean;
+  frozen: boolean;
+  frozen_reason: string | null;
+  terms_version: number;
+  cancelled_at: string | null;
 };
+
+export const gccCountries = [
+  { code: "SA", name: "Saudi Arabia" },
+  { code: "AE", name: "United Arab Emirates" },
+  { code: "BH", name: "Bahrain" },
+  { code: "QA", name: "Qatar" },
+  { code: "KW", name: "Kuwait" },
+  { code: "OM", name: "Oman" },
+  { code: "OTHER", name: "Other country" },
+] as const;
 
 export const feePayerLabels: Record<string, string> = {
   buyer: "Buyer pays the fee",
@@ -45,6 +70,7 @@ export const shippingStatusLabels: Record<string, string> = {
   preparing: "Preparing the shipment",
   shipped: "Shipped",
   in_transit: "In transit",
+  out_for_delivery: "Out for delivery",
   delivered: "Delivered to the buyer",
 };
 
@@ -82,6 +108,15 @@ export async function createDeal(input: {
   feePayer: FeePayer;
   inspectionDays: number;
   shippingRequired: boolean;
+  quantity?: number;
+  unitPrice?: number | null;
+  supplierCountry?: string | null;
+  deliveryCountry?: string | null;
+  shippingResponsibility?: "seller" | "buyer" | "none";
+  acceptanceCriteria?: string;
+  refundConditions?: string;
+  cancellationConditions?: string;
+  autoRelease?: boolean;
 }) {
   const { data: auth } = await supabase.auth.getUser();
   const uid = auth.user?.id;
@@ -103,7 +138,16 @@ export async function createDeal(input: {
       inspection_days: input.inspectionDays,
       shipping_status: input.shippingRequired ? "preparing" : "not_required",
       terms_status: "pending",
-    })
+      quantity: input.quantity ?? 1,
+      unit_price: input.unitPrice ?? null,
+      supplier_country: input.supplierCountry || null,
+      delivery_country: input.deliveryCountry || null,
+      shipping_responsibility: input.shippingResponsibility ?? "seller",
+      acceptance_criteria: input.acceptanceCriteria || null,
+      refund_conditions: input.refundConditions || null,
+      cancellation_conditions: input.cancellationConditions || null,
+      auto_release_enabled: input.autoRelease ?? true,
+    } as any)
     .select("*")
     .single();
   if (error) throw error;
@@ -115,7 +159,32 @@ export async function createDeal(input: {
     note: `Fee: ${input.feePayer} · inspection period: ${input.inspectionDays} day(s)`,
   });
 
-  return data as DealRow;
+  await supabase.from("deal_term_versions").insert({
+    deal_id: data.id,
+    version: 1,
+    snapshot: termsSnapshot(data as unknown as DealRow),
+    note: "Initial terms",
+    created_by: uid,
+  });
+
+  return data as unknown as DealRow;
+}
+
+export function termsSnapshot(d: DealRow) {
+  return {
+    title: d.title,
+    amount: Number(d.amount),
+    currency: d.currency,
+    quantity: Number(d.quantity ?? 1),
+    unit_price: d.unit_price,
+    due_at: d.due_at,
+    inspection_days: d.inspection_days,
+    fee_payer: d.fee_payer,
+    shipping_responsibility: d.shipping_responsibility,
+    acceptance_criteria: d.acceptance_criteria,
+    refund_conditions: d.refund_conditions,
+    cancellation_conditions: d.cancellation_conditions,
+  };
 }
 
 export async function listDealEvents(dealId: string) {

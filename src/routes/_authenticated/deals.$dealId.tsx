@@ -1,4 +1,12 @@
 import { requestFxQuote, type FxQuote } from "@/lib/fx-quotes.functions";
+import {
+  AttachmentsCard,
+  CancelPanel,
+  DisputePanel,
+  FrozenBanner,
+  InvoiceCard,
+  TermVersionsCard,
+} from "@/components/site/DealExtras";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -109,6 +117,7 @@ function DealPage() {
   const [carrier, setCarrier] = useState("");
   const [tracking, setTracking] = useState("");
   const [shippingState, setShippingState] = useState("shipped");
+  const [shipEta, setShipEta] = useState("");
   const [ratingScore, setRatingScore] = useState("5");
   const [ratingComment, setRatingComment] = useState("");
   const [paymentNotice, setPaymentNotice] = useState<PaymentResult | null>(null);
@@ -457,55 +466,15 @@ function DealPage() {
                   </div>
                 )}
 
-                {status !== "released" && status !== "refunded" && status !== "disputed" && (
-                  <div className="mt-4 rounded-md border border-warning/40 bg-warning/5 p-4">
-                    <div className="flex items-center gap-2">
-                      <Scale className="size-4 text-warning" />
-                      <p className="text-sm font-semibold">Request arbitration</p>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Insight reviews the case first; unresolved cases move to an external
-                      arbitrator whose fee is charged per the platform policy.
-                    </p>
-                    <Textarea
-                      value={disputeReason}
-                      onChange={(e) => setDisputeReason(e.target.value)}
-                      rows={3}
-                      className="mt-2"
-                      placeholder="Explain the problem in detail"
-                    />
-                    <Button
-                      variant="outline"
-                      className="mt-3"
-                      disabled={disputeReason.trim().length < 10}
-                      onClick={() =>
-                        action.mutate(() => openDispute(deal.id, disputeReason.trim()))
-                      }
-                    >
-                      Open a dispute
-                    </Button>
-                  </div>
-                )}
-
-                {status === "disputed" && (
-                  <div className="mt-4 flex gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-4">
-                    <AlertCircle className="size-5 text-destructive" />
-                    <div>
-                      <p className="text-sm font-semibold">This deal is under dispute</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {deal.disputed_reason ?? "Insight is reviewing the case."}
-                      </p>
-                      <Link
-                        to="/disputes"
-                        className="mt-2 inline-block text-sm text-primary hover:underline"
-                      >
-                        Open the dispute center
-                      </Link>
-                    </div>
-                  </div>
-                )}
+                <DisputePanel deal={deal} isParty={isBuyer || isSeller} />
               </CardContent>
             </Card>
+
+            <FrozenBanner deal={deal} />
+            <CancelPanel deal={deal} isParty={isBuyer || isSeller} />
+            <AttachmentsCard deal={deal} isParty={isBuyer || isSeller} />
+            <TermVersionsCard deal={deal} />
+            <InvoiceCard deal={deal} />
 
             {shippingNeeded && (
               <Card>
@@ -527,6 +496,14 @@ function DealPage() {
                     <p>
                       <span className="text-muted-foreground">Tracking: </span>
                       <bdi dir="ltr">{deal.shipping_tracking || "—"}</bdi>
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Shipped: </span>
+                      {deal.shipped_at ? formatDate(deal.shipped_at) : "—"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Estimated delivery: </span>
+                      {deal.estimated_delivery_at ? formatDate(deal.estimated_delivery_at) : "—"}
                     </p>
                   </div>
                   {isSeller && status !== "released" && status !== "refunded" && (
@@ -554,6 +531,13 @@ function DealPage() {
                             </option>
                           ))}
                       </select>
+                      <Input
+                        type="date"
+                        value={shipEta}
+                        onChange={(e) => setShipEta(e.target.value)}
+                        aria-label="Estimated delivery"
+                        className="sm:col-span-3"
+                      />
                       <Button
                         className="sm:col-span-3"
                         variant="outline"
@@ -563,6 +547,7 @@ function DealPage() {
                               carrier: carrier.trim(),
                               tracking: tracking.trim(),
                               status: shippingState,
+                              eta: shipEta || null,
                             }),
                           )
                         }
@@ -770,6 +755,10 @@ function DealPage() {
                   <Info label="Buyer pays" value={formatSAR(sides.buyerPays)} />
                   <Info label="Seller receives" value={formatSAR(sides.sellerReceives)} />
                   <Info label="Inspection period" value={`${deal.inspection_days} day(s)`} />
+                <Info label="Quantity" value={String(deal.quantity ?? 1)} />
+                <Info label="Auto-release" value={deal.auto_release_enabled ? "On" : "Off — buyer must accept"} />
+                {deal.acceptance_criteria && <Info label="Acceptance criteria" value={deal.acceptance_criteria} />}
+                {deal.refund_conditions && <Info label="Refund conditions" value={deal.refund_conditions} />}
                   <Info label="Created" value={formatDate(deal.created_at)} />
                   <Info label="Due" value={deal.due_at ? formatDate(deal.due_at) : "No due date"} />
                 </dl>

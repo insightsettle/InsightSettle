@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listPlatformUsers, setStaffRole, setVerificationStatus } from "@/lib/admin.functions";
 import { formatDate, formatSAR } from "@/lib/demo-data";
+import { AccountStateControl } from "@/components/site/StaffOps";
 
 export const Route = createFileRoute("/console/users")({
   component: ConsoleUsers,
@@ -129,6 +130,9 @@ function ConsoleUsers() {
                   >
                     {u.isStaff ? "Remove team access" : "Grant team access"}
                   </Button>
+                </div>
+                <div className="lg:col-span-3">
+                  <AccountStateControl userId={u.id} state={(u as { accountState?: string }).accountState} />
                 </div>
               </CardContent>
             </Card>

@@ -1,3 +1,4 @@
+import { LiveDisputes } from "@/components/site/StaffOps";
 import { createFileRoute } from "@tanstack/react-router";
 import { Gavel, LoaderCircle, RotateCcw, Sparkles, Timer } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
@@ -111,6 +112,7 @@ function DisputeOpsPage() {
 
   return (
     <div className="mt-8 space-y-6">
+      <LiveDisputes />
       <Card>
         <CardContent className="p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">

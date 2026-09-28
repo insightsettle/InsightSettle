@@ -12,13 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as DisputePolicyRouteImport } from './routes/dispute-policy'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as ForBuyersRouteImport } from './routes/for-buyers'
+import { Route as ForSuppliersRouteImport } from './routes/for-suppliers'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RolesRouteImport } from './routes/roles'
+import { Route as SecurityRouteImport } from './routes/security'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -38,6 +43,7 @@ import { Route as ConsoleUsersRouteImport } from './routes/console.users'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as AuthenticatedInvoiceRefRouteImport } from './routes/_authenticated/invoice.$ref'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
 
@@ -55,6 +61,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessRoute = BusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/console',
   path: '/console',
@@ -63,6 +74,21 @@ const ConsoleRoute = ConsoleRouteImport.update({
 const DisputePolicyRoute = DisputePolicyRouteImport.update({
   id: '/dispute-policy',
   path: '/dispute-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForBuyersRoute = ForBuyersRouteImport.update({
+  id: '/for-buyers',
+  path: '/for-buyers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForSuppliersRoute = ForSuppliersRouteImport.update({
+  id: '/for-suppliers',
+  path: '/for-suppliers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -88,6 +114,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const RolesRoute = RolesRouteImport.update({
   id: '/roles',
   path: '/roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -188,6 +219,11 @@ const AuthenticatedInviteTokenRoute =
     path: '/invite/$token',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedInvoiceRefRoute = AuthenticatedInvoiceRefRouteImport.update({
+  id: '/invoice/$ref',
+  path: '/invoice/$ref',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ConsoleDealsIndexRoute = ConsoleDealsIndexRouteImport.update({
   id: '/deals/',
   path: '/deals/',
@@ -202,13 +238,18 @@ const ConsoleDealsDealIdRoute = ConsoleDealsDealIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
   '/dispute-policy': typeof DisputePolicyRoute
+  '/faq': typeof FaqRoute
+  '/for-buyers': typeof ForBuyersRoute
+  '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
+  '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -228,18 +269,24 @@ export interface FileRoutesByFullPath {
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRoute
   '/dispute-policy': typeof DisputePolicyRoute
+  '/faq': typeof FaqRoute
+  '/for-buyers': typeof ForBuyersRoute
+  '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
+  '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -259,6 +306,7 @@ export interface FileRoutesByTo {
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals': typeof ConsoleDealsIndexRoute
 }
@@ -267,13 +315,18 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
   '/dispute-policy': typeof DisputePolicyRoute
+  '/faq': typeof FaqRoute
+  '/for-buyers': typeof ForBuyersRoute
+  '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
+  '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -293,6 +346,7 @@ export interface FileRoutesById {
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/_authenticated/deals/new': typeof AuthenticatedDealsNewRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/_authenticated/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
 }
@@ -301,13 +355,18 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/business'
     | '/console'
     | '/dispute-policy'
+    | '/faq'
+    | '/for-buyers'
+    | '/for-suppliers'
     | '/help'
     | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/roles'
+    | '/security'
     | '/services'
     | '/terms'
     | '/dashboard'
@@ -327,18 +386,24 @@ export interface FileRouteTypes {
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
+    | '/invoice/$ref'
     | '/console/deals/$dealId'
     | '/console/deals/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/business'
     | '/dispute-policy'
+    | '/faq'
+    | '/for-buyers'
+    | '/for-suppliers'
     | '/help'
     | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/roles'
+    | '/security'
     | '/services'
     | '/terms'
     | '/dashboard'
@@ -358,6 +423,7 @@ export interface FileRouteTypes {
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
+    | '/invoice/$ref'
     | '/console/deals/$dealId'
     | '/console/deals'
   id:
@@ -365,13 +431,18 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/business'
     | '/console'
     | '/dispute-policy'
+    | '/faq'
+    | '/for-buyers'
+    | '/for-suppliers'
     | '/help'
     | '/how-it-works'
     | '/pricing'
     | '/privacy'
     | '/roles'
+    | '/security'
     | '/services'
     | '/terms'
     | '/_authenticated/dashboard'
@@ -391,6 +462,7 @@ export interface FileRouteTypes {
     | '/_authenticated/deals/$dealId'
     | '/_authenticated/deals/new'
     | '/_authenticated/invite/$token'
+    | '/_authenticated/invoice/$ref'
     | '/console/deals/$dealId'
     | '/console/deals/'
   fileRoutesById: FileRoutesById
@@ -399,13 +471,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BusinessRoute: typeof BusinessRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
   DisputePolicyRoute: typeof DisputePolicyRoute
+  FaqRoute: typeof FaqRoute
+  ForBuyersRoute: typeof ForBuyersRoute
+  ForSuppliersRoute: typeof ForSuppliersRoute
   HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RolesRoute: typeof RolesRoute
+  SecurityRoute: typeof SecurityRoute
   ServicesRoute: typeof ServicesRoute
   TermsRoute: typeof TermsRoute
   ApiDealRiskRoute: typeof ApiDealRiskRoute
@@ -436,6 +513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business': {
+      id: '/business'
+      path: '/business'
+      fullPath: '/business'
+      preLoaderRoute: typeof BusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/console': {
       id: '/console'
       path: '/console'
@@ -448,6 +532,27 @@ declare module '@tanstack/react-router' {
       path: '/dispute-policy'
       fullPath: '/dispute-policy'
       preLoaderRoute: typeof DisputePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-buyers': {
+      id: '/for-buyers'
+      path: '/for-buyers'
+      fullPath: '/for-buyers'
+      preLoaderRoute: typeof ForBuyersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-suppliers': {
+      id: '/for-suppliers'
+      path: '/for-suppliers'
+      fullPath: '/for-suppliers'
+      preLoaderRoute: typeof ForSuppliersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -483,6 +588,13 @@ declare module '@tanstack/react-router' {
       path: '/roles'
       fullPath: '/roles'
       preLoaderRoute: typeof RolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -618,6 +730,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/invoice/$ref': {
+      id: '/_authenticated/invoice/$ref'
+      path: '/invoice/$ref'
+      fullPath: '/invoice/$ref'
+      preLoaderRoute: typeof AuthenticatedInvoiceRefRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/console/deals/': {
       id: '/console/deals/'
       path: '/deals'
@@ -643,6 +762,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
   AuthenticatedDealsNewRoute: typeof AuthenticatedDealsNewRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
+  AuthenticatedInvoiceRefRoute: typeof AuthenticatedInvoiceRefRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -653,6 +773,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
   AuthenticatedDealsNewRoute: AuthenticatedDealsNewRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
+  AuthenticatedInvoiceRefRoute: AuthenticatedInvoiceRefRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -689,13 +810,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  BusinessRoute: BusinessRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
   DisputePolicyRoute: DisputePolicyRoute,
+  FaqRoute: FaqRoute,
+  ForBuyersRoute: ForBuyersRoute,
+  ForSuppliersRoute: ForSuppliersRoute,
   HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RolesRoute: RolesRoute,
+  SecurityRoute: SecurityRoute,
   ServicesRoute: ServicesRoute,
   TermsRoute: TermsRoute,
   ApiDealRiskRoute: ApiDealRiskRoute,
