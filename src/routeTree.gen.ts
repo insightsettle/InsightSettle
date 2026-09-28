@@ -34,10 +34,12 @@ import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
+import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
 import { Route as ConsoleKycRouteImport } from './routes/console.kyc'
 import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
+import { Route as ConsoleReportsRouteImport } from './routes/console.reports'
 import { Route as ConsoleRiskRouteImport } from './routes/console.risk'
 import { Route as ConsoleUsersRouteImport } from './routes/console.users'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
@@ -172,6 +174,11 @@ const ConsoleIndexRoute = ConsoleIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleAuditRoute = ConsoleAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleDisputesRoute = ConsoleDisputesRouteImport.update({
   id: '/disputes',
   path: '/disputes',
@@ -190,6 +197,11 @@ const ConsoleKycRoute = ConsoleKycRouteImport.update({
 const ConsoleRatesRoute = ConsoleRatesRouteImport.update({
   id: '/rates',
   path: '/rates',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleReportsRoute = ConsoleReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => ConsoleRoute,
 } as any)
 const ConsoleRiskRoute = ConsoleRiskRouteImport.update({
@@ -259,10 +271,12 @@ export interface FileRoutesByFullPath {
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
+  '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
@@ -296,10 +310,12 @@ export interface FileRoutesByTo {
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
+  '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console': typeof ConsoleIndexRoute
@@ -336,10 +352,12 @@ export interface FileRoutesById {
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
+  '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
+  '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
@@ -376,10 +394,12 @@ export interface FileRouteTypes {
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
+    | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
     | '/console/kyc'
     | '/console/rates'
+    | '/console/reports'
     | '/console/risk'
     | '/console/users'
     | '/console/'
@@ -413,10 +433,12 @@ export interface FileRouteTypes {
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
+    | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
     | '/console/kyc'
     | '/console/rates'
+    | '/console/reports'
     | '/console/risk'
     | '/console/users'
     | '/console'
@@ -452,10 +474,12 @@ export interface FileRouteTypes {
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
+    | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
     | '/console/kyc'
     | '/console/rates'
+    | '/console/reports'
     | '/console/risk'
     | '/console/users'
     | '/console/'
@@ -667,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleIndexRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/audit': {
+      id: '/console/audit'
+      path: '/audit'
+      fullPath: '/console/audit'
+      preLoaderRoute: typeof ConsoleAuditRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/console/disputes': {
       id: '/console/disputes'
       path: '/disputes'
@@ -693,6 +724,13 @@ declare module '@tanstack/react-router' {
       path: '/rates'
       fullPath: '/console/rates'
       preLoaderRoute: typeof ConsoleRatesRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/reports': {
+      id: '/console/reports'
+      path: '/reports'
+      fullPath: '/console/reports'
+      preLoaderRoute: typeof ConsoleReportsRouteImport
       parentRoute: typeof ConsoleRoute
     }
     '/console/risk': {
@@ -780,10 +818,12 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ConsoleRouteChildren {
+  ConsoleAuditRoute: typeof ConsoleAuditRoute
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
   ConsoleFeesRoute: typeof ConsoleFeesRoute
   ConsoleKycRoute: typeof ConsoleKycRoute
   ConsoleRatesRoute: typeof ConsoleRatesRoute
+  ConsoleReportsRoute: typeof ConsoleReportsRoute
   ConsoleRiskRoute: typeof ConsoleRiskRoute
   ConsoleUsersRoute: typeof ConsoleUsersRoute
   ConsoleIndexRoute: typeof ConsoleIndexRoute
@@ -792,10 +832,12 @@ interface ConsoleRouteChildren {
 }
 
 const ConsoleRouteChildren: ConsoleRouteChildren = {
+  ConsoleAuditRoute: ConsoleAuditRoute,
   ConsoleDisputesRoute: ConsoleDisputesRoute,
   ConsoleFeesRoute: ConsoleFeesRoute,
   ConsoleKycRoute: ConsoleKycRoute,
   ConsoleRatesRoute: ConsoleRatesRoute,
+  ConsoleReportsRoute: ConsoleReportsRoute,
   ConsoleRiskRoute: ConsoleRiskRoute,
   ConsoleUsersRoute: ConsoleUsersRoute,
   ConsoleIndexRoute: ConsoleIndexRoute,
