@@ -28,8 +28,8 @@ export function FxCustomerQuote() {
   const [supplier, setSupplier] = useState("AED");
   const [buyer, setBuyer] = useState("SAR");
 
-  const s = list.find((c) => c.code === supplier) ?? list[0];
-  const b = list.find((c) => c.code === buyer) ?? list[0];
+  const s = list.find((c) => c.code === supplier) ?? list[0]!;
+  const b = list.find((c) => c.code === buyer) ?? list[0]!;
   const same = s.code === b.code;
   // SAR per 1 unit, margin applied once on the conversion
   const margin = same ? 0 : Math.max(s.spread, b.spread);
