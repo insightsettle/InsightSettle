@@ -49,11 +49,22 @@ function Dashboard() {
   const { user } = useSessionUser();
   const { isStaff } = useStaffAccess();
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
+  const uid = user?.id;
+  const sum = (xs: typeof myDeals) => xs.reduce((a, d) => a + Number(d.amount ?? 0), 0);
+  const heldStates = ["held", "delivered", "under_review", "disputed"];
+  const asBuyer = myDeals.filter((d) => d.buyer_id === uid);
+  const asSeller = myDeals.filter((d) => d.seller_id === uid);
   const stats = [
-    { label: "Available balance", value: formatSAR(dashboardStats.available), icon: Wallet },
-    { label: "Funds held", value: formatSAR(dashboardStats.held), icon: ShieldCheck },
-    { label: "Active deals", value: String(dashboardStats.activeDeals), icon: BriefcaseBusiness },
-    { label: "Open disputes", value: String(dashboardStats.openDisputes), icon: AlertCircle },
+    { label: "Funds held", value: formatSAR(sum(myDeals.filter((d) => heldStates.includes(d.status)))), icon: ShieldCheck },
+    { label: "Awaiting settlement", value: formatSAR(sum(asSeller.filter((d) => ["delivered", "under_review"].includes(d.status)))), icon: Wallet },
+    { label: "Active deals", value: String(myDeals.filter((d) => !["released", "refunded", "partially_refunded", "cancelled", "rejected"].includes(d.status)).length), icon: BriefcaseBusiness },
+    { label: "Open disputes", value: String(myDeals.filter((d) => d.status === "disputed").length), icon: AlertCircle },
+  ];
+  const buckets = [
+    { label: "Awaiting my payment", n: asBuyer.filter((d) => d.status === "pending_funding").length },
+    { label: "Awaiting my inspection", n: asBuyer.filter((d) => d.status === "delivered").length },
+    { label: "Ready to ship", n: asSeller.filter((d) => d.status === "held" && !d.shipping_tracking).length },
+    { label: "Awaiting terms response", n: myDeals.filter((d) => d.terms_status === "proposed" && d.created_by !== uid).length },
   ];
   const firstName = (user?.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0];
   return (
@@ -98,6 +109,15 @@ function Dashboard() {
         )}
 
         <VerificationCard />
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-4">
+          {buckets.map((b) => (
+            <div key={b.label} className="rounded-xl border border-border p-4">
+              <p className="text-xs text-muted-foreground">{b.label}</p>
+              <p className="mt-1 text-2xl font-extrabold">{b.n}</p>
+            </div>
+          ))}
+        </div>
 
         <section className="mt-8">
           <h2 className="text-xl font-bold">Your saved deals</h2>
