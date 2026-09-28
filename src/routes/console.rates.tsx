@@ -23,7 +23,7 @@ const fmtRate = (n: number) => n.toLocaleString("en-GB", { maximumFractionDigits
 const today = () => new Date().toISOString().slice(0, 10);
 
 function RatesPage() {
-  const { settings, update, reset } = usePlatformSettings();
+  const { settings, update, save, discard, dirty } = usePlatformSettings();
   const [sample, setSample] = useState(10000);
   const [draft, setDraft] = useState({ code: "", name: "", baseRate: "", spread: "1.05" });
 
@@ -66,13 +66,11 @@ function RatesPage() {
                 margin you set here — customers never see the margin.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={markAllUpdated}>
                 <RefreshCw className="size-4" /> Mark all updated today
               </Button>
-              <Button variant="ghost" size="sm" onClick={reset}>
-                <RotateCcw className="size-4" /> Reset
-              </Button>
+              <SaveBar dirty={dirty} save={save} discard={discard} />
             </div>
           </div>
 
