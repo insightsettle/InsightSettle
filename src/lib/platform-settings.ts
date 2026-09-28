@@ -179,22 +179,27 @@ async function load() {
 async function persist(prev: PlatformSettings, next: PlatformSettings) {
   const { supabase } = await import("@/integrations/supabase/client");
   const db = supabase as any;
+  const check = (r: { error: { message: string } | null }) => {
+    if (r?.error) throw new Error(r.error.message);
+  };
   if (next.rates !== prev.rates) {
     const removed = prev.rates.filter((p) => !next.rates.some((n) => n.code === p.code));
-    if (removed.length) await db.from("fx_rates").delete().in("code", removed.map((r) => r.code));
-    await db.from("fx_rates").upsert(
-      next.rates.map((r) => ({ code: r.code, name: r.name, provider_rate: r.baseRate, spread: r.spread })),
+    if (removed.length) check(await db.from("fx_rates").delete().in("code", removed.map((r) => r.code)));
+    check(
+      await db.from("fx_rates").upsert(
+        next.rates.map((r) => ({ code: r.code, name: r.name, provider_rate: r.baseRate, spread: r.spread })),
+      ),
     );
   }
   if (next.fees !== prev.fees) {
     const keep = next.fees.map((f) => f.id);
     const removed = prev.fees.filter((p) => !keep.includes(p.id) && p.id.length === 36);
-    if (removed.length) await db.from("fee_rules").delete().in("id", removed.map((r) => r.id));
+    if (removed.length) check(await db.from("fee_rules").delete().in("id", removed.map((r) => r.id)));
     const rows = next.fees.map(fromRule);
     const existing = rows.filter((r: any) => r.id);
     const fresh = rows.filter((r: any) => !r.id);
-    if (existing.length) await db.from("fee_rules").upsert(existing);
-    if (fresh.length) await db.from("fee_rules").insert(fresh);
+    if (existing.length) check(await db.from("fee_rules").upsert(existing));
+    if (fresh.length) check(await db.from("fee_rules").insert(fresh));
     await load();
   }
 }
