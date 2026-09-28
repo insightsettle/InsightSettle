@@ -16,7 +16,8 @@ import { useLocale } from "@/lib/locale";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/how-it-works", label: "How it works" },
-  { to: "/services", label: "Services" },
+  { to: "/for-buyers", label: "For buyers" },
+  { to: "/for-suppliers", label: "For suppliers" },
   { to: "/pricing", label: "Pricing" },
   { to: "/help", label: "Help" },
 ] as const;
@@ -175,6 +176,9 @@ export function SiteFooter() {
             { to: "/pricing", label: text("Fee calculator") },
             { to: "/roles", label: text("Roles & access") },
             { to: "/help", label: text("Help centre") },
+            { to: "/business", label: text("Business") },
+            { to: "/security", label: text("Security") },
+            { to: "/faq", label: text("FAQ") },
           ]}
         />
         <FooterCol
