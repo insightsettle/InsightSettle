@@ -448,3 +448,62 @@ export const getPlatformSummary = createServerFn({ method: "GET" })
       disputed: (deals ?? []).filter((d) => d.status === "disputed").length,
     };
   });
+
+async function emailMap(db: any) {
+  const { data } = await db.auth.admin.listUsers({ perPage: 1000 });
+  const map: Record<string, string> = {};
+  for (const u of data?.users ?? []) map[u.id] = u.email ?? u.id;
+  return map;
+}
+
+export const listAuditLog = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const db = await assertStaff(context);
+    const { data, error } = await db
+      .from("audit_logs")
+      .select("id,user_id,action,entity,entity_id,old_value,new_value,created_at")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw error;
+    const emails = await emailMap(db);
+    return (data ?? []).map((r: any) => ({
+      id: r.id as string,
+      actor: r.user_id ? (emails[r.user_id] ?? r.user_id) : "System",
+      action: r.action as string,
+      entity: r.entity as string,
+      entityId: (r.entity_id as string | null) ?? "",
+      change: JSON.stringify(r.new_value ?? r.old_value ?? {}),
+      createdAt: r.created_at as string,
+    }));
+  });
+
+export const getReportData = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const db = await assertStaff(context);
+    const [{ data: deals, error: e1 }, { data: tx, error: e2 }] = await Promise.all([
+      db.from("deals").select("ref,title,amount,currency,status,buyer_id,seller_id,created_at,released_at").order("created_at", { ascending: false }),
+      db.from("deal_transactions").select("kind,amount,fee,currency,status,created_at"),
+    ]);
+    if (e1) throw e1;
+    if (e2) throw e2;
+    const emails = await emailMap(db);
+    const months: Record<string, { month: string; volume: number; fees: number; count: number }> = {};
+    for (const t of tx ?? []) {
+      if (t.status !== "succeeded") continue;
+      const m = String(t.created_at).slice(0, 7);
+      months[m] ??= { month: m, volume: 0, fees: 0, count: 0 };
+      if (t.kind === "payment") months[m].volume += Number(t.amount);
+      months[m].fees += Number(t.fee);
+      months[m].count += 1;
+    }
+    return {
+      deals: (deals ?? []).map((d: any) => ({
+        ref: d.ref, title: d.title, amount: Number(d.amount), currency: d.currency, status: d.status,
+        buyer: d.buyer_id ? (emails[d.buyer_id] ?? "") : "", seller: d.seller_id ? (emails[d.seller_id] ?? "") : "",
+        createdAt: d.created_at, releasedAt: d.released_at ?? "",
+      })),
+      revenue: Object.values(months).sort((a, b) => b.month.localeCompare(a.month)),
+    };
+  });
