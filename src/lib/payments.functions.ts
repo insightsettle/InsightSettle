@@ -146,6 +146,32 @@ export const startDealFunding = createServerFn({ method: "POST" })
       quote = q;
     }
 
+    // Claim the quote atomically so one quote can never fund two payments.
+    if (quote) {
+      const { data: claimed } = await admin
+        .from("fx_quotes")
+        .update({ used_at: new Date().toISOString() })
+        .eq("id", quote.id)
+        .is("used_at", null)
+        .select("id");
+      if (!claimed?.length)
+        return {
+          ok: false,
+          status: "failed",
+          provider: provider.id,
+          providerLabel: provider.label,
+          message: "This exchange-rate quote was already used. Please request a new quote.",
+        };
+    }
+    // A new attempt number after failed/cancelled attempts; repeat clicks reuse the same key.
+    const { count: failedAttempts } = await admin
+      .from("deal_transactions")
+      .select("id", { count: "exact", head: true })
+      .eq("deal_id", deal.id)
+      .eq("kind", "funding")
+      .in("status", ["failed", "cancelled"]);
+    const attempt = String((failedAttempts ?? 0) + 1).padStart(3, "0");
+
     const status = "processing";
     const { data: tx, error } = await admin
       .from("deal_transactions")
@@ -159,7 +185,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
         provider: provider.id,
         note: provider.notice,
         created_by: context.userId,
-        idempotency_key: `${deal.ref}-PAYMENT-001`,
+        idempotency_key: `${deal.ref}-PAYMENT-${attempt}`,
         fx_quote_id: quote?.id ?? null,
       })
       .select()
@@ -175,7 +201,6 @@ export const startDealFunding = createServerFn({ method: "POST" })
         };
       throw error;
     }
-    if (quote) await admin.from("fx_quotes").update({ used_at: new Date().toISOString() }).eq("id", quote.id);
 
     await admin.from("deal_events").insert({
       deal_id: deal.id,
