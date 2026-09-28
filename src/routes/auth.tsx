@@ -42,6 +42,7 @@ function AuthPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -59,12 +60,13 @@ function AuthPage() {
     setNotice(null);
     try {
       if (mode === "signup") {
+        if (!consent) throw new Error("Please agree to the terms and privacy policy to continue.");
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin + "/dashboard",
-            data: { full_name: fullName, phone },
+            data: { full_name: fullName, phone, pdpl_consent_at: new Date().toISOString() },
           },
         });
         if (signUpError) throw signUpError;
@@ -172,6 +174,21 @@ function AuthPage() {
                 />
               </div>
 
+              {mode === "signup" && (
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-0.5 size-4"
+                  />
+                  <span>
+                    I agree to the{" "}
+                    <a href="/terms" className="text-primary hover:underline">terms of service</a> and consent to Insight processing my personal data under the{" "}
+                    <a href="/privacy" className="text-primary hover:underline">privacy policy</a> (Saudi PDPL).
+                  </span>
+                </label>
+              )}
               {error && <p className="text-sm text-destructive">{error}</p>}
               {notice && <p className="text-sm text-primary">{notice}</p>}
 
