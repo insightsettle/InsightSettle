@@ -3,6 +3,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 export type Locale = "en" | "ar";
 
 const STORAGE_KEY = "insight.locale";
+const originalText = new WeakMap<Node, string>();
+const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
   Home: "الرئيسية",
@@ -340,11 +342,10 @@ export function localizeDocument(locale: Locale) {
   let node = textNodes.nextNode();
   while (node) {
     if (node.parentElement && !["SCRIPT", "STYLE", "TEXTAREA"].includes(node.parentElement.tagName)) {
-      const original = node.parentElement.dataset["i18nOriginalText"] ?? node.textContent ?? "";
-      if (!node.parentElement.dataset["i18nOriginalText"] && original.trim()) {
-        node.parentElement.dataset["i18nOriginalText"] = original;
-      }
-      node.textContent = locale === "ar" ? translateText(original) : original;
+      const original = originalText.get(node) ?? node.textContent ?? "";
+      if (!originalText.has(node) && original.trim()) originalText.set(node, original);
+      const localized = locale === "ar" ? translateText(original) : original;
+      if (node.textContent !== localized) node.textContent = localized;
     }
     node = textNodes.nextNode();
   }
@@ -352,9 +353,10 @@ export function localizeDocument(locale: Locale) {
     for (const attribute of ["placeholder", "aria-label", "title"] as const) {
       const current = element.getAttribute(attribute);
       if (!current) continue;
-      const key = `i18n${attribute.replace(/(^|-)(\w)/g, (_, _dash, letter: string) => letter.toUpperCase())}`;
-      const original = element.dataset[key] ?? current;
-      element.dataset[key] = original;
+      const stored = originalAttributes.get(element) ?? new Map<string, string>();
+      const original = stored.get(attribute) ?? current;
+      stored.set(attribute, original);
+      originalAttributes.set(element, stored);
       element.setAttribute(attribute, locale === "ar" ? translateText(original) : original);
     }
   }
