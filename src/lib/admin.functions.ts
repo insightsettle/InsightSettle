@@ -129,6 +129,7 @@ export type AdminDeal = {
   feeOverrideFlat: number | null;
   feeOverrideNote: string | null;
   disputedReason: string | null;
+  frozen?: boolean;
 };
 
 type Directory = Map<string, { name: string | null; email: string | null }>;
@@ -170,6 +171,7 @@ function mapDeal(row: any, dir: Directory): AdminDeal {
     feeOverrideFlat: row.fee_override_flat === null ? null : Number(row.fee_override_flat),
     feeOverrideNote: row.fee_override_note ?? null,
     disputedReason: row.disputed_reason ?? null,
+    frozen: !!row.frozen,
   };
 }
 
