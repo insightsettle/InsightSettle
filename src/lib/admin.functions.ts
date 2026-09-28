@@ -30,6 +30,7 @@ export type PlatformUser = {
   fullName: string | null;
   phone: string | null;
   verificationStatus: string;
+  accountState?: string;
   createdAt: string;
   lastSignInAt: string | null;
   isStaff: boolean;
@@ -59,6 +60,7 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
         fullName: profile?.full_name ?? (u.user_metadata?.["full_name"] as string) ?? null,
         phone: profile?.phone ?? null,
         verificationStatus: profile?.verification_status ?? "pending",
+        accountState: (profile as { account_state?: string } | undefined)?.account_state ?? "active",
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at ?? null,
         isStaff: (roles ?? []).some((r) => r.user_id === u.id && r.role === "admin"),
