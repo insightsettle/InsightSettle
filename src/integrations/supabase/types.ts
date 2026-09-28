@@ -50,6 +50,80 @@ export type Database = {
         }
         Relationships: []
       }
+      business_profiles: {
+        Row: {
+          authorized_person: string | null
+          country: string
+          created_at: string
+          legal_name: string
+          registration_number: string
+          tax_number: string | null
+          updated_at: string
+          user_id: string
+          verification_status: string
+        }
+        Insert: {
+          authorized_person?: string | null
+          country: string
+          created_at?: string
+          legal_name: string
+          registration_number: string
+          tax_number?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+        }
+        Update: {
+          authorized_person?: string | null
+          country?: string
+          created_at?: string
+          legal_name?: string
+          registration_number?: string
+          tax_number?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
+      deal_attachments: {
+        Row: {
+          category: string
+          created_at: string
+          deal_id: string
+          file_name: string
+          file_path: string
+          id: string
+          uploaded_by: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          deal_id: string
+          file_name: string
+          file_path: string
+          id?: string
+          uploaded_by: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          deal_id?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_attachments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_events: {
         Row: {
           actor_id: string | null
@@ -164,6 +238,44 @@ export type Database = {
           },
         ]
       }
+      deal_term_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deal_id: string
+          id: string
+          note: string | null
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deal_id: string
+          id?: string
+          note?: string | null
+          snapshot: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string
+          id?: string
+          note?: string | null
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_term_versions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_transactions: {
         Row: {
           amount: number
@@ -248,26 +360,36 @@ export type Database = {
       }
       deals: {
         Row: {
+          acceptance_criteria: string | null
           amount: number
           auto_release_at: string | null
+          auto_release_enabled: boolean
           buyer_id: string | null
+          cancellation_conditions: string | null
+          cancelled_at: string | null
           counterparty_email: string | null
           created_at: string
           created_by: string
           currency: string
           delivered_at: string | null
+          delivery_country: string | null
           description: string
           disputed_reason: string | null
           due_at: string | null
+          estimated_delivery_at: string | null
           fee_override_by: string | null
           fee_override_flat: number | null
           fee_override_note: string | null
           fee_override_percent: number | null
           fee_payer: string
+          frozen: boolean
+          frozen_reason: string | null
           id: string
           inspection_days: number
           invite_token: string
+          quantity: number
           ref: string
+          refund_conditions: string | null
           refunded_amount: number
           released_at: string | null
           risk_checked_at: string | null
@@ -275,36 +397,51 @@ export type Database = {
           risk_score: number | null
           risk_summary: string | null
           seller_id: string | null
+          shipped_at: string | null
           shipping_carrier: string | null
+          shipping_responsibility: string
           shipping_status: string | null
           shipping_tracking: string | null
           status: string
+          supplier_country: string | null
           terms_note: string | null
           terms_status: string
+          terms_version: number
           title: string
+          unit_price: number | null
           updated_at: string
         }
         Insert: {
+          acceptance_criteria?: string | null
           amount: number
           auto_release_at?: string | null
+          auto_release_enabled?: boolean
           buyer_id?: string | null
+          cancellation_conditions?: string | null
+          cancelled_at?: string | null
           counterparty_email?: string | null
           created_at?: string
           created_by: string
           currency?: string
           delivered_at?: string | null
+          delivery_country?: string | null
           description?: string
           disputed_reason?: string | null
           due_at?: string | null
+          estimated_delivery_at?: string | null
           fee_override_by?: string | null
           fee_override_flat?: number | null
           fee_override_note?: string | null
           fee_override_percent?: number | null
           fee_payer?: string
+          frozen?: boolean
+          frozen_reason?: string | null
           id?: string
           inspection_days?: number
           invite_token?: string
+          quantity?: number
           ref?: string
+          refund_conditions?: string | null
           refunded_amount?: number
           released_at?: string | null
           risk_checked_at?: string | null
@@ -312,36 +449,51 @@ export type Database = {
           risk_score?: number | null
           risk_summary?: string | null
           seller_id?: string | null
+          shipped_at?: string | null
           shipping_carrier?: string | null
+          shipping_responsibility?: string
           shipping_status?: string | null
           shipping_tracking?: string | null
           status?: string
+          supplier_country?: string | null
           terms_note?: string | null
           terms_status?: string
+          terms_version?: number
           title: string
+          unit_price?: number | null
           updated_at?: string
         }
         Update: {
+          acceptance_criteria?: string | null
           amount?: number
           auto_release_at?: string | null
+          auto_release_enabled?: boolean
           buyer_id?: string | null
+          cancellation_conditions?: string | null
+          cancelled_at?: string | null
           counterparty_email?: string | null
           created_at?: string
           created_by?: string
           currency?: string
           delivered_at?: string | null
+          delivery_country?: string | null
           description?: string
           disputed_reason?: string | null
           due_at?: string | null
+          estimated_delivery_at?: string | null
           fee_override_by?: string | null
           fee_override_flat?: number | null
           fee_override_note?: string | null
           fee_override_percent?: number | null
           fee_payer?: string
+          frozen?: boolean
+          frozen_reason?: string | null
           id?: string
           inspection_days?: number
           invite_token?: string
+          quantity?: number
           ref?: string
+          refund_conditions?: string | null
           refunded_amount?: number
           released_at?: string | null
           risk_checked_at?: string | null
@@ -349,16 +501,127 @@ export type Database = {
           risk_score?: number | null
           risk_summary?: string | null
           seller_id?: string | null
+          shipped_at?: string | null
           shipping_carrier?: string | null
+          shipping_responsibility?: string
           shipping_status?: string | null
           shipping_tracking?: string | null
           status?: string
+          supplier_country?: string | null
           terms_note?: string | null
           terms_status?: string
+          terms_version?: number
           title?: string
+          unit_price?: number | null
           updated_at?: string
         }
         Relationships: []
+      }
+      dispute_evidence: {
+        Row: {
+          created_at: string
+          dispute_id: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          note: string | null
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          dispute_id: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          note?: string | null
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          dispute_id?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          note?: string | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_evidence_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          buyer_percent: number | null
+          created_at: string
+          deal_id: string
+          details: string
+          evidence_deadline: string
+          id: string
+          opened_by: string
+          outcome: string | null
+          reason: string
+          resolution_deadline: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          response_deadline: string
+          review_started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_percent?: number | null
+          created_at?: string
+          deal_id: string
+          details: string
+          evidence_deadline: string
+          id?: string
+          opened_by: string
+          outcome?: string | null
+          reason: string
+          resolution_deadline: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          response_deadline: string
+          review_started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_percent?: number | null
+          created_at?: string
+          deal_id?: string
+          details?: string
+          evidence_deadline?: string
+          id?: string
+          opened_by?: string
+          outcome?: string | null
+          reason?: string
+          resolution_deadline?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          response_deadline?: string
+          review_started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fee_rules: {
         Row: {
@@ -634,32 +897,177 @@ export type Database = {
           },
         ]
       }
+      payout_accounts: {
+        Row: {
+          account_name: string
+          bank_name: string
+          country: string
+          created_at: string
+          iban: string
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          account_name: string
+          bank_name: string
+          country: string
+          created_at?: string
+          iban: string
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          account_name?: string
+          bank_name?: string
+          country?: string
+          created_at?: string
+          iban?: string
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          account_state: string
+          account_type: string
+          address: string | null
+          country: string | null
           created_at: string
+          date_of_birth: string | null
           full_name: string | null
           id: string
+          id_number: string | null
+          id_type: string | null
+          nationality: string | null
+          pdpl_consent_at: string | null
           phone: string | null
           updated_at: string
           verification_status: string
         }
         Insert: {
+          account_state?: string
+          account_type?: string
+          address?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string | null
           id: string
+          id_number?: string | null
+          id_type?: string | null
+          nationality?: string | null
+          pdpl_consent_at?: string | null
           phone?: string | null
           updated_at?: string
           verification_status?: string
         }
         Update: {
+          account_state?: string
+          account_type?: string
+          address?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string | null
           id?: string
+          id_number?: string | null
+          id_type?: string | null
+          nationality?: string | null
+          pdpl_consent_at?: string | null
           phone?: string | null
           updated_at?: string
           verification_status?: string
         }
         Relationships: []
+      }
+      risk_flags: {
+        Row: {
+          created_at: string
+          deal_id: string | null
+          factors: Json
+          id: string
+          level: string
+          note: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          deal_id?: string | null
+          factors?: Json
+          id?: string
+          level: string
+          note?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string | null
+          factors?: Json
+          id?: string
+          level?: string
+          note?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_flags_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_invoices: {
+        Row: {
+          currency: string
+          deal_id: string
+          fee: number
+          id: string
+          invoice_number: string
+          issued_at: string
+          total: number
+          vat: number
+          vat_rate: number
+        }
+        Insert: {
+          currency?: string
+          deal_id: string
+          fee: number
+          id?: string
+          invoice_number?: string
+          issued_at?: string
+          total: number
+          vat: number
+          vat_rate: number
+        }
+        Update: {
+          currency?: string
+          deal_id?: string
+          fee?: number
+          id?: string
+          invoice_number?: string
+          issued_at?: string
+          total?: number
+          vat?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_invoices_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: true
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -694,9 +1102,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      run_auto_release: { Args: never; Returns: number }
     }
     Enums: {
-      app_role: "admin" | "staff"
+      app_role:
+        | "admin"
+        | "staff"
+        | "support"
+        | "finance"
+        | "compliance"
+        | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -824,7 +1239,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "staff"],
+      app_role: [
+        "admin",
+        "staff",
+        "support",
+        "finance",
+        "compliance",
+        "super_admin",
+      ],
     },
   },
 } as const
