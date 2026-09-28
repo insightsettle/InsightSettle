@@ -131,7 +131,8 @@ function Dashboard() {
                     </p>
                   </div>
                   <p className="font-bold sm:text-right">
-                    {deal.currency} {Number(deal.amount).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB")}
+                    {deal.currency}{" "}
+                    {Number(deal.amount).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB")}
                   </p>
                 </Link>
               ))}
