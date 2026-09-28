@@ -376,6 +376,18 @@ export const settleTransaction = createServerFn({ method: "POST" })
                 { account: "escrow_held", debit: amt, credit: 0 },
                 { account: "buyer_refund_payable", debit: 0, credit: amt },
               ];
+      if (tx.kind === "release" || tx.kind === "funding") {
+        const { data: full } = await admin.from("deals").select("id, supplier_country, fee_payer").eq("id", tx.deal_id).single();
+        const vatRates: Record<string, number> = { SA: 0.15, AE: 0.05, BH: 0.1, OM: 0.05, QA: 0, KW: 0 };
+        const vatRate = vatRates[full?.supplier_country ?? "SA"] ?? 0.15;
+        const { data: fundTx } = await admin.from("deal_transactions").select("fee").eq("deal_id", tx.deal_id).eq("kind", "funding").eq("status", "succeeded").maybeSingle();
+        const invFee = Number(fundTx?.fee ?? fee);
+        if (tx.kind === "release" && invFee > 0)
+          await admin.from("tax_invoices").upsert(
+            { deal_id: tx.deal_id, fee: invFee, vat_rate: vatRate, vat: +(invFee * vatRate).toFixed(2), total: +(invFee * (1 + vatRate)).toFixed(2), currency: "SAR" },
+            { onConflict: "deal_id", ignoreDuplicates: true },
+          );
+      }
       await admin.from("ledger_entries").insert(
         rows
           .filter((r) => r.debit !== 0 || r.credit !== 0)

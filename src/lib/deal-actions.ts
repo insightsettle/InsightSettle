@@ -120,6 +120,7 @@ export async function confirmDelivery(dealId: string, inspectionDays = 3) {
     .from("deals")
     .update({
       status: "delivered",
+      shipping_status: "delivered",
       delivered_at: now.toISOString(),
       auto_release_at: autoRelease.toISOString(),
     })
@@ -135,6 +136,92 @@ export async function confirmDelivery(dealId: string, inspectionDays = 3) {
     "The seller confirmed delivery",
     `You can review and release the funds. If you take no action the funds release automatically after ${inspectionDays} day(s).`,
   );
+}
+
+export type TermVersion = { id: string; version: number; snapshot: Record<string, unknown>; note: string | null; created_at: string };
+
+export async function listTermVersions(dealId: string) {
+  const { data, error } = await supabase.from("deal_term_versions").select("*").eq("deal_id", dealId).order("version");
+  if (error) throw error;
+  return (data ?? []) as TermVersion[];
+}
+
+export async function proposeNewTerms(
+  dealId: string,
+  changes: { amount?: number; quantity?: number; due_at?: string | null; inspection_days?: number; note: string },
+) {
+  const user = await currentUser();
+  const { data: deal, error } = await supabase.from("deals").select("*").eq("id", dealId).single();
+  if (error) throw error;
+  const next = (Number((deal as any).terms_version) || 1) + 1;
+  const patch: Record<string, unknown> = { terms_version: next, terms_status: "pending", terms_note: changes.note };
+  if (changes.amount) patch["amount"] = changes.amount;
+  if (changes.quantity) patch["quantity"] = changes.quantity;
+  if (changes.due_at !== undefined) patch["due_at"] = changes.due_at;
+  if (changes.inspection_days !== undefined) patch["inspection_days"] = changes.inspection_days;
+  const { data: updated, error: upErr } = await supabase.from("deals").update(patch as any).eq("id", dealId).select("*").single();
+  if (upErr) throw upErr;
+  const { termsSnapshot } = await import("@/lib/deals");
+  await supabase.from("deal_term_versions").insert({
+    deal_id: dealId, version: next, snapshot: termsSnapshot(updated as any) as any, note: changes.note, created_by: user.id,
+  });
+  await logEvent(dealId, `Terms version ${next} proposed`, changes.note);
+  await announce(dealId, `New terms (version ${next}) need your agreement`, changes.note);
+}
+
+export type DealAttachment = { id: string; category: string; file_path: string; file_name: string; created_at: string };
+
+export async function listAttachments(dealId: string) {
+  const { data, error } = await supabase.from("deal_attachments").select("*").eq("deal_id", dealId).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as DealAttachment[];
+}
+
+export async function uploadDealFile(dealId: string, file: File, category: string) {
+  const user = await currentUser();
+  if (file.size > 10 * 1024 * 1024) throw new Error("Each file must be 10 MB or smaller.");
+  const safe = file.name.replace(/[^\w.\-]+/g, "_").slice(0, 80);
+  const path = `${dealId}/${Date.now()}-${safe}`;
+  const up = await supabase.storage.from("deal-files").upload(path, file);
+  if (up.error) throw up.error;
+  const { error } = await supabase.from("deal_attachments").insert({ deal_id: dealId, uploaded_by: user.id, category, file_path: path, file_name: safe });
+  if (error) throw error;
+  await logEvent(dealId, `File uploaded: ${safe}`, category);
+  return path;
+}
+
+export async function dealFileUrl(path: string) {
+  const { data, error } = await supabase.storage.from("deal-files").createSignedUrl(path, 600);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+export type DisputeRow = {
+  id: string; reason: string; details: string; status: string; outcome: string | null; buyer_percent: number | null;
+  resolution_note: string | null; response_deadline: string; evidence_deadline: string; resolution_deadline: string; created_at: string;
+};
+
+export async function getOpenDispute(dealId: string) {
+  const { data } = await supabase.from("disputes").select("*").eq("deal_id", dealId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  return (data ?? null) as DisputeRow | null;
+}
+
+export async function addDisputeEvidence(dealId: string, disputeId: string, note: string, file?: File | null) {
+  const user = await currentUser();
+  let path: string | null = null;
+  let name: string | null = null;
+  if (file) {
+    path = await uploadDealFile(dealId, file, "dispute_evidence");
+    name = file.name;
+  }
+  const { error } = await supabase.from("dispute_evidence").insert({ dispute_id: disputeId, uploaded_by: user.id, note: note || null, file_path: path, file_name: name });
+  if (error) throw error;
+  await announce(dealId, "New dispute evidence was added", note || name, true);
+}
+
+export async function getTaxInvoice(dealId: string) {
+  const { data } = await supabase.from("tax_invoices").select("*").eq("deal_id", dealId).maybeSingle();
+  return data as null | { invoice_number: string; fee: number; vat_rate: number; vat: number; total: number; currency: string; issued_at: string };
 }
 
 export async function agreeToTerms(dealId: string) {
@@ -160,7 +247,7 @@ export async function requestTermsChange(dealId: string, note: string) {
 export async function rejectTerms(dealId: string, note: string) {
   const { error } = await supabase
     .from("deals")
-    .update({ terms_status: "rejected", terms_note: note })
+    .update({ terms_status: "rejected", terms_note: note, status: "rejected" })
     .eq("id", dealId);
   if (error) throw error;
   await logEvent(dealId, "Deal terms rejected", note);
@@ -169,7 +256,7 @@ export async function rejectTerms(dealId: string, note: string) {
 
 export async function updateShipping(
   dealId: string,
-  input: { carrier: string; tracking: string; status: string },
+  input: { carrier: string; tracking: string; status: string; eta?: string | null },
 ) {
   const { error } = await supabase
     .from("deals")
@@ -177,7 +264,9 @@ export async function updateShipping(
       shipping_carrier: input.carrier || null,
       shipping_tracking: input.tracking || null,
       shipping_status: input.status,
-    })
+      ...(input.eta ? { estimated_delivery_at: input.eta } : {}),
+      ...(["shipped", "in_transit", "out_for_delivery"].includes(input.status) ? { shipped_at: new Date().toISOString() } : {}),
+    } as any)
     .eq("id", dealId);
   if (error) throw error;
   await logEvent(
