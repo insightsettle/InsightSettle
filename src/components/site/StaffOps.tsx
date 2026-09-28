@@ -69,7 +69,7 @@ export function StaffDealActions({ dealId, frozen }: { dealId: string; frozen: b
 }
 
 /** Restrict / suspend / reactivate a member. */
-export function AccountStateControl({ userId, state }: { userId: string; state?: string | null }) {
+export function AccountStateControl({ userId, state }: { userId: string; state?: string | null | undefined }) {
   const qc = useQueryClient();
   const run = useServerFn(staffAction);
   const [next, setNext] = useState<"active" | "restricted" | "suspended">("restricted");
