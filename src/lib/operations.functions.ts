@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = { supabase: any; userId: string; claims?: any };
 
 async function admin() {
   const [{ supabaseAdmin }, notify] = await Promise.all([
@@ -16,6 +16,7 @@ async function admin() {
 async function requireStaff(ctx: Ctx) {
   const { data } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
   if (data !== true) throw new Error("Forbidden");
+  if (ctx.claims?.aal !== "aal2") throw new Error("Complete two-step verification to use staff actions.");
 }
 
 async function partyDeal(ctx: Ctx, dealId: string) {
