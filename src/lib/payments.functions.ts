@@ -69,9 +69,13 @@ async function serverDeps() {
 /** Buyer starts funding the escrow. The money movement is always recorded. */
 export const startDealFunding = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { dealId: string; fee?: number }) =>
+  .inputValidator((input: { dealId: string; fee?: number; quoteId?: string }) =>
     z
-      .object({ dealId: z.string().uuid(), fee: z.number().min(0).max(1_000_000).optional() })
+      .object({
+        dealId: z.string().uuid(),
+        fee: z.number().min(0).max(1_000_000).optional(),
+        quoteId: z.string().uuid().optional(),
+      })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<PaymentResult> => {
@@ -95,23 +99,83 @@ export const startDealFunding = createServerFn({ method: "POST" })
         message: `This deal is already at the “${String(deal.status).replace("_", " ")}” stage, so it cannot be funded again.`,
       };
 
-    const status = provider.connected ? "processing" : "processing";
+    // Idempotency: a second click returns the funding already in progress.
+    const { data: existing } = await admin
+      .from("deal_transactions")
+      .select("id, status")
+      .eq("deal_id", deal.id)
+      .eq("kind", "funding")
+      .in("status", ["pending", "processing", "succeeded"])
+      .limit(1)
+      .maybeSingle();
+    if (existing)
+      return {
+        ok: true,
+        status: existing.status,
+        provider: provider.id,
+        providerLabel: provider.label,
+        transactionId: existing.id,
+        message: "This funding is already recorded — no second payment was created.",
+      };
+
+    // Cross-currency deals must use a live, unexpired FX quote.
+    let quote: any = null;
+    if (deal.currency !== "SAR") {
+      if (!data.quoteId)
+        return {
+          ok: false,
+          status: "failed",
+          provider: provider.id,
+          providerLabel: provider.label,
+          message: "Please request an exchange-rate quote before paying.",
+        };
+      const { data: q } = await admin
+        .from("fx_quotes")
+        .select("*")
+        .eq("id", data.quoteId)
+        .eq("deal_id", deal.id)
+        .maybeSingle();
+      if (!q || new Date(q.expires_at).getTime() <= Date.now() || q.used_at)
+        return {
+          ok: false,
+          status: "failed",
+          provider: provider.id,
+          providerLabel: provider.label,
+          message: "Your exchange rate has expired. Please request a new quote.",
+        };
+      quote = q;
+    }
+
+    const status = "processing";
     const { data: tx, error } = await admin
       .from("deal_transactions")
       .insert({
         deal_id: deal.id,
         kind: "funding",
-        amount: Number(deal.amount),
-        fee: data.fee ?? 0,
-        currency: deal.currency,
+        amount: quote ? Number(quote.total) : Number(deal.amount),
+        fee: quote ? Number(quote.fee) : (data.fee ?? 0),
+        currency: quote ? quote.target_currency : deal.currency,
         status,
         provider: provider.id,
         note: provider.notice,
         created_by: context.userId,
+        idempotency_key: `${deal.ref}-PAYMENT-001`,
+        fx_quote_id: quote?.id ?? null,
       })
       .select()
       .maybeSingle();
-    if (error) throw error;
+    if (error) {
+      if (String(error.code) === "23505")
+        return {
+          ok: true,
+          status,
+          provider: provider.id,
+          providerLabel: provider.label,
+          message: "This funding is already recorded — no second payment was created.",
+        };
+      throw error;
+    }
+    if (quote) await admin.from("fx_quotes").update({ used_at: new Date().toISOString() }).eq("id", quote.id);
 
     await admin.from("deal_events").insert({
       deal_id: deal.id,
@@ -291,6 +355,38 @@ export const settleTransaction = createServerFn({ method: "POST" })
           ...(newStatus === "released" ? { released_at: new Date().toISOString() } : {}),
         })
         .eq("id", deal.id);
+
+      // Double-entry ledger: every settled movement balances debit = credit.
+      const amt = Number(tx.amount);
+      const fee = Number(tx.fee ?? 0);
+      const ref = data.providerRef ?? tx.id;
+      const rows =
+        tx.kind === "funding"
+          ? [
+              { account: "provider_clearing", debit: amt, credit: 0 },
+              { account: "escrow_held", debit: 0, credit: amt - fee },
+              { account: "insight_fee_revenue", debit: 0, credit: fee },
+            ]
+          : tx.kind === "release"
+            ? [
+                { account: "escrow_held", debit: amt, credit: 0 },
+                { account: "supplier_payable", debit: 0, credit: amt },
+              ]
+            : [
+                { account: "escrow_held", debit: amt, credit: 0 },
+                { account: "buyer_refund_payable", debit: 0, credit: amt },
+              ];
+      await admin.from("ledger_entries").insert(
+        rows
+          .filter((r) => r.debit !== 0 || r.credit !== 0)
+          .map((r) => ({
+            ...r,
+            deal_id: tx.deal_id,
+            transaction_id: tx.id,
+            currency: tx.currency,
+            reference: ref,
+          })),
+      );
     }
 
     const label =
