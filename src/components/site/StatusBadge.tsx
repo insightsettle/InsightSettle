@@ -12,7 +12,6 @@ const toneClass = {
 export function StatusBadge({ status, className }: { status: DealStatus; className?: string }) {
   const { locale } = useLocale();
   const arabicLabels: Record<DealStatus, string> = {
-    draft: "مسودة",
     pending_funding: "بانتظار التمويل",
     held: "الأموال محجوزة",
     delivered: "تم التسليم",
