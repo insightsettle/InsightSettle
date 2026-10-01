@@ -20,4 +20,4 @@
 - [x] Add the official Insight logo to the investor film opening and closing scenes.
 
 - [x] Add an opening fintech context explaining traditional escrow and its transformation into Insight’s digital financial infrastructure.
-- [ ] Add a varied escrow transaction journey, funds/dispute/refund explainer, and competitive-growth closing to the investor film.
+- [x] Add a varied escrow transaction journey, funds/dispute/refund explainer, and competitive-growth closing to the investor film.
