@@ -13,3 +13,5 @@
 - Real company name, VAT number and CR for tax invoices (placeholder now); ZATCA review
 - Decision on auto-release check frequency (hourly now, PRD asks 15 min — higher cost)
 - Legal review of terms/privacy and provider licensing disclosures
+
+- [x] Keep the admin MFA wall enabled; represent protected console capabilities visually in the investor film.
