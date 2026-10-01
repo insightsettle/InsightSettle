@@ -22,3 +22,4 @@
 - [x] Add an opening fintech context explaining traditional escrow and its transformation into Insight’s digital financial infrastructure.
 - [x] Add a varied escrow transaction journey, funds/dispute/refund explainer, and competitive-growth closing to the investor film.
 - [x] Replace the repeated four-step list throughout the investor film with varied diagrams and add a standalone narrated page with SAR 50,000 and USD 50,000 revenue calculations.
+- [ ] Shorten the investor film without removing content; add a five-second music-only opening and clean voice transitions.
