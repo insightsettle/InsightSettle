@@ -24,3 +24,5 @@
 - [x] Replace the repeated four-step list throughout the investor film with varied diagrams and add a standalone narrated page with SAR 50,000 and USD 50,000 revenue calculations.
 - [x] Shorten the investor film without removing content; add a five-second music-only opening and clean voice transitions.
 - [x] Add a concise investor-film slide connecting escrow, cross-border deal support, and Gulf financial compliance.
+- [x] Convert the original embedded customer screenshot from dark to light without replacing its content.
+- [x] Ensure the recolored original screenshot uses neutral white, never pink.
