@@ -15,4 +15,4 @@
 - Legal review of terms/privacy and provider licensing disclosures
 
 - [x] Keep the admin MFA wall enabled; represent protected console capabilities visually in the investor film.
-- [ ] Add a professional cover, a very short introduction, and continuous low-volume cinematic financial music to the investor film.
+- [x] Add a professional cover, a very short introduction, and continuous low-volume cinematic financial music to the investor film.
