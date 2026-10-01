@@ -17,3 +17,4 @@
 - [x] Keep the admin MFA wall enabled; represent protected console capabilities visually in the investor film.
 - [x] Add a professional cover, a very short introduction, and continuous low-volume cinematic financial music to the investor film.
 - [x] Replace the distracting score with a smooth low-frequency ambient bed without bird-like or sharp sounds.
+- [ ] Add the official Insight logo to the investor film opening and closing scenes.
