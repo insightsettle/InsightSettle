@@ -26,3 +26,6 @@
 - [x] Add a concise investor-film slide connecting escrow, cross-border deal support, and Gulf financial compliance.
 - [x] Convert the original embedded customer screenshot from dark to light without replacing its content.
 - [x] Ensure the recolored original screenshot uses neutral white, never pink.
+
+## In progress
+- [ ] Identify the repeated visual defect shown in the uploaded 2.7-second clip and correct every occurrence in the latest investor film.
