@@ -31,4 +31,4 @@
 - [x] Identify the repeated dark screenshot flash shown in the uploaded clip and remove every occurrence from the latest investor film.
 
 ## In progress
-- [ ] Rebuild the investor film without time compression, giving every page enough on-screen time to match its natural-speed narration and removing skipped-page transitions.
+- [x] Rebuild the investor film without time compression, giving every page enough on-screen time to match its natural-speed narration and removing skipped-page transitions.
