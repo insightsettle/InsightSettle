@@ -36,3 +36,4 @@
 - [x] Re-record slide-specific founder-style narration, verify all 25 slide-to-audio timings (including slide 8), and add soft dissolve transitions without cutting speech.
 - [x] Remove investor-film slides 17 and 18, resolve the slide 24 timeline overlap, renumber the deck, and export the refined 23-slide film with matched narration.
 - [x] Remove repeated investor-film slides 6, 19, and 20; merge their unique points into retained slides; export the 20-slide deck and synchronized film.
+- [x] Correct slides 13 and 19 to use an explicit left-to-right English flow; update the editable deck and synchronized film.
