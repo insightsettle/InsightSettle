@@ -34,3 +34,4 @@
 - [x] Rebuild the investor film without time compression, giving every page enough on-screen time to match its natural-speed narration and removing skipped-page transitions.
 - [x] Complete slides 8, 10, 14, 22, 23 and 24; restore slides 9 and 15; use the official logo on slides 1 and 25; make all slide backgrounds white; export the revised narrated film.
 - [x] Re-record slide-specific founder-style narration, verify all 25 slide-to-audio timings (including slide 8), and add soft dissolve transitions without cutting speech.
+- [x] Remove investor-film slides 17 and 18, resolve the slide 24 timeline overlap, renumber the deck, and export the refined 23-slide film with matched narration.
