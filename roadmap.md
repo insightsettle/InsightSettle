@@ -39,3 +39,4 @@
 - [x] Correct slides 13 and 19 to use an explicit left-to-right English flow; update the editable deck and synchronized film.
 - [x] Reverse the chart layouts highlighted on slides 13, 14, and 19; retain left-to-right arrows and update the synchronized film.
 - [x] Finalize the highlighted English charts from left to right: source/input on the left and outcome/decision on the right; update the deck and film.
+- [x] Deliver the project SRS document in English (faster than Arabic version)
