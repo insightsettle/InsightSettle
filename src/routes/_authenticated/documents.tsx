@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileSearch, FileUp, LoaderCircle, ScrollText, ShieldAlert, X } from "lucide-react";
 import { useRef, useState } from "react";
@@ -86,7 +87,7 @@ function DocumentsPage() {
       const documents = await Promise.all(files.map(toPayload));
       const response = await fetch("/api/document-review", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token ?? ""}` },
         signal: controller.current.signal,
         body: JSON.stringify({
           deal: {

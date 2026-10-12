@@ -44,10 +44,21 @@ function mapTransaction(row: any): DealTransaction {
   };
 }
 
+/** Fee is always derived on the server from fee rules / staff overrides — never from the client. */
+async function serverFee(admin: any, deal: any) {
+  const amount = Number(deal.amount);
+  if (deal.fee_override_flat != null) return Number(deal.fee_override_flat);
+  if (deal.fee_override_percent != null)
+    return +((amount * Number(deal.fee_override_percent)) / 100).toFixed(2);
+  const { feeFor } = await import("@/lib/fx-quotes.functions");
+  const { data: rules } = await admin.from("fee_rules").select("*").order("sort_order");
+  return feeFor(amount, rules ?? []);
+}
+
 async function loadDealForParty(context: { supabase: any; userId: string }, dealId: string) {
   const { data, error } = await context.supabase
     .from("deals")
-    .select("id, ref, amount, currency, status, buyer_id, seller_id")
+    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat")
     .eq("id", dealId)
     .maybeSingle();
   if (error) throw error;
@@ -179,7 +190,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
         deal_id: deal.id,
         kind: "funding",
         amount: quote ? Number(quote.total) : Number(deal.amount),
-        fee: quote ? Number(quote.fee) : (data.fee ?? 0),
+        fee: quote ? Number(quote.fee) : await serverFee(admin, deal),
         currency: quote ? quote.target_currency : deal.currency,
         status,
         provider: provider.id,
@@ -269,7 +280,7 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
         deal_id: deal.id,
         kind: "release",
         amount: Number(deal.amount),
-        fee: data.fee ?? 0,
+        fee: await serverFee(admin, deal),
         currency: deal.currency,
         status: "processing",
         provider: provider.id,
