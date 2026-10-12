@@ -40,5 +40,5 @@
 - [x] Reverse the chart layouts highlighted on slides 13, 14, and 19; retain left-to-right arrows and update the synchronized film.
 - [x] Finalize the highlighted English charts from left to right: source/input on the left and outcome/decision on the right; update the deck and film.
 - [x] Deliver the project SRS document in English (faster than Arabic version)
-- [ ] Replace demo "Recent activity" on dashboard with the signed-in user real notifications
-- [ ] Set up email infrastructure for notify.insightsettle.com
+- [x] Replace demo "Recent activity" on dashboard with the signed-in user real notifications
+- [x] Set up email infrastructure for notify.insightsettle.com
