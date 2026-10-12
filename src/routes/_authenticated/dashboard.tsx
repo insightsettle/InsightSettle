@@ -21,7 +21,8 @@ import { useStaffAccess } from "@/hooks/use-staff";
 import { supabase } from "@/integrations/supabase/client";
 
 import { listMyDeals } from "@/lib/deals";
-import { activity, dashboardStats, formatSAR } from "@/lib/demo-data";
+import { formatSAR } from "@/lib/demo-data";
+import { listNotifications } from "@/lib/notifications";
 import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
