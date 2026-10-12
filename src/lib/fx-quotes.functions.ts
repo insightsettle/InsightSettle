@@ -19,7 +19,7 @@ export type FxQuote = {
 const QUOTE_MINUTES = 15;
 const VAT_RATE = 0.15; // Saudi VAT on the Insight fee
 
-function feeFor(amount: number, rules: any[]) {
+export function feeFor(amount: number, rules: any[]) {
   const rule = rules.find(
     (r) => amount >= Number(r.amount_from) && (r.amount_to == null || amount <= Number(r.amount_to)),
   );

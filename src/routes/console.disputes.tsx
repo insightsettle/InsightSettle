@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { LiveDisputes } from "@/components/site/StaffOps";
 import { createFileRoute } from "@tanstack/react-router";
 import { Gavel, LoaderCircle, RotateCcw, Sparkles, Timer } from "lucide-react";
@@ -80,7 +81,7 @@ function DisputeOpsPage() {
     try {
       const response = await fetch("/api/dispute-analysis", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token ?? ""}` },
         signal: controller.current.signal,
         body: JSON.stringify({
           dealId: selected.dealId,

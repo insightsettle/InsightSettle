@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileUp, LoaderCircle, Scale, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useRef, useState } from "react";
@@ -66,7 +67,7 @@ function DisputesPage() {
     try {
       const response = await fetch("/api/dispute-analysis", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token ?? ""}` },
         signal: controller.current.signal,
         body: JSON.stringify({
           dealId,

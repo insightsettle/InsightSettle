@@ -31,11 +31,26 @@ const inputSchema = z.object({
   documents: z.array(documentSchema).min(1).max(4),
 });
 
+async function requireUser(request: Request) {
+  const h = request.headers.get("authorization") ?? "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+  if (!token) return null;
+  const { createClient } = await import("@supabase/supabase-js");
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+  const sb = createClient(process.env["SUPABASE_URL"]!, key, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+  const { data, error } = await sb.auth.getClaims(token);
+  return error || !data?.claims?.sub ? null : data.claims.sub;
+}
+
 export const Route = createFileRoute("/api/document-review")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
+          if (!(await requireUser(request)))
+            return Response.json({ error: "Please sign in to continue." }, { status: 401 });
           const parsed = inputSchema.safeParse(await request.json());
           if (!parsed.success)
             return Response.json(
