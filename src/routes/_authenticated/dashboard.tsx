@@ -21,7 +21,8 @@ import { useStaffAccess } from "@/hooks/use-staff";
 import { supabase } from "@/integrations/supabase/client";
 
 import { listMyDeals } from "@/lib/deals";
-import { activity, dashboardStats, formatSAR } from "@/lib/demo-data";
+import { formatSAR } from "@/lib/demo-data";
+import { listNotifications } from "@/lib/notifications";
 import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -54,6 +55,10 @@ function Dashboard() {
     if (isStaff) navigate({ to: "/console", replace: true });
   }, [isStaff, navigate]);
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
+  const { data: myActivity = [] } = useQuery({
+    queryKey: ["my-activity"],
+    queryFn: () => listNotifications(10),
+  });
   const uid = user?.id;
   const sum = (xs: typeof myDeals) => xs.reduce((a, d) => a + Number(d.amount ?? 0), 0);
   const heldStates = ["held", "delivered", "under_review", "disputed"];
@@ -185,7 +190,6 @@ function Dashboard() {
                   <s.icon className="size-5 text-primary" />
                 </div>
                 <p className="mt-3 text-2xl font-extrabold">{s.value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Sample data</p>
               </CardContent>
             </Card>
           ))}
@@ -195,10 +199,23 @@ function Dashboard() {
             <h2 className="mb-4 text-xl font-bold">Recent activity</h2>
             <Card>
               <CardContent className="divide-y divide-border p-0">
-                {activity.map((item) => (
-                  <div key={item.at + item.text} className="p-4">
-                    <p className="text-sm font-medium">{item.text}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{item.at}</p>
+                {myActivity.length === 0 && (
+                  <p className="p-6 text-center text-sm text-muted-foreground">
+                    No activity yet. It will appear here once you create or join a deal.
+                  </p>
+                )}
+                {myActivity.map((item) => (
+                  <div key={item.id} className="p-4">
+                    <p className="text-sm font-medium">{item.title}</p>
+                    {item.body && (
+                      <p className="mt-1 text-xs text-muted-foreground">{item.body}</p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {new Date(item.created_at).toLocaleString(
+                        locale === "ar" ? "ar-SA" : "en-GB",
+                        { dateStyle: "medium", timeStyle: "short" },
+                      )}
+                    </p>
                   </div>
                 ))}
               </CardContent>
