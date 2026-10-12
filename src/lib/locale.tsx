@@ -37,6 +37,17 @@ const translations: Record<string, string> = {
   Pricing: "الرسوم",
   Help: "المساعدة",
   "Sign in": "تسجيل الدخول",
+  "Your account was created": "تم إنشاء حسابك",
+  "We sent a confirmation link to your email address. Open it and click the link to activate your account, then come back and sign in.":
+    "أرسلنا رابط تأكيد إلى بريدك الإلكتروني. افتحه واضغط على الرابط لتفعيل حسابك، ثم عد وسجّل الدخول.",
+  "Go to sign in": "الانتقال إلى تسجيل الدخول",
+  "Didn't receive the email? Check your spam folder.":
+    "لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوب فيها.",
+  "Your email is confirmed": "تم تأكيد بريدك الإلكتروني",
+  "Your account is now active. Sign in to start creating and tracking your escrow deals.":
+    "حسابك مفعّل الآن. سجّل الدخول لبدء إنشاء صفقات الضمان ومتابعتها.",
+  "Please confirm your email address. Open the confirmation link we sent to your inbox to activate all account features.":
+    "يرجى تأكيد بريدك الإلكتروني. افتح رابط التأكيد الذي أرسلناه إلى بريدك لتفعيل جميع ميزات الحساب.",
   "Sign out": "تسجيل الخروج",
   "Create account": "إنشاء حساب",
   "My dashboard": "لوحة تحكمي",

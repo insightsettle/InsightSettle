@@ -69,7 +69,7 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin + "/dashboard",
+            emailRedirectTo: window.location.origin + "/auth/confirmed",
             data: { full_name: fullName, phone, pdpl_consent_at: new Date().toISOString() },
           },
         });
@@ -77,7 +77,7 @@ function AuthPage() {
         if (data.session) {
           navigate({ to: "/dashboard", replace: true });
         } else {
-          setNotice("Check your inbox and confirm your email address to activate the account.");
+          navigate({ to: "/auth/check-email", replace: true });
         }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });

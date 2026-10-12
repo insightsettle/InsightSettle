@@ -33,6 +33,8 @@ import { Route as AuthenticatedVerificationRouteImport } from './routes/_authent
 import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
+import { Route as AuthCheckEmailRouteImport } from './routes/auth.check-email'
+import { Route as AuthConfirmedRouteImport } from './routes/auth.confirmed'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
 import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
@@ -169,6 +171,16 @@ const ApiDocumentReviewRoute = ApiDocumentReviewRouteImport.update({
   path: '/api/document-review',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCheckEmailRoute = AuthCheckEmailRouteImport.update({
+  id: '/check-email',
+  path: '/check-email',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthConfirmedRoute = AuthConfirmedRouteImport.update({
+  id: '/confirmed',
+  path: '/confirmed',
+  getParentRoute: () => AuthRoute,
+} as any)
 const ConsoleIndexRoute = ConsoleIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -249,7 +261,7 @@ const ConsoleDealsDealIdRoute = ConsoleDealsDealIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
   '/dispute-policy': typeof DisputePolicyRoute
@@ -271,6 +283,8 @@ export interface FileRoutesByFullPath {
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
+  '/auth/check-email': typeof AuthCheckEmailRoute
+  '/auth/confirmed': typeof AuthConfirmedRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
@@ -289,7 +303,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/business': typeof BusinessRoute
   '/dispute-policy': typeof DisputePolicyRoute
   '/faq': typeof FaqRoute
@@ -310,6 +324,8 @@ export interface FileRoutesByTo {
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
+  '/auth/check-email': typeof AuthCheckEmailRoute
+  '/auth/confirmed': typeof AuthConfirmedRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
@@ -330,7 +346,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
   '/dispute-policy': typeof DisputePolicyRoute
@@ -352,6 +368,8 @@ export interface FileRoutesById {
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
+  '/auth/check-email': typeof AuthCheckEmailRoute
+  '/auth/confirmed': typeof AuthConfirmedRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
@@ -394,6 +412,8 @@ export interface FileRouteTypes {
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
+    | '/auth/check-email'
+    | '/auth/confirmed'
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
@@ -433,6 +453,8 @@ export interface FileRouteTypes {
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
+    | '/auth/check-email'
+    | '/auth/confirmed'
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
@@ -474,6 +496,8 @@ export interface FileRouteTypes {
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
+    | '/auth/check-email'
+    | '/auth/confirmed'
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
@@ -494,7 +518,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   BusinessRoute: typeof BusinessRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
   DisputePolicyRoute: typeof DisputePolicyRoute
@@ -684,6 +708,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDocumentReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/check-email': {
+      id: '/auth/check-email'
+      path: '/check-email'
+      fullPath: '/auth/check-email'
+      preLoaderRoute: typeof AuthCheckEmailRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/confirmed': {
+      id: '/auth/confirmed'
+      path: '/confirmed'
+      fullPath: '/auth/confirmed'
+      preLoaderRoute: typeof AuthConfirmedRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/console/': {
       id: '/console/'
       path: '/'
@@ -817,6 +855,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthCheckEmailRoute: typeof AuthCheckEmailRoute
+  AuthConfirmedRoute: typeof AuthConfirmedRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCheckEmailRoute: AuthCheckEmailRoute,
+  AuthConfirmedRoute: AuthConfirmedRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 interface ConsoleRouteChildren {
   ConsoleAuditRoute: typeof ConsoleAuditRoute
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
@@ -851,7 +901,7 @@ const ConsoleRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   BusinessRoute: BusinessRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
   DisputePolicyRoute: DisputePolicyRoute,
