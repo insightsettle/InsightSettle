@@ -200,10 +200,23 @@ function Dashboard() {
             <h2 className="mb-4 text-xl font-bold">Recent activity</h2>
             <Card>
               <CardContent className="divide-y divide-border p-0">
-                {activity.map((item) => (
-                  <div key={item.at + item.text} className="p-4">
-                    <p className="text-sm font-medium">{item.text}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{item.at}</p>
+                {myActivity.length === 0 && (
+                  <p className="p-6 text-center text-sm text-muted-foreground">
+                    No activity yet. It will appear here once you create or join a deal.
+                  </p>
+                )}
+                {myActivity.map((item) => (
+                  <div key={item.id} className="p-4">
+                    <p className="text-sm font-medium">{item.title}</p>
+                    {item.body && (
+                      <p className="mt-1 text-xs text-muted-foreground">{item.body}</p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {new Date(item.created_at).toLocaleString(
+                        locale === "ar" ? "ar-SA" : "en-GB",
+                        { dateStyle: "medium", timeStyle: "short" },
+                      )}
+                    </p>
                   </div>
                 ))}
               </CardContent>
