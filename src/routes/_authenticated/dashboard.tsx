@@ -113,6 +113,18 @@ function Dashboard() {
           </Card>
         )}
 
+        {user && !user.email_confirmed_at && (
+          <Card className="mt-6 border-amber-500/40 bg-amber-50 dark:bg-amber-950/30">
+            <CardContent className="flex items-center gap-3 p-4">
+              <AlertCircle className="size-5 shrink-0 text-amber-600" />
+              <p className="text-sm">
+                Please confirm your email address. Open the confirmation link we sent to your
+                inbox to activate all account features.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         <VerificationCard />
 
         <div className="mt-6 grid gap-3 sm:grid-cols-4">
