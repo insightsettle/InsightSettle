@@ -13,7 +13,7 @@ import { loadEnv } from "vite";
 // need non-VITE_ vars such as SUPABASE_SERVICE_ROLE_KEY). Never expose these
 // through the client envDefine block.
 const serverEnv = loadEnv(
-  process.env.NODE_ENV === "production" ? "production" : "development",
+  process.env["NODE_ENV"] === "production" ? "production" : "development",
   process.cwd(),
   "",
 );
