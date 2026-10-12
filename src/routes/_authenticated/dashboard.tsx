@@ -190,7 +190,6 @@ function Dashboard() {
                   <s.icon className="size-5 text-primary" />
                 </div>
                 <p className="mt-3 text-2xl font-extrabold">{s.value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Sample data</p>
               </CardContent>
             </Card>
           ))}
