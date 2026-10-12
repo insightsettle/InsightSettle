@@ -55,6 +55,10 @@ function Dashboard() {
     if (isStaff) navigate({ to: "/console", replace: true });
   }, [isStaff, navigate]);
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
+  const { data: myActivity = [] } = useQuery({
+    queryKey: ["my-activity"],
+    queryFn: () => listNotifications(10),
+  });
   const uid = user?.id;
   const sum = (xs: typeof myDeals) => xs.reduce((a, d) => a + Number(d.amount ?? 0), 0);
   const heldStates = ["held", "delivered", "under_review", "disputed"];
