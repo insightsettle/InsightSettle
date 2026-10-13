@@ -104,8 +104,8 @@ const translations: Record<string, string> = {
   "Download records for funding, releases, refunds, and account activity.":
     "نزّل سجلات التمويل والإفراج والاسترداد ونشاط الحساب.",
   "Account safeguards": "حماية الحساب",
-  "Identity verification, two-step sign-in, and session controls on every account.":
-    "توثيق الهوية والتحقق بخطوتين والتحكم في الجلسات لكل حساب.",
+  "Identity verification and session controls for every account.":
+    "التحقق من الهوية وضوابط الجلسات لكل حساب.",
   "Full visibility": "وضوح كامل",
   "One clear status at every step": "حالة واضحة في كل خطوة",
   "Both parties always see the same state of the deal — no guessing, no chasing.":
@@ -115,9 +115,11 @@ const translations: Record<string, string> = {
   "Identity checks, encrypted documents, and a full audit trail — designed for high-value transactions.":
     "تحقق من الهوية ومستندات مشفرة وسجل تدقيق كامل للصفقات عالية القيمة.",
   "KYC identity verification": "التحقق من الهوية",
-  "Every account verified before funds move.": "يتم توثيق كل حساب قبل انتقال الأموال.",
-  "Two-step sign-in": "تسجيل دخول بخطوتين",
-  "2FA on every account, enforced for payouts.": "تحقق ثنائي لكل حساب وإلزامي عند السحب.",
+  "Buyers and suppliers verify their identity in the app.":
+    "يتحقق المشترون والموردون من هويتهم داخل التطبيق.",
+  "Staff access controls": "ضوابط وصول الموظفين",
+  "Staff console access is restricted to authorised roles.":
+    "يقتصر الوصول إلى لوحة الموظفين على الأدوار المصرّح لها.",
   "Encrypted documents": "مستندات مشفرة",
   "Contracts and evidence stored securely per deal.": "تُحفظ العقود والأدلة بأمان لكل صفقة.",
   "Full audit log": "سجل تدقيق كامل",
