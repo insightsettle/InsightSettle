@@ -241,7 +241,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
 
     return {
       ok: true,
-      status,
+      status: provider.connected ? status : "succeeded",
       provider: provider.id,
       providerLabel: provider.label,
       transactionId: tx?.id,

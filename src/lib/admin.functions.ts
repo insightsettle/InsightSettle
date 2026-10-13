@@ -13,15 +13,9 @@ const dealStatuses = [
   "disputed",
 ] as const;
 
-async function assertStaff(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (error) throw error;
-  if (data !== true) throw new Error("Forbidden");
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin;
+async function assertStaff(context: { supabase: any; userId: string; claims?: any }) {
+  const { requireStaffAccess } = await import("@/lib/staff-auth.server");
+  return requireStaffAccess(context);
 }
 
 export type PlatformUser = {
@@ -494,8 +488,12 @@ export const getReportData = createServerFn({ method: "GET" })
       if (t.status !== "succeeded") continue;
       const m = String(t.created_at).slice(0, 7);
       months[m] ??= { month: m, volume: 0, fees: 0, count: 0 };
-      if (t.kind === "payment") months[m].volume += Number(t.amount);
-      months[m].fees += Number(t.fee);
+      if (t.kind !== "funding" && t.kind !== "release") continue;
+      // Volume and fees are counted once, on the funding that brought money in; releases count as transactions.
+      if (t.kind === "funding") {
+        months[m].volume += Number(t.amount);
+        months[m].fees += Number(t.fee ?? 0);
+      }
       months[m].count += 1;
     }
     return {

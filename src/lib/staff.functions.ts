@@ -5,11 +5,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getStaffAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (error) throw error;
-    return { isStaff: data === true };
+    const { isStaffUser } = await import("@/lib/staff-auth.server");
+    return { isStaff: await isStaffUser(context) };
   });
