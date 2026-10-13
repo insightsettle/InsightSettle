@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { deals, formatSAR } from "@/lib/demo-data";
+import { formatSAR } from "@/lib/demo-data";
+import { useMyDeals } from "@/lib/use-my-deals";
 import {
   computeFee,
   feeModeLabels,
@@ -45,7 +46,9 @@ function FeesPage() {
     ]);
 
   const preview = computeFee(test, settings.fees);
-  const revenue = deals.reduce((s, d) => s + computeFee(d.amount, settings.fees).fee, 0);
+  const { deals } = useMyDeals();
+  const sarDeals = deals.filter((d) => d.currency === "SAR");
+  const revenue = sarDeals.reduce((s, d) => s + computeFee(d.amount, settings.fees).fee, 0);
 
   return (
     <div className="mt-8 space-y-6">
@@ -202,12 +205,13 @@ function FeesPage() {
             </p>
             <p className="mt-4 text-3xl font-extrabold">{formatSAR(revenue)}</p>
             <ul className="mt-4 space-y-2 text-sm">
-              {deals.map((deal) => {
+              {sarDeals.length === 0 && <li className="text-muted-foreground">No deals yet.</li>}
+              {sarDeals.map((deal) => {
                 const fee = computeFee(deal.amount, settings.fees);
                 return (
                   <li key={deal.id} className="flex items-center justify-between gap-3">
                     <span className="text-muted-foreground">
-                      {deal.id} · {formatSAR(deal.amount)}
+                      {deal.ref} · {formatSAR(deal.amount)}
                     </span>
                     <span className="font-semibold">{formatSAR(fee.fee)}</span>
                   </li>
