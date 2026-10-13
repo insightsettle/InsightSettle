@@ -93,7 +93,7 @@ const features = [
   {
     icon: ShieldCheck,
     t: "Account safeguards",
-    d: "Identity verification, two-step sign-in, and session controls on every account.",
+    d: "Identity verification and session controls for every account.",
   },
 ];
 
@@ -301,8 +301,8 @@ function HomePage() {
           </div>
           <ul className="grid gap-4 sm:grid-cols-2">
             {[
-              { t: "KYC identity verification", d: "Every account verified before funds move." },
-              { t: "Two-step sign-in", d: "2FA on every account, enforced for payouts." },
+              { t: "KYC identity verification", d: "Buyers and suppliers verify their identity in the app." },
+              { t: "Staff access controls", d: "Staff console access is restricted to authorised roles." },
               { t: "Encrypted documents", d: "Contracts and evidence stored securely per deal." },
               { t: "Full audit log", d: "Every action timestamped and downloadable." },
             ].map((i) => (
