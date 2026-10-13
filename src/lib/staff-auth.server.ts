@@ -25,5 +25,5 @@ export async function requireStaffAccess(ctx: StaffCtx) {
   if (STAFF_MFA_REQUIRED && ctx.claims?.aal !== "aal2")
     throw new Error("Complete two-step verification to use staff actions.");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin as any;
+  return supabaseAdmin;
 }

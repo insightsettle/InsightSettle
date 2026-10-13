@@ -5,8 +5,8 @@ export const SIMULATED_CONFIRMATION = "Confirmed by the payment provider (simula
 type SettleInput = {
   transactionId: string;
   outcome: "succeeded" | "failed";
-  providerRef?: string | null;
-  reason?: string | null;
+  providerRef?: string | null | undefined;
+  reason?: string | null | undefined;
   actorId: string | null;
 };
 
