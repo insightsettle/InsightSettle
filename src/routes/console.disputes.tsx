@@ -53,7 +53,7 @@ function DisputeOpsPage() {
               arbitrator: c.arbitrator ?? "Insight dispute review",
               resolution: `Dispute review requested. Demo review setting ${formatSAR(
                 policy.arbitratorFee,
-              )} assigned to: ${payerLabels[policy.arbitratorFeePayer]}; not an external arbitration service.`,
+              )} assigned to: ${payerLabels[policy.arbitratorFeePayer]} (not a charge). تم طلب مراجعة النزاع؛ إعداد تجريبي وليس رسماً.`,
             }
           : c,
       ),
@@ -85,7 +85,7 @@ function DisputeOpsPage() {
         signal: controller.current.signal,
         body: JSON.stringify({
           dealId: selected.dealId,
-          issue: `Dispute ${selected.id} on deal ${selected.dealId} (${selected.dealTitle}), value ${selected.amount} SAR. Buyer: ${selected.buyer}. Seller: ${selected.seller}. Reason: ${selected.reason}. Current stage: ${disputeStageLabels[selected.stage]}. The AI mediation window is ${policy.aiWindowDays} days from ${selected.openedAt}; if it expires the case goes to an external arbitrator with a fee of ${policy.arbitratorFee} SAR charged to ${payerLabels[policy.arbitratorFeePayer]}. Produce a mediation plan for the remaining window and state clearly what must happen before escalation.`,
+          issue: `Dispute ${selected.id} on deal ${selected.dealId} (${selected.dealTitle}), value ${selected.amount} SAR. Buyer: ${selected.buyer}. Seller: ${selected.seller}. Reason: ${selected.reason}. Current stage: ${disputeStageLabels[selected.stage]}. The AI mediation window is ${policy.aiWindowDays} days from ${selected.openedAt}; the demo review setting is ${policy.arbitratorFee} SAR assigned to ${payerLabels[policy.arbitratorFeePayer]}, not an actual charge. Produce an evidence-review plan for the remaining window. Do not claim external arbitration is available.`,
           desiredOutcome: selected.aiRecommendation,
           evidence: [],
         }),
