@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { roundMoney } from "@/lib/money";
 
 type Ctx = { supabase: any; userId: string; claims?: any };
 
@@ -14,9 +15,13 @@ async function admin() {
 }
 
 async function requireStaff(ctx: Ctx) {
-  const { data } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
-  if (data !== true) throw new Error("Forbidden");
-  if (ctx.claims?.aal !== "aal2") throw new Error("Complete two-step verification to use staff actions.");
+  const { requireStaffAccess } = await import("@/lib/staff-auth.server");
+  await requireStaffAccess(ctx);
+}
+
+async function simConfirm(db: any, notify: any, ids: string[]) {
+  const { simulateProviderConfirm } = await import("@/lib/settlement.server");
+  await simulateProviderConfirm(db, notify, ids);
 }
 
 async function partyDeal(ctx: Ctx, dealId: string) {
@@ -136,8 +141,8 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
     const pct =
       data.outcome === "full_refund" ? 100 : data.outcome === "full_release" ? 0 : (data.buyerPercent ?? 50);
     const amount = Number(deal.amount);
-    const refund = +((amount * pct) / 100).toFixed(2);
-    const release = +(amount - refund).toFixed(2);
+    const refund = roundMoney((amount * pct) / 100, deal.currency);
+    const release = roundMoney(amount - refund, deal.currency);
     const rows: any[] = [];
     if (refund > 0)
       rows.push({
@@ -148,18 +153,24 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
       });
     if (release > 0)
       rows.push({ kind: "release", amount: release, idempotency_key: `${deal.ref}-RELEASE-${dispute.id.slice(0, 8)}` });
-    if (rows.length)
-      await db.from("deal_transactions").insert(
-        rows.map((r) => ({
-          ...r,
-          deal_id: deal.id,
-          currency: deal.currency,
-          status: "processing",
-          provider: "manual",
-          note: `Dispute decision: ${data.note}`.slice(0, 500),
-          created_by: context.userId,
-        })),
-      );
+    let createdIds: string[] = [];
+    if (rows.length) {
+      const { data: created } = await db
+        .from("deal_transactions")
+        .insert(
+          rows.map((r) => ({
+            ...r,
+            deal_id: deal.id,
+            currency: deal.currency,
+            status: "processing",
+            provider: "manual",
+            note: `Dispute decision: ${data.note}`.slice(0, 500),
+            created_by: context.userId,
+          })),
+        )
+        .select("id");
+      createdIds = (created ?? []).map((r: any) => r.id);
+    }
 
     await db
       .from("disputes")
@@ -194,6 +205,7 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
       body: `${label}. ${data.note}`.slice(0, 300),
       kind: "dispute",
     });
+    await simConfirm(db, notify, createdIds);
     return { ok: true };
   });
 
@@ -219,8 +231,9 @@ export const cancelDeal = createServerFn({ method: "POST" })
         .in("status", ["processing", "succeeded"])
         .maybeSingle();
       await db.from("deals").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", deal.id);
-      if (paid)
-        await db.from("deal_transactions").insert({
+      let refundId: string | null = null;
+      if (paid) {
+        const { data: created } = await db.from("deal_transactions").insert({
           deal_id: deal.id,
           kind: "refund",
           amount: paid.amount,
@@ -231,9 +244,12 @@ export const cancelDeal = createServerFn({ method: "POST" })
           idempotency_key: `${deal.ref}-REFUND-CANCEL`,
           note: "Full refund after cancellation",
           created_by: context.userId,
-        });
+        }).select("id").maybeSingle();
+        refundId = created?.id ?? null;
+      }
       await db.from("deal_events").insert({ deal_id: deal.id, actor_id: context.userId, title: "Deal cancelled", note: data.reason });
       await notify.notifyDealParties(db, deal.id, { title: `Deal ${deal.ref} was cancelled`, body: data.reason, kind: "deal" });
+      if (refundId) await simConfirm(db, notify, [refundId]);
       return { status: "cancelled" as const };
     }
 

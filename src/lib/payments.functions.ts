@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { roundMoney } from "@/lib/money";
 
 export type DealTransaction = {
   id: string;
@@ -49,10 +50,10 @@ async function serverFee(admin: any, deal: any) {
   const amount = Number(deal.amount);
   if (deal.fee_override_flat != null) return Number(deal.fee_override_flat);
   if (deal.fee_override_percent != null)
-    return +((amount * Number(deal.fee_override_percent)) / 100).toFixed(2);
+    return roundMoney((amount * Number(deal.fee_override_percent)) / 100, deal.currency);
   const { feeFor } = await import("@/lib/fx-quotes.functions");
   const { data: rules } = await admin.from("fee_rules").select("*").order("sort_order");
-  return feeFor(amount, rules ?? []);
+  return roundMoney(feeFor(amount, rules ?? []), deal.currency);
 }
 
 async function loadDealForParty(context: { supabase: any; userId: string }, dealId: string) {
@@ -224,24 +225,29 @@ export const startDealFunding = createServerFn({ method: "POST" })
       body: provider.notice,
       kind: "payment",
     });
-    const staff = await notify.staffUserIds(admin);
-    await notify.notifyUsers(admin, {
-      dealId: deal.id,
-      title: `Funding needs confirmation — ${deal.ref}`,
-      body: "A buyer started funding this deal. Record the payment provider confirmation (simulated in this demo) in the console.",
-      kind: "payment",
-      recipients: staff,
-    });
+    if (provider.connected) {
+      const staff = await notify.staffUserIds(admin);
+      await notify.notifyUsers(admin, {
+        dealId: deal.id,
+        title: `Funding started — ${deal.ref}`,
+        body: "A buyer started funding this deal. The payment provider will confirm it.",
+        kind: "payment",
+        recipients: staff,
+      });
+    } else if (tx?.id) {
+      const { simulateProviderConfirm } = await import("@/lib/settlement.server");
+      await simulateProviderConfirm(admin, notify, [tx.id]);
+    }
 
     return {
       ok: true,
-      status,
+      status: provider.connected ? status : "succeeded",
       provider: provider.id,
       providerLabel: provider.label,
       transactionId: tx?.id,
       message: provider.connected
         ? "Payment submitted to the licensed payment provider, which holds the funds. Insight records the confirmation."
-        : "Funding request recorded. Payment is confirmed by the payment provider (simulated in this demo).",
+        : "Payment confirmed by the payment provider (simulated). In this demo no real money moves.",
     };
   });
 
@@ -302,24 +308,29 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
       body: "The payout to the seller is processed by the payment provider (simulated in this demo).",
       kind: "payment",
     });
-    const staff = await notify.staffUserIds(admin);
-    await notify.notifyUsers(admin, {
-      dealId: deal.id,
-      title: `Payout to confirm — ${deal.ref}`,
-      body: "The buyer approved a release. Record the payment provider payout confirmation (simulated in this demo) in the console.",
-      kind: "payment",
-      recipients: staff,
-    });
+    if (provider.connected) {
+      const staff = await notify.staffUserIds(admin);
+      await notify.notifyUsers(admin, {
+        dealId: deal.id,
+        title: `Payout started — ${deal.ref}`,
+        body: "The buyer approved a release. The payment provider will confirm the payout.",
+        kind: "payment",
+        recipients: staff,
+      });
+    } else if (tx?.id) {
+      const { simulateProviderConfirm } = await import("@/lib/settlement.server");
+      await simulateProviderConfirm(admin, notify, [tx.id]);
+    }
 
     return {
       ok: true,
-      status: "processing",
+      status: provider.connected ? "processing" : "succeeded",
       provider: provider.id,
       providerLabel: provider.label,
       transactionId: tx?.id,
       message: provider.connected
         ? "Payout submitted to the provider."
-        : "Release recorded. The payment provider handles the transfer and settlement (simulated in this demo).",
+        : "Payout confirmed by the payment provider (simulated). In this demo no real money moves.",
     };
   });
 
@@ -343,117 +354,40 @@ export const settleTransaction = createServerFn({ method: "POST" })
         .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { data: isStaff } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (isStaff !== true) throw new Error("Forbidden");
-    const { admin, notify } = await serverDeps();
+    const { requireStaffAccess } = await import("@/lib/staff-auth.server");
+    await requireStaffAccess(context);
+    const { admin, provider, notify } = await serverDeps();
+    const { settleTransactionCore } = await import("@/lib/settlement.server");
+    if (!provider.connected) {
+      // Simulation: the simulated provider confirms money steps; staff can only simulate a decline of a pending funding.
+      if (data.outcome === "succeeded")
+        throw new Error("In this demo the simulated payment provider confirms payments automatically.");
+      const { data: tx } = await admin.from("deal_transactions").select("kind, status").eq("id", data.transactionId).maybeSingle();
+      if (!tx || tx.kind !== "funding" || !["pending", "processing"].includes(tx.status))
+        throw new Error("Only a pending funding can be declined with the testing tool.");
+    }
+    return settleTransactionCore(admin, notify, { ...data, actorId: context.userId });
+  });
 
-    const { data: tx, error: txError } = await admin
-      .from("deal_transactions")
-      .select("*")
-      .eq("id", data.transactionId)
-      .maybeSingle();
-    if (txError) throw txError;
+/** Staff add an internal reconciliation note to a transaction (no money movement). */
+export const addReconciliationNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { transactionId: string; note: string }) =>
+    z.object({ transactionId: z.string().uuid(), note: z.string().trim().min(2).max(400) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { requireStaffAccess } = await import("@/lib/staff-auth.server");
+    const admin = await requireStaffAccess(context);
+    const { data: tx } = await admin.from("deal_transactions").select("id, deal_id").eq("id", data.transactionId).maybeSingle();
     if (!tx) throw new Error("Transaction not found.");
-    if (data.outcome === "failed" && !data.reason)
-      throw new Error("A failure needs a reason so both parties understand what happened.");
-
-    const { error } = await admin
-      .from("deal_transactions")
-      .update({
-        status: data.outcome,
-        provider_ref: data.providerRef ?? tx.provider_ref,
-        error_message: data.outcome === "failed" ? data.reason : null,
-        note: data.outcome === "succeeded" ? (data.reason ?? tx.note) : tx.note,
-      })
-      .eq("id", tx.id);
-    if (error) throw error;
-
-    const { data: deal } = await admin
-      .from("deals")
-      .select("id, ref, status")
-      .eq("id", tx.deal_id)
-      .maybeSingle();
-
-    let newStatus: string | null = null;
-    if (data.outcome === "succeeded") {
-      if (tx.kind === "funding") newStatus = "held";
-      if (tx.kind === "release") newStatus = "released";
-      if (tx.kind === "refund") newStatus = "refunded";
-    }
-    if (newStatus && deal) {
-      await admin
-        .from("deals")
-        .update({
-          status: newStatus,
-          ...(newStatus === "released" ? { released_at: new Date().toISOString() } : {}),
-        })
-        .eq("id", deal.id);
-
-      // Double-entry ledger: every settled movement balances debit = credit.
-      const amt = Number(tx.amount);
-      const fee = Number(tx.fee ?? 0);
-      const ref = data.providerRef ?? tx.id;
-      const rows =
-        tx.kind === "funding"
-          ? [
-              { account: "provider_clearing", debit: amt, credit: 0 },
-              { account: "escrow_held", debit: 0, credit: amt - fee },
-              { account: "insight_fee_revenue", debit: 0, credit: fee },
-            ]
-          : tx.kind === "release"
-            ? [
-                { account: "escrow_held", debit: amt, credit: 0 },
-                { account: "supplier_payable", debit: 0, credit: amt },
-              ]
-            : [
-                { account: "escrow_held", debit: amt, credit: 0 },
-                { account: "buyer_refund_payable", debit: 0, credit: amt },
-              ];
-      if (tx.kind === "release" || tx.kind === "funding") {
-        const { data: full } = await admin.from("deals").select("id, supplier_country, fee_payer").eq("id", tx.deal_id).single();
-        const vatRates: Record<string, number> = { SA: 0.15, AE: 0.05, BH: 0.1, OM: 0.05, QA: 0, KW: 0 };
-        const vatRate = vatRates[full?.supplier_country ?? "SA"] ?? 0.15;
-        const { data: fundTx } = await admin.from("deal_transactions").select("fee").eq("deal_id", tx.deal_id).eq("kind", "funding").eq("status", "succeeded").maybeSingle();
-        const invFee = Number(fundTx?.fee ?? fee);
-        if (tx.kind === "release" && invFee > 0)
-          await admin.from("tax_invoices").upsert(
-            { deal_id: tx.deal_id, fee: invFee, vat_rate: vatRate, vat: +(invFee * vatRate).toFixed(2), total: +(invFee * (1 + vatRate)).toFixed(2), currency: "SAR" },
-            { onConflict: "deal_id", ignoreDuplicates: true },
-          );
-      }
-      await admin.from("ledger_entries").insert(
-        rows
-          .filter((r) => r.debit !== 0 || r.credit !== 0)
-          .map((r) => ({
-            ...r,
-            deal_id: tx.deal_id,
-            transaction_id: tx.id,
-            currency: tx.currency,
-            reference: ref,
-          })),
-      );
-    }
-
-    const label =
-      data.outcome === "succeeded"
-        ? `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} confirmed by the payment provider (simulated in this demo)`
-        : `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} failed`;
-
-    await admin.from("deal_events").insert({
+    const { error } = await admin.from("deal_events").insert({
       deal_id: tx.deal_id,
       actor_id: context.userId,
-      title: label,
-      note: data.reason ?? data.providerRef ?? null,
+      title: "Internal reconciliation note",
+      note: `[internal] ${data.note}`,
     });
-    await notify.notifyDealParties(admin, tx.deal_id, {
-      title: `${label} — ${deal?.ref ?? ""}`.trim(),
-      body: data.reason ?? null,
-      kind: "payment",
-    });
-    return { ok: true, status: data.outcome, dealStatus: newStatus };
+    if (error) throw error;
+    return { ok: true };
   });
 
 /** Every recorded money movement for a deal, for the Insight console. */
@@ -463,12 +397,8 @@ export const listDealTransactionsForStaff = createServerFn({ method: "GET" })
     z.object({ dealId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data, context }): Promise<DealTransaction[]> => {
-    const { data: isStaff } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (isStaff !== true) throw new Error("Forbidden");
-    const { admin } = await serverDeps();
+    const { requireStaffAccess } = await import("@/lib/staff-auth.server");
+    const admin = await requireStaffAccess(context);
     const { data: rows, error } = await admin
       .from("deal_transactions")
       .select("*")
