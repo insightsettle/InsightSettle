@@ -11,18 +11,10 @@ import { gccCountries } from "@/lib/deals";
 const db = supabase as any;
 const sel = "h-9 w-full rounded-md border border-input bg-background px-3 text-sm";
 
-/** GCC IBAN: country code + 2 check digits + BBAN of fixed length, mod-97 valid. */
-const ibanLengths: Record<string, number> = { SA: 24, AE: 23, BH: 22, QA: 29, KW: 30, OM: 23 };
-export function validIban(raw: string) {
-  const iban = raw.replace(/\s+/g, "").toUpperCase();
-  const len = ibanLengths[iban.slice(0, 2)];
-  if (!len || iban.length !== len || !/^[A-Z0-9]+$/.test(iban)) return false;
-  const moved = iban.slice(4) + iban.slice(0, 4);
-  const digits = moved.replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55));
-  let rem = 0;
-  for (const d of digits) rem = (rem * 10 + Number(d)) % 97;
-  return rem === 1;
-}
+import { COUNTRY_CURRENCY, isValidGccIban } from "@/lib/fees";
+
+/** GCC IBAN: country length + mod-97 (shared rule). */
+export const validIban = isValidGccIban;
 
 function useUid() {
   const [uid, setUid] = useState<string | null>(null);
@@ -173,10 +165,10 @@ export function PayoutAccountCard() {
     enabled: !!uid,
     queryFn: async () => (await db.from("payout_accounts").select("*").eq("user_id", uid).maybeSingle()).data,
   });
-  const [f, setF] = useState({ account_name: "", bank_name: "", iban: "", country: "SA" });
+  const [f, setF] = useState({ account_name: "", bank_name: "", iban: "", country: "SA", currency: "SAR" });
   const [msg, setMsg] = useState<string | null>(null);
   useEffect(() => {
-    if (q.data) setF({ account_name: q.data.account_name, bank_name: q.data.bank_name, iban: q.data.iban, country: q.data.country });
+    if (q.data) setF({ account_name: q.data.account_name, bank_name: q.data.bank_name, iban: q.data.iban, country: q.data.country, currency: q.data.currency ?? COUNTRY_CURRENCY[q.data.country] ?? "SAR" });
   }, [q.data]);
   return (
     <Card className="mt-4">
@@ -191,8 +183,13 @@ export function PayoutAccountCard() {
           <Field id="bn" label="Bank name"><Input id="bn" value={f.bank_name} onChange={(e) => setF({ ...f, bank_name: e.target.value })} /></Field>
           <Field id="iban" label="IBAN"><Input id="iban" dir="ltr" value={f.iban} onChange={(e) => setF({ ...f, iban: e.target.value.toUpperCase() })} placeholder="SA03 8000 0000 6080 1016 7519" /></Field>
           <Field id="pc" label="Bank country">
-            <select id="pc" className={sel} value={f.country} onChange={(e) => setF({ ...f, country: e.target.value })}>
+            <select id="pc" className={sel} value={f.country} onChange={(e) => setF({ ...f, country: e.target.value, currency: COUNTRY_CURRENCY[e.target.value] ?? f.currency })}>
               {gccCountries.filter((c) => c.code !== "OTHER").map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+            </select>
+          </Field>
+          <Field id="pcur" label="Payout currency">
+            <select id="pcur" className={sel} value={f.currency} onChange={(e) => setF({ ...f, currency: e.target.value })}>
+              {["SAR", "BHD", "AED", "QAR", "KWD", "OMR", "USD"].map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </Field>
         </div>

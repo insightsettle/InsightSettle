@@ -240,6 +240,8 @@ export type Database = {
       }
       deal_term_versions: {
         Row: {
+          accepted_at: string | null
+          accepted_by: string | null
           created_at: string
           created_by: string | null
           deal_id: string
@@ -249,6 +251,8 @@ export type Database = {
           version: number
         }
         Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           created_at?: string
           created_by?: string | null
           deal_id: string
@@ -258,6 +262,8 @@ export type Database = {
           version: number
         }
         Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           created_at?: string
           created_by?: string | null
           deal_id?: string
@@ -628,11 +634,13 @@ export type Database = {
           amount_from: number
           amount_to: number | null
           country: string | null
+          currency: string
           id: string
           label: string
           max_fee: number | null
           min_fee: number
           percent: number
+          provisional: boolean
           sort_order: number
           updated_at: string
         }
@@ -640,11 +648,13 @@ export type Database = {
           amount_from?: number
           amount_to?: number | null
           country?: string | null
+          currency?: string
           id?: string
           label: string
           max_fee?: number | null
           min_fee?: number
           percent?: number
+          provisional?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -652,11 +662,13 @@ export type Database = {
           amount_from?: number
           amount_to?: number | null
           country?: string | null
+          currency?: string
           id?: string
           label?: string
           max_fee?: number | null
           min_fee?: number
           percent?: number
+          provisional?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -664,6 +676,7 @@ export type Database = {
       }
       fx_quotes: {
         Row: {
+          breakdown: Json | null
           created_at: string
           created_by: string | null
           customer_amount: number
@@ -683,6 +696,7 @@ export type Database = {
           vat: number
         }
         Insert: {
+          breakdown?: Json | null
           created_at?: string
           created_by?: string | null
           customer_amount: number
@@ -702,6 +716,7 @@ export type Database = {
           vat?: number
         }
         Update: {
+          breakdown?: Json | null
           created_at?: string
           created_by?: string | null
           customer_amount?: number
@@ -903,6 +918,7 @@ export type Database = {
           bank_name: string
           country: string
           created_at: string
+          currency: string | null
           iban: string
           updated_at: string
           user_id: string
@@ -913,6 +929,7 @@ export type Database = {
           bank_name: string
           country: string
           created_at?: string
+          currency?: string | null
           iban: string
           updated_at?: string
           user_id: string
@@ -923,6 +940,7 @@ export type Database = {
           bank_name?: string
           country?: string
           created_at?: string
+          currency?: string | null
           iban?: string
           updated_at?: string
           user_id?: string
@@ -1033,6 +1051,7 @@ export type Database = {
           id: string
           invoice_number: string
           issued_at: string
+          lines: Json | null
           total: number
           vat: number
           vat_rate: number
@@ -1044,6 +1063,7 @@ export type Database = {
           id?: string
           invoice_number?: string
           issued_at?: string
+          lines?: Json | null
           total: number
           vat: number
           vat_rate: number
@@ -1055,6 +1075,7 @@ export type Database = {
           id?: string
           invoice_number?: string
           issued_at?: string
+          lines?: Json | null
           total?: number
           vat?: number
           vat_rate?: number
@@ -1090,6 +1111,27 @@ export type Database = {
         }
         Relationships: []
       }
+      vat_rates: {
+        Row: {
+          country_code: string
+          provisional: boolean
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          provisional?: boolean
+          rate: number
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          provisional?: boolean
+          rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1102,6 +1144,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      iban_is_valid: { Args: { _iban: string }; Returns: boolean }
       run_auto_release: { Args: never; Returns: number }
     }
     Enums: {

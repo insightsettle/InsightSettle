@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { listAllDeals } from "@/lib/admin.functions";
 import { formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
-import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
+import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/deals/")({
   component: ConsoleDeals,
@@ -20,7 +20,6 @@ const filters = ["all", ...Object.keys(statusLabels)] as const;
 function ConsoleDeals() {
   const fetchDeals = useServerFn(listAllDeals);
   const deals = useQuery({ queryKey: ["all-deals"], queryFn: () => fetchDeals({}) });
-  const { settings } = usePlatformSettings();
   const [term, setTerm] = useState("");
   const [status, setStatus] = useState<string>("all");
 
@@ -41,8 +40,7 @@ function ConsoleDeals() {
         <div>
           <h2 className="text-xl font-bold">All platform deals</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Every real deal created by members — {rows.length} shown, {formatSAR(volume)} combined
-            value.
+            Every real deal created by members — {rows.length} shown.
           </p>
         </div>
         <div className="relative w-full max-w-xs">
@@ -85,13 +83,7 @@ function ConsoleDeals() {
       ) : (
         <div className="mt-5 space-y-3">
           {rows.map((d) => {
-            const base = computeFee(d.amount, settings.fees).fee;
-            const fee =
-              d.feeOverrideFlat !== null
-                ? d.feeOverrideFlat
-                : d.feeOverridePercent !== null
-                  ? (d.amount * d.feeOverridePercent) / 100
-                  : base;
+            const special = d.feeOverrideFlat !== null || d.feeOverridePercent !== null;
             return (
               <Link
                 key={d.id}
@@ -115,12 +107,9 @@ function ConsoleDeals() {
                 </div>
                 <div className="lg:text-right">
                   <p className="font-bold">
-                    {d.currency} {d.amount.toLocaleString("en-GB")}
+                    <bdi dir="ltr">{formatMoney(d.amount, d.currency)}</bdi>
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Fee {formatSAR(fee)}
-                    {fee !== base ? " (special offer)" : ""}
-                  </p>
+                  {special && <p className="text-xs text-muted-foreground">Special fee offer</p>}
                 </div>
                 <ArrowUpRight className="hidden size-4 text-muted-foreground lg:block" />
               </Link>

@@ -85,7 +85,7 @@ function NewDeal() {
   const [dueAt, setDueAt] = useState("");
   const [feePayer, setFeePayer] = useState<FeePayer>("buyer");
   const [inspectionDays, setInspectionDays] = useState("3");
-  const [shippingRequired, setShippingRequired] = useState(false);
+  const [shippingRequired, setShippingRequired] = useState(true);
   const [quantity, setQuantity] = useState("1");
   const [supplierCountry, setSupplierCountry] = useState("SA");
   const [deliveryCountry, setDeliveryCountry] = useState("SA");
@@ -127,7 +127,7 @@ function NewDeal() {
         counterpartyEmail,
         dueAt: dueAt || null,
         feePayer,
-        inspectionDays: Math.min(60, Math.max(0, Number(inspectionDays) || 0)),
+        inspectionDays: Math.min(30, Math.max(1, Number(inspectionDays) || 1)),
         shippingRequired,
         quantity: Math.max(1, Number(quantity) || 1),
         unitPrice: numericAmount / Math.max(1, Number(quantity) || 1),
@@ -313,8 +313,9 @@ function NewDeal() {
               <Input
                 id="inspection"
                 type="number"
-                min={0}
-                max={60}
+                min={1}
+                max={30}
+                required
                 value={inspectionDays}
                 onChange={(e) => setInspectionDays(e.target.value)}
               />

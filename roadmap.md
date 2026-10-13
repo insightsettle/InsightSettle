@@ -45,3 +45,7 @@
 - [x] Replace demo "Recent activity" on dashboard with the signed-in user real notifications
 - [x] Set up email infrastructure for notify.insightsettle.com
 - [x] Deliver each SAMA sandbox answer as a separate Word file within its character limit
+
+- [x] Batch B: one USD marginal fee calculator, fee-payer split with per-party VAT, balanced FX-B ledger, server-only deal actions, payout-currency check, new-deal defaults.
+- [ ] Owner/pricing: confirm provisional USD fee bands and VAT treatment (legal review).
+- [ ] Public pricing/services calculators still use the old SAR bands (marketing copy frozen) — align when copy may change.

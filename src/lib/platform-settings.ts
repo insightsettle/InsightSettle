@@ -159,7 +159,7 @@ async function load() {
   const { supabase } = await import("@/integrations/supabase/client");
   const [rates, fees] = await Promise.all([
     supabase.from("fx_rates").select("*").neq("code", "SAR").order("code"),
-    supabase.from("fee_rules").select("*").order("sort_order"),
+    supabase.from("fee_rules").select("*").eq("currency", "SAR").order("sort_order"),
   ]);
   current = {
     rates: rates.data?.length

@@ -15,6 +15,13 @@
       "when": 1791917297716,
       "tag": "0001_usd_supported_and_peg_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791920622395,
+      "tag": "0002_batch_b_money_and_terms_integrity",
+      "breakpoints": true
     }
   ]
 }

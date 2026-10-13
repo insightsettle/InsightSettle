@@ -102,41 +102,7 @@ export async function listDealTransactions(dealId: string) {
   })) as DealTransactionRow[];
 }
 
-async function setStatus(dealId: string, status: string) {
-  const { error } = await supabase
-    .from("deals")
-    .update({
-      status,
-      ...(status === "released" ? { released_at: new Date().toISOString() } : {}),
-    })
-    .eq("id", dealId);
-  if (error) throw error;
-}
 
-export async function confirmDelivery(dealId: string, inspectionDays = 3) {
-  const now = new Date();
-  const autoRelease = new Date(now.getTime() + inspectionDays * 24 * 60 * 60 * 1000);
-  const { error } = await supabase
-    .from("deals")
-    .update({
-      status: "delivered",
-      shipping_status: "delivered",
-      delivered_at: now.toISOString(),
-      auto_release_at: autoRelease.toISOString(),
-    })
-    .eq("id", dealId);
-  if (error) throw error;
-  await logEvent(
-    dealId,
-    "Seller confirmed delivery",
-    `Buyer inspection period ends ${autoRelease.toISOString().slice(0, 10)}`,
-  );
-  await announce(
-    dealId,
-    "The seller confirmed delivery",
-    `You can review and release the funds. If you take no action the funds release automatically after ${inspectionDays} day(s).`,
-  );
-}
 
 export type TermVersion = { id: string; version: number; snapshot: Record<string, unknown>; note: string | null; created_at: string };
 
@@ -146,28 +112,6 @@ export async function listTermVersions(dealId: string) {
   return (data ?? []) as TermVersion[];
 }
 
-export async function proposeNewTerms(
-  dealId: string,
-  changes: { amount?: number; quantity?: number; due_at?: string | null; inspection_days?: number; note: string },
-) {
-  const user = await currentUser();
-  const { data: deal, error } = await supabase.from("deals").select("*").eq("id", dealId).single();
-  if (error) throw error;
-  const next = (Number((deal as any).terms_version) || 1) + 1;
-  const patch: Record<string, unknown> = { terms_version: next, terms_status: "pending", terms_note: changes.note };
-  if (changes.amount) patch["amount"] = changes.amount;
-  if (changes.quantity) patch["quantity"] = changes.quantity;
-  if (changes.due_at !== undefined) patch["due_at"] = changes.due_at;
-  if (changes.inspection_days !== undefined) patch["inspection_days"] = changes.inspection_days;
-  const { data: updated, error: upErr } = await supabase.from("deals").update(patch as any).eq("id", dealId).select("*").single();
-  if (upErr) throw upErr;
-  const { termsSnapshot } = await import("@/lib/deals");
-  await supabase.from("deal_term_versions").insert({
-    deal_id: dealId, version: next, snapshot: termsSnapshot(updated as any) as any, note: changes.note, created_by: user.id,
-  });
-  await logEvent(dealId, `Terms version ${next} proposed`, changes.note);
-  await announce(dealId, `New terms (version ${next}) need your agreement`, changes.note);
-}
 
 export type DealAttachment = { id: string; category: string; file_path: string; file_name: string; created_at: string };
 
@@ -224,62 +168,9 @@ export async function getTaxInvoice(dealId: string) {
   return data as null | { invoice_number: string; fee: number; vat_rate: number; vat: number; total: number; currency: string; issued_at: string };
 }
 
-export async function agreeToTerms(dealId: string) {
-  const { error } = await supabase
-    .from("deals")
-    .update({ terms_status: "agreed", terms_note: null })
-    .eq("id", dealId);
-  if (error) throw error;
-  await logEvent(dealId, "Deal terms accepted by both parties");
-  await announce(dealId, "The deal terms were accepted", "The buyer can now fund the deal.");
-}
 
-export async function requestTermsChange(dealId: string, note: string) {
-  const { error } = await supabase
-    .from("deals")
-    .update({ terms_status: "changes_requested", terms_note: note })
-    .eq("id", dealId);
-  if (error) throw error;
-  await logEvent(dealId, "Changes requested on the deal terms", note);
-  await announce(dealId, "The other party requested changes to the terms", note);
-}
 
-export async function rejectTerms(dealId: string, note: string) {
-  const { error } = await supabase
-    .from("deals")
-    .update({ terms_status: "rejected", terms_note: note, status: "rejected" })
-    .eq("id", dealId);
-  if (error) throw error;
-  await logEvent(dealId, "Deal terms rejected", note);
-  await announce(dealId, "The other party rejected the deal terms", note);
-}
 
-export async function updateShipping(
-  dealId: string,
-  input: { carrier: string; tracking: string; status: string; eta?: string | null },
-) {
-  const { error } = await supabase
-    .from("deals")
-    .update({
-      shipping_carrier: input.carrier || null,
-      shipping_tracking: input.tracking || null,
-      shipping_status: input.status,
-      ...(input.eta ? { estimated_delivery_at: input.eta } : {}),
-      ...(["shipped", "in_transit", "out_for_delivery"].includes(input.status) ? { shipped_at: new Date().toISOString() } : {}),
-    } as any)
-    .eq("id", dealId);
-  if (error) throw error;
-  await logEvent(
-    dealId,
-    "Shipping details updated",
-    `${input.carrier || "Carrier"} · ${input.tracking || "no tracking number"} · ${input.status}`,
-  );
-  await announce(
-    dealId,
-    "Shipping details were updated",
-    `${input.carrier || "Carrier"} · ${input.tracking || "no tracking number"}`,
-  );
-}
 
 export type DealRating = {
   id: string;
@@ -325,21 +216,7 @@ export async function submitRating(input: {
 }
 
 
-export async function requestReview(dealId: string, note: string) {
-  await setStatus(dealId, "under_review");
-  await logEvent(dealId, "Buyer asked for a revision before releasing funds", note);
-  await announce(dealId, "The buyer asked for a revision", note);
-}
 
-export async function openDispute(dealId: string, reason: string) {
-  const { error } = await supabase
-    .from("deals")
-    .update({ status: "disputed", disputed_reason: reason })
-    .eq("id", dealId);
-  if (error) throw error;
-  await logEvent(dealId, "Dispute opened", reason);
-  await announce(dealId, "Dispute opened", reason, true);
-}
 
 export async function contactSupport(dealId: string, note: string) {
   await logEvent(dealId, "Member asked Insight support for help", note);

@@ -21,3 +21,9 @@ export function roundMoney(amount: number, currency: string, table?: Record<stri
 
 /** Supported deal currencies shown to users. */
 export const SUPPORTED_CURRENCIES = ["SAR", "BHD", "AED", "QAR", "KWD", "OMR", "USD"] as const;
+
+/** Formats an amount in its own currency with that currency's minor units, e.g. "BHD 1,000.000". */
+export function formatMoney(amount: number, currency: string) {
+  const d = minorUnitsFor(currency);
+  return `${currency} ${Number(amount).toLocaleString("en-GB", { minimumFractionDigits: d, maximumFractionDigits: d })}`;
+}
