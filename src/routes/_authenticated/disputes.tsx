@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { deals } from "@/lib/demo-data";
+import { useMyDeals } from "@/lib/use-my-deals";
 
 export const Route = createFileRoute("/_authenticated/disputes")({
   head: () => ({
@@ -34,9 +34,9 @@ export const Route = createFileRoute("/_authenticated/disputes")({
 });
 
 function DisputesPage() {
-  const [dealId, setDealId] = useState(
-    deals.find((deal) => deal.status === "disputed")?.id ?? deals[0]?.id ?? "",
-  );
+  const { deals } = useMyDeals();
+  const [picked, setDealId] = useState("");
+  const dealId = picked || deals.find((deal) => deal.status === "disputed")?.id || deals[0]?.id || "";
   const [issue, setIssue] = useState("");
   const [desiredOutcome, setDesiredOutcome] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -148,9 +148,10 @@ function DisputesPage() {
                   onChange={(e) => setDealId(e.target.value)}
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
+                  {deals.length === 0 && <option value="">No deals yet.</option>}
                   {deals.map((deal) => (
                     <option key={deal.id} value={deal.id}>
-                      {deal.id} — {deal.title}
+                      {deal.ref} — {deal.title}
                     </option>
                   ))}
                 </select>
