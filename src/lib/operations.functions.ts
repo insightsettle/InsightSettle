@@ -47,10 +47,11 @@ export const disputeReasons = [
 /** Party opens a dispute: funds are frozen, supplier notified, staff alerted. */
 export const openDisputeCase = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { dealId: string; reason: string; details: string }) =>
+  .inputValidator((i: { dealId: string; reason: string; details: string; milestoneId?: string }) =>
     z
       .object({
         dealId: z.string().uuid(),
+        milestoneId: z.string().uuid().optional(),
         reason: z.enum(disputeReasons),
         details: z.string().trim().min(10).max(3000),
       })
@@ -58,22 +59,27 @@ export const openDisputeCase = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const deal = await partyDeal(context, data.dealId);
-    if (!["held", "delivered", "under_review"].includes(deal.status))
-      throw new Error("A dispute can only be opened while the funds are protected.");
     const { db, notify } = await admin();
-    const { data: open } = await db
-      .from("disputes")
-      .select("id")
-      .eq("deal_id", deal.id)
-      .neq("status", "resolved")
-      .maybeSingle();
-    if (open) throw new Error("A dispute is already open on this deal.");
+    let milestone: any = null;
+    if (data.milestoneId) {
+      if (deal.status !== "in_progress") throw new Error("A dispute can only be opened while the funds are protected.");
+      const { data: m } = await db.from("deal_milestones").select("*").eq("id", data.milestoneId).eq("deal_id", deal.id).maybeSingle();
+      if (!m || !["funded", "submitted", "revision_requested"].includes(m.status))
+        throw new Error("A dispute can be opened on a funded milestone that has not been released.");
+      milestone = m;
+    } else if (!["held", "delivered", "under_review"].includes(deal.status))
+      throw new Error("A dispute can only be opened while the funds are protected.");
+    let openQ = db.from("disputes").select("id").eq("deal_id", deal.id).neq("status", "resolved");
+    openQ = milestone ? openQ.eq("milestone_id", milestone.id) : openQ.is("milestone_id", null);
+    const { data: open } = await openQ.limit(1).maybeSingle();
+    if (open) throw new Error(milestone ? "A dispute is already open on this milestone." : "A dispute is already open on this deal.");
 
     const now = Date.now();
     const { data: dispute, error } = await db
       .from("disputes")
       .insert({
         deal_id: deal.id,
+        milestone_id: milestone?.id ?? null,
         opened_by: context.userId,
         reason: data.reason,
         details: data.details,
@@ -85,14 +91,17 @@ export const openDisputeCase = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw error;
-    await db
-      .from("deals")
-      .update({ status: "disputed", disputed_reason: `${data.reason}: ${data.details}`.slice(0, 500) })
-      .eq("id", deal.id);
+    if (milestone)
+      await db.from("deal_milestones").update({ status: "disputed", auto_release_at: null }).eq("id", milestone.id);
+    else
+      await db
+        .from("deals")
+        .update({ status: "disputed", disputed_reason: `${data.reason}: ${data.details}`.slice(0, 500) })
+        .eq("id", deal.id);
     await db.from("deal_events").insert({
       deal_id: deal.id,
       actor_id: context.userId,
-      title: "Dispute opened — release blocked",
+      title: milestone ? `Dispute opened on milestone ${milestone.seq} — its release is blocked` : "Dispute opened — release blocked",
       note: `${data.reason.replace(/_/g, " ")} · the other party has 48 hours to respond`,
     });
     await notify.notifyDealParties(db, deal.id, {
@@ -130,6 +139,37 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
     const { data: dispute } = await db.from("disputes").select("*").eq("id", data.disputeId).maybeSingle();
     if (!dispute || dispute.status === "resolved") throw new Error("This dispute is already closed.");
     const { data: deal } = await db.from("deals").select("*").eq("id", dispute.deal_id).single();
+    if (dispute.milestone_id) {
+      const pct =
+        data.outcome === "full_refund" ? 100 : data.outcome === "full_release" ? 0 : (data.buyerPercent ?? 50);
+      const { data: m } = await db.from("deal_milestones").select("*").eq("id", dispute.milestone_id).single();
+      const ids: string[] = [];
+      const refund = roundMoney((Number(m.amount) * pct) / 100, deal.currency);
+      if (pct < 100) {
+        const { createMilestoneRelease } = await import("@/lib/milestones.server");
+        const tx = await createMilestoneRelease(db, deal, m.id, context.userId, `Dispute decision: ${data.note}`, (100 - pct) / 100);
+        ids.push(tx.id);
+      }
+      if (refund > 0) {
+        const { data: r } = await db.from("deal_transactions").insert({
+          deal_id: deal.id, kind: "refund", milestone_id: m.id, amount: refund, currency: deal.currency, status: "processing",
+          provider: "manual", note: `Dispute decision: ${data.note}`.slice(0, 500), created_by: context.userId,
+          idempotency_key: `${deal.ref}-M${m.seq}-REFUND-${dispute.id.slice(0, 8)}`,
+        }).select("id").single();
+        ids.unshift(r.id);
+      }
+      await db.from("disputes").update({
+        status: "resolved", outcome: data.outcome, buyer_percent: pct, resolution_note: data.note, resolved_by: context.userId,
+        resolved_at: new Date().toISOString(), review_started_at: dispute.review_started_at ?? new Date().toISOString(),
+      }).eq("id", dispute.id);
+      await db.from("deal_events").insert({
+        deal_id: deal.id, actor_id: context.userId,
+        title: `Milestone ${m.seq} dispute resolved — buyer ${pct}% · supplier ${100 - pct}%`, note: data.note,
+      });
+      await notify.notifyDealParties(db, deal.id, { title: `Dispute decision on ${deal.ref} (milestone ${m.seq})`, body: data.note.slice(0, 300), kind: "dispute" });
+      await simConfirm(db, notify, ids);
+      return { ok: true };
+    }
     const { data: funding } = await db
       .from("deal_transactions")
       .select("id")
@@ -278,7 +318,7 @@ export const staffAction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
     (i: {
-      action: "freeze" | "unfreeze" | "request_documents" | "internal_note" | "account_state";
+      action: "freeze" | "unfreeze" | "request_documents" | "internal_note" | "account_state" | "cancel";
       dealId?: string;
       userId?: string;
       state?: "active" | "restricted" | "suspended";
@@ -286,7 +326,7 @@ export const staffAction = createServerFn({ method: "POST" })
     }) =>
       z
         .object({
-          action: z.enum(["freeze", "unfreeze", "request_documents", "internal_note", "account_state"]),
+          action: z.enum(["freeze", "unfreeze", "request_documents", "internal_note", "account_state", "cancel"]),
           dealId: z.string().uuid().optional(),
           userId: z.string().uuid().optional(),
           state: z.enum(["active", "restricted", "suspended"]).optional(),
@@ -319,7 +359,18 @@ export const staffAction = createServerFn({ method: "POST" })
       return { ok: true };
     }
     if (!data.dealId) throw new Error("Choose a deal.");
-    const { data: deal } = await db.from("deals").select("id, ref").eq("id", data.dealId).single();
+    const { data: deal } = await db.from("deals").select("id, ref, status").eq("id", data.dealId).single();
+
+    if (data.action === "cancel") {
+      if (deal.status !== "pending_funding") throw new Error("Staff can cancel only a deal that is still waiting for funding.");
+      const { data: money } = await db.from("deal_transactions").select("id").eq("deal_id", deal.id).in("status", ["pending", "processing", "succeeded"]).limit(1);
+      if (money?.length) throw new Error("This deal has a recorded payment; use the refund flow instead.");
+      await db.from("deals").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", deal.id);
+      await db.from("deal_events").insert({ deal_id: deal.id, actor_id: context.userId, title: "Deal cancelled by Insight (no money moved)", note: data.note });
+      await log("deals", deal.id, { status: "cancelled", note: data.note });
+      await notify.notifyDealParties(db, deal.id, { title: `Deal ${deal.ref} was cancelled`, body: data.note, kind: "deal" });
+      return { ok: true };
+    }
 
     if (data.action === "freeze" || data.action === "unfreeze") {
       const frozen = data.action === "freeze";

@@ -104,15 +104,28 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
     .eq("id", tx.deal_id)
     .maybeSingle();
 
+  const ref = data.providerRef ?? tx.id;
   let newStatus: string | null = null;
-  if (data.outcome === "succeeded") {
+  let milestoneHandled = false;
+  if (data.outcome === "succeeded" && (tx.milestone_id || tx.release_part === "retention")) {
+    const { settleMilestoneTx } = await import("@/lib/milestones.server");
+    milestoneHandled = await settleMilestoneTx(admin, tx, ref);
+  }
+  if (data.outcome === "succeeded" && !milestoneHandled) {
     if (tx.kind === "funding") newStatus = "held";
     if (tx.kind === "release") newStatus = "released";
     if (tx.kind === "refund") newStatus = "refunded";
   }
   // A staff decision may already have set the final outcome (e.g. a partial refund); do not overwrite it.
   const finalStatuses = ["released", "refunded", "partially_refunded"];
-  if (newStatus && deal && !(tx.kind !== "funding" && finalStatuses.includes(deal.status))) {
+  if (newStatus === "held" && deal) {
+    const { markMilestonesFunded } = await import("@/lib/milestones.server");
+    if (await markMilestonesFunded(admin, deal.id)) {
+      await writeLedgerAndInvoice(admin, tx, ref);
+      newStatus = "in_progress";
+    }
+  }
+  if (newStatus && newStatus !== "in_progress" && deal && !(tx.kind !== "funding" && finalStatuses.includes(deal.status))) {
     await admin
       .from("deals")
       .update({
@@ -121,11 +134,13 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
       })
       .eq("id", deal.id);
   }
-  if (newStatus && deal) {
-    await writeLedgerAndInvoice(admin, tx, data.providerRef ?? tx.id);
+  if (newStatus && newStatus !== "in_progress" && deal) {
+    await writeLedgerAndInvoice(admin, tx, ref);
   }
 
-  const kindLabel = tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund";
+  const kindLabel =
+    tx.release_part === "retention" ? "Retention payout" : tx.milestone_id ? (tx.kind === "release" ? "Milestone payout" : "Milestone refund")
+      : tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund";
   const simulated = data.actorId === null && data.outcome === "succeeded";
   const label = simulated
     ? SIMULATED_CONFIRMATION

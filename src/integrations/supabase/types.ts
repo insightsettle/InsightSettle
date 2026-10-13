@@ -197,6 +197,92 @@ export type Database = {
           },
         ]
       }
+      deal_milestones: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          auto_release_at: string | null
+          created_at: string
+          deal_id: string
+          description: string | null
+          due_date: string | null
+          evidence_note: string | null
+          evidence_required: string | null
+          fee_share: number
+          funded_at: string | null
+          id: string
+          kind: string
+          net_released: number
+          released_at: string | null
+          retention_amount: number
+          revision_note: string | null
+          seq: number
+          status: string
+          submitted_at: string | null
+          title: string
+          updated_at: string
+          vat: number
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          auto_release_at?: string | null
+          created_at?: string
+          deal_id: string
+          description?: string | null
+          due_date?: string | null
+          evidence_note?: string | null
+          evidence_required?: string | null
+          fee_share?: number
+          funded_at?: string | null
+          id?: string
+          kind?: string
+          net_released?: number
+          released_at?: string | null
+          retention_amount?: number
+          revision_note?: string | null
+          seq: number
+          status?: string
+          submitted_at?: string | null
+          title: string
+          updated_at?: string
+          vat?: number
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          auto_release_at?: string | null
+          created_at?: string
+          deal_id?: string
+          description?: string | null
+          due_date?: string | null
+          evidence_note?: string | null
+          evidence_required?: string | null
+          fee_share?: number
+          funded_at?: string | null
+          id?: string
+          kind?: string
+          net_released?: number
+          released_at?: string | null
+          retention_amount?: number
+          revision_note?: string | null
+          seq?: number
+          status?: string
+          submitted_at?: string | null
+          title?: string
+          updated_at?: string
+          vat?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_milestones_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_ratings: {
         Row: {
           comment: string | null
@@ -295,10 +381,12 @@ export type Database = {
           id: string
           idempotency_key: string | null
           kind: string
+          milestone_id: string | null
           note: string | null
           original_transaction_id: string | null
           provider: string
           provider_ref: string | null
+          release_part: string | null
           status: string
           updated_at: string
         }
@@ -314,10 +402,12 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           kind: string
+          milestone_id?: string | null
           note?: string | null
           original_transaction_id?: string | null
           provider?: string
           provider_ref?: string | null
+          release_part?: string | null
           status?: string
           updated_at?: string
         }
@@ -333,10 +423,12 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           kind?: string
+          milestone_id?: string | null
           note?: string | null
           original_transaction_id?: string | null
           provider?: string
           provider_ref?: string | null
+          release_part?: string | null
           status?: string
           updated_at?: string
         }
@@ -377,6 +469,8 @@ export type Database = {
           created_at: string
           created_by: string
           currency: string
+          deal_type: Database["public"]["Enums"]["deal_type"]
+          defects_liability_days: number
           delivered_at: string | null
           delivery_country: string | null
           description: string
@@ -390,6 +484,8 @@ export type Database = {
           fee_payer: string
           frozen: boolean
           frozen_reason: string | null
+          funding_mode: string
+          handover_at: string | null
           id: string
           inspection_days: number
           invite_token: string
@@ -398,6 +494,11 @@ export type Database = {
           refund_conditions: string | null
           refunded_amount: number
           released_at: string | null
+          retention_percent: number
+          retention_release_at: string | null
+          retention_released_at: string | null
+          revisions_included: number
+          revisions_used: number
           risk_checked_at: string | null
           risk_level: string | null
           risk_score: number | null
@@ -429,6 +530,8 @@ export type Database = {
           created_at?: string
           created_by: string
           currency?: string
+          deal_type?: Database["public"]["Enums"]["deal_type"]
+          defects_liability_days?: number
           delivered_at?: string | null
           delivery_country?: string | null
           description?: string
@@ -442,6 +545,8 @@ export type Database = {
           fee_payer?: string
           frozen?: boolean
           frozen_reason?: string | null
+          funding_mode?: string
+          handover_at?: string | null
           id?: string
           inspection_days?: number
           invite_token?: string
@@ -450,6 +555,11 @@ export type Database = {
           refund_conditions?: string | null
           refunded_amount?: number
           released_at?: string | null
+          retention_percent?: number
+          retention_release_at?: string | null
+          retention_released_at?: string | null
+          revisions_included?: number
+          revisions_used?: number
           risk_checked_at?: string | null
           risk_level?: string | null
           risk_score?: number | null
@@ -481,6 +591,8 @@ export type Database = {
           created_at?: string
           created_by?: string
           currency?: string
+          deal_type?: Database["public"]["Enums"]["deal_type"]
+          defects_liability_days?: number
           delivered_at?: string | null
           delivery_country?: string | null
           description?: string
@@ -494,6 +606,8 @@ export type Database = {
           fee_payer?: string
           frozen?: boolean
           frozen_reason?: string | null
+          funding_mode?: string
+          handover_at?: string | null
           id?: string
           inspection_days?: number
           invite_token?: string
@@ -502,6 +616,11 @@ export type Database = {
           refund_conditions?: string | null
           refunded_amount?: number
           released_at?: string | null
+          retention_percent?: number
+          retention_release_at?: string | null
+          retention_released_at?: string | null
+          revisions_included?: number
+          revisions_used?: number
           risk_checked_at?: string | null
           risk_level?: string | null
           risk_score?: number | null
@@ -569,6 +688,7 @@ export type Database = {
           details: string
           evidence_deadline: string
           id: string
+          milestone_id: string | null
           opened_by: string
           outcome: string | null
           reason: string
@@ -588,6 +708,7 @@ export type Database = {
           details: string
           evidence_deadline: string
           id?: string
+          milestone_id?: string | null
           opened_by: string
           outcome?: string | null
           reason: string
@@ -607,6 +728,7 @@ export type Database = {
           details?: string
           evidence_deadline?: string
           id?: string
+          milestone_id?: string | null
           opened_by?: string
           outcome?: string | null
           reason?: string
@@ -1155,6 +1277,7 @@ export type Database = {
         | "finance"
         | "compliance"
         | "super_admin"
+      deal_type: "goods" | "services" | "contracting" | "freelance"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1290,6 +1413,7 @@ export const Constants = {
         "compliance",
         "super_admin",
       ],
+      deal_type: ["goods", "services", "contracting", "freelance"],
     },
   },
 } as const

@@ -58,7 +58,7 @@ const statuses: DealStatus[] = [
   "refunded",
   "disputed",
 ];
-const desc: Record<DealStatus, string> = {
+const desc: Partial<Record<DealStatus, string>> = {
   pending_funding: "The agreement is ready but has not been funded.",
   held: "Funds are held by the licensed payment provider and work can begin.",
   delivered: "The seller marked the work as delivered.",
