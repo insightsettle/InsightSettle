@@ -22,8 +22,10 @@ export const Route = createFileRoute("/api/public/auto-release")({
           const admin = supabaseAdmin as any;
           const { data: started, error } = await admin.rpc("run_auto_release");
           if (error) throw error;
+          const { runMilestoneJobs } = await import("@/lib/milestones.server");
+          const milestones = await runMilestoneJobs(admin, notify);
           const confirmed = await sweepSimulatedTransactions(admin, notify);
-          return Response.json({ ok: true, started: started ?? 0, confirmed });
+          return Response.json({ ok: true, started: started ?? 0, milestones, confirmed });
         } catch (e) {
           console.error("auto-release job failed", e);
           return Response.json({ ok: false }, { status: 500 });
