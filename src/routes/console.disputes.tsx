@@ -53,7 +53,7 @@ function DisputeOpsPage() {
               arbitrator: c.arbitrator ?? "Insight dispute review",
               resolution: `Dispute review requested. Demo review setting ${formatSAR(
                 policy.arbitratorFee,
-              )} assigned to: ${payerLabels[policy.arbitratorFeePayer]} (not a charge). تم طلب مراجعة النزاع؛ إعداد تجريبي وليس رسماً.`,
+              )} assigned to: ${payerLabels[policy.arbitratorFeePayer]} (not a charge).`,
             }
           : c,
       ),

@@ -12,6 +12,8 @@ const translations: Record<string, string> = {
   Business: "الأعمال",
   Security: "الأمان",
   FAQ: "الأسئلة الشائعة",
+  "Saudi riyal, UAE dirham, Bahraini dinar, Qatari riyal, Kuwaiti dinar and Omani rial, plus US dollar.":
+    "الريال السعودي والدرهم الإماراتي والدينار البحريني والريال القطري والدينار الكويتي والريال العماني، بالإضافة إلى الدولار الأمريكي.",
   "Cancel this deal": "إلغاء الصفقة",
   "Deal files": "ملفات الصفقة",
   "Terms history": "سجل الشروط",

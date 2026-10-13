@@ -439,7 +439,7 @@ export const settleTransaction = createServerFn({ method: "POST" })
 
     const label =
       data.outcome === "succeeded"
-        ? `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} confirmed by the payment provider (simulated in this demo) / يؤكده مزوّد الدفع (محاكاة في هذه النسخة التجريبية)`
+        ? `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} confirmed by the payment provider (simulated in this demo)`
         : `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} failed`;
 
     await admin.from("deal_events").insert({
