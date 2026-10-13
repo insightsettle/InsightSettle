@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Complete SRS FR-081/082/083 English/Arabic copy-only corrections and provide every old-to-new string.
+- [x] Complete SRS FR-081/082/083 English/Arabic copy-only corrections and provide every old-to-new string.
 
 ## Done
 - Shared FX rates and fee rules, 15-minute rate quotes, double-entry ledger, audit log, protection against paying twice
