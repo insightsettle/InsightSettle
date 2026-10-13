@@ -8,6 +8,13 @@
       "when": 1791764769505,
       "tag": "0000_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791917297716,
+      "tag": "0001_usd_supported_and_peg_rates",
+      "breakpoints": true
     }
   ]
 }

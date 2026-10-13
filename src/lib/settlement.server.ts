@@ -166,6 +166,6 @@ export async function sweepSimulatedTransactions(admin: any, notify: any) {
     .eq("provider", "manual")
     .in("status", ["pending", "processing"])
     .lt("created_at", new Date(Date.now() - 10_000).toISOString())
-    .limit(200);
+    .limit(20);
   return simulateProviderConfirm(admin, notify, (data ?? []).map((r: any) => r.id), 0);
 }
