@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { roundMoney } from "@/lib/money";
 
 export type FxQuote = {
   id: string;
@@ -19,7 +20,7 @@ export type FxQuote = {
 const QUOTE_MINUTES = 15;
 const VAT_RATE = 0.15; // Saudi VAT on the Insight fee
 
-export function feeFor(amount: number, rules: any[]) {
+export function feeFor(amount: number, rules: any[], currency = "SAR") {
   const rule = rules.find(
     (r) => amount >= Number(r.amount_from) && (r.amount_to == null || amount <= Number(r.amount_to)),
   );
@@ -27,7 +28,7 @@ export function feeFor(amount: number, rules: any[]) {
   let fee = (amount * Number(rule.percent)) / 100;
   fee = Math.max(fee, Number(rule.min_fee ?? 0));
   if (rule.max_fee != null) fee = Math.min(fee, Number(rule.max_fee));
-  return Math.round(fee * 100) / 100;
+  return roundMoney(fee, currency);
 }
 
 /** Locks an exchange rate for 15 minutes. Customers only see the final rate. */
@@ -54,14 +55,14 @@ export const requestFxQuote = createServerFn({ method: "POST" })
     const source = Number(deal.amount);
     const providerRate = Number(rate.provider_rate);
     const customerRate = +(providerRate * (1 + Number(rate.spread))).toFixed(6);
-    const providerAmount = +(source * providerRate).toFixed(2);
-    const customerAmount = +(source * customerRate).toFixed(2);
+    const providerAmount = roundMoney(source * providerRate, "SAR");
+    const customerAmount = roundMoney(source * customerRate, "SAR");
     let fee = feeFor(customerAmount, rules ?? []);
     if (deal.fee_override_flat != null) fee = Number(deal.fee_override_flat);
     else if (deal.fee_override_percent != null)
-      fee = +((customerAmount * Number(deal.fee_override_percent)) / 100).toFixed(2);
-    const vat = +(fee * VAT_RATE).toFixed(2);
-    const total = +(customerAmount + fee + vat).toFixed(2);
+      fee = roundMoney((customerAmount * Number(deal.fee_override_percent)) / 100, "SAR");
+    const vat = roundMoney(fee * VAT_RATE, "SAR");
+    const total = roundMoney(customerAmount + fee + vat, "SAR");
 
     const { data: q, error: qErr } = await admin
       .from("fx_quotes")
@@ -74,7 +75,7 @@ export const requestFxQuote = createServerFn({ method: "POST" })
         customer_rate: customerRate,
         provider_amount: providerAmount,
         customer_amount: customerAmount,
-        fx_spread: +(customerAmount - providerAmount).toFixed(2),
+        fx_spread: roundMoney(customerAmount - providerAmount, "SAR"),
         fee,
         vat,
         total,

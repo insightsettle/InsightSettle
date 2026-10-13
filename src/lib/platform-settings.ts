@@ -12,6 +12,8 @@ export type RateRow = {
   /** Margin added on top of the base rate for the customer quote. */
   spread: number;
   updatedAt: string;
+  /** Inactive currencies are hidden from user currency choices. */
+  active?: boolean;
 };
 
 export type FeeMode = "percent" | "flat" | "higher_of";
@@ -49,14 +51,14 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export const defaultSettings: PlatformSettings = {
   rates: [
-    { code: "BHD", name: "Bahraini dinar", baseRate: 9.94563, spread: 0.0105, updatedAt: today() },
+    { code: "BHD", name: "Bahraini dinar", baseRate: 9.97340, spread: 0.0105, updatedAt: today() },
     { code: "USD", name: "US dollar", baseRate: 3.75, spread: 0.0105, updatedAt: today() },
-    { code: "EUR", name: "Euro", baseRate: 4.09, spread: 0.0125, updatedAt: today() },
-    { code: "GBP", name: "British pound", baseRate: 4.78, spread: 0.0125, updatedAt: today() },
-    { code: "AED", name: "UAE dirham", baseRate: 1.021, spread: 0.009, updatedAt: today() },
-    { code: "KWD", name: "Kuwaiti dinar", baseRate: 12.2185, spread: 0.0105, updatedAt: today() },
-    { code: "QAR", name: "Qatari riyal", baseRate: 1.03, spread: 0.008, updatedAt: today() },
-    { code: "OMR", name: "Omani rial", baseRate: 9.74, spread: 0.01, updatedAt: today() },
+    { code: "EUR", name: "Euro", baseRate: 4.09, spread: 0.0125, updatedAt: today(), active: false },
+    { code: "GBP", name: "British pound", baseRate: 4.78, spread: 0.0125, updatedAt: today(), active: false },
+    { code: "AED", name: "UAE dirham", baseRate: 1.021102, spread: 0.009, updatedAt: today() },
+    { code: "KWD", name: "Kuwaiti dinar", baseRate: 12.09375, spread: 0.0105, updatedAt: today() },
+    { code: "QAR", name: "Qatari riyal", baseRate: 1.030220, spread: 0.008, updatedAt: today() },
+    { code: "OMR", name: "Omani rial", baseRate: 9.752926, spread: 0.01, updatedAt: today() },
   ],
   fees: [
     {
@@ -167,6 +169,7 @@ async function load() {
           baseRate: Number(r.provider_rate),
           spread: Number(r.spread),
           updatedAt: String(r.updated_at).slice(0, 10),
+          active: r.active !== false,
         }))
       : defaultSettings.rates,
     fees: fees.data?.length ? fees.data.map(toRule) : defaultSettings.fees,

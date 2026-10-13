@@ -10,11 +10,11 @@ export const SPREAD = 0.0105;
 export type FxCurrency = "AED" | "BHD" | "QAR" | "KWD" | "OMR" | "USD" | "EUR" | "GBP";
 
 export const baseRates: Record<FxCurrency, number> = {
-  AED: 1.021,
-  BHD: 9.94563,
-  QAR: 1.03,
-  KWD: 12.2185,
-  OMR: 9.74,
+  AED: 1.021102,
+  BHD: 9.9734,
+  QAR: 1.03022,
+  KWD: 12.09375,
+  OMR: 9.752926,
   USD: 3.75,
   EUR: 4.09,
   GBP: 4.78,
@@ -31,7 +31,8 @@ export const currencyNames: Record<FxCurrency, string> = {
   GBP: "British pound",
 };
 
-export const fxCurrencies = Object.keys(baseRates) as FxCurrency[];
+/** Currencies offered to users: the GCC currencies plus USD (EUR and GBP are inactive). */
+export const fxCurrencies: FxCurrency[] = ["AED", "BHD", "QAR", "KWD", "OMR", "USD"];
 
 export type FxQuote = {
   currency: FxCurrency;
