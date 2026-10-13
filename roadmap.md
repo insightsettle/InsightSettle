@@ -42,3 +42,4 @@
 - [x] Deliver the project SRS document in English (faster than Arabic version)
 - [x] Replace demo "Recent activity" on dashboard with the signed-in user real notifications
 - [x] Set up email infrastructure for notify.insightsettle.com
+- [ ] Deliver each SAMA sandbox answer as a separate Word file within its character limit
