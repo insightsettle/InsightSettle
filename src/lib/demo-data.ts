@@ -1,5 +1,5 @@
 export type DealStatus =
-  "pending_funding" | "held" | "delivered" | "under_review" | "released" | "refunded" | "disputed";
+  "pending_funding" | "held" | "delivered" | "under_review" | "released" | "refunded" | "disputed" | "in_progress" | "completed" | "cancelled" | "rejected" | "partially_refunded";
 
 export const statusLabels: Record<DealStatus, string> = {
   pending_funding: "Pending funding",
@@ -9,6 +9,11 @@ export const statusLabels: Record<DealStatus, string> = {
   released: "Released",
   refunded: "Refunded",
   disputed: "Disputed",
+  in_progress: "In progress",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  rejected: "Rejected",
+  partially_refunded: "Partially refunded",
 };
 
 export const statusTone: Record<DealStatus, "muted" | "primary" | "warning" | "destructive"> = {
@@ -19,6 +24,11 @@ export const statusTone: Record<DealStatus, "muted" | "primary" | "warning" | "d
   released: "primary",
   refunded: "warning",
   disputed: "destructive",
+  in_progress: "primary",
+  completed: "primary",
+  cancelled: "muted",
+  rejected: "muted",
+  partially_refunded: "warning",
 };
 
 export type Stage = {

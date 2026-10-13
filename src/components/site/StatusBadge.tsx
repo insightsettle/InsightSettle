@@ -19,17 +19,22 @@ export function StatusBadge({ status, className }: { status: DealStatus; classNa
     released: "تم الإفراج",
     refunded: "تم الاسترداد",
     disputed: "متنازع عليها",
+    in_progress: "قيد التنفيذ",
+    completed: "مكتملة",
+    cancelled: "ملغاة",
+    rejected: "مرفوضة",
+    partially_refunded: "مستردة جزئياً",
   };
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold",
-        toneClass[statusTone[status]],
+        toneClass[statusTone[status] ?? "muted"],
         className,
       )}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {locale === "ar" ? arabicLabels[status] : statusLabels[status]}
+      {(locale === "ar" ? arabicLabels[status] : statusLabels[status]) ?? status}
     </span>
   );
 }
