@@ -35,14 +35,8 @@ const services = [
   {
     icon: CircleDollarSign,
     t: "Single-payment escrow",
-    d: "One protected payment, one delivery, and one release.",
+    d: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
     points: ["Full-value protection", "Defined review window", "Receipt and invoice"],
-  },
-  {
-    icon: Layers3,
-    t: "Milestone escrow",
-    d: "Break larger projects into deliverables with independent releases.",
-    points: ["Up to 10 milestones", "Partial releases", "Stage-by-stage tracking"],
   },
   {
     icon: Scale,
@@ -53,7 +47,7 @@ const services = [
   {
     icon: ArrowRightLeft,
     t: "Cross-border payments",
-    d: "Pay a supplier abroad in their currency while you pay in Saudi riyals.",
+    d: "A licensed payment provider handles cross-border payments; Insight records the deal and the rate shown before funding.",
     points: ["One clear rate before funding", "Riyal total fixed at funding", "Settlement summary"],
   },
 ];
@@ -151,7 +145,7 @@ function Page() {
                 <Row k="Seller settlement" v={formatSAR(Math.max(0, amount - fee))} />
               </dl>
               <p className="mt-4 text-xs text-warning">
-                Sample pricing for illustration only. The live rate is shown before funding.
+                Indicative pricing for this demo; final pricing to be confirmed
               </p>
               <Button asChild className="mt-5 w-full">
                 <Link to="/dashboard">Create a deal</Link>

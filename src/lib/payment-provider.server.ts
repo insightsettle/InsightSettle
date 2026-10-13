@@ -16,16 +16,16 @@ export function getPaymentProvider(): PaymentProvider {
   if (stripe && stripe.length > 10) {
     return {
       id: "stripe",
-      label: "Stripe",
+      label: "Payment provider",
       connected: true,
-      notice: "Payments are processed by Stripe.",
+      notice: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
     };
   }
   return {
     id: "manual",
-    label: "Manual bank settlement",
+    label: "Payment provider simulation",
     connected: false,
     notice:
-      "No card provider is connected yet, so this payment is recorded and confirmed manually by the Insight team.",
+      "Payment is confirmed by the payment provider (simulated in this demo). Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
   };
 }

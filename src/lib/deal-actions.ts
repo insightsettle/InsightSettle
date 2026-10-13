@@ -337,8 +337,8 @@ export async function openDispute(dealId: string, reason: string) {
     .update({ status: "disputed", disputed_reason: reason })
     .eq("id", dealId);
   if (error) throw error;
-  await logEvent(dealId, "Arbitration requested", reason);
-  await announce(dealId, "Arbitration was requested on this deal", reason, true);
+  await logEvent(dealId, "Dispute opened", reason);
+  await announce(dealId, "Dispute opened", reason, true);
 }
 
 export async function contactSupport(dealId: string, note: string) {

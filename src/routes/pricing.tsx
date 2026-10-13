@@ -18,12 +18,12 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Work out the exact Insight escrow fee for any deal value and choose who pays it — buyer, seller, or split.",
+          "Explore indicative demo escrow fees and choose who pays — buyer, seller, or split. Final pricing is to be confirmed.",
       },
       { property: "og:title", content: "Insight escrow fee calculator" },
       {
         property: "og:description",
-        content: "Transparent escrow pricing with no hidden charges.",
+        content: "Indicative pricing for this demo; final pricing to be confirmed.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -45,12 +45,11 @@ function PricingPage() {
     <SiteShell>
       <div className="mx-auto max-w-4xl px-4 py-14">
         <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-          <Calculator className="size-3.5" /> Transparent pricing
+          <Calculator className="size-3.5" /> Indicative demo pricing
         </span>
-        <h1 className="mt-4 text-4xl font-extrabold">Escrow fee calculator</h1>
+        <h1 className="mt-4 text-4xl font-extrabold">Indicative escrow fee calculator</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          One escrow fee per deal. No subscription, no monthly minimum, and no charge until a deal is
-          funded. You decide together whether the buyer, the seller, or both cover it.
+          Indicative pricing for this demo; final pricing to be confirmed. The platform supports SAR, BHD, AED, QAR, KWD, OMR and USD. In Bahrain and Saudi Arabia, funds are to be held by payment providers licensed by the Central Bank of Bahrain (CBB) and the Saudi Central Bank (SAMA), respectively. Insight runs the deal rules and keeps the record; Insight is not licensed, regulated or approved by either central bank.
         </p>
 
         <Card className="mt-8">
@@ -79,14 +78,14 @@ function PricingPage() {
               </select>
             </div>
             <div className="sm:col-span-2 grid gap-3 rounded-lg bg-secondary p-5 sm:grid-cols-3">
-              <Figure label="Escrow fee" value={formatSAR(fee.fee)} note={fee.rule?.label ?? ""} />
+              <Figure label="Indicative escrow fee" value={formatSAR(fee.fee)} note={fee.rule?.label ?? ""} />
               <Figure
-                label="Buyer pays"
+                label="Indicative buyer total"
                 value={formatSAR(sides.buyerPays)}
                 note="Total transferred into escrow"
               />
               <Figure
-                label="Seller receives"
+                label="Indicative seller receipt"
                 value={formatSAR(sides.sellerReceives)}
                 note="Paid out after release"
               />
@@ -94,7 +93,7 @@ function PricingPage() {
           </CardContent>
         </Card>
 
-        <h2 className="mt-12 text-2xl font-bold">Fee bands</h2>
+        <h2 className="mt-12 text-2xl font-bold">Indicative fee bands</h2>
         <div className="mt-4 overflow-hidden rounded-lg border border-border">
           <table className="w-full text-sm">
             <thead className="bg-secondary text-left">
@@ -118,9 +117,7 @@ function PricingPage() {
           </table>
         </div>
         <p className="mt-4 text-sm text-muted-foreground">
-          Arbitration by an external arbitrator is charged separately and only when a case cannot be
-          resolved inside Insight. Cross-currency deals include a currency conversion margin shown in
-          the final total before you confirm.
+          Cross-currency deals include a currency conversion margin shown in the indicative total before you confirm. Final pricing is to be confirmed.
         </p>
 
         <div className="mt-10 flex flex-wrap gap-3">

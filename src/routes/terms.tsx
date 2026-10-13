@@ -38,7 +38,7 @@ const sections = [
   },
   {
     h: "5. Fees",
-    p: "The escrow fee is shown before the deal is funded and is charged to the party agreed in the deal. Currency conversion, where used, includes a margin shown in the final amount. Arbitration fees are charged separately as described in the dispute policy.",
+    p: "The escrow fee is shown before the deal is funded and is charged to the party agreed in the deal. Currency conversion, where used, includes a margin shown in the final amount.",
   },
   {
     h: "6. Prohibited use",
@@ -46,11 +46,11 @@ const sections = [
   },
   {
     h: "7. Disputes",
-    p: "Disputes are handled under the published dispute and refund policy. Insight reviews a case with the evidence supplied by both parties and may escalate it to an independent arbitrator.",
+    p: "Disputes are handled under the published dispute and refund policy. Insight reviews evidence supplied by both parties and records the decision; the licensed payment provider handles any release or refund.",
   },
   {
     h: "8. Liability",
-    p: "Insight is a neutral holder of funds. We are not a party to the underlying commercial agreement, do not guarantee the quality of goods or services, and our liability is limited to the value of the funds held in the affected deal.",
+    p: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record. We are not a party to the underlying commercial agreement, do not guarantee the quality of goods or services, and our liability is limited to the value of the funds held in the affected deal.",
   },
   {
     h: "9. Changes and termination",

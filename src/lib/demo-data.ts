@@ -83,7 +83,7 @@ export const deals: Deal[] = [
     id: "DL-10428",
     title: "Brand identity for an online store",
     description:
-      "Logo, brand guide, and social templates delivered across three milestones with two revisions each.",
+      "Logo, brand guide, and social templates delivered under the agreed scope with two revisions each.",
     amount: 18000,
     buyer: "Raffa Store",
     seller: "Noon Studio",
@@ -92,16 +92,16 @@ export const deals: Deal[] = [
     createdAt: "2026-08-28",
     dueAt: "2026-09-25",
     stages: [
-      { name: "Milestone 1 — Logo", amount: 6000, status: "released" },
-      { name: "Milestone 2 — Brand guide", amount: 7000, status: "under_review" },
-      { name: "Milestone 3 — Templates", amount: 5000, status: "pending_funding" },
+      { name: "Deliverable — Logo", amount: 6000, status: "released" },
+      { name: "Deliverable — Brand guide", amount: 7000, status: "under_review" },
+      { name: "Deliverable — Templates", amount: 5000, status: "pending_funding" },
     ],
     timeline: [
       { title: "Deal created", at: "2026-08-28 10:12" },
       { title: "Invitation accepted", at: "2026-08-28 13:40" },
-      { title: "First two milestones funded", at: "2026-08-29 09:05", note: "Sample data" },
-      { title: "First milestone released", at: "2026-09-06 16:22" },
-      { title: "Second milestone delivered", at: "2026-09-17 11:48", note: "4 files attached" },
+      { title: "Payment funding recorded", at: "2026-08-29 09:05", note: "Sample data" },
+      { title: "Provider payment release recorded", at: "2026-09-06 16:22" },
+      { title: "Brand guide delivered", at: "2026-09-17 11:48", note: "4 files attached" },
     ],
     attachments: [
       { name: "brand-guide-v2.pdf", size: "4.2 MB" },
@@ -119,7 +119,7 @@ export const deals: Deal[] = [
         body: "I will review it today and confirm receipt.",
       },
     ],
-    actionRequired: "Approve milestone two or request changes",
+    actionRequired: "Review the brand guide or request changes",
   },
   {
     id: "DL-10391",
@@ -203,7 +203,7 @@ export const deals: Deal[] = [
   },
   {
     id: "DL-10465",
-    title: "Office furniture — two payments",
+    title: "Office furniture",
     description: "Supply and install office furniture with a one-year warranty.",
     amount: 27500,
     buyer: "Ofuq Consulting",
@@ -213,13 +213,13 @@ export const deals: Deal[] = [
     createdAt: "2026-09-16",
     dueAt: "2026-10-12",
     stages: [
-      { name: "First payment", amount: 15000, status: "pending_funding" },
-      { name: "Second payment on installation", amount: 12500, status: "pending_funding" },
+      { name: "Furniture supply", amount: 15000, status: "pending_funding" },
+      { name: "Installation deliverable", amount: 12500, status: "pending_funding" },
     ],
     timeline: [{ title: "Deal created and invitation sent", at: "2026-09-16 08:45" }],
     attachments: [],
     messages: [],
-    actionRequired: "Fund the first payment to start delivery",
+    actionRequired: "Fund the deal to start delivery",
   },
 ];
 
@@ -240,7 +240,7 @@ export const activity = [
   { at: "2026-09-18 08:30", text: "New message in deal DL-10428", tone: "primary" as const },
   {
     at: "2026-09-17 11:48",
-    text: "Second milestone delivered — DL-10428",
+    text: "Brand guide delivered — DL-10428",
     tone: "primary" as const,
   },
   {

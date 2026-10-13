@@ -165,7 +165,7 @@ export function SiteFooter() {
             <img src={logo} alt="Insight" className="h-10 w-auto object-contain" />
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {text("Secure escrow that protects every payment until delivery is confirmed.")}
+            {text("Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.")}
           </p>
         </div>
         <FooterCol

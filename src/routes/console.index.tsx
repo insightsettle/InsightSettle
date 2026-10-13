@@ -75,7 +75,7 @@ function AdminOverview() {
     { label: "Successful releases", value: `${(successRate * 100).toFixed(0)}%` },
     { label: "Dispute rate", value: `${(disputeRate * 100).toFixed(0)}%` },
     { label: "Open disputes", value: String(openDisputes + (live?.disputed ?? 0)) },
-    { label: "With external arbitrator", value: String(escalated) },
+    { label: "Disputes under review", value: String(escalated) },
     { label: "Rates needing a daily update", value: String(staleRates) },
     { label: "Active fee tiers", value: String(settings.fees.length) },
   ];
