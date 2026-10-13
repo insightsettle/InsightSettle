@@ -99,8 +99,11 @@ function DocumentsPage() {
             description: deal.description,
             amount: deal.amount,
             currency: deal.currency,
-            dueAt: deal.due_at,
+            buyer: "Buyer",
+            seller: "Supplier",
+            dueAt: deal.due_at ?? "Not set",
             status: deal.status,
+            stages: [],
           },
           notes,
           documents,
@@ -248,21 +251,12 @@ function DocumentsPage() {
                 <ScrollText className="size-5 text-primary" />
                 <h2 className="font-semibold">Escrow record used for comparison</h2>
               </div>
+              {!deal && <p className="mt-4 text-sm text-muted-foreground">No deals yet.</p>}
               {deal && (
                 <dl className="mt-4 space-y-3 text-sm">
-                  <Row label="Deal" value={`${deal.id} — ${deal.title}`} />
-                  <Row label="Value" value={formatSAR(deal.amount)} />
-                  <Row label="Buyer" value={deal.buyer} />
-                  <Row label="Seller" value={deal.seller} />
-                  <Row label="Delivery due" value={deal.dueAt} />
-                  <Row
-                    label="Stages"
-                    value={
-                      deal.stages.length > 1
-                        ? deal.stages.map((s) => `${s.name} (${formatSAR(s.amount)})`).join(", ")
-                        : "Single payment"
-                    }
-                  />
+                  <Row label="Deal" value={`${deal.ref} — ${deal.title}`} />
+                  <Row label="Value" value={`${deal.amount} ${deal.currency}`} />
+                  <Row label="Delivery due" value={deal.due_at ?? "—"} />
                 </dl>
               )}
               <div className="mt-5 flex gap-3 rounded-md border border-warning/30 bg-warning/5 p-4">
