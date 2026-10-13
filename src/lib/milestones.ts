@@ -16,11 +16,11 @@ export const DEAL_TYPE_DEFAULTS: Record<DealType, { inspectionDays: number; ship
 
 export type MilestoneInput = {
   title: string;
-  description?: string | null;
+  description?: string | null | undefined;
   amount: number;
-  dueDate?: string | null;
-  evidenceRequired?: string | null;
-  kind?: "advance" | "work";
+  dueDate?: string | null | undefined;
+  evidenceRequired?: string | null | undefined;
+  kind?: "advance" | "work" | undefined;
 };
 
 export const MAX_ADVANCE_PERCENT = 20;
