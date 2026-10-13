@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { Lock } from "lucide-react";
 
 import { ConsoleShell } from "@/components/site/ConsoleShell";
-import { MfaGate } from "@/components/site/MfaGate";
 import { SiteShell } from "@/components/site/SiteShell";
 import { supabase } from "@/integrations/supabase/client";
 import { getStaffAccess } from "@/lib/staff.functions";
@@ -70,14 +69,13 @@ function AdminLayout() {
     );
   }
 
+  // MFA wall temporarily disabled at the owner's request; restore by wrapping in <MfaGate>.
   return (
-    <MfaGate>
     <ConsoleShell
       title="Operations, revenue and controls"
       subtitle="Staff view of every member, deal, fee, currency rate, and dispute."
     >
       <Outlet />
     </ConsoleShell>
-    </MfaGate>
   );
 }
