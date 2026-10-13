@@ -39,6 +39,8 @@ import {
 import { useEffect, useState } from "react";
 
 import { SiteShell } from "@/components/site/SiteShell";
+import { ContractDashboard, EscrowStepper, FreelancePanel, ServicesPanel, ShipmentTracker, useMilestones } from "@/components/deal/DealPanels";
+import { supabase as sbClient } from "@/integrations/supabase/client";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -105,6 +107,18 @@ function DealPage() {
     enabled: !!deal,
   });
 
+  const milestonesQ = useMilestones(deal?.id);
+  const termsQ = useQuery({
+    queryKey: ["deal-terms-all", deal?.id],
+    enabled: !!deal,
+    queryFn: async () => (await sbClient.from("deal_term_versions").select("*").eq("deal_id", deal!.id).order("version")).data ?? [],
+  });
+  const filesQ = useQuery({
+    queryKey: ["deal-files-list", deal?.id],
+    enabled: !!deal,
+    queryFn: async () => ((await sbClient.from("deal_attachments").select("id, file_name, category").eq("deal_id", deal!.id)).data ?? []) as any[],
+  });
+
   const ratings = useQuery({
     queryKey: ["deal-ratings", deal?.id],
     queryFn: () => listDealRatings(deal!.id),
@@ -130,6 +144,8 @@ function DealPage() {
     queryClient.invalidateQueries({ queryKey: ["deal-messages", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-transactions", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-ratings", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["deal-milestones", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["deal-terms-all", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["my-deals"] });
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
@@ -248,8 +264,15 @@ function DealPage() {
           <StatusBadge status={status} className="px-4 py-2" />
         </div>
 
+        <div className="mt-6"><EscrowStepper status={deal.status} termsStatus={deal.terms_status} /></div>
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.8fr]">
           <div className="space-y-6">
+            {(milestonesQ.data?.length ?? 0) > 0 && (
+              <ContractDashboard deal={deal} milestones={milestonesQ.data ?? []} isBuyer={isBuyer} isSeller={isSeller} termVersions={termsQ.data ?? []} onDone={refresh} />
+            )}
+            {(deal as any).deal_type === "goods" && shippingNeeded && <ShipmentTracker deal={deal} />}
+            {(deal as any).deal_type === "freelance" && !milestonesQ.data?.length && <FreelancePanel deal={deal} files={filesQ.data ?? []} />}
+            {(deal as any).deal_type === "services" && !milestonesQ.data?.length && <ServicesPanel deal={deal} files={filesQ.data ?? []} />}
             {!termsAgreed && (
               <Card className="border-warning/40 bg-warning/5">
                 <CardContent className="p-6">
