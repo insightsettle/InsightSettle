@@ -167,3 +167,18 @@ export async function runMilestoneJobs(admin: any, notify: any) {
   }
   return ids.length;
 }
+
+/** Applies an accepted milestone plan from a terms snapshot (used by acceptTerms). */
+export async function applyMilestoneSnapshot(admin: any, deal: any, planned: any[]) {
+  const current = await listMilestones(admin, deal.id);
+  const keep = new Set(current.filter((m) => !["pending", "funded"].includes(m.status)).map((m) => m.id));
+  const funded = deal.status === "in_progress";
+  for (const m of current) await admin.from("deal_milestones").update({ seq: m.seq + 1000 }).eq("id", m.id);
+  for (const m of current) if (!keep.has(m.id)) await admin.from("deal_milestones").delete().eq("id", m.id);
+  for (const [i, p] of planned.entries()) {
+    const row = { seq: i + 1, kind: p.kind ?? "work", title: p.title, description: p.description ?? null, amount: p.amount, due_date: p.due_date ?? null, evidence_required: p.evidence_required ?? null };
+    if (p.id && keep.has(p.id)) await admin.from("deal_milestones").update({ seq: i + 1 }).eq("id", p.id);
+    else await admin.from("deal_milestones").insert({ ...row, deal_id: deal.id, status: funded ? "funded" : "pending", funded_at: funded ? new Date().toISOString() : null });
+  }
+}
+

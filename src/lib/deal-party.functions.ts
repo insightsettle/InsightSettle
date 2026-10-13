@@ -51,7 +51,7 @@ export const acceptTerms = createServerFn({ method: "POST" })
   .inputValidator((i: { dealId: string }) => idOnly.parse(i))
   .handler(async ({ data, context }) => {
     const { admin, notify, deal, isSeller } = await load(context, data.dealId);
-    if (deal.status !== "pending_funding") throw new Error("Terms can only be accepted before funding.");
+    if (deal.status !== "pending_funding" && deal.status !== "in_progress") throw new Error("Terms can only be accepted before funding.");
     if (!deal.buyer_id || !deal.seller_id) throw new Error("Both parties must join before the terms can be accepted.");
     const { latestTerms, supplierPayoutOk, PAYOUT_ACCOUNT_MESSAGE } = await import("@/lib/deal-rules.server");
     const terms = await latestTerms(admin, deal.id);
@@ -68,8 +68,14 @@ export const acceptTerms = createServerFn({ method: "POST" })
       .is("accepted_at", null)
       .select("id");
     if (!claimed?.length) throw new Error("This terms version is already accepted.");
+    const planned = (terms as any).snapshot?.milestones;
+    if (Array.isArray(planned) && planned.length) {
+      const { applyMilestoneSnapshot } = await import("@/lib/milestones.server");
+      await applyMilestoneSnapshot(admin, deal, planned);
+    }
     await admin.from("deals").update({ terms_status: "agreed", terms_note: null }).eq("id", deal.id);
-    await record(admin, notify, deal.id, context.userId, `Terms version ${terms.version} accepted by both parties`, null);
+    await record(admin, notify, deal.id, context.userId,
+      (terms as any).snapshot?.variation ? `Variation accepted — terms version ${terms.version}` : `Terms version ${terms.version} accepted by both parties`, null);
     return { ok: true };
   });
 
@@ -168,7 +174,7 @@ export const confirmDelivery = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { admin, notify, deal, isSeller } = await load(context, data.dealId);
     if (!isSeller) throw new Error("Only the seller can confirm delivery.");
-    if (deal.status !== "held") throw new Error("Delivery can be confirmed only while the funds are held.");
+    if (deal.status !== "held" && deal.status !== "under_review") throw new Error("Delivery can be confirmed only while the funds are held.");
     const now = new Date();
     const autoRelease = new Date(now.getTime() + Number(deal.inspection_days) * 86_400_000);
     await admin
@@ -180,8 +186,8 @@ export const confirmDelivery = createServerFn({ method: "POST" })
         auto_release_at: autoRelease.toISOString(),
       })
       .eq("id", deal.id)
-      .eq("status", "held");
-    await record(admin, notify, deal.id, context.userId, "Seller confirmed delivery", `Buyer inspection period ends ${autoRelease.toISOString().slice(0, 10)}`);
+      .in("status", ["held", "under_review"]);
+    await record(admin, notify, deal.id, context.userId, deal.status === "under_review" ? "Seller resubmitted the delivery — a new full inspection period started" : "Seller confirmed delivery", `Buyer inspection period ends ${autoRelease.toISOString().slice(0, 10)}`);
     return { ok: true };
   });
 
@@ -192,7 +198,10 @@ export const requestRevision = createServerFn({ method: "POST" })
     const { admin, notify, deal, isBuyer } = await load(context, data.dealId);
     if (!isBuyer) throw new Error("Only the buyer can ask for a revision.");
     if (deal.status !== "delivered") throw new Error("A revision can be requested after delivery is confirmed.");
-    await admin.from("deals").update({ status: "under_review" }).eq("id", deal.id).eq("status", "delivered");
+    const used = Number(deal.revisions_used ?? 0);
+    if (deal.deal_type === "freelance" && used >= Number(deal.revisions_included ?? 0))
+      throw new Error("All included revisions are used. Accept the work or open a dispute.");
+    await admin.from("deals").update({ status: "under_review", auto_release_at: null, revisions_used: used + 1 }).eq("id", deal.id).eq("status", "delivered");
     await record(admin, notify, deal.id, context.userId, "Buyer asked for a revision before releasing funds", data.note);
     return { ok: true };
   });
