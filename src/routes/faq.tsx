@@ -11,7 +11,7 @@ export const Route = createFileRoute("/faq")({
       intro="Short answers about payments, currencies, fees and disputes."
       sections={[
         { h: "Who holds my money?", p: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record." },
-        { h: "Which currencies are supported?", p: "Saudi riyal, UAE dirham, Bahraini dinar, Qatari riyal, Kuwaiti dinar and Omani rial, plus USD, EUR and GBP." },
+        { h: "Which currencies are supported?", p: "Saudi riyal, UAE dirham, Bahraini dinar, Qatari riyal, Kuwaiti dinar and Omani rial, plus US dollar." },
         { h: "How are fees charged?", p: "A percentage of the deal value with a minimum and a cap, plus VAT on the fee. Choose whether the buyer, the seller, or both pay it." },
         { h: "How long is the inspection period?", p: "Agreed per deal, usually 2–7 days. If no dispute is opened in time, the funds release automatically (unless auto-release is off)." },
         { h: "Can I cancel?", p: "Before payment: yes, instantly. After payment but before shipping: under the agreed cancellation terms. After shipping or during a dispute: no." },
