@@ -1,7 +1,7 @@
 /**
  * Deal types and milestone escrow rules (Batch C). Pure functions shared by the form, the server and tests.
  */
-import { roundMoney, minorUnits } from "@/lib/money";
+import { roundMoney, minorUnitsFor as minorUnits } from "@/lib/money";
 import type { FeeBreakdown } from "@/lib/fees";
 
 export const DEAL_TYPES = ["goods", "services", "contracting", "freelance"] as const;
@@ -36,7 +36,7 @@ export function validateMilestones(dealAmount: number, currency: string, list: M
   for (const m of list) {
     if (!m.title?.trim()) return "Every milestone needs a title.";
     if (!(m.amount > 0)) return "Every milestone needs an amount above zero.";
-    if (toMinor(m.amount) / scale !== roundMoney(m.amount, currency) || Math.abs(toMinor(m.amount) - m.amount * scale) > 1e-6)
+    if (Math.abs(toMinor(m.amount) - m.amount * scale) > 1e-6)
       return `Milestone amounts can have at most ${minorUnits(currency)} decimals.`;
   }
   const sum = list.reduce((s, m) => s + toMinor(m.amount), 0);
