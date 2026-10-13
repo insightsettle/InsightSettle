@@ -19,7 +19,7 @@ export type DisputeCase = {
 export const disputeStageLabels: Record<DisputeStage, string> = {
   ai_review: "AI mediation window",
   awaiting_response: "Awaiting party response",
-  escalated: "External arbitrator",
+  escalated: "Dispute review",
   resolved: "Resolved",
 };
 
@@ -49,7 +49,7 @@ export const disputeCases: DisputeCase[] = [
     reason: "Delivery delayed beyond the agreed date",
     openedAt: iso(2),
     stage: "awaiting_response",
-    aiRecommendation: "Release 60% now, hold 40% pending the delayed admin area.",
+    aiRecommendation: "Review the delayed admin area and the delivery terms before recommending a decision.",
   },
   {
     id: "DS-4371",
@@ -61,8 +61,8 @@ export const disputeCases: DisputeCase[] = [
     reason: "Scope disagreement on revisions",
     openedAt: iso(5),
     stage: "escalated",
-    arbitrator: "Gulf Commercial Arbitration Centre",
-    aiRecommendation: "Evidence is balanced; an external arbitrator decision is required.",
+    arbitrator: "Insight dispute review",
+    aiRecommendation: "Evidence is balanced; further dispute review is required.",
   },
   {
     id: "DS-4355",
@@ -75,6 +75,6 @@ export const disputeCases: DisputeCase[] = [
     openedAt: iso(12),
     stage: "resolved",
     aiRecommendation: "Seller reworks 4 articles within 5 days.",
-    resolution: "Settled in the AI mediation window — no arbitration fee charged.",
+    resolution: "Resolved in the AI mediation window.",
   },
 ];

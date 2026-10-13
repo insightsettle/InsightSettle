@@ -3,12 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { InfoPage, infoHead } from "@/components/site/InfoPage";
 
 export const Route = createFileRoute("/security")({
-  head: () => infoHead("Security", "How Insight protects your money, identity and deal records."),
+  head: () => infoHead("Security", "How licensed payment providers hold funds and Insight protects identity and deal records."),
   component: () => (
     <InfoPage
       eyebrow="Security"
       title="Built so money can't move by mistake"
-      intro="Insight doesn't hold customer money itself. Funds are secured and settled by licensed payment providers; Insight manages the agreement, the evidence and the release rules."
+      intro="Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record."
       sections={[
         { h: "Licensed providers", p: "Payments go through a regulated payment provider. Card details are tokenised by the provider and never stored by Insight." },
         { h: "Strict deal rules", p: "Deal status can only move in the allowed order, core terms can't change after payment is secured, and a dispute freezes release immediately." },

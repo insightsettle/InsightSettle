@@ -50,10 +50,10 @@ function DisputeOpsPage() {
           ? {
               ...c,
               stage: "escalated",
-              arbitrator: c.arbitrator ?? "Gulf Commercial Arbitration Centre",
-              resolution: `Escalated to an external arbitrator. Arbitration fee ${formatSAR(
+              arbitrator: c.arbitrator ?? "Insight dispute review",
+              resolution: `Dispute review requested. Demo review setting ${formatSAR(
                 policy.arbitratorFee,
-              )} charged to: ${payerLabels[policy.arbitratorFeePayer]}.`,
+              )} assigned to: ${payerLabels[policy.arbitratorFeePayer]}; not an external arbitration service.`,
             }
           : c,
       ),
@@ -66,7 +66,7 @@ function DisputeOpsPage() {
           ? {
               ...c,
               stage: "resolved",
-              resolution: "Settled inside the AI mediation window — no arbitration fee charged.",
+              resolution: "Resolved inside the AI mediation window.",
             }
           : c,
       ),
@@ -120,9 +120,7 @@ function DisputeOpsPage() {
             <div>
               <h2 className="text-lg font-bold">Resolution policy</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                AI mediation runs for a fixed window. If the parties do not settle, the case moves
-                to an external arbitrator and the arbitration fee is charged to the party you
-                choose.
+                AI guidance supports evidence review. Insight records the dispute decision; the licensed payment provider handles releases and refunds.
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={reset}>
@@ -143,7 +141,7 @@ function DisputeOpsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="fee">Arbitration fee (SAR)</Label>
+              <Label htmlFor="fee">Demo review setting (SAR; not a charge)</Label>
               <Input
                 id="fee"
                 type="number"
@@ -154,7 +152,7 @@ function DisputeOpsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="payer">Arbitration fee charged to</Label>
+              <Label htmlFor="payer">Demo review setting assigned to</Label>
               <select
                 id="payer"
                 value={policy.arbitratorFeePayer}
@@ -233,7 +231,7 @@ function DisputeOpsPage() {
                         {c.stage === "resolved" ? (
                           <span className="text-primary">Closed</span>
                         ) : c.stage === "escalated" ? (
-                          <span className="text-muted-foreground">With arbitrator</span>
+                          <span className="text-muted-foreground">Under dispute review</span>
                         ) : (
                           <span className={expired ? "text-destructive" : "text-muted-foreground"}>
                             {expired
@@ -281,10 +279,10 @@ function DisputeOpsPage() {
                 <Row label="Opened" value={selected.openedAt} />
                 <Row label="Stage" value={disputeStageLabels[selected.stage]} />
                 <Row
-                  label="Arbitration fee"
+                  label="Demo review setting (not a charge)"
                   value={`${formatSAR(policy.arbitratorFee)} → ${payerLabels[policy.arbitratorFeePayer]}`}
                 />
-                {selected.arbitrator && <Row label="Arbitrator" value={selected.arbitrator} />}
+                {selected.arbitrator && <Row label="Review team" value={selected.arbitrator} />}
               </dl>
               <p className="mt-4 rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">
                 <span className="font-semibold text-foreground">Current AI recommendation: </span>
@@ -337,7 +335,7 @@ function DisputeOpsPage() {
               ) : (
                 <p className="text-sm text-muted-foreground">
                   Run the analysis to get verification points, evidence gaps, and a settlement path
-                  for the remaining {policy.aiWindowDays}-day window before arbitration.
+                  for the remaining {policy.aiWindowDays}-day window for dispute review.
                 </p>
               )}
               <p className="mt-6 border-t pt-4 text-xs text-muted-foreground">

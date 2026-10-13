@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     q: "When is my money safe?",
-    a: "From the moment funding is confirmed the amount is held by Insight and neither side can move it alone. The seller is paid only after acceptance, an expired inspection period, or a decision on a dispute.",
+    a: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record. Payment is confirmed by the payment provider (simulated in this demo).",
   },
   {
     q: "What is the inspection period?",
@@ -42,7 +42,7 @@ const faqs = [
   },
   {
     q: "What happens in a dispute?",
-    a: "Insight reviews the case first with both sides' evidence within the review window. If it cannot be resolved, the case moves to an external arbitrator whose fee is charged according to the dispute policy.",
+    a: "Insight reviews both sides' evidence under the dispute policy and records the decision. The licensed payment provider handles any release or refund.",
   },
   {
     q: "Why do I need to verify my identity?",

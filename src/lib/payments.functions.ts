@@ -228,7 +228,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
     await notify.notifyUsers(admin, {
       dealId: deal.id,
       title: `Funding needs confirmation — ${deal.ref}`,
-      body: "A buyer started funding this deal. Confirm or reject the payment in the console.",
+      body: "A buyer started funding this deal. Record the payment provider confirmation (simulated in this demo) in the console.",
       kind: "payment",
       recipients: staff,
     });
@@ -240,8 +240,8 @@ export const startDealFunding = createServerFn({ method: "POST" })
       providerLabel: provider.label,
       transactionId: tx?.id,
       message: provider.connected
-        ? "Payment submitted to the provider. You will be notified when the funds are secured."
-        : "Funding request recorded. The Insight team confirms the transfer, then the funds are marked as protected.",
+        ? "Payment submitted to the licensed payment provider, which holds the funds. Insight records the confirmation."
+        : "Funding request recorded. Payment is confirmed by the payment provider (simulated in this demo).",
     };
   });
 
@@ -299,14 +299,14 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
     });
     await notify.notifyDealParties(admin, deal.id, {
       title: `Release approved for ${deal.ref}`,
-      body: "The payout to the seller is being processed.",
+      body: "The payout to the seller is processed by the payment provider (simulated in this demo).",
       kind: "payment",
     });
     const staff = await notify.staffUserIds(admin);
     await notify.notifyUsers(admin, {
       dealId: deal.id,
       title: `Payout to confirm — ${deal.ref}`,
-      body: "The buyer approved a release. Settle the payout in the console.",
+      body: "The buyer approved a release. Record the payment provider payout confirmation (simulated in this demo) in the console.",
       kind: "payment",
       recipients: staff,
     });
@@ -319,7 +319,7 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
       transactionId: tx?.id,
       message: provider.connected
         ? "Payout submitted to the provider."
-        : "Release recorded. The Insight team completes the bank transfer and marks it settled.",
+        : "Release recorded. The payment provider handles the transfer and settlement (simulated in this demo).",
     };
   });
 
@@ -439,7 +439,7 @@ export const settleTransaction = createServerFn({ method: "POST" })
 
     const label =
       data.outcome === "succeeded"
-        ? `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} settled successfully`
+        ? `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} confirmed by the payment provider (simulated in this demo)`
         : `${tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund"} failed`;
 
     await admin.from("deal_events").insert({

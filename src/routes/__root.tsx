@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Insight | Secure Escrow" },
       {
         property: "og:description",
-        content: "Protected payments, clear milestones, and fair dispute resolution.",
+        content: "Provider-held funds, clear deal rules, and documented dispute resolution.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

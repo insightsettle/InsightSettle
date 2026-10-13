@@ -31,7 +31,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Insight | Secure escrow" },
       {
         property: "og:description",
-        content: "Protected payments, clear milestones, and fair dispute resolution.",
+        content: "Provider-held funds, clear deal rules, and documented dispute resolution.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -53,7 +53,7 @@ const statuses: DealStatus[] = [
 const steps = [
   {
     t: "Create the agreement",
-    d: "Define the scope, amount, milestones, and delivery terms in minutes.",
+    d: "Define the scope, amount, and delivery terms in minutes.",
   },
   {
     t: "Invite the other party",
@@ -61,11 +61,11 @@ const steps = [
   },
   {
     t: "Fund the escrow",
-    d: "The buyer deposits the amount. Insight holds it safely and neutrally.",
+    d: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
   },
   {
     t: "Confirm and release",
-    d: "Once delivery is confirmed, funds are released to the seller — fully documented.",
+    d: "Once delivery is confirmed, the licensed payment provider releases funds to the seller — fully documented.",
   },
 ];
 
@@ -73,12 +73,7 @@ const features = [
   {
     icon: Lock,
     t: "Protected funds",
-    d: "Funds remain in neutral escrow until the agreed release conditions are met.",
-  },
-  {
-    icon: Wallet,
-    t: "Milestone payments",
-    d: "Split complex work into defined stages and release each payment independently.",
+    d: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
   },
   {
     icon: MessageSquare,
@@ -116,7 +111,7 @@ const useCases = [
   {
     icon: Landmark,
     t: "Business services",
-    d: "Close B2B contracts with staged payments and a documented trail.",
+    d: "Close B2B contracts with agreed delivery terms and a documented trail.",
   },
 ];
 
@@ -140,8 +135,7 @@ function HomePage() {
               The safer way to <span className="text-primary">close every deal</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Insight holds funds until the buyer confirms delivery. Every milestone, message, and
-              decision stays documented from agreement to settlement.
+              Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Button
@@ -157,20 +151,7 @@ function HomePage() {
                 <Link to="/how-it-works">See how it works</Link>
               </Button>
             </div>
-            <dl className="mt-12 grid max-w-2xl grid-cols-3 gap-6 border-t border-border pt-7">
-              {[
-                { k: "Protected volume", v: "SAR 12.4M" },
-                { k: "Completion rate", v: "96%" },
-                { k: "Average resolution", v: "3 days" },
-              ].map((s) => (
-                <div key={s.k}>
-                  <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    {s.k}
-                  </dt>
-                  <dd className="mt-1.5 text-2xl font-extrabold">{s.v}</dd>
-                </div>
-              ))}
-            </dl>
+
           </div>
 
           {/* Floating transaction card */}
@@ -204,7 +185,7 @@ function HomePage() {
                   </span>
                 </li>
                 <li className="relative flex items-center justify-between rounded-xl border-2 border-primary px-4 py-3">
-                  <span className="text-sm font-semibold">Funds in escrow</span>
+                  <span className="text-sm font-semibold">Funds held by the payment provider</span>
                   <span className="text-xs font-bold text-primary">Secured</span>
                   <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-primary" />
                 </li>
@@ -218,7 +199,7 @@ function HomePage() {
               <p className="text-[10px] font-bold tracking-widest text-primary uppercase">
                 New update
               </p>
-              <p className="text-xs font-medium text-background">Funds verified and locked</p>
+              <p className="text-xs font-medium text-background">Provider confirmation (simulated)</p>
             </div>
           </div>
         </div>
@@ -403,8 +384,7 @@ function HomePage() {
               Ready to secure your next deal?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-background/70">
-              Create your account, set up the agreement, invite the other party, and let Insight
-              protect the payment.
+              Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg">

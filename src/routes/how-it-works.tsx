@@ -37,7 +37,7 @@ const steps = [
   },
   {
     t: "Fund the agreement",
-    d: "The buyer funds the deal and the amount moves into protected escrow.",
+    d: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
   },
   { t: "Deliver the work", d: "The seller confirms delivery with notes and supporting files." },
   {
@@ -46,7 +46,7 @@ const steps = [
   },
   {
     t: "Release or refund",
-    d: "Funds are released or refunded with a receipt and complete timeline.",
+    d: "The licensed payment provider releases or refunds funds; Insight keeps the receipt and complete timeline.",
   },
 ];
 const statuses: DealStatus[] = [
@@ -60,11 +60,11 @@ const statuses: DealStatus[] = [
 ];
 const desc: Record<DealStatus, string> = {
   pending_funding: "The agreement is ready but has not been funded.",
-  held: "Funds are protected and work can begin.",
+  held: "Funds are held by the licensed payment provider and work can begin.",
   delivered: "The seller marked the work as delivered.",
   under_review: "The buyer is reviewing the submitted work.",
-  released: "Funds were released to the seller.",
-  refunded: "Funds were returned under the refund policy.",
+  released: "The licensed payment provider released funds to the seller.",
+  refunded: "The licensed payment provider returned funds under the refund policy.",
   disputed: "The deal is paused for mediation.",
 };
 function Page() {
@@ -74,7 +74,7 @@ function Page() {
         <p className="text-sm font-semibold text-primary">THE ESCROW JOURNEY</p>
         <h1 className="mt-2 text-4xl font-extrabold">From agreement to settlement</h1>
         <p className="mt-3 text-muted-foreground">
-          Seven transparent steps, each recorded in the deal timeline.
+          The platform supports SAR, BHD, AED, QAR, KWD, OMR and USD. In Bahrain and Saudi Arabia, funds are to be held by payment providers licensed by the Central Bank of Bahrain (CBB) and the Saudi Central Bank (SAMA), respectively. Insight runs the deal rules and keeps the record; Insight is not licensed, regulated or approved by either central bank.
         </p>
         <ol className="mt-10 space-y-4">
           {steps.map((s, i) => (

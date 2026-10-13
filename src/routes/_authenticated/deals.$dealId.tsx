@@ -397,7 +397,7 @@ function DealPage() {
                       }
                       disabled={payment.isPending}
                     >
-                      <Wallet /> {payment.isPending ? "Sending payout…" : "Release the funds"}
+                      <Wallet /> {payment.isPending ? "Requesting provider payout…" : "Release the funds"}
                     </Button>
                   )}
                   {status === "released" && (
@@ -769,8 +769,7 @@ function DealPage() {
                   </p>
                 )}
                 <p className="mt-4 text-xs text-warning">
-                  No card provider is connected yet, so transfers are confirmed manually by the
-                  Insight team and every step is recorded above.
+                  Payment is confirmed by the payment provider (simulated in this demo). Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.
                 </p>
               </CardContent>
             </Card>

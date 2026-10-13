@@ -11,7 +11,7 @@ export const Route = createFileRoute("/dispute-policy")({
       {
         name: "description",
         content:
-          "How Insight reviews disputes, the review window, partial refunds, and when a case goes to an external arbitrator.",
+          "How Insight reviews dispute evidence and records decisions, with releases and refunds handled by a licensed payment provider.",
       },
       { property: "og:title", content: "Insight disputes and refunds policy" },
       { property: "og:description", content: "A clear path from disagreement to decision." },
@@ -36,12 +36,8 @@ const steps = [
     p: "Insight reviews the case within the review window published in the dispute centre (3 days by default) and proposes an outcome: release, full refund, or a partial settlement split between the parties.",
   },
   {
-    h: "4. External arbitration",
-    p: "If a party rejects the proposal, or the case is too complex, it is escalated to an independent arbitrator. The arbitrator's fee is charged according to the deal's dispute settings and is stated before escalation.",
-  },
-  {
-    h: "5. Decision and payout",
-    p: "The final outcome is applied to the held funds and recorded in the deal's payment records with the amount, reason, and reference, visible to both parties.",
+    h: "4. Decision and payout",
+    p: "The licensed payment provider handles the release or refund under the recorded decision. Insight keeps the amount, reason and reference in the deal record, visible to both parties.",
   },
 ];
 

@@ -287,8 +287,7 @@ function StaffDealPage() {
                 <h3 className="font-bold">Payment records</h3>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                Confirm or reject each money movement. The outcome and the reason are shown to both
-                parties.
+                Record payment provider confirmations (simulated in this demo). The outcome and reason are shown to both parties.
               </p>
               <div className="mt-4 space-y-3">
                 {(transactions.data ?? []).map((t) => (
@@ -345,7 +344,7 @@ function StaffDealPage() {
                               })
                             }
                           >
-                            Confirm settled
+                            Record provider confirmation (simulated)
                           </Button>
                           <Button
                             size="sm"
