@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { deals, formatSAR, getDeal } from "@/lib/demo-data";
+import { formatSAR } from "@/lib/demo-data";
+import { useMyDeals } from "@/lib/use-my-deals";
 
 export const Route = createFileRoute("/_authenticated/documents")({
   head: () => ({
@@ -51,14 +52,16 @@ async function toPayload(file: File) {
 }
 
 function DocumentsPage() {
-  const [dealId, setDealId] = useState(deals[0]?.id ?? "");
+  const { deals } = useMyDeals();
+  const [picked, setDealId] = useState("");
+  const dealId = picked || deals[0]?.id || "";
   const [notes, setNotes] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [review, setReview] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const controller = useRef<AbortController | null>(null);
-  const deal = getDeal(dealId);
+  const deal = deals.find((d) => d.id === dealId);
 
   const onFiles = (list: FileList | null) => {
     if (!list) return;
@@ -95,12 +98,9 @@ function DocumentsPage() {
             title: deal.title,
             description: deal.description,
             amount: deal.amount,
-            currency: "SAR",
-            buyer: deal.buyer,
-            seller: deal.seller,
-            dueAt: deal.dueAt,
+            currency: deal.currency,
+            dueAt: deal.due_at,
             status: deal.status,
-            stages: deal.stages.map((s) => ({ name: s.name, amount: s.amount })),
           },
           notes,
           documents,
@@ -148,9 +148,10 @@ function DocumentsPage() {
                   onChange={(e) => setDealId(e.target.value)}
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
+                  {deals.length === 0 && <option value="">No deals yet.</option>}
                   {deals.map((d) => (
                     <option key={d.id} value={d.id}>
-                      {d.id} — {d.title}
+                      {d.ref} — {d.title}
                     </option>
                   ))}
                 </select>
