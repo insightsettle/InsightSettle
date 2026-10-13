@@ -50,7 +50,9 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
     if (tx.kind === "release") newStatus = "released";
     if (tx.kind === "refund") newStatus = "refunded";
   }
-  if (newStatus && deal) {
+  // A staff decision may already have set the final outcome (e.g. a partial refund); do not overwrite it.
+  const finalStatuses = ["released", "refunded", "partially_refunded"];
+  if (newStatus && deal && !(tx.kind !== "funding" && finalStatuses.includes(deal.status))) {
     await admin
       .from("deals")
       .update({
@@ -58,7 +60,8 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
         ...(newStatus === "released" ? { released_at: new Date().toISOString() } : {}),
       })
       .eq("id", deal.id);
-
+  }
+  if (newStatus && deal) {
     // Double-entry ledger: every settled movement balances debit = credit.
     const amt = Number(tx.amount);
     const fee = Number(tx.fee ?? 0);
