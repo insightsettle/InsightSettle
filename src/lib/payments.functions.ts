@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { roundMoney } from "@/lib/money";
 
 export type DealTransaction = {
   id: string;
@@ -45,21 +44,17 @@ function mapTransaction(row: any): DealTransaction {
   };
 }
 
-/** Fee is always derived on the server from fee rules / staff overrides — never from the client. */
-async function serverFee(admin: any, deal: any) {
-  const amount = Number(deal.amount);
-  if (deal.fee_override_flat != null) return Number(deal.fee_override_flat);
-  if (deal.fee_override_percent != null)
-    return roundMoney((amount * Number(deal.fee_override_percent)) / 100, deal.currency);
-  const { feeFor } = await import("@/lib/fx-quotes.functions");
-  const { data: rules } = await admin.from("fee_rules").select("*").order("sort_order");
-  return roundMoney(feeFor(amount, rules ?? [], deal.currency), deal.currency);
+/** Supplier net and supplier fee share from the locked funding quote. */
+async function releaseFigures(admin: any, deal: any) {
+  const { getDealPricingLocked } = await import("@/lib/deal-rules.server");
+  const b = await getDealPricingLocked(admin, deal);
+  return { amount: b.supplierNet, fee: b.sellerShare, currency: b.currency };
 }
 
 async function loadDealForParty(context: { supabase: any; userId: string }, dealId: string) {
   const { data, error } = await context.supabase
     .from("deals")
-    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat")
+    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat, fee_payer, terms_version")
     .eq("id", dealId)
     .maybeSingle();
   if (error) throw error;
@@ -130,9 +125,15 @@ export const startDealFunding = createServerFn({ method: "POST" })
         message: "This funding is already recorded — no second payment was created.",
       };
 
-    // Cross-currency deals must use a live, unexpired FX quote.
+    // Terms and payout-account rules are enforced here, not only in the screen.
+    const { fundingGuard } = await import("@/lib/deal-rules.server");
+    const blocked = await fundingGuard(admin, deal.id);
+    if (blocked)
+      return { ok: false, status: "failed", provider: provider.id, providerLabel: provider.label, message: blocked };
+
+    // Every funding uses a live, unexpired quote (SAR deals at rate 1) so all numbers match.
     let quote: any = null;
-    if (deal.currency !== "SAR") {
+    {
       if (!data.quoteId)
         return {
           ok: false,
@@ -147,7 +148,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
         .eq("id", data.quoteId)
         .eq("deal_id", deal.id)
         .maybeSingle();
-      if (!q || new Date(q.expires_at).getTime() <= Date.now() || q.used_at)
+      if (!q || new Date(q.expires_at).getTime() <= Date.now() || q.used_at || !q.breakdown || Number(q.breakdown.terms_version) !== Number(deal.terms_version))
         return {
           ok: false,
           status: "failed",
@@ -190,9 +191,9 @@ export const startDealFunding = createServerFn({ method: "POST" })
       .insert({
         deal_id: deal.id,
         kind: "funding",
-        amount: quote ? Number(quote.total) : Number(deal.amount),
-        fee: quote ? Number(quote.fee) : await serverFee(admin, deal),
-        currency: quote ? quote.target_currency : deal.currency,
+        amount: Number(quote.total),
+        fee: Number(quote.fee),
+        currency: quote.target_currency,
         status,
         provider: provider.id,
         note: provider.notice,
@@ -285,9 +286,7 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
       .insert({
         deal_id: deal.id,
         kind: "release",
-        amount: Number(deal.amount),
-        fee: await serverFee(admin, deal),
-        currency: deal.currency,
+        ...(await releaseFigures(admin, deal)),
         status: "processing",
         provider: provider.id,
         note: provider.notice,

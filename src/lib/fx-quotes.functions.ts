@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { roundMoney } from "@/lib/money";
+import type { FeeBreakdown, LedgerRow, PayInQuote } from "@/lib/fees";
 
 export type FxQuote = {
   id: string;
@@ -15,83 +15,97 @@ export type FxQuote = {
   vat: number;
   total: number;
   expires_at: string;
+  breakdown: FeeBreakdown;
+  payIn: PayInQuote;
+};
+
+export type DealPricingView = {
+  breakdown: FeeBreakdown;
+  payIn: PayInQuote;
+  ledger: LedgerRow[];
+  /** From the buyer's used quote once the deal is funded; otherwise a live preview. */
+  locked: boolean;
 };
 
 const QUOTE_MINUTES = 15;
-const VAT_RATE = 0.15; // Saudi VAT on the Insight fee
 
-export function feeFor(amount: number, rules: any[], currency = "SAR") {
-  const rule = rules.find(
-    (r) => amount >= Number(r.amount_from) && (r.amount_to == null || amount <= Number(r.amount_to)),
-  );
-  if (!rule) return 0;
-  let fee = (amount * Number(rule.percent)) / 100;
-  fee = Math.max(fee, Number(rule.min_fee ?? 0));
-  if (rule.max_fee != null) fee = Math.min(fee, Number(rule.max_fee));
-  return roundMoney(fee, currency);
-}
-
-/** Locks an exchange rate for 15 minutes. Customers only see the final rate. */
+/** Locks an exchange rate for 15 minutes. Every deal is funded from a quote (SAR deals at rate 1). */
 export const requestFxQuote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { dealId: string }) => z.object({ dealId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }): Promise<FxQuote> => {
-    const { data: deal, error } = await context.supabase
-      .from("deals")
-      .select("id, amount, currency, buyer_id, fee_override_percent, fee_override_flat")
-      .eq("id", data.dealId)
-      .maybeSingle();
-    if (error) throw error;
-    if (!deal || deal.buyer_id !== context.userId) throw new Error("Only the buyer can request a quote.");
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
-    const [{ data: rate }, { data: rules }] = await Promise.all([
-      admin.from("fx_rates").select("*").eq("code", deal.currency).maybeSingle(),
-      admin.from("fee_rules").select("*").order("sort_order"),
-    ]);
-    if (!rate || !rate.active) throw new Error("This currency is not available right now.");
+    const { data: deal, error } = await admin.from("deals").select("*").eq("id", data.dealId).maybeSingle();
+    if (error) throw error;
+    if (!deal || deal.buyer_id !== context.userId) throw new Error("Only the buyer can request a quote.");
+    if (deal.status !== "pending_funding") throw new Error("This deal is not waiting for funding.");
 
-    const source = Number(deal.amount);
-    const providerRate = Number(rate.provider_rate);
-    const customerRate = +(providerRate * (1 + Number(rate.spread))).toFixed(6);
-    const providerAmount = roundMoney(source * providerRate, "SAR");
-    const customerAmount = roundMoney(source * customerRate, "SAR");
-    let fee = feeFor(customerAmount, rules ?? []);
-    if (deal.fee_override_flat != null) fee = Number(deal.fee_override_flat);
-    else if (deal.fee_override_percent != null)
-      fee = roundMoney((customerAmount * Number(deal.fee_override_percent)) / 100, "SAR");
-    const vat = roundMoney(fee * VAT_RATE, "SAR");
-    const total = roundMoney(customerAmount + fee + vat, "SAR");
-
+    const { priceDeal, PAY_IN_CURRENCY } = await import("@/lib/pricing.server");
+    const p = await priceDeal(admin, deal);
     const { data: q, error: qErr } = await admin
       .from("fx_quotes")
       .insert({
         deal_id: deal.id,
         source_currency: deal.currency,
-        target_currency: "SAR",
-        source_amount: source,
-        provider_rate: providerRate,
-        customer_rate: customerRate,
-        provider_amount: providerAmount,
-        customer_amount: customerAmount,
-        fx_spread: roundMoney(customerAmount - providerAmount, "SAR"),
-        fee,
-        vat,
-        total,
+        target_currency: PAY_IN_CURRENCY,
+        source_amount: Number(deal.amount),
+        provider_rate: p.payIn.providerRate,
+        customer_rate: p.payIn.customerRate,
+        provider_amount: p.payIn.escrowConversion,
+        customer_amount: p.payIn.escrowConversion + p.payIn.fxSpread,
+        fx_spread: p.payIn.fxSpread,
+        fee: p.payIn.insightFee,
+        vat: p.payIn.vatPayable,
+        total: p.payIn.total,
+        breakdown: { ...p, terms_version: deal.terms_version },
         expires_at: new Date(Date.now() + QUOTE_MINUTES * 60_000).toISOString(),
         created_by: context.userId,
       })
-      .select("id, source_currency, target_currency, source_amount, customer_rate, customer_amount, fee, vat, total, expires_at")
+      .select("*")
       .single();
     if (qErr) throw qErr;
     return {
-      ...q,
+      id: q.id,
+      source_currency: q.source_currency,
+      target_currency: q.target_currency,
       source_amount: Number(q.source_amount),
       customer_rate: Number(q.customer_rate),
       customer_amount: Number(q.customer_amount),
       fee: Number(q.fee),
       vat: Number(q.vat),
       total: Number(q.total),
+      expires_at: q.expires_at,
+      breakdown: p.breakdown,
+      payIn: p.payIn,
     };
+  });
+
+/** Fee, VAT and ledger view for a party or staff — the same numbers everywhere. */
+export const getDealPricing = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { dealId: string }) => z.object({ dealId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }): Promise<DealPricingView> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+    const { data: deal } = await admin.from("deals").select("*").eq("id", data.dealId).maybeSingle();
+    if (!deal) throw new Error("Deal not found.");
+    if (deal.buyer_id !== context.userId && deal.seller_id !== context.userId) {
+      const { isStaffUser } = await import("@/lib/staff-auth.server");
+      if (!(await isStaffUser(context))) throw new Error("You are not a party to this deal.");
+    }
+    const { ledgerPreview, priceDeal } = await import("@/lib/pricing.server");
+    const { data: fund } = await admin
+      .from("deal_transactions")
+      .select("fx_quote_id")
+      .eq("deal_id", deal.id)
+      .eq("kind", "funding")
+      .eq("status", "succeeded")
+      .maybeSingle();
+    if (fund?.fx_quote_id) {
+      const { data: q } = await admin.from("fx_quotes").select("breakdown").eq("id", fund.fx_quote_id).maybeSingle();
+      if (q?.breakdown?.breakdown) return { ...q.breakdown, ledger: ledgerPreview(q.breakdown), locked: true };
+    }
+    const p = await priceDeal(admin, deal);
+    return { breakdown: p.breakdown, payIn: p.payIn, ledger: ledgerPreview(p), locked: false };
   });

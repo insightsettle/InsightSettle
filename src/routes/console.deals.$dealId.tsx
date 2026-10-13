@@ -23,7 +23,8 @@ import {
   listDealTransactionsForStaff,
   settleTransaction,
 } from "@/lib/payments.functions";
-import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
+import { getDealPricing } from "@/lib/fx-quotes.functions";
+import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/deals/$dealId")({
   component: StaffDealPage,
@@ -38,14 +39,13 @@ function StaffDealPage() {
   const changeStatus = useServerFn(setDealStatus);
   const changeFee = useServerFn(setFeeOverride);
   const sendMessage = useServerFn(postStaffMessage);
-  const { settings } = usePlatformSettings();
 
   const detail = useQuery({
     queryKey: ["staff-deal", dealId],
     queryFn: () => fetchDeal({ data: { ref: dealId } }),
   });
 
-  const [nextStatus, setNextStatus] = useState<DealStatus>("held");
+  const [pickedStatus, setNextStatus] = useState<DealStatus | null>(null);
   const [reason, setReason] = useState("");
   const [percent, setPercent] = useState("");
   const [flat, setFlat] = useState("");
@@ -55,6 +55,12 @@ function StaffDealPage() {
   const [settleReason, setSettleReason] = useState<Record<string, string>>({});
 
   const dealUuid = detail.data?.deal.id ?? null;
+  const pricingFn = useServerFn(getDealPricing);
+  const pricing = useQuery({
+    queryKey: ["staff-deal-pricing", dealUuid, detail.data?.deal.status],
+    queryFn: () => pricingFn({ data: { dealId: dealUuid! } }),
+    enabled: !!dealUuid,
+  });
   const loadTransactions = useServerFn(listDealTransactionsForStaff);
   const settle = useServerFn(settleTransaction);
   const addNote = useServerFn(addReconciliationNote);
@@ -137,13 +143,12 @@ function StaffDealPage() {
   }
 
   const { deal, events, messages } = detail.data;
-  const baseFee = computeFee(deal.amount, settings.fees).fee;
-  const effectiveFee =
-    deal.feeOverrideFlat !== null
-      ? deal.feeOverrideFlat
-      : deal.feeOverridePercent !== null
-        ? (deal.amount * deal.feeOverridePercent) / 100
-        : baseFee;
+  // Highlight the real current status until staff pick a different one.
+  const nextStatus = (pickedStatus ?? deal.status) as DealStatus;
+  const money = (n: number, c: string = deal.currency) => formatMoney(n, c);
+  const fb = pricing.data?.breakdown ?? null;
+  const effectiveFee = fb?.fee ?? 0;
+  const hasOverride = deal.feeOverrideFlat !== null || deal.feeOverridePercent !== null;
 
   return (
     <div className="mt-6">
@@ -220,8 +225,8 @@ function StaffDealPage() {
                 <Percent className="size-5 text-primary" />
                 <h3 className="font-bold">Special fee offer</h3>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Standard fee for this amount is {formatSAR(baseFee)}. Set a percentage or a fixed
+              <p key={`fee-${effectiveFee}`} className="mt-1 text-sm text-muted-foreground">
+                Fee for this deal is {money(effectiveFee)}. Set a percentage or a fixed
                 amount for high-value deals.
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -236,7 +241,7 @@ function StaffDealPage() {
                   />
                 </label>
                 <label className="text-sm">
-                  Fixed fee (SAR)
+                  Fixed fee (deal currency)
                   <Input
                     value={flat}
                     onChange={(e) => setFlat(e.target.value)}
@@ -283,11 +288,11 @@ function StaffDealPage() {
                   Remove offer
                 </Button>
               </div>
-              <p className="mt-3 text-sm">
+              <p key={`charged-${effectiveFee}`} className="mt-3 text-sm">
                 Fee charged to this deal:{" "}
                 <b>
-                  {formatSAR(effectiveFee)}
-                  {effectiveFee !== baseFee ? " (special offer active)" : ""}
+                  {money(effectiveFee)}
+                  {hasOverride ? " (special offer active)" : ""}
                 </b>
               </p>
               {deal.feeOverrideNote && (
@@ -312,7 +317,7 @@ function StaffDealPage() {
                   <div key={t.id} className="rounded-md border border-border p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-semibold capitalize">
-                        {t.kind} · <bdi dir="ltr">{formatSAR(t.amount)}</bdi>
+                        {t.kind} · <bdi dir="ltr">{money(t.amount, t.currency)}</bdi>
                       </p>
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -437,13 +442,23 @@ function StaffDealPage() {
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground">Deal value</p>
               <p className="mt-1 text-3xl font-extrabold">
-                {deal.currency} {deal.amount.toLocaleString("en-GB")}
+                <bdi dir="ltr">{money(deal.amount)}</bdi>
               </p>
               <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
                 <Row label="Created" value={formatDate(deal.createdAt)} />
                 <Row label="Due" value={deal.dueAt ? formatDate(deal.dueAt) : "—"} />
-                <Row label="Standard fee" value={formatSAR(baseFee)} />
-                <Row label="Fee charged" value={formatSAR(effectiveFee)} />
+                {fb && <Row label="Fee charged" value={money(fb.fee)} />}
+                {fb && (
+                  <>
+                    <Row label="Buyer share + VAT" value={`${money(fb.buyerShare)} + ${money(fb.buyerVat)} (${Math.round(fb.buyerVatRate * 100)}%)`} />
+                    <Row label="Supplier share + VAT" value={`${money(fb.sellerShare)} + ${money(fb.sellerVat)} (${Math.round(fb.sellerVatRate * 100)}%)`} />
+                    <Row label="Buyer funds" value={money(fb.buyerTotal)} />
+                    <Row label="Supplier receives" value={money(fb.supplierNet)} />
+                    {pricing.data && (
+                      <Row label={pricing.data.locked ? "Pricing" : "Pricing (live preview)"} value={pricing.data.locked ? "Locked by funding quote" : "Not funded yet"} />
+                    )}
+                  </>
+                )}
               </dl>
             </CardContent>
           </Card>

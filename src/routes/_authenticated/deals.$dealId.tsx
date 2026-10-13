@@ -1,4 +1,13 @@
-import { requestFxQuote, type FxQuote } from "@/lib/fx-quotes.functions";
+import { getDealPricing, requestFxQuote, type FxQuote } from "@/lib/fx-quotes.functions";
+import {
+  acceptTerms,
+  confirmDelivery as confirmDeliveryFn,
+  rejectTerms as rejectTermsFn,
+  requestRevision,
+  requestTermsChange as requestTermsChangeFn,
+  updateShipping as updateShippingFn,
+} from "@/lib/deal-party.functions";
+import { formatMoney } from "@/lib/money";
 import {
   AttachmentsCard,
   CancelPanel,
@@ -38,23 +47,16 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { useSessionUser } from "@/hooks/use-session";
 import {
-  agreeToTerms,
-  confirmDelivery,
   contactSupport,
   listDealMessages,
   listDealRatings,
   listDealTransactions,
   listTimeline,
-  openDispute,
   postDealMessage,
-  rejectTerms,
-  requestReview,
-  requestTermsChange,
   submitRating,
-  updateShipping,
 } from "@/lib/deal-actions";
-import { feePayerLabels, getDealByRef, shippingStatusLabels, splitFee } from "@/lib/deals";
-import { calcFee, formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
+import { feePayerLabels, getDealByRef, shippingStatusLabels } from "@/lib/deals";
+import { formatDate, statusLabels, type DealStatus } from "@/lib/demo-data";
 import {
   requestFundsRelease,
   startDealFunding,
@@ -133,7 +135,7 @@ function DealPage() {
   };
 
   const action = useMutation({
-    mutationFn: async (fn: () => Promise<void>) => fn(),
+    mutationFn: async (fn: () => Promise<unknown>) => fn(),
     onSuccess: () => {
       setReviewNote("");
       setDisputeReason("");
@@ -146,6 +148,18 @@ function DealPage() {
   });
 
   const fund = useServerFn(startDealFunding);
+  const agreeFn = useServerFn(acceptTerms);
+  const changeFn = useServerFn(requestTermsChangeFn);
+  const rejectFn = useServerFn(rejectTermsFn);
+  const deliverFn = useServerFn(confirmDeliveryFn);
+  const reviewFn = useServerFn(requestRevision);
+  const shipFn = useServerFn(updateShippingFn);
+  const pricingFn = useServerFn(getDealPricing);
+  const pricing = useQuery({
+    queryKey: ["deal-pricing", deal?.id, deal?.status, deal?.terms_version],
+    queryFn: () => pricingFn({ data: { dealId: deal!.id } }),
+    enabled: !!deal,
+  });
   const release = useServerFn(requestFundsRelease);
   const getQuote = useServerFn(requestFxQuote);
   const [quote, setQuote] = useState<FxQuote | null>(null);
@@ -193,19 +207,14 @@ function DealPage() {
   const status = (
     Object.keys(statusLabels).includes(deal.status) ? deal.status : "pending_funding"
   ) as DealStatus;
-  const standardFee = calcFee(amount).fee;
-  const fee =
-    deal.fee_override_flat !== null && deal.fee_override_flat !== undefined
-      ? Number(deal.fee_override_flat)
-      : deal.fee_override_percent !== null && deal.fee_override_percent !== undefined
-        ? (amount * Number(deal.fee_override_percent)) / 100
-        : standardFee;
+  const money = (n: number, c: string = deal.currency) => formatMoney(n, c);
+  const fb = pricing.data?.breakdown ?? null;
+  const pin = pricing.data?.payIn ?? null;
 
   const isBuyer = !!user && deal.buyer_id === user.id;
   const isSeller = !!user && deal.seller_id === user.id;
   const bothJoined = !!deal.buyer_id && !!deal.seller_id;
 
-  const sides = splitFee(amount, fee, deal.fee_payer);
   const termsAgreed = deal.terms_status === "agreed";
   const isCreator = !!user && deal.created_by === user.id;
   const canDecideTerms = !termsAgreed && bothJoined && !isCreator;
@@ -250,7 +259,7 @@ function DealPage() {
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">
                     No money can be funded until both sides accept the terms: value{" "}
-                    {formatSAR(amount)}, {feePayerLabels[deal.fee_payer] ?? "buyer pays the fee"},
+                    {money(amount)}, {feePayerLabels[deal.fee_payer] ?? "buyer pays the fee"},
                     buyer inspection period of {deal.inspection_days} day(s)
                     {deal.due_at ? `, delivery by ${formatDate(deal.due_at)}` : ""}.
                   </p>
@@ -269,14 +278,14 @@ function DealPage() {
                         placeholder="Optional: what should change before you accept?"
                       />
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <Button onClick={() => action.mutate(() => agreeToTerms(deal.id))}>
+                        <Button onClick={() => action.mutate(() => agreeFn({ data: { dealId: deal.id } }))}>
                           <BadgeCheck /> Accept the terms
                         </Button>
                         <Button
                           variant="outline"
                           disabled={termsNote.trim().length < 3}
                           onClick={() =>
-                            action.mutate(() => requestTermsChange(deal.id, termsNote.trim()))
+                            action.mutate(() => changeFn({ data: { dealId: deal.id, note: termsNote.trim() } }))
                           }
                         >
                           Request a change
@@ -285,7 +294,7 @@ function DealPage() {
                           variant="ghost"
                           disabled={termsNote.trim().length < 3}
                           onClick={() =>
-                            action.mutate(() => rejectTerms(deal.id, termsNote.trim()))
+                            action.mutate(() => rejectFn({ data: { dealId: deal.id, note: termsNote.trim() } }))
                           }
                         >
                           Reject
@@ -311,18 +320,19 @@ function DealPage() {
                   movement is recorded below with its status.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {isBuyer && status === "pending_funding" && deal.currency !== "SAR" && (
+                  {isBuyer && status === "pending_funding" && (
                     <div className="w-full rounded-lg border p-4 text-sm">
                       {quote && !quoteExpired ? (
                         <div className="space-y-1" dir="ltr">
                           <div>
-                            {deal.currency} {quote.source_amount.toLocaleString()} × {quote.customer_rate} ={" "}
-                            SAR {quote.customer_amount.toLocaleString()}
+                            {money(quote.breakdown.buyerTotal)} × {quote.customer_rate} = {money(quote.total, quote.target_currency)}
                           </div>
                           <div>
-                            Insight fee SAR {quote.fee.toLocaleString()} · VAT SAR {quote.vat.toLocaleString()}
+                            Deal amount {money(quote.payIn.escrowConversion + quote.payIn.fxSpread, quote.target_currency)} · Your fee share{" "}
+                            {money(quote.fee, quote.target_currency)} · VAT {Math.round(quote.breakdown.buyerVatRate * 100)}%{" "}
+                            {money(quote.vat, quote.target_currency)}
                           </div>
-                          <div className="font-bold">Total SAR {quote.total.toLocaleString()}</div>
+                          <div className="font-bold">Total {money(quote.total, quote.target_currency)}</div>
                           <div className="text-muted-foreground">
                             Rate locked until {new Date(quote.expires_at).toLocaleTimeString()}
                           </div>
@@ -365,7 +375,6 @@ function DealPage() {
                           fund({
                             data: {
                               dealId: deal.id,
-                              fee,
                               ...(quote && !quoteExpired ? { quoteId: quote.id } : {}),
                             },
                           }),
@@ -375,7 +384,7 @@ function DealPage() {
                         !bothJoined ||
                         !termsAgreed ||
                         payment.isPending ||
-                        (deal.currency !== "SAR" && (!quote || quoteExpired))
+                        !quote || quoteExpired
                       }
                     >
                       <Wallet /> {payment.isPending ? "Starting payment…" : "Fund the deal"}
@@ -384,7 +393,7 @@ function DealPage() {
                   {isSeller && status === "held" && (
                     <Button
                       onClick={() =>
-                        action.mutate(() => confirmDelivery(deal.id, deal.inspection_days))
+                        action.mutate(() => deliverFn({ data: { dealId: deal.id } }))
                       }
                     >
                       <BadgeCheck /> Confirm delivery
@@ -393,7 +402,7 @@ function DealPage() {
                   {isBuyer && (status === "delivered" || status === "under_review") && (
                     <Button
                       onClick={() =>
-                        payment.mutate(() => release({ data: { dealId: deal.id, fee } }))
+                        payment.mutate(() => release({ data: { dealId: deal.id } }))
                       }
                       disabled={payment.isPending}
                     >
@@ -412,6 +421,10 @@ function DealPage() {
                   )}
                 </div>
                 <p className="mt-3 text-xs text-warning">In this demo the payment provider is simulated and no real money moves.</p>
+
+                {action.error && (
+                  <p className="mt-3 text-sm text-destructive">{(action.error as Error).message}</p>
+                )}
 
                 {status === "delivered" && inspectionEnds && (
                   <div className="mt-4 flex gap-2 rounded-md border border-primary/30 bg-primary/5 p-4">
@@ -460,7 +473,7 @@ function DealPage() {
                       variant="outline"
                       className="mt-3"
                       disabled={reviewNote.trim().length < 3}
-                      onClick={() => action.mutate(() => requestReview(deal.id, reviewNote.trim()))}
+                      onClick={() => action.mutate(() => reviewFn({ data: { dealId: deal.id, note: reviewNote.trim() } }))}
                     >
                       Ask for a revision
                     </Button>
@@ -544,11 +557,14 @@ function DealPage() {
                         variant="outline"
                         onClick={() =>
                           action.mutate(() =>
-                            updateShipping(deal.id, {
-                              carrier: carrier.trim(),
-                              tracking: tracking.trim(),
-                              status: shippingState,
-                              eta: shipEta || null,
+                            shipFn({
+                              data: {
+                                dealId: deal.id,
+                                carrier: carrier.trim(),
+                                tracking: tracking.trim(),
+                                status: shippingState,
+                                eta: shipEta || null,
+                              },
                             }),
                           )
                         }
@@ -634,7 +650,7 @@ function DealPage() {
                     <div key={t.id} className="rounded-md border border-border p-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-sm font-semibold capitalize">
-                          {t.kind} · <bdi dir="ltr">{formatSAR(t.amount)}</bdi>
+                          {t.kind} · <bdi dir="ltr">{money(t.amount, t.currency)}</bdi>
                         </p>
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -743,19 +759,22 @@ function DealPage() {
               <CardContent className="p-6">
                 <p className="text-sm text-muted-foreground">Deal value</p>
                 <p className="mt-1 text-3xl font-extrabold">
-                  {deal.currency} {amount.toLocaleString("en-GB")}
+                  <bdi dir="ltr">{money(amount)}</bdi>
                 </p>
                 <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
-                  <Info label="Platform fee" value={formatSAR(fee)} />
-                  {fee !== standardFee && (
-                    <Info label="Standard fee" value={formatSAR(standardFee)} />
-                  )}
+                  {fb && <Info label="Platform fee" value={money(fb.fee)} />}
                   <Info
                     label="Fee paid by"
                     value={feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee"}
                   />
-                  <Info label="Buyer pays" value={formatSAR(sides.buyerPays)} />
-                  <Info label="Seller receives" value={formatSAR(sides.sellerReceives)} />
+                  {fb && (
+                    <>
+                      <Info label="Buyer fee share" value={`${money(fb.buyerShare)} + VAT ${Math.round(fb.buyerVatRate * 100)}% ${money(fb.buyerVat)}`} />
+                      <Info label="Supplier fee share" value={`${money(fb.sellerShare)} + VAT ${Math.round(fb.sellerVatRate * 100)}% ${money(fb.sellerVat)}`} />
+                      <Info label="Buyer pays" value={pin && pin.payCurrency !== deal.currency ? `${money(fb.buyerTotal)} ≈ ${money(pin.total, pin.payCurrency)}` : money(fb.buyerTotal)} />
+                      <Info label="Supplier receives" value={money(fb.supplierNet)} />
+                    </>
+                  )}
                   <Info label="Inspection period" value={`${deal.inspection_days} day(s)`} />
                 <Info label="Quantity" value={String(deal.quantity ?? 1)} />
                 <Info label="Auto-release" value={deal.auto_release_enabled ? "On" : "Off — buyer must accept"} />
@@ -764,7 +783,7 @@ function DealPage() {
                   <Info label="Created" value={formatDate(deal.created_at)} />
                   <Info label="Due" value={deal.due_at ? formatDate(deal.due_at) : "No due date"} />
                 </dl>
-                {fee !== standardFee && (
+                {(deal.fee_override_flat != null || deal.fee_override_percent != null) && (
                   <p className="mt-3 rounded-md bg-primary/10 p-3 text-xs text-primary">
                     Insight applied a special fee to this deal.
                     {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
@@ -786,7 +805,7 @@ function DealPage() {
                 <Info
                   label="Buyer"
                   value={
-                    deal.buyer_id ? (isBuyer ? "You" : "Invited buyer joined") : "Awaiting buyer"
+                    deal.buyer_id ? (isBuyer ? "You" : "Other party (joined)") : "Awaiting buyer"
                   }
                 />
                 <Info
@@ -795,11 +814,11 @@ function DealPage() {
                     deal.seller_id
                       ? isSeller
                         ? "You"
-                        : "Invited seller joined"
+                        : "Other party (joined)"
                       : "Awaiting seller"
                   }
                 />
-                <Info label="Invited email" value={deal.counterparty_email ?? "—"} />
+                {isCreator && <Info label="You invited" value={deal.counterparty_email ?? "—"} />}
               </CardContent>
             </Card>
 

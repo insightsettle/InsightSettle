@@ -1,4 +1,64 @@
+import { fundingLedger, releaseLedger, type FeeBreakdown, type PayInQuote } from "@/lib/fees";
 import { roundMoney } from "@/lib/money";
+
+async function lockedPricing(admin: any, dealId: string): Promise<{ breakdown: FeeBreakdown; payIn: PayInQuote } | null> {
+  const { data: fund } = await admin
+    .from("deal_transactions")
+    .select("fx_quote_id")
+    .eq("deal_id", dealId)
+    .eq("kind", "funding")
+    .eq("status", "succeeded")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!fund?.fx_quote_id) return null;
+  const { data: q } = await admin.from("fx_quotes").select("breakdown").eq("id", fund.fx_quote_id).maybeSingle();
+  return q?.breakdown?.breakdown ? q.breakdown : null;
+}
+
+/** Ledger rows (balanced per currency) and the tax invoice, from the same locked quote numbers. */
+async function writeLedgerAndInvoice(admin: any, tx: any, ref: string) {
+  const pricing = tx.kind === "refund" ? null : await lockedPricing(admin, tx.deal_id);
+  let rows: { account: string; debit: number; credit: number; currency: string }[];
+  if (tx.kind === "funding" && pricing) {
+    rows = fundingLedger(pricing.breakdown, pricing.payIn);
+    const b = pricing.breakdown;
+    const lines = [
+      { party: "buyer", fee: pricing.payIn.insightFee, vat_rate: b.buyerVatRate, vat: pricing.payIn.vatPayable, currency: pricing.payIn.payCurrency },
+      { party: "supplier", fee: b.sellerShare, vat_rate: b.sellerVatRate, vat: b.sellerVat, currency: b.currency },
+    ].filter((l) => l.fee > 0);
+    const first = lines[0];
+    if (first)
+      await admin.from("tax_invoices").upsert(
+        {
+          deal_id: tx.deal_id,
+          fee: first.fee,
+          vat_rate: first.vat_rate,
+          vat: first.vat,
+          total: roundMoney(first.fee + first.vat, first.currency),
+          currency: first.currency,
+          lines,
+        },
+        { onConflict: "deal_id", ignoreDuplicates: true },
+      );
+  } else if (tx.kind === "release" && pricing) {
+    const b = pricing.breakdown;
+    // The supplier receives the deal amount less its fee share and VAT; keep the record consistent.
+    await admin.from("deal_transactions").update({ amount: b.supplierNet, fee: b.sellerShare, currency: b.currency }).eq("id", tx.id);
+    rows = releaseLedger(b);
+  } else {
+    const amt = Number(tx.amount);
+    rows = [
+      { account: "escrow_held", debit: amt, credit: 0, currency: tx.currency },
+      { account: tx.kind === "release" ? "supplier_payable" : "buyer_refund_payable", debit: 0, credit: amt, currency: tx.currency },
+    ];
+  }
+  await admin.from("ledger_entries").insert(
+    rows
+      .filter((r) => r.debit !== 0 || r.credit !== 0)
+      .map((r) => ({ ...r, deal_id: tx.deal_id, transaction_id: tx.id, reference: ref })),
+  );
+}
 
 export const SIMULATED_CONFIRMATION = "Confirmed by the payment provider (simulated)";
 
@@ -62,50 +122,7 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
       .eq("id", deal.id);
   }
   if (newStatus && deal) {
-    // Double-entry ledger: every settled movement balances debit = credit.
-    const amt = Number(tx.amount);
-    const fee = Number(tx.fee ?? 0);
-    const ref = data.providerRef ?? tx.id;
-    const rows =
-      tx.kind === "funding"
-        ? [
-            { account: "provider_clearing", debit: amt, credit: 0 },
-            { account: "escrow_held", debit: 0, credit: roundMoney(amt - fee, tx.currency) },
-            { account: "insight_fee_revenue", debit: 0, credit: fee },
-          ]
-        : tx.kind === "release"
-          ? [
-              { account: "escrow_held", debit: amt, credit: 0 },
-              { account: "supplier_payable", debit: 0, credit: amt },
-            ]
-          : [
-              { account: "escrow_held", debit: amt, credit: 0 },
-              { account: "buyer_refund_payable", debit: 0, credit: amt },
-            ];
-    if (tx.kind === "release") {
-      const { data: full } = await admin.from("deals").select("id, supplier_country, fee_payer").eq("id", tx.deal_id).single();
-      const vatRates: Record<string, number> = { SA: 0.15, AE: 0.05, BH: 0.1, OM: 0.05, QA: 0, KW: 0 };
-      const vatRate = vatRates[full?.supplier_country ?? "SA"] ?? 0.15;
-      const { data: fundTx } = await admin.from("deal_transactions").select("fee").eq("deal_id", tx.deal_id).eq("kind", "funding").eq("status", "succeeded").maybeSingle();
-      const invFee = Number(fundTx?.fee ?? fee);
-      if (invFee > 0)
-        await admin.from("tax_invoices").upsert(
-          {
-            deal_id: tx.deal_id,
-            fee: invFee,
-            vat_rate: vatRate,
-            vat: roundMoney(invFee * vatRate, "SAR"),
-            total: roundMoney(invFee * (1 + vatRate), "SAR"),
-            currency: "SAR",
-          },
-          { onConflict: "deal_id", ignoreDuplicates: true },
-        );
-    }
-    await admin.from("ledger_entries").insert(
-      rows
-        .filter((r) => r.debit !== 0 || r.credit !== 0)
-        .map((r) => ({ ...r, deal_id: tx.deal_id, transaction_id: tx.id, currency: tx.currency, reference: ref })),
-    );
+    await writeLedgerAndInvoice(admin, tx, data.providerRef ?? tx.id);
   }
 
   const kindLabel = tx.kind === "funding" ? "Funding" : tx.kind === "release" ? "Payout" : "Refund";
