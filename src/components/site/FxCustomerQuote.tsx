@@ -20,7 +20,7 @@ export function FxCustomerQuote() {
   const list: Cur[] = useMemo(
     () => [
       { code: "SAR", name: "Saudi riyal", base: 1, spread: 0 },
-      ...settings.rates.map((r) => ({ code: r.code, name: r.name, base: r.baseRate, spread: r.spread })),
+      ...settings.rates.filter((r) => r.active !== false).map((r) => ({ code: r.code, name: r.name, base: r.baseRate, spread: r.spread })),
     ],
     [settings.rates],
   );

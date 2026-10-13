@@ -426,20 +426,63 @@ export const getPlatformSummary = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const admin = await assertStaff(context);
-    const { count: userCount } = await admin
-      .from("profiles")
-      .select("id", { count: "exact", head: true });
-    const { data: deals } = await admin.from("deals").select("amount, status");
-    const { count: pendingKyc } = await admin
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("verification_status", "pending");
+    const [users, kyc, dealsRes, txRes, disputesRes, quotesRes] = await Promise.all([
+      admin.from("profiles").select("id", { count: "exact", head: true }),
+      admin.from("profiles").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
+      admin
+        .from("deals")
+        .select("id, ref, title, amount, currency, status, created_at, released_at")
+        .order("created_at", { ascending: false }),
+      admin.from("deal_transactions").select("kind, amount, fee, status, created_at"),
+      admin.from("disputes").select("id, deal_id, reason, status, created_at"),
+      admin.from("fx_quotes").select("fx_spread, used_at").not("used_at", "is", null),
+    ]);
+    const deals = (dealsRes.data ?? []) as any[];
+    const tx = ((txRes.data ?? []) as any[]).filter((t) => t.status === "succeeded");
+    const disputes = (disputesRes.data ?? []) as any[];
+    const funding = tx.filter((t) => t.kind === "funding");
+    const months: Record<string, { month: string; value: number; fees: number }> = {};
+    for (const t of funding) {
+      const m = String(t.created_at).slice(0, 7);
+      months[m] ??= { month: m, value: 0, fees: 0 };
+      months[m].value += Number(t.amount);
+      months[m].fees += Number(t.fee ?? 0);
+    }
+    const released = deals.filter((d) => d.released_at);
+    const releaseDays = released.map(
+      (d) => (new Date(d.released_at).getTime() - new Date(d.created_at).getTime()) / 86_400_000,
+    );
+    const statusCounts: Record<string, number> = {};
+    for (const d of deals) statusCounts[d.status] = (statusCounts[d.status] ?? 0) + 1;
+    const refs = Object.fromEntries(deals.map((d) => [d.id, d.ref]));
     return {
-      userCount: userCount ?? 0,
-      pendingKyc: pendingKyc ?? 0,
-      dealCount: deals?.length ?? 0,
-      dealVolume: (deals ?? []).reduce((s, d) => s + Number(d.amount), 0),
-      disputed: (deals ?? []).filter((d) => d.status === "disputed").length,
+      userCount: users.count ?? 0,
+      pendingKyc: kyc.count ?? 0,
+      dealCount: deals.length,
+      dealVolume: deals.reduce((s, d) => s + Number(d.amount), 0),
+      disputed: deals.filter((d) => d.status === "disputed").length,
+      fundedVolume: funding.reduce((s, t) => s + Number(t.amount), 0),
+      feeRevenue: funding.reduce((s, t) => s + Number(t.fee ?? 0), 0),
+      marginRevenue: ((quotesRes.data ?? []) as any[]).reduce((s, q) => s + Number(q.fx_spread ?? 0), 0),
+      heldFunds: deals
+        .filter((d) => ["held", "delivered", "under_review", "disputed"].includes(d.status))
+        .reduce((s, d) => s + Number(d.amount), 0),
+      releasedCount: deals.filter((d) => d.status === "released").length,
+      avgReleaseDays: releaseDays.length ? releaseDays.reduce((a, b) => a + b, 0) / releaseDays.length : null,
+      openDisputes: disputes.filter((d) => d.status !== "resolved").length,
+      disputesUnderReview: disputes.filter((d) => d.status === "under_review").length,
+      openDisputeList: disputes
+        .filter((d) => d.status !== "resolved")
+        .map((d) => ({ id: d.id as string, ref: refs[d.deal_id] ?? "", reason: d.reason as string, createdAt: d.created_at as string })),
+      monthly: Object.values(months).sort((a, b) => b.month.localeCompare(a.month)).slice(0, 6),
+      statusCounts,
+      recentDeals: deals.slice(0, 15).map((d) => ({
+        ref: d.ref as string,
+        title: d.title as string,
+        amount: Number(d.amount),
+        currency: d.currency as string,
+        status: d.status as string,
+      })),
     };
   });
 

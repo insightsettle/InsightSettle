@@ -7,6 +7,15 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "In this demo the payment provider is simulated and no real money moves.": "في هذه النسخة التجريبية مزوّد الدفع محاكى ولا تُنقل أموال حقيقية.",
+  "Confirmed by the payment provider (simulated)": "أكّده مزوّد الدفع (محاكاة)",
+  "Payment confirmed by the payment provider (simulated). In this demo no real money moves.": "أكّد مزوّد الدفع الدفعة (محاكاة). في هذه النسخة التجريبية لا تُنقل أموال حقيقية.",
+  "Payout confirmed by the payment provider (simulated). In this demo no real money moves.": "أكّد مزوّد الدفع التحويل للمورد (محاكاة). في هذه النسخة التجريبية لا تُنقل أموال حقيقية.",
+  "Internal reconciliation note": "ملاحظة تسوية داخلية",
+  "Add note": "إضافة ملاحظة",
+  "Testing tool — simulated provider": "أداة اختبار — مزوّد محاكى",
+  "Simulate provider decline": "محاكاة رفض مزوّد الدفع",
+  "Waiting for the payment provider.": "بانتظار مزوّد الدفع.",
   "For buyers": "للمشترين",
   "For suppliers": "للموردين",
   Business: "الأعمال",

@@ -17,7 +17,12 @@ import {
   setFeeOverride,
 } from "@/lib/admin.functions";
 import { formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
-import { listDealTransactionsForStaff, settleTransaction } from "@/lib/payments.functions";
+import {
+  addReconciliationNote,
+  getPaymentProviderStatus,
+  listDealTransactionsForStaff,
+  settleTransaction,
+} from "@/lib/payments.functions";
 import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/console/deals/$dealId")({
@@ -52,6 +57,17 @@ function StaffDealPage() {
   const dealUuid = detail.data?.deal.id ?? null;
   const loadTransactions = useServerFn(listDealTransactionsForStaff);
   const settle = useServerFn(settleTransaction);
+  const addNote = useServerFn(addReconciliationNote);
+  const providerStatus = useQuery({ queryKey: ["payment-provider"], queryFn: () => getPaymentProviderStatus() });
+  const simulated = providerStatus.data ? !providerStatus.data.connected : true;
+  const [noteText, setNoteText] = useState<Record<string, string>>({});
+  const noteMutation = useMutation({
+    mutationFn: (vars: { transactionId: string; note: string }) => addNote({ data: vars }),
+    onSuccess: () => {
+      setNoteText({});
+      refresh();
+    },
+  });
   const transactions = useQuery({
     queryKey: ["staff-deal-transactions", dealUuid],
     queryFn: () => loadTransactions({ data: { dealId: dealUuid! } }),
@@ -287,7 +303,9 @@ function StaffDealPage() {
                 <h3 className="font-bold">Payment records</h3>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                Record payment provider confirmations (simulated in this demo). The outcome and reason are shown to both parties.
+                {simulated
+                  ? "In this demo the payment provider is simulated and confirms each money step automatically. Staff can view provider status and add internal reconciliation notes."
+                  : "Payment provider status for every money movement. The outcome and reason are shown to both parties."}
               </p>
               <div className="mt-4 space-y-3">
                 {(transactions.data ?? []).map((t) => (
@@ -315,56 +333,51 @@ function StaffDealPage() {
                     {t.error_message && (
                       <p className="mt-2 text-sm text-destructive">{t.error_message}</p>
                     )}
-                    {(t.status === "pending" || t.status === "processing") && (
-                      <div className="mt-3 space-y-2">
-                        <Input
-                          value={settleRef[t.id] ?? ""}
-                          onChange={(e) =>
-                            setSettleRef((prev) => ({ ...prev, [t.id]: e.target.value }))
-                          }
-                          placeholder="Provider or bank reference (optional)"
-                        />
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Input
+                        className="max-w-sm"
+                        value={noteText[t.id] ?? ""}
+                        onChange={(e) => setNoteText((prev) => ({ ...prev, [t.id]: e.target.value }))}
+                        placeholder="Internal reconciliation note"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={noteMutation.isPending || (noteText[t.id] ?? "").trim().length < 2}
+                        onClick={() => noteMutation.mutate({ transactionId: t.id, note: noteText[t.id]!.trim() })}
+                      >
+                        Add note
+                      </Button>
+                    </div>
+                    {simulated && t.kind === "funding" && (t.status === "pending" || t.status === "processing") && (
+                      <div className="mt-3 space-y-2 rounded-md border border-dashed border-warning/50 p-3">
+                        <p className="text-xs font-semibold text-warning">Testing tool — simulated provider</p>
                         <Input
                           value={settleReason[t.id] ?? ""}
                           onChange={(e) =>
                             setSettleReason((prev) => ({ ...prev, [t.id]: e.target.value }))
                           }
-                          placeholder="Reason — required when rejecting"
+                          placeholder="Decline reason code, e.g. CARD_DECLINED"
                         />
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            size="sm"
-                            disabled={settleMutation.isPending}
-                            onClick={() =>
-                              settleMutation.mutate({
-                                transactionId: t.id,
-                                outcome: "succeeded",
-                                providerRef: settleRef[t.id]?.trim() || null,
-                                reason: settleReason[t.id]?.trim() || null,
-                              })
-                            }
-                          >
-                            Record provider confirmation (simulated)
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={
-                              settleMutation.isPending || !(settleReason[t.id] ?? "").trim()
-                            }
-                            onClick={() =>
-                              settleMutation.mutate({
-                                transactionId: t.id,
-                                outcome: "failed",
-                                providerRef: settleRef[t.id]?.trim() || null,
-                                reason: settleReason[t.id]!.trim(),
-                              })
-                            }
-                          >
-                            Mark failed
-                          </Button>
-                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={settleMutation.isPending || !(settleReason[t.id] ?? "").trim()}
+                          onClick={() =>
+                            settleMutation.mutate({
+                              transactionId: t.id,
+                              outcome: "failed",
+                              providerRef: null,
+                              reason: `Simulated provider decline: ${settleReason[t.id]!.trim()}`,
+                            })
+                          }
+                        >
+                          Simulate provider decline
+                        </Button>
                       </div>
+                    )}
+                    {!simulated && (t.status === "pending" || t.status === "processing") && (
+                      <p className="mt-2 text-xs text-muted-foreground">Waiting for the payment provider.</p>
                     )}
                   </div>
                 ))}

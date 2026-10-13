@@ -411,6 +411,7 @@ function DealPage() {
                     </p>
                   )}
                 </div>
+                <p className="mt-3 text-xs text-warning">In this demo the payment provider is simulated and no real money moves.</p>
 
                 {status === "delivered" && inspectionEnds && (
                   <div className="mt-4 flex gap-2 rounded-md border border-primary/30 bg-primary/5 p-4">
@@ -627,6 +628,7 @@ function DealPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Funding, payouts, and refunds with the exact status both parties can see.
                 </p>
+                <p className="mt-1 text-xs text-warning">In this demo the payment provider is simulated and no real money moves.</p>
                 <div className="mt-4 space-y-3">
                   {(transactions.data ?? []).map((t) => (
                     <div key={t.id} className="rounded-md border border-border p-4">
@@ -771,6 +773,7 @@ function DealPage() {
                 <p className="mt-4 text-xs text-warning">
                   Payment is confirmed by the payment provider (simulated in this demo). Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.
                 </p>
+                <p className="mt-2 text-xs text-warning">In this demo the payment provider is simulated and no real money moves.</p>
               </CardContent>
             </Card>
 

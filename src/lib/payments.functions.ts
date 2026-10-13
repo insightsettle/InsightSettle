@@ -53,7 +53,7 @@ async function serverFee(admin: any, deal: any) {
     return roundMoney((amount * Number(deal.fee_override_percent)) / 100, deal.currency);
   const { feeFor } = await import("@/lib/fx-quotes.functions");
   const { data: rules } = await admin.from("fee_rules").select("*").order("sort_order");
-  return roundMoney(feeFor(amount, rules ?? []), deal.currency);
+  return roundMoney(feeFor(amount, rules ?? [], deal.currency), deal.currency);
 }
 
 async function loadDealForParty(context: { supabase: any; userId: string }, dealId: string) {
