@@ -7,9 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createDeal, gccCountries, splitFee, type DealRow, type FeePayer } from "@/lib/deals";
-import { formatSAR } from "@/lib/demo-data";
-import { computeFee, usePlatformSettings } from "@/lib/platform-settings";
+import { useServerFn } from "@tanstack/react-start";
+import { gccCountries, type FeePayer } from "@/lib/deals";
+import { DEAL_TYPE_META, MilestoneEditor, toInput, type EditableMilestone } from "@/components/deal/DealPanels";
+import { createTypedDeal } from "@/lib/deal-milestones.functions";
+import { DEAL_TYPES, DEAL_TYPE_DEFAULTS, validateMilestones, type DealType } from "@/lib/milestones";
 
 import { fxCurrencies } from "@/lib/fx";
 
@@ -30,52 +32,16 @@ export const Route = createFileRoute("/_authenticated/deals/new")({
   component: NewDeal,
 });
 
-const templates = [
-  {
-    id: "custom",
-    label: "Custom deal",
-    title: "",
-    description: "",
-    inspectionDays: 3,
-    shipping: false,
-  },
-  {
-    id: "goods",
-    label: "Physical goods",
-    title: "Purchase of goods",
-    description:
-      "Item description, condition, shipping method, and the inspection conditions on arrival.",
-    inspectionDays: 5,
-    shipping: true,
-  },
-  {
-    id: "services",
-    label: "Freelance service",
-    title: "Freelance project",
-    description: "Scope of work, number of revisions, delivery format, and acceptance conditions.",
-    inspectionDays: 3,
-    shipping: false,
-  },
-  {
-    id: "domain",
-    label: "Domain or online account",
-    title: "Domain transfer",
-    description: "Domain name, registrar, transfer method, and confirmation of the transfer.",
-    inspectionDays: 2,
-    shipping: false,
-  },
-  {
-    id: "vehicle",
-    label: "Vehicle",
-    title: "Vehicle sale",
-    description: "Make, model, year, mileage, inspection report, and ownership transfer steps.",
-    inspectionDays: 7,
-    shipping: true,
-  },
-] as const;
+const blankRow = (): EditableMilestone => ({ title: "", amount: "", dueDate: "", evidenceRequired: "", kind: "work" });
 
 function NewDeal() {
-  const [template, setTemplate] = useState<string>("custom");
+  const [dealType, setDealType] = useState<DealType | null>(null);
+  const [useMilestones, setUseMilestones] = useState(false);
+  const [rows, setRows] = useState<EditableMilestone[]>([blankRow(), blankRow()]);
+  const [retention, setRetention] = useState("5");
+  const [dlp, setDlp] = useState("90");
+  const [revisions, setRevisions] = useState("2");
+  const createFn = useServerFn(createTypedDeal);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("5000");
@@ -96,21 +62,21 @@ function NewDeal() {
   const [autoRelease, setAutoRelease] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [created, setCreated] = useState<DealRow | null>(null);
+  const [created, setCreated] = useState<{ ref: string; invite_token: string } | null>(null);
 
   const numericAmount = Number(amount) || 0;
-  const { settings: platform } = usePlatformSettings();
-  const fee = computeFee(numericAmount, platform.fees);
-  const sides = splitFee(numericAmount, fee.fee, feePayer);
+  const milestonesOn = dealType === "contracting" || (useMilestones && (dealType === "services" || dealType === "freelance"));
+  const planError = dealType && milestonesOn
+    ? validateMilestones(numericAmount, currency, rows.map(toInput), dealType)
+    : null;
 
-  function applyTemplate(id: string) {
-    setTemplate(id);
-    const found = templates.find((t) => t.id === id);
-    if (!found || found.id === "custom") return;
-    setTitle(found.title);
-    setDescription(found.description);
-    setInspectionDays(String(found.inspectionDays));
-    setShippingRequired(found.shipping);
+  function chooseType(t: DealType) {
+    setDealType(t);
+    const d = DEAL_TYPE_DEFAULTS[t];
+    setInspectionDays(String(d.inspectionDays));
+    setShippingRequired(d.shipping);
+    setShippingResponsibility(d.shipping ? "seller" : "none");
+    setRevisions(String(d.revisions || 2));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -118,19 +84,21 @@ function NewDeal() {
     setBusy(true);
     setError(null);
     try {
-      const deal = await createDeal({
+      if (!dealType) throw new Error("Choose a deal type first.");
+      if (planError) throw new Error(planError);
+      const deal = await createFn({ data: {
+        dealType,
         title,
         description,
         amount: numericAmount,
-        currency,
+        currency: currency as "SAR",
         role,
         counterpartyEmail,
         dueAt: dueAt || null,
         feePayer,
         inspectionDays: Math.min(30, Math.max(1, Number(inspectionDays) || 1)),
-        shippingRequired,
+        shippingRequired: dealType === "goods" && shippingRequired,
         quantity: Math.max(1, Number(quantity) || 1),
-        unitPrice: numericAmount / Math.max(1, Number(quantity) || 1),
         supplierCountry,
         deliveryCountry,
         shippingResponsibility,
@@ -138,7 +106,12 @@ function NewDeal() {
         refundConditions,
         cancellationConditions,
         autoRelease,
-      });
+        revisionsIncluded: Math.min(20, Math.max(0, Number(revisions) || 0)),
+        retentionPercent: Math.min(10, Math.max(0, Number(retention) || 0)),
+        defectsLiabilityDays: Math.min(365, Math.max(0, Math.round(Number(dlp) || 0))),
+        fundingMode: "upfront",
+        milestones: milestonesOn ? rows.map(toInput) : [],
+      } });
       setCreated(deal);
     } catch (err) {
       setError(err instanceof Error ? err.message : "The deal could not be saved.");
@@ -191,21 +164,23 @@ function NewDeal() {
         </p>
 
         <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
-          <div className="space-y-2">
-            <Label htmlFor="template">Deal template</Label>
-            <select
-              id="template"
-              value={template}
-              onChange={(e) => applyTemplate(e.target.value)}
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-            >
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <fieldset>
+            <legend className="text-sm font-semibold">Deal type</legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
+              {DEAL_TYPES.map((t) => {
+                const M = DEAL_TYPE_META[t];
+                const Icon = M.icon;
+                return (
+                  <button type="button" key={t} role="radio" aria-checked={dealType === t} onClick={() => chooseType(t)}
+                    className={`flex items-start gap-3 rounded-lg border p-4 text-start transition ${dealType === t ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                    <Icon className="mt-0.5 size-6 shrink-0 text-primary" />
+                    <span><b className="block">{M.label}</b><span className="mt-1 block text-xs text-muted-foreground">{M.hint}</span></span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+          {dealType && (<>
           <div className="space-y-2">
             <Label htmlFor="title">Deal title</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -325,7 +300,7 @@ function NewDeal() {
               </p>
             </div>
           </div>
-          <label className="flex items-start gap-3 rounded-md border border-border p-4 text-sm">
+          {dealType === "goods" && (<label className="flex items-start gap-3 rounded-md border border-border p-4 text-sm">
             <input
               type="checkbox"
               checked={shippingRequired}
@@ -338,15 +313,15 @@ function NewDeal() {
                 The seller adds the carrier and tracking number before confirming delivery.
               </span>
             </span>
-          </label>
-          <div className="space-y-2">
+          </label>)}
+          {dealType === "goods" && shippingRequired && (<div className="space-y-2">
             <Label htmlFor="shipResp">Shipping responsibility</Label>
             <select id="shipResp" value={shippingResponsibility} onChange={(e) => setShippingResponsibility(e.target.value as "seller" | "buyer" | "none")} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
               <option value="seller">Seller arranges and pays shipping</option>
               <option value="buyer">Buyer arranges shipping</option>
               <option value="none">No shipping (service or digital)</option>
             </select>
-          </div>
+          </div>)}
           <div className="space-y-2">
             <Label htmlFor="acceptance">Acceptance criteria</Label>
             <Textarea id="acceptance" rows={2} value={acceptanceCriteria} onChange={(e) => setAcceptanceCriteria(e.target.value)} placeholder="What must be true for the buyer to accept the delivery." />
@@ -381,27 +356,48 @@ function NewDeal() {
             />
           </div>
 
-          <Card className="border-primary/25 bg-primary/5">
-            <CardContent className="p-5 text-sm">
-              <p className="font-semibold">Escrow fee on this value</p>
-              <p className="mt-1 text-muted-foreground">
-                {formatSAR(fee.fee)} ({(fee.effectiveRate * 100).toFixed(2)}% — {fee.rule?.label})
-              </p>
-              <div className="mt-3 grid gap-1 border-t border-primary/20 pt-3 text-muted-foreground">
-                <p>
-                  Buyer pays: <b className="text-foreground">{formatSAR(sides.buyerPays)}</b>
-                </p>
-                <p>
-                  Seller receives:{" "}
-                  <b className="text-foreground">{formatSAR(sides.sellerReceives)}</b>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {dealType === "freelance" && (
+            <div className="space-y-2">
+              <Label htmlFor="revisions">Included revisions</Label>
+              <Input id="revisions" type="number" min={0} max={20} dir="ltr" value={revisions} onChange={(e) => setRevisions(e.target.value)} />
+            </div>
+          )}
+          {(dealType === "services" || dealType === "freelance") && (
+            <label className="flex items-start gap-3 rounded-md border border-border p-4 text-sm">
+              <input type="checkbox" checked={useMilestones} onChange={(e) => setUseMilestones(e.target.checked)} className="mt-0.5 size-4" />
+              <span><b>Pay in milestones</b><span className="mt-1 block text-muted-foreground">Split the deal into 2–20 milestones released one by one.</span></span>
+            </label>
+          )}
+          {milestonesOn && (
+            <div className="space-y-3 rounded-md border border-border p-4">
+              <p className="font-semibold">Milestones</p>
+              <MilestoneEditor rows={rows} onChange={setRows} currency={currency} total={numericAmount} allowAdvance={dealType === "contracting"} />
+              {dealType === "contracting" && (
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="retention">Retention %</Label>
+                    <Input id="retention" type="number" min={0} max={10} step="0.5" dir="ltr" value={retention} onChange={(e) => setRetention(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dlp">Defects liability period (days)</Label>
+                    <Input id="dlp" type="number" min={0} max={365} dir="ltr" value={dlp} onChange={(e) => setDlp(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="funding">Funding</Label>
+                    <select id="funding" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value="upfront" onChange={() => undefined}>
+                      <option value="upfront">Fund all upfront</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+              {planError && <p className="text-sm text-destructive">{planError}</p>}
+            </div>
+          )}
+          </>)}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button type="submit" disabled={busy}>
+          <Button type="submit" disabled={busy || !dealType || !!planError}>
             {busy ? "Saving…" : "Create deal and get invite link"}
           </Button>
         </form>
