@@ -45,6 +45,7 @@ describe("C09-D15 milestone-only dispute in a 4-milestone deal", () => {
     const refund = roundMoney(300 - gross, "BHD");
     expect([gross, refund]).toEqual([210, 90]);
     const rows = [
+      { account: "provider_conversion", debit: 300, credit: 0, currency: "BHD" },
       { account: "escrow_held", debit: 0, credit: 300, currency: "BHD" },
       ...milestoneReleaseLedger("BHD", { gross, retention, feeShare, vat, net }),
       ...refundRows(refund),
