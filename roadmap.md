@@ -49,3 +49,5 @@
 - [x] Batch B: one USD marginal fee calculator, fee-payer split with per-party VAT, balanced FX-B ledger, server-only deal actions, payout-currency check, new-deal defaults.
 - [ ] Owner/pricing: confirm provisional USD fee bands and VAT treatment (legal review).
 - [ ] Public pricing/services calculators still use the old SAR bands (marketing copy frozen) — align when copy may change.
+
+- [ ] Daily: sync deals.amount numeric(18,3) in migration files; verify new-deal form (goods + contracting) as supplier.
