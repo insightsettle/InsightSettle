@@ -144,11 +144,13 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
         data.outcome === "full_refund" ? 100 : data.outcome === "full_release" ? 0 : (data.buyerPercent ?? 50);
       const { data: m } = await db.from("deal_milestones").select("*").eq("id", dispute.milestone_id).single();
       const ids: string[] = [];
-      const refund = roundMoney((Number(m.amount) * pct) / 100, deal.currency);
+      // C09-D15: refund = milestone amount − released gross, so escrow for this milestone nets to exactly 0.
+      let refund = Number(m.amount);
       if (pct < 100) {
         const { createMilestoneRelease } = await import("@/lib/milestones.server");
         const tx = await createMilestoneRelease(db, deal, m.id, context.userId, `Dispute decision: ${data.note}`, (100 - pct) / 100);
         ids.push(tx.id);
+        refund = roundMoney(Number(m.amount) - tx.gross, deal.currency);
       }
       if (refund > 0) {
         const { data: r } = await db.from("deal_transactions").insert({

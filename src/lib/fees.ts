@@ -190,3 +190,29 @@ export function fundingBlockReason(input: {
     return "The supplier needs a verified payout account in the deal currency before this deal can be funded.";
   return null;
 }
+
+/**
+ * C09-D15: dispute split on a whole deal. The supplier gets only its share of the held amount, less its
+ * fee share and VAT pro rata; the buyer gets the rest back. Escrow is debited once per part and nets to 0.
+ */
+export function disputeSplit(b: FeeBreakdown, buyerPercent: number) {
+  const c = b.currency;
+  const refund = roundMoney((b.amount * buyerPercent) / 100, c);
+  return { refund, ...releasePortion(b, roundMoney(b.amount - refund, c)) };
+}
+
+/** Release of `gross` out of the held amount, with the supplier fee share and VAT pro rata. */
+export function releasePortion(b: FeeBreakdown, gross: number) {
+  const c = b.currency;
+  const f = b.amount > 0 ? gross / b.amount : 0;
+  const sellerShare = f >= 1 ? b.sellerShare : roundMoney(b.sellerShare * f, c);
+  const sellerVat = f >= 1 ? b.sellerVat : roundMoney(b.sellerVat * f, c);
+  const supplierNet = roundMoney(gross - sellerShare - sellerVat, c);
+  const ledger: LedgerRow[] = [
+    { account: "escrow_held", debit: gross, credit: 0, currency: c },
+    { account: "supplier_payable", debit: 0, credit: supplierNet, currency: c },
+    { account: "insight_fee_revenue", debit: 0, credit: sellerShare, currency: c },
+    { account: "vat_payable", debit: 0, credit: sellerVat, currency: c },
+  ].filter((r) => r.debit !== 0 || r.credit !== 0);
+  return { releaseGross: gross, sellerShare, sellerVat, supplierNet, ledger };
+}

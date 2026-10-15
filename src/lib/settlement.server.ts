@@ -1,4 +1,4 @@
-import { fundingLedger, releaseLedger, type FeeBreakdown, type PayInQuote } from "@/lib/fees";
+import { fundingLedger, releaseLedger, releasePortion, type FeeBreakdown, type PayInQuote } from "@/lib/fees";
 import { roundMoney } from "@/lib/money";
 
 async function lockedPricing(admin: any, dealId: string): Promise<{ breakdown: FeeBreakdown; payIn: PayInQuote } | null> {
@@ -43,9 +43,17 @@ async function writeLedgerAndInvoice(admin: any, tx: any, ref: string) {
       );
   } else if (tx.kind === "release" && pricing) {
     const b = pricing.breakdown;
-    // The supplier receives the deal amount less its fee share and VAT; keep the record consistent.
-    await admin.from("deal_transactions").update({ amount: b.supplierNet, fee: b.sellerShare, currency: b.currency }).eq("id", tx.id);
-    rows = releaseLedger(b);
+    // C09-D15: a dispute-split release carries the gross supplier portion; only that portion leaves escrow.
+    const isDisputeSplit = /-RELEASE-[0-9a-f]{8}$/.test(String(tx.idempotency_key ?? "")) && Number(tx.amount) < b.amount;
+    if (isDisputeSplit) {
+      const p = releasePortion(b, Number(tx.amount));
+      await admin.from("deal_transactions").update({ amount: p.supplierNet, fee: p.sellerShare, currency: b.currency }).eq("id", tx.id);
+      rows = p.ledger;
+    } else {
+      // The supplier receives the deal amount less its fee share and VAT; keep the record consistent.
+      await admin.from("deal_transactions").update({ amount: b.supplierNet, fee: b.sellerShare, currency: b.currency }).eq("id", tx.id);
+      rows = releaseLedger(b);
+    }
   } else {
     const amt = Number(tx.amount);
     rows = [
