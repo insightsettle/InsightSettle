@@ -7,6 +7,10 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "Deals": "الصفقات",
+  "Request changes": "طلب تعديلات",
+  "Terms accepted": "قبول الشروط",
+  "Shipped & delivered": "الشحن والتسليم",
   "No VAT": "لا توجد ضريبة",
   "Type & party": "النوع والطرف",
   "Terms & amount": "الشروط والمبلغ",

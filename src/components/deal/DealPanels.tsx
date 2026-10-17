@@ -146,11 +146,6 @@ export function ContractDashboard(props: {
           {[[text("Contract value", "قيمة العقد"), total], [text("Held with the provider", "محفوظة لدى مزوّد الدفع"), funded - releasedGross + retentionHeld], [text("Released to contractor", "المُفرج عنه للمقاول"), paidOut], [text("Retention held", "المحتجزات"), retentionHeld]].map(([l,v]) => <Card key={String(l)}><CardContent className="p-5"><div className="flex items-center justify-between gap-2"><p className="text-xs text-muted-foreground">{l}</p><span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent"><HardHat className="size-4 text-primary" /></span></div><p className="mt-3 break-words text-2xl font-semibold tabular-nums"><bdi>{money(Number(v))}</bdi></p><p className="mt-2 text-xs text-muted-foreground">{text("Defects liability period", "فترة ضمان العيوب")}: {deal.defects_liability_days} {text("days", "أيام")}</p></CardContent></Card>)}
         </div>
         <div data-no-localize className="flex flex-wrap gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-primary" />{text("Released", "تم الإفراج")}: <bdi>{money(releasedGross)}</bdi></span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-gold" />{text("Funded", "ممول")}: <bdi>{money(funded - releasedGross)}</bdi></span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-muted-foreground" />{text("Not funded", "غير ممول")}: <bdi>{money(total-funded)}</bdi></span></div>
-        <p className="text-xs text-muted-foreground">{l as string}</p>
-              <p className="mt-1 font-bold" dir="ltr">{money(v as number)}</p>
-            </div>
-          ))}
-        </div>
         <p className="text-xs text-muted-foreground">
           <span>Retention</span> <span dir="ltr">{Number(deal.retention_percent)}%</span> · <span>Defects liability period</span>{" "}
           <span dir="ltr">{deal.defects_liability_days}</span> <span>days</span> · <span>Fund all upfront</span>

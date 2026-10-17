@@ -76,6 +76,8 @@ function Dashboard() {
   const held = grouped(active.filter((d) => ["held", "in_progress", "delivered", "under_review", "disputed"].includes(d.status)));
   const month = new Date().toISOString().slice(0, 7);
   const released = grouped(myDeals.filter((d) => ["released", "completed"].includes(d.status) && d.released_at?.startsWith(month)));
+  const heldMain = held[0];
+  const releasedMain = released[0];
   const firstName = (user?.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "";
   const typeCounts = Object.entries(active.reduce<Record<string, number>>((out, d) => {
     const type = (d as typeof d & { deal_type?: string }).deal_type ?? "goods";
@@ -83,10 +85,10 @@ function Dashboard() {
     return out;
   }, {})).map(([type, n]) => `${text(typeLabels[type] ?? type)}: ${n}`).join(" · ");
   const stats = [
-    { label: text("Held with the provider", "محفوظة لدى مزوّد الدفع"), value: held.length ? formatMoney(held[0][1], held[0][0]) : "—", note: `${active.filter((d) => ["held", "in_progress", "delivered", "under_review", "disputed"].includes(d.status)).length} ${text("active deals", "صفقات نشطة")}`, extra: held.slice(1).map(([c, n]) => formatMoney(n, c)).join(" · "), icon: ShieldCheck },
+    { label: text("Held with the provider", "محفوظة لدى مزوّد الدفع"), value: heldMain ? formatMoney(heldMain[1], heldMain[0]) : "—", note: `${active.filter((d) => ["held", "in_progress", "delivered", "under_review", "disputed"].includes(d.status)).length} ${text("active deals", "صفقات نشطة")}`, extra: held.slice(1).map(([c, n]) => formatMoney(n, c)).join(" · "), icon: ShieldCheck },
     { label: text("Waiting for you", "بانتظارك"), value: String(actionDeals.length), note: text("Actions needing your attention", "إجراءات تتطلب اهتمامك"), icon: AlertCircle },
     { label: text("Active deals", "الصفقات النشطة"), value: String(active.length), note: typeCounts || text("No active deals", "لا توجد صفقات نشطة"), icon: BriefcaseBusiness },
-    { label: text("Released this month", "المُفرج عنه هذا الشهر"), value: released.length ? formatMoney(released[0][1], released[0][0]) : "—", note: released.slice(1).map(([c, n]) => formatMoney(n, c)).join(" · ") || text("Completed releases", "عمليات الإفراج المكتملة"), icon: Wallet },
+    { label: text("Released this month", "المُفرج عنه هذا الشهر"), value: releasedMain ? formatMoney(releasedMain[1], releasedMain[0]) : "—", note: released.slice(1).map(([c, n]) => formatMoney(n, c)).join(" · ") || text("Completed releases", "عمليات الإفراج المكتملة"), icon: Wallet },
   ];
   return (
     <SiteShell>
