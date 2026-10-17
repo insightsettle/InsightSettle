@@ -49,7 +49,8 @@ async function writeLedgerAndInvoice(admin: any, tx: any, ref: string) {
       const { data: decisions, error } = await admin.from("disputes").select("id, buyer_percent, outcome")
         .eq("deal_id", tx.deal_id).is("milestone_id", null).eq("status", "resolved");
       if (error) throw error;
-      const decision = decisions?.find((d: any) => decisionKey && String(d.id).startsWith(decisionKey[1]));
+      const decisionPrefix = decisionKey?.[1];
+      const decision = decisions?.find((d: any) => decisionPrefix && String(d.id).startsWith(decisionPrefix));
       if (!decision) throw new Error("The locked dispute decision is missing.");
       const pct = decision.outcome === "full_release" ? 0 : decision.outcome === "full_refund" ? 100 : Number(decision.buyer_percent);
       const p = disputeSplit(b, pct);
