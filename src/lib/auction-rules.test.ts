@@ -170,6 +170,13 @@ describe('auction database rules (actual migration)', () => {
     expect((await db.query(`SELECT amount::text amount,idempotency_key FROM deal_transactions WHERE kind='release' ORDER BY amount DESC`)).rows).toEqual([
       {amount:'900.000',idempotency_key:'DL-test-RELEASE-OWNER'},{amount:'100.000',idempotency_key:'DL-test-RELEASE-ORG'}]);
   });
+  it('winner acceptance during inspection creates exactly owner and organiser release legs',async()=>{
+    await bid(); await makeDeal(); await fund('succeeded');
+    await db.exec(`INSERT INTO deal_payout_splits(deal_id,beneficiary_id,role,pct,amount,currency) VALUES ('${deal}','${owner}','owner',90,900,'BHD'),('${deal}','${organiser}','organiser',10,100,'BHD'); UPDATE deals SET status='delivered',delivered_at=now(),auto_release_at=now()+interval '72 hours' WHERE id='${deal}';`);
+    const accepted = await db.query(`SELECT * FROM create_auction_release('${deal}','${buyer}')`);
+    expect(accepted.rows).toHaveLength(2);
+    expect((await db.query(`SELECT ps.role,dt.amount::text amount FROM deal_transactions dt JOIN deal_payout_splits ps ON ps.id=dt.payout_split_id WHERE dt.kind='release' ORDER BY ps.role`)).rows).toEqual([{role:'organiser',amount:'100.000'},{role:'owner',amount:'900.000'}]);
+  });
   it('creates dispute refund and beneficiary shares from the locked percentages',async()=>{
     await bid(); await makeDeal(); await fund('succeeded');
     await db.exec(`INSERT INTO deal_payout_splits(deal_id,beneficiary_id,role,pct,amount,currency) VALUES ('${deal}','${owner}','owner',90,900,'BHD'),('${deal}','${organiser}','organiser',10,100,'BHD');
