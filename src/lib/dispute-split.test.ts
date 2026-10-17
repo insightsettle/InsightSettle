@@ -38,12 +38,14 @@ describe("C09-D15 milestone-only dispute in a 4-milestone deal", () => {
   it("splits milestone 3 only; escrow for it nets to 0 and others are untouched", () => {
     const alloc = allocateMilestones(b, [100, 400, 300, 200], 5);
     const before = JSON.parse(JSON.stringify(alloc));
-    const a = alloc[2]!; // same math as createMilestoneRelease with factor 0.7
+    const a = alloc[2];
+    if (!a) throw new Error("Missing milestone 3");
     const s = (n: number) => roundMoney(n * 0.7, "BHD");
-    const gross = s(a.gross), retention = s(a.retention), feeShare = s(a.feeShare), vat = s(a.vat);
+    const gross = s(a.gross), retention = a.retention, feeShare = s(a.feeShare), vat = s(a.vat);
     const net = roundMoney(gross - retention - feeShare - vat, "BHD");
     const refund = roundMoney(300 - gross, "BHD");
     expect([gross, refund]).toEqual([210, 90]);
+    expect(retention).toBe(15);
     const rows = [
       { account: "provider_conversion", debit: 300, credit: 0, currency: "BHD" },
       { account: "escrow_held", debit: 0, credit: 300, currency: "BHD" },
@@ -54,5 +56,26 @@ describe("C09-D15 milestone-only dispute in a 4-milestone deal", () => {
     expect(ledgerBalance(rows)).toEqual({ BHD: 0 });
     expect(alloc).toEqual(before);
     expect(alloc.map((x) => x.gross)).toEqual([100, 400, 300, 200]);
+  });
+});
+
+describe("C09-D15 currency rounding", () => {
+  it("70/30 on SAR 10,000.00 charges supplier fees on 7,000 only", () => {
+    const base = splitFee({ amount: 10_000, currency: "SAR", fee: 250, feePayer: "split", buyerCountry: "SA", supplierCountry: "SA" });
+    const result = disputeSplit(base, 30);
+    expect([result.releaseGross, result.refund, result.sellerShare, result.sellerVat, result.supplierNet]).toEqual([7000, 3000, 87.5, 13.13, 6899.37]);
+    expect(result.releaseGross + result.refund).toBe(10000);
+    expect(ledgerBalance([...result.ledger, ...[
+      { account: "escrow_held", debit: 0, credit: 10000, currency: "SAR" },
+      { account: "provider_conversion", debit: 10000, credit: 0, currency: "SAR" },
+      { account: "escrow_held", debit: 3000, credit: 0, currency: "SAR" },
+      { account: "buyer_refund_payable", debit: 0, credit: 3000, currency: "SAR" },
+    ]])).toEqual({ SAR: 0 });
+  });
+  it("assigns the half-minor-unit remainder to the refund", () => {
+    const base = { ...b, amount: 1.001 };
+    const result = disputeSplit(base, 50);
+    expect([result.releaseGross, result.refund]).toEqual([0.501, 0.5]);
+    expect(roundMoney(result.releaseGross + result.refund, "BHD")).toBe(1.001);
   });
 });
