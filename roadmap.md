@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Auctions step 2: direct owner/organiser release legs, independent provider confirmation and ledger, buyer-only pricing, auction dispute refund/release legs, T22 vectors and all regressions; no publishing.
+- [x] Auctions step 2: direct owner/organiser release legs created atomically, independent confirmation and payable ledger accounts, forced buyer-only existing USD pricing, locked auction dispute shares, auto-release auction branch, final-status confirmation guard; 66 tests passed including T22-a/e/f and all previous regressions; no publishing. Provider remains simulated; no live auction UI exists yet.
 
 - [x] Auctions step 1: migration 0005 applied; locked direct beneficiary shares, verified beneficiaries, ordered bidders and funding reservations/deadlines, C01 public-read grants; actual-migration isolated database tests; no screens, settlement changes or publishing. True parallel live-provider race testing belongs to the later funding integration step.
 
