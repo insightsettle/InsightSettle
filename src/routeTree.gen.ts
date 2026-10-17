@@ -37,6 +37,7 @@ import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-rev
 import { Route as AuthCheckEmailRouteImport } from './routes/auth.check-email'
 import { Route as AuthConfirmedRouteImport } from './routes/auth.confirmed'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
+import { Route as ConsoleAuctionsRouteImport } from './routes/console.auctions'
 import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
@@ -197,6 +198,11 @@ const ConsoleIndexRoute = ConsoleIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleAuctionsRoute = ConsoleAuctionsRouteImport.update({
+  id: '/auctions',
+  path: '/auctions',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleAuditRoute = ConsoleAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -323,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
+  '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
@@ -370,6 +377,7 @@ export interface FileRoutesByTo {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
+  '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
@@ -420,6 +428,7 @@ export interface FileRoutesById {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
+  '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
@@ -470,6 +479,7 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/auth/check-email'
     | '/auth/confirmed'
+    | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/auth/check-email'
     | '/auth/confirmed'
+    | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/auth/check-email'
     | '/auth/confirmed'
+    | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
@@ -813,6 +825,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleIndexRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/auctions': {
+      id: '/console/auctions'
+      path: '/auctions'
+      fullPath: '/console/auctions'
+      preLoaderRoute: typeof ConsoleAuctionsRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/console/audit': {
       id: '/console/audit'
       path: '/audit'
@@ -991,6 +1010,7 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface ConsoleRouteChildren {
+  ConsoleAuctionsRoute: typeof ConsoleAuctionsRoute
   ConsoleAuditRoute: typeof ConsoleAuditRoute
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
   ConsoleFeesRoute: typeof ConsoleFeesRoute
@@ -1005,6 +1025,7 @@ interface ConsoleRouteChildren {
 }
 
 const ConsoleRouteChildren: ConsoleRouteChildren = {
+  ConsoleAuctionsRoute: ConsoleAuctionsRoute,
   ConsoleAuditRoute: ConsoleAuditRoute,
   ConsoleDisputesRoute: ConsoleDisputesRoute,
   ConsoleFeesRoute: ConsoleFeesRoute,

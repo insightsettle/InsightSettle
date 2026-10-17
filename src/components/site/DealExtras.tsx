@@ -19,6 +19,7 @@ import type { DealRow } from "@/lib/deals";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { cancelDeal, openDisputeCase } from "@/lib/operations.functions";
+import { auctionDisputeOptions } from '@/lib/auction-console-display';
 
 const reasonLabels: Record<string, string> = {
   not_received: "Item not received",
@@ -61,7 +62,8 @@ export function FrozenBanner({ deal }: { deal: DealRow }) {
   );
 }
 
-export function DisputePanel({ deal, isParty }: { deal: DealRow; isParty: boolean }) {
+export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: string }; isParty: boolean }) {
+  const { text } = useLocale();
   const refresh = useRefresh(deal);
   const open = useServerFn(openDisputeCase);
   const [reason, setReason] = useState("not_received");
@@ -145,11 +147,12 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow; isParty: boolea
         onChange={(e) => setReason(e.target.value)}
         className="mt-2 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
       >
-        {Object.entries(reasonLabels).map(([k, v]) => (
+        {Object.entries(reasonLabels).filter(([key]) => deal.deal_type !== 'auction' || key !== 'quality_issue').map(([k, v]) => (
           <option key={k} value={k}>
-            {v}
+            {text(v)}
           </option>
         ))}
+        {auctionDisputeOptions(deal.deal_type ?? '').map(o => <option key={o.value} value={o.value}>{text(o.en,o.ar)}</option>)}
       </select>
       <Textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} className="mt-2" placeholder="Explain the problem in detail" />
       <Button

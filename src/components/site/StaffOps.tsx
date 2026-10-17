@@ -108,7 +108,7 @@ export function AccountStateControl({ userId, state }: { userId: string; state?:
 }
 
 /** Existing decision controls, with read-only case positions and settlement allocation. */
-export function LiveDisputes() {
+export function LiveDisputes({ auctionOnly = false }: { auctionOnly?: boolean } = {}) {
   const { text } = useLocale();
   const qc = useQueryClient();
   const listFn = useServerFn(listDisputeCases);
@@ -124,7 +124,7 @@ export function LiveDisputes() {
     {cases.isLoading && <p>{text("Loading…", "جارٍ التحميل…")}</p>}
     {cases.isError && <p role="alert" className="text-destructive">{text("Could not load disputes", "تعذر تحميل النزاعات")}</p>}
     {(cases.data ?? []).length === 0 && !cases.isLoading && <Card><CardContent className="p-5 text-sm text-muted-foreground">{text("No live disputes.", "لا توجد نزاعات حالية.")}</CardContent></Card>}
-    {(cases.data ?? []).map((c: any) => {
+    {(cases.data ?? []).filter((c: any) => !auctionOnly || overview.data?.deals.some(d => d.id === c.deal_id && d.deal_type === 'auction')).map((c: any) => {
       const p = pick[c.id] ?? { outcome: "full_refund", pct: "50", note: "" };
       const deal = overview.data?.deals.find(d => d.id === c.deal_id);
       const milestone = overview.data?.milestones.find(m => m.id === c.milestone_id);

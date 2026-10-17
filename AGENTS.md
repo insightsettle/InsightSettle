@@ -12,6 +12,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Staff auction tabs use the shared staff guard and paginated read-only projections; authenticity copy maps to the existing quality-issue dispute flow so decision and payment logic remain unchanged.
 - Auction client screens reuse existing winner, invite, decline, quote and funding actions; authenticated CRUD remains RLS/trigger-governed, supplemental read adapters authorize lot access before projecting metadata, and owner screens are read-only so presentation cannot alter settlement rules.
 
 - Auction invariants live in database triggers with auction/lot row locks and immutable funding reservations; tests execute the migration in isolated PostgreSQL-compatible PGlite so writes cannot bypass bidder, split or deadline guards.
