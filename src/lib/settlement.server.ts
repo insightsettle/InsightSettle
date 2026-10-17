@@ -99,6 +99,19 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
   if (data.outcome === "failed" && !data.reason)
     throw new Error("A failure needs a reason so both parties understand what happened.");
 
+  let auctionDeal: any = null;
+  let auctionAccount: string | null = null;
+  if (tx.payout_split_id || tx.auction_dispute_id) {
+    const { data: auction, error: auctionError } = await admin.from('deals').select('*').eq('id', tx.deal_id).maybeSingle();
+    if (auctionError) throw auctionError;
+    if (!auction || auction.deal_type !== 'auction') throw new Error('Auction transaction requires an auction deal.');
+    const pricing = await lockedPricing(admin, tx.deal_id);
+    if (!pricing) throw new Error('Auction funding pricing is missing.');
+    const { validateAuctionLeg } = await import('./auction-settlement.server');
+    auctionAccount = await validateAuctionLeg(admin, tx, auction, pricing.breakdown);
+    auctionDeal = auction;
+  }
+
   const { data: updated, error } = await admin
     .from("deal_transactions")
     .update({
@@ -126,6 +139,11 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
     const { settleMilestoneTx } = await import("@/lib/milestones.server");
     milestoneHandled = await settleMilestoneTx(admin, tx, ref);
   }
+  if (data.outcome === 'succeeded' && auctionDeal && auctionAccount) {
+    const { settleAuctionLeg } = await import('./auction-settlement.server');
+    newStatus = await settleAuctionLeg(admin, tx, auctionDeal, auctionAccount, ref);
+    milestoneHandled = true;
+  }
   if (data.outcome === "succeeded" && !milestoneHandled) {
     if (tx.kind === "funding") newStatus = "held";
     if (tx.kind === "release") newStatus = "released";
@@ -140,7 +158,7 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
       newStatus = "in_progress";
     }
   }
-  if (newStatus && newStatus !== "in_progress" && deal && !(tx.kind !== "funding" && finalStatuses.includes(deal.status))) {
+  if (!auctionDeal && newStatus && newStatus !== "in_progress" && deal && !(tx.kind !== "funding" && finalStatuses.includes(deal.status))) {
     await admin
       .from("deals")
       .update({
@@ -149,7 +167,7 @@ export async function settleTransactionCore(admin: any, notify: any, data: Settl
       })
       .eq("id", deal.id);
   }
-  if (newStatus && newStatus !== "in_progress" && deal) {
+  if (!auctionDeal && newStatus && newStatus !== "in_progress" && deal) {
     await writeLedgerAndInvoice(admin, tx, ref);
   }
 

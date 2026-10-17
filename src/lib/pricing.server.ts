@@ -63,7 +63,7 @@ export async function priceDeal(admin: any, deal: any): Promise<DealPricing> {
   });
   const countries = await partyCountries(admin, deal);
   const breakdown = splitFee({
-    amount: Number(deal.amount), currency: deal.currency, fee, feePayer: deal.fee_payer, ...countries, vatTable: inputs.vatTable,
+    amount: Number(deal.amount), currency: deal.currency, fee, feePayer: deal.deal_type === 'auction' ? 'buyer' : deal.fee_payer, ...countries, vatTable: inputs.vatTable,
   });
   const payIn = payInQuote(breakdown, PAY_IN_CURRENCY, inputs.providerRate, inputs.customerRate);
   return { breakdown, payIn, usdPerUnit: inputs.usdPerUnit, ...countries };
