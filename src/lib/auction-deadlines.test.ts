@@ -16,7 +16,7 @@ let db: ReturnType<typeof postgres>;
 let offer: any;
 async function record(count = 3, guest = false) {
   const bidders = Array.from({ length: count }, (_, i) => ({ rank: i + 1, handle: `bid${i + 1}`, email: guest && i === 0 ? 'guest@example.test' : `bid${i + 1}@example.test`, price: 1000 - i * 100 }));
-  const rows = await db`SELECT record_auction_winner(${lot},${organiser},${JSON.stringify(bidders)}::jsonb) value`;
+  const rows = await db`SELECT record_auction_winner(${lot},${organiser},${db.json(bidders)}) value`;
   offer = rows[0]?.value;
   return offer;
 }
@@ -34,7 +34,7 @@ async function quote(dealId: string) {
 suite('auction deadline workflow — actual PostgreSQL concurrent connections', () => {
   beforeAll(async () => {
     if (!url || !/^postgres(?:ql)?:\/\/[^@]+@(?:localhost|127\.0\.0\.1)/.test(url)) throw new Error('Only a disposable localhost test database is allowed.');
-    db = postgres(url, { max: 6 });
+    db = postgres(url, { max: 6, onnotice: () => {} });
     await db.unsafe('DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS auth CASCADE; CREATE SCHEMA public; DROP ROLE IF EXISTS anon; DROP ROLE IF EXISTS authenticated; DROP ROLE IF EXISTS service_role;');
     await db.unsafe(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;
       CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY,email text,email_confirmed_at timestamptz);
