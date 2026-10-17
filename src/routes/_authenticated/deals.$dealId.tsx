@@ -278,7 +278,7 @@ function DealPage() {
                   <bdi dir="ltr">{money(amount)}</bdi>
                 </p>
                 <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
-                  {fb && <Info label="Platform fee" value={money(fb.fee)} />}
+                  {fb && <><Info label={text("Your fee share", "حصتك من الرسوم")} value={money(isBuyer ? fb.buyerShare : fb.sellerShare)} /><Info label={(isBuyer ? fb.buyerVatRate : fb.sellerVatRate) === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${Math.round((isBuyer ? fb.buyerVatRate : fb.sellerVatRate)*100)}% · ${text((isBuyer ? deal.delivery_country : deal.supplier_country) ?? "SA")}`} value={money(isBuyer ? fb.buyerVat : fb.sellerVat)} /><Info label="Platform fee" value={money(fb.fee)} /></>}
                   <Info
                     label="Fee paid by"
                     value={feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee"}
@@ -405,7 +405,7 @@ function DealPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2">
                     <FileSignature className="size-5 text-warning" />
-                    <h2 className="font-bold">Deal terms need agreement</h2>
+                    <h2 className="font-bold">{text("Deal terms need agreement")}</h2>
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">
                     No money can be funded until both sides accept the terms: value{" "}
@@ -640,7 +640,7 @@ function DealPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2">
                     <Star className="size-5 text-primary" />
-                    <h2 className="font-bold">Rate the other party</h2>
+                    <h2 className="font-bold">{text("Rate the other party")}</h2>
                   </div>
                   {myRating ? (
                     <p className="mt-2 text-sm text-muted-foreground">
@@ -697,7 +697,7 @@ function DealPage() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Receipt className="size-5 text-primary" />
-                  <h2 className="font-bold">Payment records</h2>
+                  <h2 className="font-bold">{text("Payment records")}</h2>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Funding, payouts, and refunds with the exact status both parties can see.
@@ -748,7 +748,7 @@ function DealPage() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="size-5 text-primary" />
-                  <h2 className="font-bold">Deal conversation</h2>
+                  <h2 className="font-bold">{text("Deal conversation")}</h2>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Talk to the other party and to Insight support in one place.
@@ -789,38 +789,11 @@ function DealPage() {
           </div>
 
           <aside className="min-w-0 space-y-4">
-            <AttachmentsCard deal={deal} isParty={isBuyer || isSeller} />
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="font-bold">{text("Deal log", "سجل الصفقة")}</h2>
-                {timeline.isLoading ? (
-                  <p className="mt-3 text-sm text-muted-foreground">Loading activity…</p>
-                ) : (
-                  <ol className="mt-5 space-y-5 border-s border-border ps-5">
-                    {(timeline.data ?? []).map((e) => (
-                      <li key={e.id} className="relative">
-                        <span className="absolute -start-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
-                        <p className="font-medium">{e.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(e.created_at)}
-                          {e.note ? ` · ${text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note)}` : ""}
-                        </p>
-                      </li>
-                    ))}
-                    {(timeline.data ?? []).length === 0 && (
-                      <li className="text-sm text-muted-foreground">No activity yet.</li>
-                    )}
-                  </ol>
-                )}
-              </CardContent>
-            </Card>
-
-
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Users className="size-5 text-primary" />
-                  <h2 className="font-bold">Parties</h2>
+                  <h2 className="font-bold">{text("Parties")}</h2>
                 </div>
                 <Info
                   label="Buyer"
@@ -843,6 +816,34 @@ function DealPage() {
               </CardContent>
             </Card>
 
+            <AttachmentsCard deal={deal} isParty={isBuyer || isSeller} />
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="font-bold">{text("Deal log", "سجل الصفقة")}</h2>
+                {timeline.isLoading ? (
+                  <p className="mt-3 text-sm text-muted-foreground">Loading activity…</p>
+                ) : (
+                  <ol className="mt-5 space-y-5 border-s border-border ps-5">
+                    {(timeline.data ?? []).map((e) => (
+                      <li key={e.id} className="relative">
+                        <span className="absolute -start-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
+                        <p className="text-sm font-medium" data-no-localize>{text(e.title)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(e.created_at)}
+                          {e.note ? ` · ${text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note)}` : ""}
+                        </p>
+                      </li>
+                    ))}
+                    {(timeline.data ?? []).length === 0 && (
+                      <li className="text-sm text-muted-foreground">No activity yet.</li>
+                    )}
+                  </ol>
+                )}
+              </CardContent>
+            </Card>
+
+
+
             {!bothJoined && (
               <Card className="border-warning/40 bg-warning/5">
                 <CardContent className="p-5">
@@ -863,7 +864,7 @@ function DealPage() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <LifeBuoy className="size-5 text-primary" />
-                  <h2 className="font-bold">Note for Insight</h2>
+                  <h2 className="font-bold">{text("Note for Insight")}</h2>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Add a note about this deal for the Insight team to review.

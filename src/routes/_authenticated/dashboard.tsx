@@ -8,7 +8,6 @@ import {
   Users,
   BriefcaseBusiness,
   Plus,
-  ShieldAlert,
   ShieldCheck,
   Wallet,
 } from "lucide-react";
@@ -24,7 +23,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { formatMoney } from "@/lib/money";
 import { listMyDeals } from "@/lib/deals";
-import { formatSAR } from "@/lib/demo-data";
 import { listNotifications } from "@/lib/notifications";
 import { CustodyNote } from "@/components/deal/DealPresentation";
 import { clientAction } from "@/lib/deal-display";
@@ -64,10 +62,14 @@ function Dashboard() {
     queryKey: ["my-activity"],
     queryFn: () => listNotifications(10),
   });
+  const { data: actionMilestones = [] } = useQuery({
+    queryKey: ["my-action-milestones", user?.id], enabled: !!user,
+    queryFn: async () => (await supabase.from("deal_milestones").select("deal_id, status").eq("status", "submitted")).data ?? [],
+  });
   const uid = user?.id;
   const closed = ["released", "completed", "refunded", "partially_refunded", "cancelled", "rejected"];
   const active = myDeals.filter((d) => !closed.includes(d.status));
-  const actionDeals = myDeals.map((deal) => ({ deal, action: clientAction(deal, uid) })).filter((item) => item.action);
+  const actionDeals = myDeals.map((deal) => ({ deal, action: clientAction(deal, uid, actionMilestones) })).filter((item) => item.action);
   const grouped = (deals: typeof myDeals) => {
     const totals: Record<string, number> = {};
     for (const d of deals) totals[d.currency] = (totals[d.currency] ?? 0) + Number(d.amount);
@@ -120,7 +122,7 @@ function Dashboard() {
         </div>
         <VerificationCard />
         {user && !user.email_confirmed_at && <p className="rounded-lg bg-warning-subtle p-4 text-sm text-warning">{text("Please confirm your email address.", "يرجى تأكيد بريدك الإلكتروني.")}</p>}
-        <details><summary className="cursor-pointer text-sm font-medium text-primary">{text("All deals", "جميع الصفقات")}</summary><div className="mt-3 space-y-2">{myDeals.map((d) => <Link className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4 text-sm" key={d.id} to="/deals/$dealId" params={{ dealId: d.ref }}><span>{d.title} · {d.ref}</span><StatusBadge status={d.status as never} /><bdi className="tabular-nums">{formatMoney(Number(d.amount), d.currency)}</bdi></Link>)}</div></details>
+        <details id="saved-deals"><summary className="cursor-pointer text-sm font-medium text-primary">{text("All deals", "جميع الصفقات")}</summary><div className="mt-3 space-y-2">{myDeals.map((d) => <Link className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4 text-sm" key={d.id} to="/deals/$dealId" params={{ dealId: d.ref }}><span>{d.title} · {d.ref}</span><StatusBadge status={d.status as never} /><bdi className="tabular-nums">{formatMoney(Number(d.amount), d.currency)}</bdi></Link>)}</div></details>
         <FxCustomerQuote />
       </div>
     </SiteShell>

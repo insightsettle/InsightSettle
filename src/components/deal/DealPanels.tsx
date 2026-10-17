@@ -134,12 +134,12 @@ export function ContractDashboard(props: {
   return (
     <section className="space-y-5">
       <div className="space-y-5">
-        <div className="flex items-center gap-2"><HardHat className="size-5 text-primary" /><h2 className="font-bold">Contract dashboard</h2></div>
+        <div className="flex items-center gap-2"><HardHat className="size-5 text-primary" /><h2 className="font-bold">{text("Contract dashboard", "لوحة العقد")}</h2></div>
         {next && <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm"><b>Next action: </b><span>{next}</span></div>}
         <div>
           <div className="flex justify-between text-xs text-muted-foreground"><span>Contract value released</span><span dir="ltr">{pct}%</span></div>
           <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-            <div className="h-full bg-primary" style={{ width: `${Math.min(100, pct)}%` }} />
+            <div className="flex h-full"><span className="h-full bg-primary" style={{ width: `${total ? Math.min(100,releasedGross/total*100) : 0}%` }} /><span className="h-full bg-gold" style={{ width: `${total ? Math.max(0,Math.min(100,(funded-releasedGross)/total*100)) : 0}%` }} /></div>
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" data-no-localize>
@@ -207,11 +207,11 @@ export function ContractDashboard(props: {
             </td><td className="p-4 tabular-nums">{total ? Math.round(Number(m.amount)/total*1000)/10 : 0}%</td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(Number(m.amount))}</bdi></td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(Number(m.retention_amount))}</bdi></td><td className="p-4"><MilestoneChip status={m.status} /></td></tr>
           ))}
         </tbody></table></div></CardContent></Card>
-        <aside className="space-y-4">{milestones.filter((m) => isBuyer && m.status === "submitted").slice(0,1).map((m) => <Card key={m.id} data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text(`Approve milestone ${m.seq}`, `اعتماد المرحلة ${m.seq}`)}</h3><dl className="mt-4 space-y-3 text-sm">{[[text("Amount", "المبلغ"), money(Number(m.amount))], [text("Retention", "المحتجزات"), money(Number(m.retention_amount))], [text("Net released", "صافي الإفراج"), money(Number(m.net_released))]].map(([l,v]) => <div key={l} className="flex justify-between gap-3"><dt className="text-muted-foreground">{l}</dt><dd className="tabular-nums"><bdi>{v}</bdi></dd></div>)}</dl><p className="mt-4 text-xs text-muted-foreground">{m.evidence_note ?? m.evidence_required}</p><Button className="mt-4 w-full" disabled={act.isPending} onClick={() => act.mutate(() => approveFn({ data: { dealId: deal.id, milestoneId: m.id } }))}>{text("Approve and release", "اعتماد وإفراج")}</Button><Button className="mt-2 w-full" variant="secondary" onClick={() => { setOpenId(m.id); setMode("revision"); }}>{text("Request changes", "طلب تعديلات")}</Button><p className="mt-3 text-xs text-muted-foreground">{text("Review window: 7 days. A revision request pauses auto-release.", "مهلة المراجعة: 7 أيام. طلب التعديل يوقف الإفراج التلقائي.")}</p></CardContent></Card>)}<CustodyNote /><Card data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text("Defects liability period", "فترة ضمان العيوب")}</h3><p className="mt-2 text-sm text-muted-foreground">{deal.defects_liability_days} {text("days", "أيام")} · {deal.retention_percent}%</p>{deal.retention_release_at && <p className="mt-2 text-xs text-muted-foreground">{formatDate(deal.retention_release_at)}</p>}</CardContent></Card></aside></div>
+        <aside className="space-y-4">{milestones.filter((m) => isBuyer && m.status === "submitted").slice(0,1).map((m) => <Card key={m.id} data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text(`Approve milestone ${m.seq}`, `اعتماد المرحلة ${m.seq}`)}</h3><dl className="mt-4 space-y-3 text-sm">{[[text("Amount", "المبلغ"), money(Number(m.amount))], [text("Retention", "المحتجزات"), money(Number(m.retention_amount))], [text("Net released", "صافي الإفراج"), Number(m.net_released) > 0 ? money(Number(m.net_released)) : text("Confirmed at release", "يُحدد عند الإفراج")]].map(([l,v]) => <div key={l} className="flex justify-between gap-3"><dt className="text-muted-foreground">{l}</dt><dd className="tabular-nums"><bdi>{v}</bdi></dd></div>)}</dl><p className="mt-4 text-xs text-muted-foreground">{m.evidence_note ?? m.evidence_required}</p><Button className="mt-4 w-full" disabled={act.isPending} onClick={() => act.mutate(() => approveFn({ data: { dealId: deal.id, milestoneId: m.id } }))}>{text("Approve and release", "اعتماد وإفراج")}</Button><Button className="mt-2 w-full" variant="secondary" onClick={() => { setOpenId(m.id); setMode("revision"); }}>{text("Request changes", "طلب تعديلات")}</Button><p className="mt-3 text-xs text-muted-foreground">{text("Review window: 7 days. A revision request pauses auto-release.", "مهلة المراجعة: 7 أيام. طلب التعديل يوقف الإفراج التلقائي.")}</p></CardContent></Card>)}<CustodyNote /><Card data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text("Defects liability period", "فترة ضمان العيوب")}</h3><p className="mt-2 text-sm text-muted-foreground">{deal.defects_liability_days} {text("days", "أيام")} · {deal.retention_percent}%</p>{deal.retention_release_at && <p className="mt-2 text-xs text-muted-foreground">{formatDate(deal.retention_release_at)}</p>}</CardContent></Card></aside></div>
         {act.error && <p className="text-sm text-destructive">{(act.error as Error).message}</p>}
 
-        <div>
-          <h3 className="text-sm font-semibold">Variation history</h3>
+        <Card><CardContent className="p-5">
+          <h3 className="text-sm font-semibold">{text("Variation history", "سجل أوامر التغيير")}</h3>
           {variations.length === 0 ? (
             <p className="mt-1 text-xs text-muted-foreground">No variations yet.</p>
           ) : (
@@ -224,7 +224,7 @@ export function ContractDashboard(props: {
           {(isBuyer || isSeller) && ["pending_funding", "in_progress"].includes(deal.status) && (
             <VariationForm deal={deal} milestones={milestones} onDone={props.onDone} />
           )}
-        </div>
+        </CardContent></Card>
       </div>
     </section>
   );

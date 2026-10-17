@@ -7,6 +7,13 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "current": "الحالية",
+  "Version": "النسخة",
+  "Delivered to the buyer": "تم التسليم للمشتري",
+  "Buyer approved the release of funds": "اعتمد المشتري الإفراج عن الأموال",
+  "Buyer started funding the escrow": "بدأ المشتري تمويل الضمان",
+  "Invitation accepted \u2014 both parties are now on the deal": "قُبلت الدعوة وانضم الطرفان للصفقة",
+  "Deal created and invitation link generated": "إنشاء الصفقة ورابط الدعوة",
   "OM": "عُمان",
   "AE": "الإمارات",
   "KW": "الكويت",
@@ -830,7 +837,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       setLocale: setLocaleState,
       toggleLocale: () => setLocaleState((current) => (current === "en" ? "ar" : "en")),
       text: (english, arabic) =>
-        locale === "ar" ? (arabic ?? translations[english] ?? english) : english,
+        locale === "ar" ? (arabic ?? translateText(english)) : english,
     }),
     [locale],
   );
