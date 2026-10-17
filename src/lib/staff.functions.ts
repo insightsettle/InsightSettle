@@ -18,7 +18,7 @@ export const getStaffOverview = createServerFn({ method: "GET" })
     const read = async (table: string, columns: string) => {
       const rows: any[] = [];
       for (let offset = 0; ; offset += 1000) {
-        const { data, error } = await (db as any).from(table).select(columns).order("id").range(offset, offset + 999);
+        const { data, error } = await (db as any).from(table).select(columns).order(table === "fx_rates" ? "code" : table === "business_profiles" ? "user_id" : "id").range(offset, offset + 999);
         if (error) throw error;
         rows.push(...(data ?? []));
         if ((data ?? []).length < 1000) return rows;
@@ -27,11 +27,11 @@ export const getStaffOverview = createServerFn({ method: "GET" })
     const [deals, disputes, profiles, businesses, milestones, ledger, transactions, invoices, rates, evidence] = await Promise.all([
       read("deals", "id,ref,title,amount,currency,status,deal_type,supplier_country,delivery_country,created_at,auto_release_at,auto_release_enabled,frozen,retention_percent,defects_liability_days,handover_at,retention_release_at,retention_released_at,buyer_id,seller_id"),
       read("disputes", "*"), read("profiles", "id,full_name,verification_status"),
-      read("business_profiles", "id,user_id,verification_status"), read("deal_milestones", "*"),
+      read("business_profiles", "user_id,verification_status"), read("deal_milestones", "*"),
       read("ledger_entries", "id,deal_id,transaction_id,currency,account,debit,credit"),
       read("deal_transactions", "id,deal_id,kind,status,provider_ref,currency,amount"),
       read("tax_invoices", "id,deal_id,currency,fee,vat,lines"),
-      read("fx_rates", "id,code,provider_rate,active"),
+      read("fx_rates", "code,provider_rate,active"),
       read("dispute_evidence", "id,dispute_id,uploaded_by,file_name,note,created_at"),
     ]);
     const totals: Record<string, number> = {};

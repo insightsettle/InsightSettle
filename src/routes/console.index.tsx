@@ -1,25 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  AlertTriangle,
-  BarChart3,
-  Clock,
-  Coins,
-  Gauge,
-  Percent,
-  ShieldCheck,
-  TrendingUp,
-  Users,
-  Wallet,
-} from "lucide-react";
-
-import { StatusBadge } from "@/components/site/StatusBadge";
+import { useState } from "react";
+import { Wallet, BriefcaseBusiness, Gavel, ShieldCheck, Clock, ArrowUpRight, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { getPlatformSummary } from "@/lib/admin.functions";
-import { formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/site/StatusBadge";
+import { getStaffOverview } from "@/lib/staff.functions";
 import { formatMoney } from "@/lib/money";
-import { daysSince, usePlatformSettings } from "@/lib/platform-settings";
+import { useLocale } from "@/lib/locale";
+import type { DealStatus } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/console/")({
   head: () => ({ meta: [
@@ -34,272 +24,46 @@ export const Route = createFileRoute("/console/")({
   component: AdminOverview,
 });
 
-const pct = (n: number, d: number) => (d > 0 ? `${((n / d) * 100).toFixed(0)}%` : "—");
-
 function AdminOverview() {
-  const { settings } = usePlatformSettings();
-  const fetchSummary = useServerFn(getPlatformSummary);
-  const summary = useQuery({ queryKey: ["platform-summary"], queryFn: () => fetchSummary({}) });
-  const live = summary.data;
-  const v = (fn: (l: NonNullable<typeof live>) => string) => (live ? fn(live) : "…");
-
-  const totalRevenue = live ? live.feeRevenue + live.marginRevenue : 0;
-  const staleRates = settings.rates.filter((r) => r.active !== false && daysSince(r.updatedAt) >= 1).length;
-
-  const kpis = [
-    { label: "Funded volume", value: v((l) => formatSAR(l.fundedVolume)), icon: BarChart3 },
-    { label: "Total revenue", value: v(() => formatSAR(totalRevenue)), icon: TrendingUp },
-    { label: "Escrow fee revenue", value: v((l) => formatSAR(l.feeRevenue)), icon: Percent },
-    { label: "Currency margin revenue", value: v((l) => formatSAR(l.marginRevenue)), icon: Coins },
-    { label: "Funds currently held", value: v((l) => formatSAR(l.heldFunds)), icon: Wallet },
-    {
-      label: "Blended take rate",
-      value: v((l) => (l.fundedVolume > 0 ? `${((totalRevenue / l.fundedVolume) * 100).toFixed(2)}%` : "—")),
-      icon: Gauge,
-    },
-    {
-      label: "Average deal value",
-      value: v((l) => (l.dealCount ? formatSAR(l.dealVolume / l.dealCount) : "—")),
-      icon: BarChart3,
-    },
-    {
-      label: "Average release time",
-      value: v((l) => (l.avgReleaseDays === null ? "—" : `${l.avgReleaseDays.toFixed(1)} days`)),
-      icon: Clock,
-    },
+  const { text } = useLocale();
+  const fetch = useServerFn(getStaffOverview);
+  const query = useQuery({ queryKey: ["staff-overview"], queryFn: () => fetch() });
+  const live = query.data;
+  const [type, setType] = useState("all");
+  const now = Date.now();
+  const open = live?.disputes.filter(d => d.status !== "resolved") ?? [];
+  const active = live?.deals.filter(d => !["released", "completed", "refunded", "partially_refunded", "cancelled", "rejected"].includes(d.status)) ?? [];
+  const pending = (live?.profiles.filter(p => p.verification_status === "pending").length ?? 0) + (live?.businesses.filter(p => p.verification_status === "pending").length ?? 0);
+  const oldest = open.length ? Math.max(...open.map(d => Math.floor((now - new Date(d.created_at).getTime()) / 86400000))) : 0;
+  const due = (live?.deals ?? []).filter(d => !d.frozen && d.status === "delivered" && d.auto_release_enabled && d.auto_release_at && new Date(d.auto_release_at).toDateString() === new Date(now).toDateString());
+  const delayed = live?.milestones.filter(m => m.status === "submitted" && m.submitted_at && now - new Date(m.submitted_at).getTime() > 7 * 86400000) ?? [];
+  const queue = [
+    ...open.map(d => ({ key: d.id, icon: Gavel, title: text("Open dispute", "نزاع مفتوح"), detail: `${live?.deals.find(x => x.id === d.deal_id)?.ref ?? ""} · ${text(d.reason.replaceAll("_", " "))}`, priority: text("High", "عالية"), kind: "dispute", ref: "" })),
+    ...(pending ? [{ key: "kyc", icon: ShieldCheck, title: text("Pending KYC / KYB", "طلبات تحقق الأفراد والمنشآت"), detail: `${pending} ${text("requests pending", "طلبات قيد الانتظار")}`, priority: text("Normal", "عادية"), kind: "kyc", ref: "" }] : []),
+    ...due.map(d => ({ key: d.id, icon: Clock, title: text("Auto-release due today", "إفراج تلقائي مستحق اليوم"), detail: `${d.ref} · ${formatMoney(d.amount, d.currency)}`, priority: text("Today", "اليوم"), kind: "deal", ref: d.ref })),
+    ...delayed.map(m => ({ key: m.id, icon: Clock, title: text("Milestone awaiting approval > 7 days", "مرحلة بانتظار الاعتماد لأكثر من ٧ أيام"), detail: m.title, priority: text("High", "عالية"), kind: "deal", ref: live?.deals.find(d => d.id === m.deal_id)?.ref ?? "" })),
   ];
-
-  const secondary = [
-    { label: "Successful releases", value: v((l) => pct(l.releasedCount, l.dealCount)) },
-    { label: "Dispute rate", value: v((l) => pct(l.openDisputes, l.dealCount)) },
-    { label: "Open disputes", value: v((l) => String(l.openDisputes)) },
-    { label: "Disputes under review", value: v((l) => String(l.disputesUnderReview)) },
-    { label: "Rates needing a daily update", value: String(staleRates) },
-    { label: "Active fee tiers", value: String(settings.fees.length) },
-  ];
-
-  const monthly = live?.monthly ?? [];
-  const peak = Math.max(1, ...monthly.map((m) => m.value));
-
-  return (
-    <div className="mt-8 space-y-8">
-      <section className="border-b border-border pb-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Live platform data
-          </p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              { label: "Registered members", value: v((l) => String(l.userCount)) },
-              { label: "Pending identity checks", value: v((l) => String(l.pendingKyc)) },
-              { label: "Deals created", value: v((l) => String(l.dealCount)) },
-              { label: "Deal volume", value: v((l) => formatSAR(l.dealVolume)) },
-              { label: "Deals in dispute", value: v((l) => String(l.disputed)) },
-            ].map((item) => (
-              <div key={item.label} className="rounded-lg bg-card border border-border p-4">
-                <p className="text-xs text-muted-foreground">{item.label}</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">{item.value}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex flex-wrap gap-3 text-sm">
-            <Link to="/console/users" className="font-semibold text-primary hover:underline">
-              Manage members →
-            </Link>
-            <Link to="/console/deals" className="font-semibold text-primary hover:underline">
-              Review all deals →
-            </Link>
-            <Link to="/console/risk" className="font-semibold text-primary hover:underline">
-              Run risk screening →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {summary.isError && <p className="text-sm text-destructive">Could not load live data.</p>}
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <Card key={k.label}>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{k.label}</span>
-                <span className="grid size-8 place-items-center rounded-lg bg-accent"><k.icon className="size-4 text-primary" /></span>
-              </div>
-              <p className="mt-3 text-2xl font-semibold tabular-nums">{k.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardContent className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4">
-          {secondary.map((s) => (
-            <div key={s.label} className="rounded-lg bg-muted/50 p-4">
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-              <p className="mt-1 text-lg font-bold">{s.value}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="size-4 text-primary" />
-              <h2 className="font-semibold">Monthly volume and fee revenue</h2>
-            </div>
-            {monthly.length === 0 ? (
-              <p className="mt-5 text-sm text-muted-foreground">No confirmed payments yet.</p>
-            ) : (
-              <ul className="mt-5 space-y-3">
-                {monthly.map((m) => (
-                  <li key={m.month} className="text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground" dir="ltr">{m.month}</span>
-                      <span className="font-semibold">
-                        {formatSAR(m.value)}{" "}
-                        <span className="text-xs font-medium text-primary">+{formatSAR(m.fees)} fees</span>
-                      </span>
-                    </div>
-                    <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${(m.value / peak) * 100}%` }} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="space-y-4">
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center gap-2">
-                <Gauge className="size-4 text-primary" />
-                <h2 className="font-semibold">Deal status distribution</h2>
-              </div>
-              <ul className="mt-4 space-y-2 text-sm">
-                {Object.entries(live?.statusCounts ?? {}).map(([status, count]) => (
-                  <li key={status} className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">
-                      {statusLabels[status as DealStatus] ?? status.replace(/_/g, " ")}
-                    </span>
-                    <span className="font-semibold">{count}</span>
-                  </li>
-                ))}
-                {live && Object.keys(live.statusCounts).length === 0 && (
-                  <li className="text-muted-foreground">No deals yet.</li>
-                )}
-              </ul>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center gap-2">
-                <Users className="size-4 text-primary" />
-                <h2 className="font-semibold">Revenue mix</h2>
-              </div>
-              {live && totalRevenue > 0 ? (
-                <>
-                  <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-muted">
-                    <div className="bg-primary" style={{ width: `${(live.feeRevenue / totalRevenue) * 100}%` }} />
-                    <div className="bg-warning" style={{ width: `${(live.marginRevenue / totalRevenue) * 100}%` }} />
-                  </div>
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Escrow fees {((live.feeRevenue / totalRevenue) * 100).toFixed(0)}% · currency margin{" "}
-                    {((live.marginRevenue / totalRevenue) * 100).toFixed(0)}%
-                  </p>
-                </>
-              ) : (
-                <p className="mt-3 text-sm text-muted-foreground">No revenue recorded yet.</p>
-              )}
-            </CardContent>
-          </Card>
-          <Card className="border-primary/25 bg-primary/5">
-            <CardContent className="p-5">
-              <ShieldCheck className="size-5 text-primary" />
-              <p className="mt-3 font-semibold">Controls are editable</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Update currency rates daily and define fee tiers by percentage, fixed amount, or
-                whichever is higher.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-0">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
-            <h2 className="font-semibold">Latest deals across the platform</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-start text-xs uppercase text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3 text-start font-semibold">Deal</th>
-                  <th className="px-5 py-3 text-start font-semibold">Value</th>
-                  <th className="px-5 py-3 text-start font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {(live?.recentDeals ?? []).map((deal) => (
-                  <tr key={deal.ref}>
-                    <td className="px-5 py-3">
-                      <Link
-                        to="/console/deals/$dealId"
-                        params={{ dealId: deal.ref }}
-                        className="font-medium hover:text-primary"
-                      >
-                        {deal.ref}
-                      </Link>
-                      <span className="block text-xs text-muted-foreground">{deal.title}</span>
-                    </td>
-                    <td className="px-5 py-3" dir="ltr">
-                      {formatMoney(deal.amount, deal.currency)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <StatusBadge status={deal.status as DealStatus} />
-                    </td>
-                  </tr>
-                ))}
-                {live && live.recentDeals.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="px-5 py-5 text-muted-foreground">No deals yet.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-5">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="size-4 text-warning" />
-            <h2 className="font-semibold">Open disputes</h2>
-          </div>
-          <ul className="mt-4 space-y-3 text-sm">
-            {(live?.openDisputeList ?? []).map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2">
-                <span>
-                  <span className="font-medium">{c.ref}</span>{" "}
-                  <span className="text-muted-foreground">— {c.reason}</span>
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  opened {daysSince(c.createdAt)} day(s) ago
-                </span>
-              </li>
-            ))}
-            {live && live.openDisputeList.length === 0 && (
-              <li className="text-muted-foreground">No open disputes.</li>
-            )}
-          </ul>
-        </CardContent>
-      </Card>
+  const checks = [
+    ["R1", text("Ledger sums per currency = 0", "مجموع القيود لكل عملة = ٠"), live?.reconciliation.r1],
+    ["R2", text("Held = provider total", "المحتجز = إجمالي مزوّد الدفع"), null],
+    ["R3", text("Every release has provider confirmation", "كل إفراج له تأكيد من مزوّد الدفع"), live?.reconciliation.r3],
+    ["R4", text("Tax invoices = fees collected", "الفواتير الضريبية = الرسوم المحصّلة"), live?.reconciliation.r4],
+    ["R5", text("No held balance on closed deals", "لا رصيد محتجز للصفقات المغلقة"), live?.reconciliation.r5],
+  ] as const;
+  return <div className="mt-6 space-y-6">
+    <div className="rounded-2xl bg-brand-strong px-5 py-4 text-sm text-primary-foreground">{text("Demo environment — the payment provider is simulated and all data is fictional.", "بيئة تجريبية — مزوّد الدفع محاكى وجميع البيانات وهمية.")}</div>
+    <h2 className="text-2xl font-semibold">{text("Operations overview", "نظرة عامة على العمليات")}</h2>
+    {query.isError && <p role="alert" className="text-destructive">{text("Could not load staff data.", "تعذر تحميل بيانات الموظفين.")}</p>}
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[
+      { icon: Wallet, title: text("Held with the provider · USD equivalent", "محتجز لدى مزوّد الدفع · معادل الدولار"), value: live?.heldUsd == null ? "—" : formatMoney(live.heldUsd, "USD"), detail: `${live?.fundedCount ?? "—"} ${text("funded deals", "صفقات ممولة")}` },
+      { icon: BriefcaseBusiness, title: text("Active deals", "الصفقات النشطة"), value: live ? active.length : "—", detail: text("Across all deal types", "جميع أنواع الصفقات") },
+      { icon: Gavel, title: text("Open disputes", "النزاعات المفتوحة"), value: live ? open.length : "—", detail: `${text("Oldest", "الأقدم")}: ${oldest} ${text("days", "أيام")}` },
+      { icon: ShieldCheck, title: text("Verification requests pending", "طلبات التحقق المعلقة"), value: live ? pending : "—", detail: text("Personal and business", "أفراد ومنشآت") },
+    ].map(k => <Card key={k.title}><CardContent className="p-5"><div className="flex items-start justify-between gap-3"><p className="text-xs text-muted-foreground">{k.title}</p><k.icon className="size-5 shrink-0 text-primary" /></div><p className="mt-4 text-2xl font-semibold tabular-nums"><bdi>{k.value}</bdi></p><p className="mt-2 text-xs text-muted-foreground">{k.detail}</p></CardContent></Card>)}</div>
+    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <Card><CardContent className="p-0"><h3 className="border-b px-5 py-4 font-semibold">{text("Work queue", "قائمة العمل")}</h3><div className="divide-y divide-border">{queue.map(q => <div key={q.key} className="flex flex-wrap items-center gap-3 p-4"><span className="grid size-9 shrink-0 place-items-center rounded-lg bg-accent text-primary"><q.icon className="size-4" /></span><div className="min-w-0 flex-1"><p className="text-sm font-medium">{q.title}</p><p className="mt-1 truncate text-xs text-muted-foreground">{q.detail}</p></div><span className="rounded-full bg-warning-subtle px-2 py-1 text-xs text-warning">{q.priority}</span><Button asChild size="sm" variant="outline">{q.kind === "deal" ? <Link to="/console/deals/$dealId" params={{dealId:q.ref}}>{text("Open", "فتح")}<ArrowUpRight /></Link> : q.kind === "kyc" ? <Link to="/console/kyc">{text("Open", "فتح")}<ArrowUpRight /></Link> : <Link to="/console/disputes">{text("Open", "فتح")}<ArrowUpRight /></Link>}</Button></div>)}{!queue.length && <p className="p-5 text-sm text-muted-foreground">{text(live ? "Nothing needs attention" : "Loading…", live ? "لا يوجد إجراء مطلوب" : "جارٍ التحميل…")}</p>}</div></CardContent></Card>
+      <Card><CardContent className="p-5"><h3 className="font-semibold">{text("Daily reconciliation", "المطابقة اليومية")}</h3><ul className="mt-4 divide-y divide-border">{checks.map(([code, label, count]) => <li key={code} className="py-3"><div className="flex items-start justify-between gap-2"><span className="text-sm"><bdi className="me-2 text-muted-foreground">{code}</bdi>{label}</span><span className={`shrink-0 rounded-full px-2 py-1 text-xs ${count == null ? "bg-muted text-muted-foreground" : count === 0 ? "bg-success-subtle text-primary" : "bg-warning-subtle text-warning"}`}>{count == null ? text("Unverified", "غير متحقق") : count === 0 ? text("Match", "مطابق") : `${count} ${text("exceptions", "استثناءات")}`}</span></div>{code === "R1" && live?.balances.map(b => <p key={b.currency} className="mt-1 text-xs text-muted-foreground"><bdi>{formatMoney(b.ledger,b.currency)}</bdi></p>)}{code === "R2" && <p className="mt-2 text-xs leading-5 text-muted-foreground">{text("No independent provider statement is available; internal ledger totals cannot verify the provider balance.", "لا يتوفر كشف مستقل من مزوّد الدفع؛ لا تكفي قيود السجل للتحقق من رصيد المزوّد.")}</p>}</li>)}</ul></CardContent></Card>
     </div>
-  );
+    <Card><CardContent className="p-0"><div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4"><h3 className="font-semibold">{text("Recent deals", "الصفقات الأخيرة")}</h3><select aria-label={text("Deal type", "نوع الصفقة")} value={type} onChange={e => setType(e.target.value)} className="h-9 rounded-lg border border-input bg-card px-3 text-sm">{["all","goods","services","contracting","freelance"].map(t => <option key={t} value={t}>{text(t === "all" ? "All types" : t, ({all:"كل الأنواع", goods:"بضائع",services:"خدمات",contracting:"مقاولات",freelance:"عمل حر"} as Record<string,string>)[t])}</option>)}</select></div><div className="overflow-x-auto"><table className="w-full text-start text-sm"><thead className="bg-muted text-xs text-muted-foreground"><tr>{[["Deal","الصفقة"],["Type","النوع"],["Route","المسار"],["Amount","المبلغ"],["Status","الحالة"]].map(([en,ar]) => <th key={en} className="px-5 py-3 text-start font-medium">{text(en,ar)}</th>)}</tr></thead><tbody className="divide-y divide-border">{live?.deals.filter(d => type === "all" || d.deal_type === type).sort((a,b) => b.created_at.localeCompare(a.created_at)).slice(0,15).map(d => <tr key={d.id}><td className="px-5 py-4"><Link to="/console/deals/$dealId" params={{dealId:d.ref}} className="font-medium text-primary">{d.title}</Link><p className="mt-1 text-xs text-muted-foreground"><bdi>{d.ref}</bdi></p></td><td className="px-5 py-4">{text(d.deal_type)}</td><td className="px-5 py-4"><bdi>{text(d.supplier_country ?? "—")} → {text(d.delivery_country ?? "—")}</bdi></td><td className="whitespace-nowrap px-5 py-4 tabular-nums"><bdi>{formatMoney(d.amount,d.currency)}</bdi></td><td className="px-5 py-4"><StatusBadge status={d.status as DealStatus} /></td></tr>)}</tbody></table></div></CardContent></Card>
+  </div>;
 }
