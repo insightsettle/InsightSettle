@@ -71,6 +71,13 @@
       "when": 1792273173989,
       "tag": "0009_auction_bidder_deadlines",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792273253723,
+      "tag": "0010_auction_funded_bidder_confirmation",
+      "breakpoints": true
     }
   ]
 }
