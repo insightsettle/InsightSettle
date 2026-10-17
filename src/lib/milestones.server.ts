@@ -24,10 +24,11 @@ export async function createMilestoneRelease(admin: any, deal: any, milestoneId:
   const { ms, alloc } = await milestoneAllocations(admin, deal);
   const i = ms.findIndex((m) => m.id === milestoneId);
   if (i < 0) throw new Error("Milestone not found.");
-  const a = alloc[i]!;
+  const a = alloc[i];
+  if (!a) throw new Error("Milestone allocation not found.");
   const c = deal.currency;
   const s = (n: number) => roundMoney(n * factor, c);
-  const gross = s(a.gross), retention = s(a.retention), feeShare = s(a.feeShare), vat = s(a.vat);
+  const gross = s(a.gross), retention = a.retention, feeShare = s(a.feeShare), vat = s(a.vat);
   const net = roundMoney(gross - retention - feeShare - vat, c);
   await admin.from("deal_milestones").update({ retention_amount: retention, fee_share: feeShare, vat, net_released: net }).eq("id", milestoneId);
   const { data: tx, error } = await admin
@@ -124,6 +125,11 @@ export async function runMilestoneJobs(admin: any, notify: any) {
   for (const m of due ?? []) {
     const { data: deal } = await admin.from("deals").select("*").eq("id", m.deal_id).single();
     if (deal.frozen || !deal.auto_release_enabled) continue;
+    const { data: current } = await admin.from("deal_milestones").select("status").eq("id", m.id).single();
+    if (current?.status !== "submitted") continue;
+    const { data: releases } = await admin.from("deal_transactions").select("id").eq("milestone_id", m.id)
+      .eq("kind", "release").in("status", ["processing", "pending", "succeeded"]).limit(1);
+    if (releases?.length) continue;
     try {
       const tx = await createMilestoneRelease(admin, deal, m.id, null, "Automatic release after the inspection period");
       await admin.from("deal_milestones").update({ approved_at: now }).eq("id", m.id);

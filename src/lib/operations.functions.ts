@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { roundMoney } from "@/lib/money";
+import { disputeSplit } from "@/lib/fees";
 
 type Ctx = { supabase: any; userId: string; claims?: any };
 
@@ -182,9 +183,10 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
 
     const pct =
       data.outcome === "full_refund" ? 100 : data.outcome === "full_release" ? 0 : (data.buyerPercent ?? 50);
-    const amount = Number(deal.amount);
-    const refund = roundMoney((amount * pct) / 100, deal.currency);
-    const release = roundMoney(amount - refund, deal.currency);
+    const { getDealPricingLocked } = await import("@/lib/deal-rules.server");
+    const split = disputeSplit(await getDealPricingLocked(db, deal), pct);
+    const refund = split.refund;
+    const release = split.releaseGross;
     const rows: any[] = [];
     if (refund > 0)
       rows.push({
@@ -194,7 +196,7 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
         original_transaction_id: funding?.id ?? null,
       });
     if (release > 0)
-      rows.push({ kind: "release", amount: release, idempotency_key: `${deal.ref}-RELEASE-${dispute.id.slice(0, 8)}` });
+      rows.push({ kind: "release", amount: split.supplierNet, fee: split.sellerShare, release_part: "dispute", idempotency_key: `${deal.ref}-RELEASE-${dispute.id.slice(0, 8)}` });
     let createdIds: string[] = [];
     if (rows.length) {
       const { data: created } = await db
