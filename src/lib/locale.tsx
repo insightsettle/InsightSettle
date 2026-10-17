@@ -7,6 +7,12 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "Set status to": "تعيين الحالة إلى",
+  "Every action needs a reason and is written to the audit log.": "يتطلب كل إجراء سبباً ويُسجّل في سجل التدقيق.",
+  "Held retention": "الاحتفاظ المحتجز",
+  "Supplier position": "موقف المورد",
+  "Buyer position": "موقف المشتري",
+
   "Pay a supplier abroad": "الدفع لمورد خارج بلدك",
   "Choose your currency and the supplier's currency to see exactly what you will pay before you fund the deal. The rate is fixed at funding time — no extra charges added later.": "اختر عملتك وعملة المورد لعرض مبلغ الدفع قبل تمويل الصفقة. يُثبت السعر عند التمويل دون رسوم إضافية لاحقاً.",
   "What do you need help with?": "بماذا تحتاج مساعدة؟",

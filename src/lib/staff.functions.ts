@@ -46,7 +46,7 @@ export const getStaffOverview = createServerFn({ method: "GET" })
       }
     }
     const { roundMoney } = await import("@/lib/money");
-    const balances = Object.keys(totals).sort().map(currency => ({ currency, ledger: roundMoney(totals[currency], currency), held: roundMoney(held[currency] ?? 0, currency) }));
+    const balances = Object.keys(totals).sort().map(currency => ({ currency, ledger: roundMoney(totals[currency] ?? 0, currency), held: roundMoney(held[currency] ?? 0, currency) }));
     const usdRate = rates.find(r => r.code === "USD" && r.active)?.provider_rate;
     let heldUsd = 0;
     let missingRates = false;
@@ -56,7 +56,7 @@ export const getStaffOverview = createServerFn({ method: "GET" })
       heldUsd += b.held * Number(rate) / Number(usdRate);
     }
     const closed = new Set(deals.filter(d => ["released", "completed", "refunded", "partially_refunded", "cancelled", "rejected"].includes(d.status)).map(d => d.id));
-    const closedHeld = Object.entries(heldByDeal).filter(([key, v]) => closed.has(key.split(":")[0]) && roundMoney(v, key.split(":")[1]) !== 0).length;
+    const closedHeld = Object.entries(heldByDeal).filter(([key, v]) => closed.has(key.split(":")[0]) && roundMoney(v, key.split(":")[1] ?? "USD") !== 0).length;
     const invoiceExceptions = invoices.filter(invoice => {
       const lines = Array.isArray(invoice.lines) ? invoice.lines : [{ currency: invoice.currency, fee: invoice.fee, vat: invoice.vat }];
       const currencies = new Set([...lines.map((l: any) => l.currency), ...ledger.filter(l => l.deal_id === invoice.deal_id && ["insight_fee_revenue", "vat_payable"].includes(l.account)).map(l => l.currency)]);
