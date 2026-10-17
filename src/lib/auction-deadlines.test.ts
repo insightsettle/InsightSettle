@@ -53,7 +53,7 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
       CREATE FUNCTION run_auto_release() RETURNS integer LANGUAGE plpgsql AS $$ DECLARE r record; BEGIN
     INSERT INTO deal_transactions(deal_id, kind, amount, currency, status, provider, note, idempotency_key)
     VALUES (r.id, 'release', r.amount, r.currency, 'processing', 'manual', 'Automatic release after the inspection period', r.ref || '-RELEASE-AUTO'); RETURN 0; END; $$;`);
-    for (const file of ['0005_auction_model_and_rules.sql','0006_auction_direct_payout.sql','0007_auction_payout_query_qualification.sql','0008_auction_final_confirmation_guard.sql','0009_auction_bidder_deadlines.sql','0010_auction_funded_bidder_confirmation.sql']) {
+    for (const file of ['0005_auction_model_and_rules.sql','0006_auction_direct_payout.sql','0007_auction_payout_query_qualification.sql','0008_auction_final_confirmation_guard.sql','0009_auction_bidder_deadlines.sql','0010_auction_funded_bidder_confirmation.sql','0011_auction_offer_terms_guards.sql','0012_auction_decline_identity_guard.sql']) {
       await db.unsafe(readFileSync(new URL(`../../drizzle/migrations/${file}`, import.meta.url),'utf8'));
     }
   }, 30000);
@@ -146,5 +146,19 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
     await db`INSERT INTO auth.users VALUES('00000000-0000-0000-0000-000000000008','guest@example.test',now())`;
     await db`SELECT claim_auction_invite(${offer.token},'00000000-0000-0000-0000-000000000008')`;
     expect((await db`SELECT buyer_id FROM deals`)[0]?.buyer_id).toBe('00000000-0000-0000-0000-000000000008');
+  });
+  it('refuses frozen funding and immutable term changes', async () => {
+    await record(); const q = await quote(offer.dealId);
+    await db`UPDATE deals SET frozen=true WHERE id=${offer.dealId}`;
+    await expect(db`SELECT reserve_auction_funding(${offer.dealId},${buyer},${q},'manual','Demo')`).rejects.toThrow(/ended or already funded/);
+    await expect(db`UPDATE deals SET title='Replacement' WHERE id=${offer.dealId}`).rejects.toThrow(/immutable/);
+    await expect(db`UPDATE deal_term_versions SET snapshot='{}' WHERE deal_id=${offer.dealId}`).rejects.toThrow(/immutable/);
+    expect(await db`SELECT * FROM deal_transactions`).toHaveLength(0);
+  });
+  it('refuses stale decline against a later offer even for the same bidder account', async () => {
+    await record(); const old=offer.dealId;
+    await db`SELECT decline_auction_deal(${old},${buyer})`;
+    await expect(db`SELECT decline_auction_deal(${old},${buyer})`).rejects.toThrow(/no longer current/);
+    expect((await db`SELECT status FROM lot_bidders ORDER BY rank`).map(b=>b.status)).toEqual(['declined','offered','waiting']);
   });
 });

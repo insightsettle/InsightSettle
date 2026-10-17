@@ -31,7 +31,7 @@ export const declineAuctionOffer = createServerFn({ method: 'POST' })
     const { data: deal } = await context.supabase.from('deals').select('buyer_id,deal_type,auction_lot_id').eq('id', data.dealId).maybeSingle();
     if (deal?.buyer_id !== context.userId || deal.deal_type !== 'auction' || !deal.auction_lot_id) throw new Error('Only the offered buyer can decline.');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: events, error } = await supabaseAdmin.rpc('advance_auction_bidder', { _lot: deal.auction_lot_id, _decliner: context.userId });
+    const { data: events, error } = await supabaseAdmin.rpc('decline_auction_deal', { _deal: data.dealId, _buyer: context.userId });
     if (error) throw error;
     if (!events) throw new Error('Offer is no longer available or funding is reserved.');
     const { deliverAuctionEvents } = await import('./auction-deadlines.server');
