@@ -310,6 +310,94 @@ function DealPage() {
               </CardContent>
             </Card>
 
+            {shippingNeeded && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <Truck className="size-5 text-primary" />
+                    <h2 className="font-bold">{text("Shipping & delivery", "الشحن والتسليم")}</h2>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                    <p className="rounded-lg bg-muted p-3">
+                      <span className="text-muted-foreground">Status: </span>
+                      {shippingStatusLabels[deal.shipping_status ?? "preparing"] ??
+                        deal.shipping_status}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Carrier: </span>
+                      {deal.shipping_carrier || "—"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Tracking: </span>
+                      <bdi dir="ltr">{deal.shipping_tracking || "—"}</bdi>
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Shipped: </span>
+                      {deal.shipped_at ? formatDate(deal.shipped_at) : "—"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Estimated delivery: </span>
+                      {deal.estimated_delivery_at ? formatDate(deal.estimated_delivery_at) : "—"}
+                    </p>
+                  </div>
+                  <div data-no-localize className="mt-3 grid gap-3 sm:grid-cols-2">{[[text("Delivered", "تم التسليم"), deal.delivered_at ? formatDate(deal.delivered_at) : "—"], [text("Destination", "الوجهة"), text(deal.delivery_country ?? "—")]].map(([label,value]) => <div key={label} className="rounded-lg bg-muted p-3"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-sm font-medium">{value}</p></div>)}</div>
+                  {isSeller && status !== "released" && status !== "refunded" && (
+                    <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                      <Input
+                        value={carrier}
+                        onChange={(e) => setCarrier(e.target.value)}
+                        placeholder="Carrier (e.g. Aramex)"
+                      />
+                      <Input
+                        value={tracking}
+                        onChange={(e) => setTracking(e.target.value)}
+                        placeholder="Tracking number"
+                      />
+                      <select
+                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={shippingState}
+                        onChange={(e) => setShippingState(e.target.value)}
+                      >
+                        {Object.entries(shippingStatusLabels)
+                          .filter(([key]) => key !== "not_required")
+                          .map(([key, label]) => (
+                            <option key={key} value={key}>
+                              {label}
+                            </option>
+                          ))}
+                      </select>
+                      <Input
+                        type="date"
+                        value={shipEta}
+                        onChange={(e) => setShipEta(e.target.value)}
+                        aria-label="Estimated delivery"
+                        className="sm:col-span-3"
+                      />
+                      <Button
+                        className="sm:col-span-3"
+                        variant="outline"
+                        onClick={() =>
+                          action.mutate(() =>
+                            shipFn({
+                              data: {
+                                dealId: deal.id,
+                                carrier: carrier.trim(),
+                                tracking: tracking.trim(),
+                                status: shippingState,
+                                eta: shipEta || null,
+                              },
+                            }),
+                          )
+                        }
+                      >
+                        Update shipping
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {(deal as any).deal_type === "freelance" && !milestonesQ.data?.length && <FreelancePanel deal={deal} files={filesQ.data ?? []} />}
             {(deal as any).deal_type === "services" && !milestonesQ.data?.length && <ServicesPanel deal={deal} files={filesQ.data ?? []} />}
             {!termsAgreed && (
@@ -546,93 +634,6 @@ function DealPage() {
             <TermVersionsCard deal={deal} />
             <InvoiceCard deal={deal} />
 
-            {shippingNeeded && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2">
-                    <Truck className="size-5 text-primary" />
-                    <h2 className="font-bold">{text("Shipping & delivery", "الشحن والتسليم")}</h2>
-                  </div>
-                  <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                    <p className="rounded-lg bg-muted p-3">
-                      <span className="text-muted-foreground">Status: </span>
-                      {shippingStatusLabels[deal.shipping_status ?? "preparing"] ??
-                        deal.shipping_status}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Carrier: </span>
-                      {deal.shipping_carrier || "—"}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Tracking: </span>
-                      <bdi dir="ltr">{deal.shipping_tracking || "—"}</bdi>
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Shipped: </span>
-                      {deal.shipped_at ? formatDate(deal.shipped_at) : "—"}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Estimated delivery: </span>
-                      {deal.estimated_delivery_at ? formatDate(deal.estimated_delivery_at) : "—"}
-                    </p>
-                  </div>
-                  <div data-no-localize className="mt-3 grid gap-3 sm:grid-cols-2">{[[text("Delivered", "تم التسليم"), deal.delivered_at ? formatDate(deal.delivered_at) : "—"], [text("Destination", "الوجهة"), text(deal.delivery_country ?? "—")]].map(([label,value]) => <div key={label} className="rounded-lg bg-muted p-3"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-sm font-medium">{value}</p></div>)}</div>
-                  {isSeller && status !== "released" && status !== "refunded" && (
-                    <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                      <Input
-                        value={carrier}
-                        onChange={(e) => setCarrier(e.target.value)}
-                        placeholder="Carrier (e.g. Aramex)"
-                      />
-                      <Input
-                        value={tracking}
-                        onChange={(e) => setTracking(e.target.value)}
-                        placeholder="Tracking number"
-                      />
-                      <select
-                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                        value={shippingState}
-                        onChange={(e) => setShippingState(e.target.value)}
-                      >
-                        {Object.entries(shippingStatusLabels)
-                          .filter(([key]) => key !== "not_required")
-                          .map(([key, label]) => (
-                            <option key={key} value={key}>
-                              {label}
-                            </option>
-                          ))}
-                      </select>
-                      <Input
-                        type="date"
-                        value={shipEta}
-                        onChange={(e) => setShipEta(e.target.value)}
-                        aria-label="Estimated delivery"
-                        className="sm:col-span-3"
-                      />
-                      <Button
-                        className="sm:col-span-3"
-                        variant="outline"
-                        onClick={() =>
-                          action.mutate(() =>
-                            shipFn({
-                              data: {
-                                dealId: deal.id,
-                                carrier: carrier.trim(),
-                                tracking: tracking.trim(),
-                                status: shippingState,
-                                eta: shipEta || null,
-                              },
-                            }),
-                          )
-                        }
-                      >
-                        Update shipping
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
             {dealClosed && bothJoined && (
               <Card>
@@ -802,7 +803,7 @@ function DealPage() {
                         <p className="font-medium">{e.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {formatDate(e.created_at)}
-                          {e.note ? ` · ${e.note}` : ""}
+                          {e.note ? ` · ${text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note)}` : ""}
                         </p>
                       </li>
                     ))}
@@ -892,10 +893,11 @@ function DealPage() {
 }
 
 function Info({ label, value }: { label: string; value: string }) {
+  const { text } = useLocale();
   return (
     <div className="mt-3 flex items-center justify-between gap-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 break-words text-end text-sm font-semibold tabular-nums">{value}</dd>
+      <dt className="text-sm text-muted-foreground">{text(label)}</dt>
+      <dd className="min-w-0 break-words text-end text-sm font-semibold tabular-nums">{text(value)}</dd>
     </div>
   );
 }

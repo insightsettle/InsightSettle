@@ -16,6 +16,7 @@ import {
   uploadDealFile,
 } from "@/lib/deal-actions";
 import type { DealRow } from "@/lib/deals";
+import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { cancelDeal, openDisputeCase } from "@/lib/operations.functions";
 
@@ -320,6 +321,7 @@ export function TermVersionsCard({ deal }: { deal: DealRow }) {
 }
 
 export function InvoiceCard({ deal }: { deal: DealRow }) {
+  const { text } = useLocale();
   const inv = useQuery({ queryKey: ["invoice", deal.id, deal.status], queryFn: () => getTaxInvoice(deal.id) });
   if (!inv.data) return null;
   const i = inv.data;
@@ -331,7 +333,7 @@ export function InvoiceCard({ deal }: { deal: DealRow }) {
           <h2 className="font-bold">Tax invoice</h2>
         </div>
         <p className="mt-2 text-sm" dir="ltr">
-          {i.invoice_number} · fee {formatMoney(Number(i.fee), i.currency)} + VAT {(Number(i.vat_rate) * 100).toFixed(0)}% {formatMoney(Number(i.vat), i.currency)} ={" "}
+          {i.invoice_number} · fee {formatMoney(Number(i.fee), i.currency)} + {Number(i.vat_rate) === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${(Number(i.vat_rate) * 100).toFixed(0)}%`} {formatMoney(Number(i.vat), i.currency)} ={" "}
           <b>
             {formatMoney(Number(i.total), i.currency)}
           </b>
