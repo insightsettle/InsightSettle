@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
 import { acceptDealInvite } from "@/lib/invites.functions";
+import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/_authenticated/invite/$token")({
   head: () => ({
@@ -24,6 +25,7 @@ function InvitePage() {
   const { token } = Route.useParams();
   const accept = useServerFn(acceptDealInvite);
   const navigate = useNavigate();
+  const { text } = useLocale();
   const [message, setMessage] = useState("Joining the deal…");
 
   useEffect(() => {
@@ -52,7 +54,7 @@ function InvitePage() {
   return (
     <SiteShell>
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Deal invitation</h1>
+        <h1 className="text-2xl font-bold">{text('Deal invitation', 'دعوة صفقة')}</h1>
         <p className="mt-3 text-muted-foreground">{message}</p>
         <Button asChild className="mt-6">
           <Link to="/dashboard">Go to dashboard</Link>

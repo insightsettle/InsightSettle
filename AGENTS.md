@@ -12,6 +12,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Auction client screens reuse existing winner, invite, decline, quote and funding actions; authenticated CRUD remains RLS/trigger-governed, supplemental read adapters authorize lot access before projecting metadata, and owner screens are read-only so presentation cannot alter settlement rules.
 
 - Auction invariants live in database triggers with auction/lot row locks and immutable funding reservations; tests execute the migration in isolated PostgreSQL-compatible PGlite so writes cannot bypass bidder, split or deadline guards.
 - Auction offers, expiry/decline advancement, invite claims and quote/funding reservations are service-only atomic database functions locking auction then lot then deal; deadline races use independent PostgreSQL sessions, and the existing managed callback runs the deadline sweep without adding a schedule.
