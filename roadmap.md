@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] UX-A: apply v1 tokens, bilingual client/staff shells, statuses, cards/tables; run tests and capture at most three EN/AR screenshots. No publishing or business logic changes.
+
 - [x] Display-only: format deal history, invoices, milestone editor and console amounts with currency minor units; verify types and tests.
 
 - [x] C09-D15: lock dispute payout legs, preserve milestone retention, and run BHD/SAR settlement regression tests.
