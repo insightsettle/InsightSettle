@@ -92,6 +92,13 @@
       "when": 1792273402417,
       "tag": "0012_auction_decline_identity_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792273468195,
+      "tag": "0013_auction_backup_price_validation",
+      "breakpoints": true
     }
   ]
 }
