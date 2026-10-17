@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] UX-D: public homepage/navigation/footer and pricing v1, live USD fee/VAT calculator reuse, Arabic-first presentation, two screenshots, tests and vector checks; no publishing.
+
 - [x] UX-C: staff overview and paginated guarded read-only reconciliation, deal milestones/retention, dispute positions/timeline/decision presentation; D21 cancel routing tested through existing guard without writes; Arabic overview/contract screenshots reviewed; automatic type/build checks clean; no publishing.
 - [ ] UX-C open dispute decision/evidence verification: no live dispute exists. Needs a real test case; no fictional dispute or financial mutation created. R2 remains unverified without an independent provider statement; R4/R5 existing-data exceptions are displayed, not changed.
 
