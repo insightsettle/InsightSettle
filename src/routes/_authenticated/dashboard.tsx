@@ -123,8 +123,8 @@ function Dashboard() {
         <VerificationCard />
         {user && !user.email_confirmed_at && <p className="rounded-lg bg-warning-subtle p-4 text-sm text-warning">{text("Please confirm your email address.", "يرجى تأكيد بريدك الإلكتروني.")}</p>}
         <details id="saved-deals"><summary className="cursor-pointer text-sm font-medium text-primary">{text("All deals", "جميع الصفقات")}</summary><div className="mt-3 space-y-2">{myDeals.map((d) => <Link className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4 text-sm" key={d.id} to="/deals/$dealId" params={{ dealId: d.ref }}><span>{d.title} · {d.ref}</span><StatusBadge status={d.status as never} /><bdi className="tabular-nums">{formatMoney(Number(d.amount), d.currency)}</bdi></Link>)}</div></details>
-        <FxCustomerQuote />
       </div>
+      <FxCustomerQuote />
     </SiteShell>
   );
 }

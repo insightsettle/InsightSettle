@@ -7,6 +7,9 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "Pay a supplier abroad": "الدفع لمورد خارج بلدك",
+  "Choose your currency and the supplier's currency to see exactly what you will pay before you fund the deal. The rate is fixed at funding time — no extra charges added later.": "اختر عملتك وعملة المورد لعرض مبلغ الدفع قبل تمويل الصفقة. يُثبت السعر عند التمويل دون رسوم إضافية لاحقاً.",
+  "What do you need help with?": "بماذا تحتاج مساعدة؟",
   "current": "الحالية",
   "Version": "النسخة",
   "Delivered to the buyer": "تم التسليم للمشتري",
