@@ -1,0 +1,9 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS organises_auctions boolean NOT NULL DEFAULT false;
+ALTER TABLE public.auctions ADD COLUMN IF NOT EXISTS starts_at timestamptz;
+CREATE OR REPLACE FUNCTION public.auction_is_verified_business(uid uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM public.profiles p JOIN public.business_profiles b ON b.user_id=p.id WHERE p.id=uid AND p.account_type='business' AND p.verification_status='verified' AND b.verification_status='verified'); $$;
+REVOKE ALL ON FUNCTION public.auction_is_verified_business(uuid) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.auction_is_verified_business(uuid) TO authenticated,service_role;
+CREATE OR REPLACE FUNCTION public.guard_auction_business() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NOT public.auction_is_verified_business(NEW.organiser_id) THEN RAISE EXCEPTION 'Organisers require a verified business account'; END IF; RETURN NEW; END; $$;
+CREATE TRIGGER guard_auction_business BEFORE INSERT OR UPDATE ON public.auctions FOR EACH ROW EXECUTE FUNCTION public.guard_auction_business();
+CREATE OR REPLACE FUNCTION public.guard_auction_preference() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN IF NEW.organises_auctions AND (TG_OP='INSERT' OR NEW.organises_auctions IS DISTINCT FROM OLD.organises_auctions) AND NOT public.auction_is_verified_business(NEW.id) THEN RAISE EXCEPTION 'Organisers require a verified business account'; END IF; RETURN NEW; END; $$;
+CREATE TRIGGER guard_auction_preference BEFORE INSERT OR UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.guard_auction_preference();

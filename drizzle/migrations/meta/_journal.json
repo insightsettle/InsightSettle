@@ -99,6 +99,34 @@
       "when": 1792273468195,
       "tag": "0013_auction_backup_price_validation",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792273699212,
+      "tag": "0014_auction_client_preferences",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792273727129,
+      "tag": "0015_auction_photo_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792273770074,
+      "tag": "0016_auction_owner_lookup",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792273963377,
+      "tag": "0017_auction_verified_business_eligibility",
+      "breakpoints": true
     }
   ]
 }

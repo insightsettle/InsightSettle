@@ -1,0 +1,3 @@
+CREATE POLICY auction_photos_upload ON storage.objects FOR INSERT TO authenticated WITH CHECK(bucket_id='auction-photos' AND (storage.foldername(name))[1]=auth.uid()::text);
+CREATE POLICY auction_photos_read ON storage.objects FOR SELECT TO authenticated USING(bucket_id='auction-photos' AND ((storage.foldername(name))[1]=auth.uid()::text OR EXISTS(SELECT 1 FROM public.auction_lots l WHERE name=ANY(l.images) AND public.auction_can_read_lot(l.id))));
+CREATE POLICY auction_photos_delete ON storage.objects FOR DELETE TO authenticated USING(bucket_id='auction-photos' AND (storage.foldername(name))[1]=auth.uid()::text);

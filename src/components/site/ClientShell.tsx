@@ -9,13 +9,13 @@ import { listMyDeals } from "@/lib/deals";
 import { useLocale } from "@/lib/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAction } from "@/lib/deal-display";
+import { auctionAccess } from "@/lib/auction-client";
 
-// TODO: enable Auctions only for verified organisers when that feature exists.
-const AUCTIONS_ENABLED = false;
 export function ClientShell({ children }: { children: ReactNode }) {
   const { text } = useLocale();
   const { pathname, hash } = useLocation();
   const { user } = useSessionUser();
+  const { data: auctionsAccess } = useQuery({ queryKey: ["auction-access"], queryFn: auctionAccess, enabled: !!user });
   const { data: deals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
   const { data: actionMilestones = [] } = useQuery({
     queryKey: ["my-action-milestones", user?.id], enabled: !!user,
@@ -34,7 +34,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
       <Link to="/disputes" className={shellNavClass}><Scale className="size-4" />{text("Disputes")}</Link>
       <Link to="/documents" className={shellNavClass}><Receipt className="size-4" />{text("Payments & invoices")}</Link>
       <Link to="/verification" className={shellNavClass}><UserRoundCheck className="size-4" />{text("Account & verification")}</Link>
-      {AUCTIONS_ENABLED && <span className={shellNavClass}><Gavel className="size-4" />{text("Auctions")}</span>}
+      {auctionsAccess?.visible && <Link to="/auctions" className={shellNavClass} data-status={pathname.startsWith('/auctions') ? 'active' : 'inactive'}><Gavel className="size-4" />{text("Auctions", "المزادات")}</Link>}
     </nav>
   </>;
   return <AppShell navigation={nav} title={title}>{children}</AppShell>;

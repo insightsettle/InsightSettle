@@ -1,0 +1,1 @@
+CREATE OR REPLACE FUNCTION public.auction_is_verified_business(uid uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT EXISTS(SELECT 1 FROM public.profiles p WHERE p.id=uid AND p.account_type='business' AND p.verification_status='verified'); $$;

@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useLocale } from "@/lib/locale";
+import { auctionAccess } from "@/lib/auction-client";
 import { useSessionUser } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDate } from "@/lib/demo-data";
@@ -47,6 +50,12 @@ const tone: Record<string, string> = {
 function VerificationPage() {
   const queryClient = useQueryClient();
   const { user } = useSessionUser();
+  const { text } = useLocale();
+  const auctionPreference = useQuery({ queryKey: ['auction-access'], queryFn: auctionAccess });
+  const preferenceMutation = useMutation({
+    mutationFn: async (enabled: boolean) => { if (!user) return; const { error } = await supabase.from('profiles').update({ organises_auctions: enabled }).eq('id', user.id); if (error) throw error; },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['auction-access'] }),
+  });
   const [docType, setDocType] = useState<string>("national_id");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +130,7 @@ function VerificationPage() {
         <PersonalDetailsCard />
         <BusinessDetailsCard />
         <PayoutAccountCard />
+        <Card className="mt-4" data-no-localize><CardContent className="flex items-start justify-between gap-4 p-6"><div><Label htmlFor="organises-auctions">{text('I organise auctions', 'أنا أنظّم مزادات')}</Label><p className="mt-2 text-xs leading-6 text-muted-foreground">{text('Auction organisers must be verified business accounts.', 'يجب أن يكون منظّم المزاد حساب أعمال موثّقًا.')}</p>{preferenceMutation.error && <p role="alert" className="mt-2 text-xs text-destructive">{text('Unable to update this preference.', 'تعذّر تحديث هذا الخيار.')}</p>}</div><Switch id="organises-auctions" checked={auctionPreference.data?.enabled ?? false} disabled={preferenceMutation.isPending || (!auctionPreference.data?.eligible && !auctionPreference.data?.enabled)} onCheckedChange={value => preferenceMutation.mutate(value)} /></CardContent></Card>
 
         <Card className="mt-4">
           <CardContent className="p-6">

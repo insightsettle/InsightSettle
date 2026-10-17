@@ -1,4 +1,6 @@
 import { getDealPricing, requestFxQuote, type FxQuote } from "@/lib/fx-quotes.functions";
+import { getAuctionDealView } from "@/lib/auction-client.functions";
+import { AuctionDealScreen } from "@/components/auction/AuctionWinner";
 import {
   acceptTerms,
   confirmDelivery as confirmDeliveryFn,
@@ -86,6 +88,16 @@ export const Route = createFileRoute("/_authenticated/deals/$dealId")({
 });
 
 function DealPage() {
+  const { dealId } = Route.useParams();
+  const viewFn = useServerFn(getAuctionDealView);
+  const query = useQuery({ queryKey: ['auction-deal-view', dealId], queryFn: () => viewFn({ data: { ref: dealId } }) });
+  const { text } = useLocale();
+  if (query.isPending) return <p data-no-localize>{text('Loading…', 'جارٍ التحميل…')}</p>;
+  if (query.data && (query.data.owner || query.data.buyer)) return <AuctionDealScreen refCode={dealId} />;
+  return <OrdinaryDealPage />;
+}
+
+function OrdinaryDealPage() {
   const { dealId } = Route.useParams();
   const { locale, text } = useLocale();
   const queryClient = useQueryClient();

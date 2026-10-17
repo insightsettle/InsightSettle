@@ -101,6 +101,7 @@ export type Database = {
           organiser_id: string
           payment_deadline_hours: number
           platform: string
+          starts_at: string | null
           status: string
           stream_url: string | null
           title: string
@@ -114,6 +115,7 @@ export type Database = {
           organiser_id: string
           payment_deadline_hours?: number
           platform: string
+          starts_at?: string | null
           status?: string
           stream_url?: string | null
           title: string
@@ -127,6 +129,7 @@ export type Database = {
           organiser_id?: string
           payment_deadline_hours?: number
           platform?: string
+          starts_at?: string | null
           status?: string
           stream_url?: string | null
           title?: string
@@ -1341,6 +1344,7 @@ export type Database = {
           id_number: string | null
           id_type: string | null
           nationality: string | null
+          organises_auctions: boolean
           pdpl_consent_at: string | null
           phone: string | null
           updated_at: string
@@ -1358,6 +1362,7 @@ export type Database = {
           id_number?: string | null
           id_type?: string | null
           nationality?: string | null
+          organises_auctions?: boolean
           pdpl_consent_at?: string | null
           phone?: string | null
           updated_at?: string
@@ -1375,6 +1380,7 @@ export type Database = {
           id_number?: string | null
           id_type?: string | null
           nationality?: string | null
+          organises_auctions?: boolean
           pdpl_consent_at?: string | null
           phone?: string | null
           updated_at?: string
@@ -1523,7 +1529,12 @@ export type Database = {
       }
       auction_can_read_lot: { Args: { lid: string }; Returns: boolean }
       auction_is_organiser: { Args: { aid: string }; Returns: boolean }
+      auction_is_verified_business: { Args: { uid: string }; Returns: boolean }
       auction_offer_bidder: { Args: { _bidder: string }; Returns: Json }
+      auction_owner_by_email: {
+        Args: { _actor: string; _auction: string; _email: string }
+        Returns: string
+      }
       auction_require_beneficiary: {
         Args: { cur: string; uid: string }
         Returns: undefined

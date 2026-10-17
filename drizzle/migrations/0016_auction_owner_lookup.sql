@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION public.auction_owner_by_email(_email text,_auction uuid,_actor uuid) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE uid uuid; BEGIN IF NOT EXISTS(SELECT 1 FROM public.auctions WHERE id=_auction AND organiser_id=_actor) THEN RAISE EXCEPTION 'Only the organiser can select an owner'; END IF; SELECT u.id INTO uid FROM auth.users u JOIN public.profiles p ON p.id=u.id WHERE lower(u.email)=lower(_email) AND p.verification_status='verified' AND u.email_confirmed_at IS NOT NULL; RETURN uid; END; $$;
+REVOKE ALL ON FUNCTION public.auction_owner_by_email(text,uuid,uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.auction_owner_by_email(text,uuid,uuid) TO service_role;
