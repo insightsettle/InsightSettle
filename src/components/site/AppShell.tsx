@@ -29,13 +29,13 @@ export function AppShell({ children, navigation, title, staff = false }: { child
   const sidebar = (
     <div className="flex min-h-full flex-col p-5" data-no-localize>
       <Link to={staff ? "/console" : "/dashboard"} className="mb-6 flex items-center gap-2.5 text-2xl font-semibold" aria-label="Insight">
-        <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><TrendingUp className="size-6" /></span>
+        <span className="grid size-10 place-items-center rounded-lg bg-primary text-primary-foreground"><TrendingUp className="size-6" /></span>
         <span data-no-localize>Insight</span>
       </Link>
       {staff && <span className="mb-5 w-fit rounded-md bg-brand-strong px-2.5 py-1 text-xs font-medium text-primary-foreground">{text("Staff console")}</span>}
       <div onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setOpen(false); }}>{navigation}</div>
       <div className="mt-auto pt-8">
-        <div className="rounded-xl bg-secondary p-4">
+        <div className="rounded-lg bg-secondary p-4">
           <Link to="/help" className="text-sm font-medium text-primary">{text("Need help?")}</Link>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">{text("Support is available Sunday–Thursday, 9am–6pm Riyadh time.")}</p>
         </div>
@@ -57,10 +57,10 @@ export function AppShell({ children, navigation, title, staff = false }: { child
           <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setOpen(true)} aria-label={text("Open navigation")}><Menu /></Button>
           <p className="min-w-0 truncate text-base font-semibold">{text(title)}</p>
           <div className="ms-auto flex shrink-0 items-center gap-2">
-            <div className="relative hidden w-[260px] xl:block"><Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label={text("Search")} placeholder={text("Search by deal ref or party…")} className="bg-background ps-9 text-xs" /></div>
+            <div className="relative hidden w-[260px] xl:block"><Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label={text("Search")} placeholder={text("Search by deal ref or party…")} className="bg-background ps-9 text-[11px]" /></div>
             <NotificationBell /><LanguageToggle />
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gold-subtle text-sm font-medium text-gold-foreground" data-no-localize>{name.charAt(0)}</span>
-            <div className="hidden max-w-36 sm:block"><p className="truncate text-xs font-medium" data-no-localize>{name}</p><p className="text-xs text-muted-foreground">{text(staff ? "Staff console" : "Account")}</p></div>
+            <div className="hidden max-w-36 sm:block"><p className="truncate text-xs font-medium" data-no-localize>{name}</p><p className="text-xs text-muted-foreground">{text(staff ? "Staff console" : "Customer view")}</p></div>
           </div>
         </header>
         <main className="app-content min-w-0 p-4 lg:p-8">{children}</main>

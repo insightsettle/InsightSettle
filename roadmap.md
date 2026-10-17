@@ -1,6 +1,7 @@
 # Roadmap
 
-- [ ] UX-A: apply v1 tokens, bilingual client/staff shells, statuses, cards/tables; run tests and capture at most three EN/AR screenshots. No publishing or business logic changes.
+- [x] UX-A: apply v1 tokens, bilingual client/staff shells, statuses, cards/tables; verify automatic type check/build and 31 unit tests. No publishing or business logic changes.
+- [ ] UX-A signed-in EN/AR dashboard and console screenshots (maximum three): blocked by unavailable test-account session approval; owner must sign into the preview. No screenshots taken or mock sessions used.
 
 - [x] Display-only: format deal history, invoices, milestone editor and console amounts with currency minor units; verify types and tests.
 
