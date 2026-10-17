@@ -1,4 +1,4 @@
-import { fundingLedger, releaseLedger, releasePortion, type FeeBreakdown, type PayInQuote } from "@/lib/fees";
+import { disputeSplit, fundingLedger, releaseLedger, type FeeBreakdown, type PayInQuote } from "@/lib/fees";
 import { roundMoney } from "@/lib/money";
 
 async function lockedPricing(admin: any, dealId: string): Promise<{ breakdown: FeeBreakdown; payIn: PayInQuote } | null> {
@@ -43,10 +43,16 @@ async function writeLedgerAndInvoice(admin: any, tx: any, ref: string) {
       );
   } else if (tx.kind === "release" && pricing) {
     const b = pricing.breakdown;
-    // C09-D15: a dispute-split release carries the gross supplier portion; only that portion leaves escrow.
-    const isDisputeSplit = /-RELEASE-[0-9a-f]{8}$/.test(String(tx.idempotency_key ?? "")) && Number(tx.amount) < b.amount;
-    if (isDisputeSplit) {
-      const p = releasePortion(b, Number(tx.amount));
+    // C09-D15: never infer gross from amount: newly created dispute payouts already contain net.
+    const decisionKey = /-RELEASE-([0-9a-f]{8})$/.exec(String(tx.idempotency_key ?? ""));
+    if (tx.release_part === "dispute" || decisionKey) {
+      const { data: decisions, error } = await admin.from("disputes").select("id, buyer_percent, outcome")
+        .eq("deal_id", tx.deal_id).is("milestone_id", null).eq("status", "resolved");
+      if (error) throw error;
+      const decision = decisions?.find((d: any) => decisionKey && String(d.id).startsWith(decisionKey[1]));
+      if (!decision) throw new Error("The locked dispute decision is missing.");
+      const pct = decision.outcome === "full_release" ? 0 : decision.outcome === "full_refund" ? 100 : Number(decision.buyer_percent);
+      const p = disputeSplit(b, pct);
       await admin.from("deal_transactions").update({ amount: p.supplierNet, fee: p.sellerShare, currency: b.currency }).eq("id", tx.id);
       rows = p.ledger;
     } else {

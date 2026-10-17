@@ -197,8 +197,9 @@ export function fundingBlockReason(input: {
  */
 export function disputeSplit(b: FeeBreakdown, buyerPercent: number) {
   const c = b.currency;
-  const refund = roundMoney((b.amount * buyerPercent) / 100, c);
-  return { refund, ...releasePortion(b, roundMoney(b.amount - refund, c)) };
+  const gross = roundMoney((b.amount * (100 - buyerPercent)) / 100, c);
+  const refund = roundMoney(b.amount - gross, c);
+  return { refund, ...releasePortion(b, gross) };
 }
 
 /** Release of `gross` out of the held amount, with the supplier fee share and VAT pro rata. */
