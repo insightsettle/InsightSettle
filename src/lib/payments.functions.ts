@@ -54,7 +54,7 @@ async function releaseFigures(admin: any, deal: any) {
 async function loadDealForParty(context: { supabase: any; userId: string }, dealId: string) {
   const { data, error } = await context.supabase
     .from("deals")
-    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat, fee_payer, terms_version")
+    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat, fee_payer, terms_version, deal_type, auction_lot_id")
     .eq("id", dealId)
     .maybeSingle();
   if (error) throw error;
@@ -280,6 +280,18 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
         providerLabel: provider.label,
         message: "Funds can only be released while they are protected in escrow.",
       };
+
+    if (deal.deal_type === 'auction') {
+      const { createAuctionRelease } = await import('./auction-settlement.server');
+      const legs = await createAuctionRelease(admin, deal.id, context.userId);
+      if (!provider.connected) {
+        const { simulateProviderConfirm } = await import('./settlement.server');
+        await simulateProviderConfirm(admin, notify, legs.map(l => l.id));
+      }
+      return { ok: true, status: provider.connected ? 'processing' : 'succeeded', provider: provider.id,
+        providerLabel: provider.label, ...(legs[0] ? { transactionId: legs[0].id } : {}),
+        message: 'Separate owner and organiser payouts submitted to the payment provider.' };
+    }
 
     const { data: tx, error } = await admin
       .from("deal_transactions")

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { settleTransactionCore } from "./settlement.server";
 import { ledgerBalance, payInQuote, splitFee } from "./fees";
+import { priceDeal } from './pricing.server';
+import { auctionReleaseAmounts } from './auction-settlement.server';
 import { roundMoney } from "./money";
 import { settleMilestoneTx } from "./milestones.server";
 
@@ -17,6 +19,7 @@ function database(tables: Record<string, any[]>) {
       in(k: string, v: any[]) { filters.push(r => v.includes(r[k])); return q; },
       update(v: any) { patch = v; return q; },
       insert(v: any) { inserted = Array.isArray(v) ? v : [v]; return q; },
+      upsert(v: any) { inserted = [v]; return q; },
       async maybeSingle() { const r = await q; return { data: r.data[0] ?? null }; },
       async single() { return q.maybeSingle(); },
       then(resolve: any) {
@@ -88,4 +91,94 @@ describe("C09-D15 actual confirmation path", () => {
       });
     }
   }
+});
+
+describe('T22 auction real confirmation path', () => {
+  async function fixture(amount = 48000, buyerPercent = 0) {
+    const schedule = [
+      {amount_from:0,amount_to:1500,percent:3}, {amount_from:1500,amount_to:6000,percent:2.5},
+      {amount_from:6000,amount_to:250000,percent:1}, {amount_from:250000,amount_to:null,percent:0.5},
+    ].map(r => ({...r,currency:'USD',min_fee:15,max_fee:3500}));
+    const tables: Record<string,any[]> = {
+      deals:[{id:'deal',ref:'DL-T22',deal_type:'auction',auction_lot_id:'lot',amount,currency:'SAR',fee_payer:'split',buyer_id:'winner',seller_id:'owner',status:buyerPercent ? 'disputed' : 'held'}],
+      profiles:[{id:'winner',country:'KW'},{id:'owner',country:'SA'}],
+      fee_rules:schedule, vat_rates:[{country_code:'KW',rate:0},{country_code:'SA',rate:0.15}],
+      fx_rates:[{code:'USD',provider_rate:3.75,spread:0,active:true}],
+      auction_lots:[{id:'lot',split_locked_at:'2026-10-17'}],
+      deal_payout_splits:[{id:'owner-split',deal_id:'deal',role:'owner',pct:85,beneficiary_id:'owner',release_tx_id:'owner-release'},
+        {id:'org-split',deal_id:'deal',role:'organiser',pct:15,beneficiary_id:'organiser',release_tx_id:'org-release'}],
+      deal_transactions:[{id:'fund',deal_id:'deal',kind:'funding',status:'processing',amount:0,currency:'SAR',fx_quote_id:'quote'}],
+    };
+    const db=database(tables); const pricing=await priceDeal(db,tables['deals']?.[0]);
+    tables['fx_quotes']=[{id:'quote',breakdown:pricing}];
+    const fund=tables['deal_transactions']?.[0]; fund.amount=pricing.payIn.total;
+    const notify={notifyDealParties:async()=>{}};
+    await settleTransactionCore(db,notify,{transactionId:'fund',outcome:'succeeded',actorId:null});
+    const gross=roundMoney(amount*(100-buyerPercent)/100,'SAR');
+    const legs=auctionReleaseAmounts(gross,'SAR',85,15);
+    if (buyerPercent) {
+      tables['deals']?.forEach(d=>{d.status='disputed';});
+      tables['disputes']=[{id:'decision',deal_id:'deal',status:'resolved',outcome:'partial_settlement',buyer_percent:buyerPercent}];
+      tables['deal_transactions']?.push({id:'refund',deal_id:'deal',kind:'refund',status:'processing',amount:amount-gross,fee:0,currency:'SAR',auction_dispute_id:'decision'});
+    }
+    for (const [id,split,amount] of [['owner-release','owner-split',legs.owner],['org-release','org-split',legs.organiser]])
+      tables['deal_transactions']?.push({id,deal_id:'deal',kind:'release',status:'processing',amount,fee:0,currency:'SAR',payout_split_id:split,
+        auction_dispute_id:buyerPercent ? 'decision' : null,idempotency_key:`DL-T22-RELEASE-${split==='owner-split'?'OWNER':'ORG'}`});
+    return {db,tables,pricing,notify};
+  }
+  it('T22-a: SAR 48,000, KW winner, 85/15 direct legs, held zero and duplicate safe', async()=>{
+    const {db,tables,pricing,notify}=await fixture();
+    expect(pricing.breakdown.fee).toBe(845.63);
+    expect(pricing.breakdown.feePayer).toBe('buyer');
+    expect(pricing.breakdown.buyerVat).toBe(0);
+    expect(pricing.breakdown.sellerVat).toBe(0);
+    expect(tables['tax_invoices']?.[0].fee).toBe(845.63);
+    await settleTransactionCore(db,notify,{transactionId:'owner-release',outcome:'succeeded',actorId:null});
+    expect(tables['deals']?.[0].status).toBe('held');
+    expect(tables['ledger_entries']?.find(r=>r.account==='owner_payable').credit).toBe(40800);
+    await settleTransactionCore(db,notify,{transactionId:'org-release',outcome:'succeeded',actorId:null});
+    expect(tables['deals']?.[0].status).toBe('released');
+    expect(tables['ledger_entries']?.find(r=>r.account==='organiser_payable').credit).toBe(7200);
+    const before=JSON.stringify(tables);
+    for (const transactionId of ['fund','owner-release','org-release']) await settleTransactionCore(db,notify,{transactionId,outcome:'succeeded',actorId:null});
+    expect(JSON.stringify(tables)).toBe(before);
+    const rows=tables['ledger_entries']??[];
+    expect(ledgerBalance(rows)).toEqual({SAR:0});
+    expect(rows.filter(r=>r.account==='escrow_held').reduce((s,r)=>s+r.credit-r.debit,0)).toBe(0);
+    expect(rows.filter(r=>r.account==='insight_fee_revenue').reduce((s,r)=>s+r.credit,0)).toBe(845.63);
+  });
+  it('T22-e: 70% buyer refund, 30% released across locked shares',async()=>{
+    const {db,tables,notify}=await fixture(48000,70);
+    for (const transactionId of ['refund','owner-release','org-release','owner-release'])
+      await settleTransactionCore(db,notify,{transactionId,outcome:'succeeded',actorId:null});
+    expect(tables['deal_transactions']?.find(t=>t.id==='refund').amount).toBe(33600);
+    expect(tables['deal_transactions']?.find(t=>t.id==='owner-release').amount).toBe(12240);
+    expect(tables['deal_transactions']?.find(t=>t.id==='org-release').amount).toBe(2160);
+    expect(tables['deals']?.[0].status).toBe('partially_refunded');
+    const rows=tables['ledger_entries']??[];
+    expect(ledgerBalance(rows)).toEqual({SAR:0});
+    expect(rows.filter(r=>r.account==='escrow_held').reduce((s,r)=>s+r.credit-r.debit,0)).toBe(0);
+  });
+  it('T22-f: SAR 36,500 hammer price uses existing USD tiers, fee 730.63',async()=>{
+    const {pricing}=await fixture(36500);
+    expect(pricing.breakdown.fee).toBe(730.63);
+    expect(pricing.breakdown.buyerVat).toBe(0);
+  });
+  it('assigns the 3-decimal rounding remainder to the owner',()=>{
+    expect(auctionReleaseAmounts(1000.001,'BHD',85,15)).toEqual({owner:850.001,organiser:150});
+  });
+  it('does not mark the deal released when one provider leg fails',async()=>{
+    const {db,tables,notify}=await fixture();
+    await settleTransactionCore(db,notify,{transactionId:'owner-release',outcome:'succeeded',actorId:null});
+    await settleTransactionCore(db,notify,{transactionId:'org-release',outcome:'failed',reason:'Provider refused',actorId:null});
+    expect(tables['deals']?.[0].status).toBe('held');
+    expect(tables['ledger_entries']?.filter(r=>r.account==='escrow_held').reduce((s,r)=>s+r.credit-r.debit,0)).toBe(7200);
+  });
+  it('preserves I-33 final dispute outcome while independently confirming legs',async()=>{
+    const {db,tables,notify}=await fixture(48000,70);
+    tables['deals']?.forEach(d=>{d.status='partially_refunded';});
+    for (const transactionId of ['owner-release','org-release','refund']) await settleTransactionCore(db,notify,{transactionId,outcome:'succeeded',actorId:null});
+    expect(tables['deals']?.[0].status).toBe('partially_refunded');
+    expect(ledgerBalance(tables['ledger_entries']??[])).toEqual({SAR:0});
+  });
 });

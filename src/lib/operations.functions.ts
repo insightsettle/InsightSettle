@@ -140,6 +140,14 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
     const { data: dispute } = await db.from("disputes").select("*").eq("id", data.disputeId).maybeSingle();
     if (!dispute || dispute.status === "resolved") throw new Error("This dispute is already closed.");
     const { data: deal } = await db.from("deals").select("*").eq("id", dispute.deal_id).single();
+    if (deal.deal_type === 'auction') {
+      const { createAuctionRelease } = await import('./auction-settlement.server');
+      const pct = data.outcome === 'full_refund' ? 100 : data.outcome === 'full_release' ? 0 : (data.buyerPercent ?? 50);
+      const legs = await createAuctionRelease(db, deal.id, context.userId, { id: dispute.id, outcome: data.outcome, buyerPercent: pct, note: data.note });
+      await notify.notifyDealParties(db, deal.id, { title: `Dispute decision on ${deal.ref}`, body: data.note.slice(0,300), kind: 'dispute' });
+      await simConfirm(db, notify, legs.map(l => l.id));
+      return { ok: true };
+    }
     if (dispute.milestone_id) {
       const pct =
         data.outcome === "full_refund" ? 100 : data.outcome === "full_release" ? 0 : (data.buyerPercent ?? 50);
