@@ -32,3 +32,17 @@ export const resolveAuctionOwner = createServerFn({ method: 'GET' })
     if (error) throw error;
     return result;
   });
+
+export const remindAuctionWinner = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ dealId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: d } = await context.supabase.from('deals').select('id,title,ref,invite_token,counterparty_email,payment_deadline_at,auction_lot_id,status').eq('id',data.dealId).eq('deal_type','auction').maybeSingle();
+    if (!d?.auction_lot_id || d.status!=='pending_funding' || !d.counterparty_email || !d.payment_deadline_at || new Date(d.payment_deadline_at).getTime()<=Date.now()) throw new Error('No current payment offer.');
+    const { data:l } = await context.supabase.from('auction_lots').select('auction_id,deal_id').eq('id',d.auction_lot_id).maybeSingle();
+    const { data:a } = await context.supabase.from('auctions').select('organiser_id').eq('id',l?.auction_id??'').maybeSingle();
+    if(a?.organiser_id!==context.userId || l?.deal_id!==d.id)throw new Error('Only the organiser can remind the current winner.');
+    const {sendTemplateEmail}=await import('./email-templates/send-email');
+    const result=await sendTemplateEmail('auction-offer',d.counterparty_email,{templateData:{title:d.title,ended:false,deadline:d.payment_deadline_at,link:`https://insightsettle.com/invite/${d.invite_token}`},idempotencyKey:`auction-reminder-${d.id}-${Math.floor(Date.now()/3600000)}`});
+    return {sent:result.sent};
+  });

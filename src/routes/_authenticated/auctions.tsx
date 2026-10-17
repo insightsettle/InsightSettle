@@ -1,0 +1,3 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { AuctionList } from '@/components/auction/AuctionOrganiser';
+export const Route = createFileRoute('/_authenticated/auctions')({head:()=>({meta:[{title:'Auctions | Insight'},{name:'description',content:'Manage verified business auctions, lots and ordered winner offers.'},{property:'og:title',content:'Insight auctions'},{property:'og:description',content:'Auction lots, payment deadlines and direct beneficiary payouts.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:AuctionList});
