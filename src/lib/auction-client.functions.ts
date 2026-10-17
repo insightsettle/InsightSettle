@@ -12,7 +12,7 @@ export const getOrganiserLotSummaries = createServerFn({ method: 'GET' })
     const { data: lots } = await context.supabase.from('auction_lots').select('deal_id,funded_deal_id').eq('auction_id', data.auctionId);
     const ids = (lots ?? []).flatMap(l => [l.deal_id,l.funded_deal_id]).filter((id): id is string => !!id);
     if (!ids.length) return [];
-    const { data: deals, error } = await supabaseAdmin.from('deals').select('id,amount,currency,status,payment_deadline_at,invite_token').in('id', ids);
+    const { data: deals, error } = await supabaseAdmin.from('deals').select('id,ref,amount,currency,status,payment_deadline_at,invite_token,shipping_tracking,auto_release_at,frozen').in('id', ids);
     if (error) throw error;
     return deals ?? [];
   });

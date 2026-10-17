@@ -12,6 +12,8 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Auction shipping and delivery reuse goods party actions with server-authorized organiser shipping access; buyer acceptance reuses the existing split-release branch, and shared completion controls serve both auction surfaces.
+- Staff business and demo payout verification reuse the existing staff guard and append explicit actor/time audit records; live payout verification cannot substitute a simulated provider check.
 - Staff auction tabs use the shared staff guard and paginated read-only projections; authenticity copy maps to the existing quality-issue dispute flow so decision and payment logic remain unchanged.
 - Auction client screens reuse existing winner, invite, decline, quote and funding actions; authenticated CRUD remains RLS/trigger-governed, supplemental read adapters authorize lot access before projecting metadata, and owner screens are read-only so presentation cannot alter settlement rules.
 
