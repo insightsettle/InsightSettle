@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Auctions step 3: atomic record winner, expiry/decline next-ranked offers and unsold notifications, auction payment acceptance, existing scheduled callback extension, real PostgreSQL funding races; no screens or publishing.
 
 - [x] Auctions step 2: direct owner/organiser release legs created atomically, independent confirmation and payable ledger accounts, forced buyer-only existing USD pricing, locked auction dispute shares, auto-release auction branch, final-status confirmation guard; 66 tests passed including T22-a/e/f and all previous regressions; no publishing. Provider remains simulated; no live auction UI exists yet.
 
