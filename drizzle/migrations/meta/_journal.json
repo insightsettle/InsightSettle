@@ -120,6 +120,13 @@
       "when": 1792273770074,
       "tag": "0016_auction_owner_lookup",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792273963377,
+      "tag": "0017_auction_verified_business_eligibility",
+      "breakpoints": true
     }
   ]
 }
