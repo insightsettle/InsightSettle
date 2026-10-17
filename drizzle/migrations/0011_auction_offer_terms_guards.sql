@@ -1,0 +1,10 @@
+CREATE OR REPLACE FUNCTION public.guard_auction_offer_terms() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN
+ IF OLD.deal_type::text='auction' AND (NEW.amount IS DISTINCT FROM OLD.amount OR NEW.currency IS DISTINCT FROM OLD.currency OR NEW.title IS DISTINCT FROM OLD.title OR NEW.description IS DISTINCT FROM OLD.description OR NEW.terms_version IS DISTINCT FROM OLD.terms_version OR NEW.fee_payer IS DISTINCT FROM OLD.fee_payer OR NEW.seller_id IS DISTINCT FROM OLD.seller_id OR NEW.payment_deadline_at IS DISTINCT FROM OLD.payment_deadline_at OR NEW.counterparty_email IS DISTINCT FROM OLD.counterparty_email OR NEW.inspection_days IS DISTINCT FROM OLD.inspection_days OR NEW.shipping_responsibility IS DISTINCT FROM OLD.shipping_responsibility OR NEW.fee_override_percent IS DISTINCT FROM OLD.fee_override_percent OR NEW.fee_override_flat IS DISTINCT FROM OLD.fee_override_flat) THEN RAISE EXCEPTION 'Auction offer terms are immutable; cancel the lot instead'; END IF;
+ RETURN NEW; END; $$;
+CREATE TRIGGER guard_auction_offer_terms BEFORE UPDATE ON public.deals FOR EACH ROW EXECUTE FUNCTION public.guard_auction_offer_terms();
+DO $$ DECLARE def text; BEGIN
+ SELECT pg_get_functiondef('public.reserve_auction_funding(uuid,uuid,uuid,text,text)'::regprocedure) INTO def;
+ def:=replace(def,'IF d.buyer_id IS DISTINCT FROM _buyer','IF _buyer IS NULL OR d.id IS NULL OR d.frozen OR d.buyer_id IS DISTINCT FROM _buyer');
+ def:=replace(def,'UPDATE public.fx_quotes SET used_at=clock_timestamp() WHERE id=q.id;', 'IF NOT EXISTS(SELECT 1 FROM public.deal_term_versions WHERE deal_id=d.id AND version=d.terms_version) THEN RAISE EXCEPTION ''Locked lot terms required''; END IF; UPDATE public.fx_quotes SET used_at=clock_timestamp() WHERE id=q.id;');
+ EXECUTE def;
+END $$;
