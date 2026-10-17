@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Auctions step 4: Arabic-first organiser/list/detail/forms, winner invite payment and read-only owner screen, conditional sidebar/account flag, existing payment/winner/decline functions only; tests and two signed-in temporary-password screenshots, invalidate afterward; no publishing.
 - [x] Auctions step 3: atomic winner recording, ordered expiry/decline and unsold notifications, email invite links, verified-email invite claims, atomic quote/funding acceptance, existing managed 10-minute callback extended unchanged; real independent PostgreSQL funding/funding and funding/sweep races verified; no screens or publishing. Hosted callback changes activate only after publication; no live auction records mutated.
 
 - [x] Auctions step 2: direct owner/organiser release legs created atomically, independent confirmation and payable ledger accounts, forced buyer-only existing USD pricing, locked auction dispute shares, auto-release auction branch, final-status confirmation guard; 66 tests passed including T22-a/e/f and all previous regressions; no publishing. Provider remains simulated; no live auction UI exists yet.
