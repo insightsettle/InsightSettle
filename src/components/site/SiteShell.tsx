@@ -1,9 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Menu, ShieldAlert } from "lucide-react";
+import { Menu, ShieldAlert, TrendingUp } from "lucide-react";
 import { useState } from "react";
 
-import logo from "@/assets/insight-wordmark-transparent.png";
 import { NotificationBell } from "@/components/site/NotificationBell";
 import { LanguageToggle } from "@/components/site/LanguageToggle";
 import { Button } from "@/components/ui/button";
@@ -14,12 +13,14 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/locale";
 
 const nav = [
-  { to: "/", label: "Home" },
-  { to: "/how-it-works", label: "How it works" },
-  { to: "/for-buyers", label: "For buyers" },
-  { to: "/for-suppliers", label: "For suppliers" },
-  { to: "/pricing", label: "Pricing" },
-  { to: "/help", label: "Help" },
+  { to: "/", label: "Home", ar: "الرئيسية", hash: "" },
+  { to: "/how-it-works", label: "How it works", ar: "كيف تعمل؟", hash: "" },
+  { to: "/for-buyers", label: "For buyers", ar: "للمشترين", hash: "" },
+  { to: "/for-suppliers", label: "For suppliers", ar: "للموردين", hash: "" },
+  { to: "/how-it-works", label: "Contracting", ar: "المقاولات", hash: "contracting" },
+  { to: "/how-it-works", label: "Auctions", ar: "المزادات", hash: "auctions" },
+  { to: "/pricing", label: "Pricing", ar: "الرسوم", hash: "" },
+  { to: "/help", label: "Help", ar: "المساعدة", hash: "" },
 ] as const;
 
 export function SiteHeader() {
@@ -37,26 +38,27 @@ export function SiteHeader() {
     navigate({ to: "/auth", replace: true });
   }
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-        <Link to="/" aria-label="Insight home" className="flex shrink-0 items-center">
-          <img src={logo} alt="Insight" className="h-11 w-auto object-contain" />
+    <header data-no-localize className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
+        <Link to="/" aria-label="Insight home" className="flex shrink-0 items-center gap-2 text-xl font-semibold">
+          <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground"><TrendingUp className="size-5" /></span><span>Insight</span>
         </Link>
 
-        <nav className="ms-auto hidden items-center gap-1 lg:flex">
+        <nav className="ms-auto hidden items-center gap-1 xl:flex">
           {nav.map((item) => (
             <Link
-              key={item.to}
+              key={item.label}
               to={item.to}
+              hash={item.hash}
               activeOptions={{ exact: item.to === "/" }}
-              className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground"
+              className="rounded-lg px-2 py-2 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground"
             >
-              {text(item.label)}
+              {text(item.label, item.ar)}
             </Link>
           ))}
         </nav>
 
-        <div className="ms-auto flex items-center gap-2 lg:ms-0">
+        <div className="ms-auto flex items-center gap-2 xl:ms-0">
           <LanguageToggle className="px-2 sm:px-3" />
           {loading ? null : user ? (
             <>
@@ -87,19 +89,19 @@ export function SiteHeader() {
             </>
           ) : (
             <>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/auth">{text("Sign in")}</Link>
+              <Button asChild variant="secondary" size="sm">
+                <Link to="/auth">{text("Sign in", "تسجيل الدخول")}</Link>
               </Button>
               <Button asChild size="sm">
-                <Link to="/auth" search={{ mode: "signup" }}>{text("Create account")}</Link>
+                <Link to="/auth" search={{ mode: "signup" }}>{text("Create account", "إنشاء حساب")}</Link>
               </Button>
             </>
           )}
           <Button
             variant="outline"
             size="icon"
-            className="lg:hidden"
-            aria-label="Open navigation"
+            className="xl:hidden"
+            aria-label={text("Open navigation", "فتح القائمة")}
             onClick={() => setOpen((v) => !v)}
           >
             <Menu className="size-4" />
@@ -108,15 +110,16 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav className="border-t border-border bg-card px-4 py-3 lg:hidden">
+        <nav className="border-t border-border bg-card px-4 py-3 xl:hidden">
           {nav.map((item) => (
             <Link
-              key={item.to}
+              key={item.label}
               to={item.to}
+              hash={item.hash}
               onClick={() => setOpen(false)}
               className="block rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
-              {text(item.label)}
+              {text(item.label, item.ar)}
             </Link>
           ))}
           <div className="mt-2 border-t border-border pt-2">
@@ -129,7 +132,7 @@ export function SiteHeader() {
                 >
                   {text("My dashboard")}
                 </Link>
-                <button
+                <Button variant="ghost"
                   onClick={() => {
                     setOpen(false);
                     void handleSignOut();
@@ -137,7 +140,7 @@ export function SiteHeader() {
                   className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground"
                 >
                   {text("Sign out")}
-                </button>
+                </Button>
               </>
             ) : (
               <Link
@@ -145,7 +148,7 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
                 className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary"
               >
-                {text("Sign in")} / {text("Create account")}
+                {text("Sign in")} / {text("Create account", "إنشاء حساب")}
               </Link>
             )}
           </div>
@@ -157,56 +160,24 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   const { text } = useLocale();
-  return (
-    <footer className="mt-24 border-t border-border bg-card/40">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-3">
-        <div>
-          <div className="flex items-center">
-            <img src={logo} alt="Insight" className="h-10 w-auto object-contain" />
-          </div>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {text("Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.")}
-          </p>
-        </div>
-        <FooterCol
-          title={text("Platform")}
-          links={[
-            { to: "/how-it-works", label: text("How it works") },
-            { to: "/services", label: text("Services") },
-            { to: "/pricing", label: text("Fee calculator") },
-            { to: "/roles", label: text("Roles & access") },
-            { to: "/help", label: text("Help centre") },
-            { to: "/business", label: text("Business") },
-            { to: "/security", label: text("Security") },
-            { to: "/faq", label: text("FAQ") },
-          ]}
-        />
-        <FooterCol
-          title={text("Legal")}
-          links={[
-            { to: "/terms", label: text("Terms of service") },
-            { to: "/privacy", label: text("Privacy policy") },
-            { to: "/dispute-policy", label: text("Disputes & refunds") },
-          ]}
-        />
-      </div>
-      <div className="border-t border-border px-4 py-5 text-center text-xs text-muted-foreground">
-        {text(
-          "Demo experience — all balances and payment details are sample data. No real funds are moved.",
-        )}
-      </div>
-    </footer>
-  );
+  return <footer data-no-localize className="border-t border-primary-foreground/15 bg-brand-strong text-primary-foreground">
+    <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div><Link to="/" className="flex items-center gap-2 text-2xl font-semibold"><span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground"><TrendingUp className="size-5" /></span>Insight</Link><p className="mt-4 max-w-xs text-sm leading-7 text-primary-foreground/75">{text("Clear rules for individuals and businesses across the Gulf, and from the Gulf to the world.", "قواعد واضحة لصفقات الأفراد والشركات بين دول الخليج، ومن الخليج إلى العالم.")}</p></div>
+      <FooterCol title={text("Product", "المنتج")} links={[{to:"/how-it-works",label:text("How it works","كيف تعمل؟")},{to:"/for-buyers",label:text("For buyers","للمشترين")},{to:"/for-suppliers",label:text("For suppliers","للموردين")},{to:"/pricing",label:text("Pricing","الرسوم")}]} />
+      <FooterCol title={text("Company", "الشركة")} links={[{to:"/business",label:text("Business","الأعمال")},{to:"/security",label:text("Security","الأمان")},{to:"/help",label:text("Help","المساعدة")},{to:"/faq",label:text("FAQ","الأسئلة الشائعة")}]} />
+      <FooterCol title={text("Legal", "قانوني")} links={[{to:"/terms",label:text("Terms of service","شروط الخدمة")},{to:"/privacy",label:text("Privacy policy","سياسة الخصوصية")},{to:"/dispute-policy",label:text("Disputes & refunds","النزاعات والاسترداد")}]} />
+    </div><div className="border-t border-primary-foreground/15 px-5 py-6"><p className="mx-auto max-w-7xl text-xs leading-6 text-primary-foreground/70">{text("Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.", "نسخة تجريبية لخدمة الضمان: مزوّد الدفع محاكى ولا تُحوَّل أي أموال حقيقية. عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، وتدير إنسايت قواعد الصفقة وتحفظ سجلها.")}</p></div>
+  </footer>;
 }
 
 function FooterCol({ title, links }: { title: string; links: { to: string; label: string }[] }) {
   return (
     <div>
       <h4 className="text-sm font-semibold">{title}</h4>
-      <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+      <ul className="mt-4 space-y-3 text-sm text-primary-foreground/75">
         {links.map((l) => (
           <li key={l.to}>
-            <Link to={l.to} className="transition-colors hover:text-primary">
+            <Link to={l.to} className="transition-colors hover:text-primary-foreground">
               {l.label}
             </Link>
           </li>
