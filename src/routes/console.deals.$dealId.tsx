@@ -25,6 +25,10 @@ import {
 } from "@/lib/payments.functions";
 import { getDealPricing } from "@/lib/fx-quotes.functions";
 import { formatMoney } from "@/lib/money";
+import { useLocale } from "@/lib/locale";
+import { staffAction } from "@/lib/operations.functions";
+import { getStaffOverview } from "@/lib/staff.functions";
+import { submitStaffStatus } from "@/lib/staff-display";
 
 export const Route = createFileRoute("/console/deals/$dealId")({
   head: () => ({ meta: [
@@ -43,6 +47,10 @@ const statusOptions = Object.keys(statusLabels) as DealStatus[];
 
 function StaffDealPage() {
   const { dealId } = Route.useParams();
+  const { text } = useLocale();
+  const cancelStaff = useServerFn(staffAction);
+  const overviewFn = useServerFn(getStaffOverview);
+  const overview = useQuery({ queryKey: ["staff-overview"], queryFn: () => overviewFn() });
   const queryClient = useQueryClient();
   const fetchDeal = useServerFn(getDealForStaff);
   const changeStatus = useServerFn(setDealStatus);
@@ -67,7 +75,7 @@ function StaffDealPage() {
   const pricingFn = useServerFn(getDealPricing);
   const pricing = useQuery({
     queryKey: ["staff-deal-pricing", dealUuid, detail.data?.deal.status],
-    queryFn: () => pricingFn({ data: { dealId: dealUuid! } }),
+    queryFn: () => pricingFn({ data: { dealId: dealUuid ?? "" } }),
     enabled: !!dealUuid,
   });
   const loadTransactions = useServerFn(listDealTransactionsForStaff);
@@ -85,7 +93,7 @@ function StaffDealPage() {
   });
   const transactions = useQuery({
     queryKey: ["staff-deal-transactions", dealUuid],
-    queryFn: () => loadTransactions({ data: { dealId: dealUuid! } }),
+    queryFn: () => loadTransactions({ data: { dealId: dealUuid ?? "" } }),
     enabled: !!dealUuid,
   });
 
@@ -111,7 +119,7 @@ function StaffDealPage() {
 
   const statusMutation = useMutation({
     mutationFn: (vars: { dealId: string; status: DealStatus; reason: string }) =>
-      changeStatus({ data: vars }),
+      submitStaffStatus(vars, cancelStaff, changeStatus),
     onSuccess: () => {
       setReason("");
       refresh();
@@ -136,12 +144,12 @@ function StaffDealPage() {
   });
 
   if (detail.isLoading) {
-    return <p className="mt-10 text-sm text-muted-foreground">Loading deal…</p>;
+    return <p className="mt-10 text-sm text-muted-foreground">{text("Loading deal…")}</p>;
   }
   if (!detail.data) {
     return (
       <div className="mt-10">
-        <p className="text-sm text-muted-foreground">This deal reference does not exist.</p>
+        <p className="text-sm text-muted-foreground">{text("This deal reference does not exist.")}</p>
         <Button asChild variant="ghost" className="mt-4">
           <Link to="/console/deals">
             <ArrowLeft /> Back to all deals
@@ -157,6 +165,8 @@ function StaffDealPage() {
   const money = (n: number, c: string = deal.currency) => formatMoney(n, c);
   const fb = pricing.data?.breakdown ?? null;
   const effectiveFee = fb?.fee ?? 0;
+  const raw = overview.data?.deals.find(d => d.id === dealUuid);
+  const milestones = overview.data?.milestones.filter(m => m.deal_id === dealUuid).sort((a,b) => a.seq-b.seq) ?? [];
   const hasOverride = deal.feeOverrideFlat !== null || deal.feeOverridePercent !== null;
 
   return (
@@ -169,7 +179,7 @@ function StaffDealPage() {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-primary">{deal.ref}</p>
+          <p className="text-sm font-semibold text-primary" data-no-localize>{deal.ref}</p>
           <h2 className="mt-1 text-2xl font-extrabold">{deal.title}</h2>
           <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
             {deal.description || "No description was added."}
@@ -178,6 +188,10 @@ function StaffDealPage() {
         <StatusBadge status={deal.status as DealStatus} className="px-4 py-2" />
       </div>
 
+      {raw?.deal_type === "contracting" && <div className="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <Card><CardContent className="p-0"><h3 className="border-b px-5 py-4 font-semibold">{text("Milestones", "المراحل")}</h3><div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-muted text-muted-foreground"><tr>{[["Name","الاسم"],["%","٪"],["Amount","المبلغ"],["Retention","الاحتفاظ"],["Status","الحالة"]].map(([en,ar]) => <th key={en} className="px-4 py-3 text-start font-medium">{text(en ?? "",ar)}</th>)}</tr></thead><tbody className="divide-y divide-border">{milestones.map(m => <tr key={m.id}><td className="px-4 py-3">{m.title}</td><td className="px-4 py-3 tabular-nums"><bdi>{deal.amount > 0 ? (m.amount/deal.amount*100).toFixed(1) : "0"}%</bdi></td><td className="whitespace-nowrap px-4 py-3 tabular-nums"><bdi>{money(m.amount)}</bdi></td><td className="whitespace-nowrap px-4 py-3 tabular-nums"><bdi>{money(m.retention_amount)}</bdi></td><td className="px-4 py-3"><StatusBadge status={m.status as DealStatus} /></td></tr>)}</tbody></table></div></CardContent></Card>
+        <Card><CardContent className="p-5"><h3 className="font-semibold">{text("Retention & defects liability", "الاحتفاظ وضمان العيوب")}</h3><Row label={text("Retention", "الاحتفاظ")} value={`${raw.retention_percent}%`} /><Row label={text("Held retention", "مبلغ الاحتفاظ")} value={money(milestones.reduce((sum,m) => sum + Number(m.retention_amount),0))} /><Row label={text("Defects liability period", "مدة ضمان العيوب")} value={`${raw.defects_liability_days} ${text("days", "أيام")}`} /><Row label={text("Handover", "التسليم النهائي")} value={raw.handover_at ? formatDate(raw.handover_at) : "—"} /><Row label={text("Retention release", "إفراج الاحتفاظ")} value={raw.retention_released_at ? formatDate(raw.retention_released_at) : raw.retention_release_at ? formatDate(raw.retention_release_at) : "—"} /></CardContent></Card>
+      </div>}
       <div className="mt-5">
         <StaffDealActions dealId={deal.id} frozen={!!deal.frozen} />
       </div>
@@ -186,13 +200,13 @@ function StaffDealPage() {
         <div className="space-y-5">
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-bold">Change deal status</h3>
+              <h3 className="font-bold">{text("Change deal status", "تغيير حالة الصفقة")}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 The reason is written into the deal log and is visible to both parties.
               </p>
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {statusOptions.map((s) => (
-                  <button
+                  <Button variant="outline" size="sm"
                     key={s}
                     onClick={() => setNextStatus(s)}
                     className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
@@ -201,14 +215,14 @@ function StaffDealPage() {
                         : "border-border text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {statusLabels[s]}
-                  </button>
+                    {text(statusLabels[s])}
+                  </Button>
                 ))}
               </div>
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Why is the status changing?"
+                placeholder={text("Why is the status changing?", "سبب تغيير الحالة")} required
                 className="mt-3"
                 rows={3}
               />
@@ -223,8 +237,9 @@ function StaffDealPage() {
                   })
                 }
               >
-                {statusMutation.isPending ? "Saving…" : `Set status to ${statusLabels[nextStatus]}`}
+                {statusMutation.isPending ? text("Saving…", "جارٍ الحفظ…") : `${text("Set status to", "تعيين الحالة إلى")} ${text(statusLabels[nextStatus])}`}
               </Button>
+            {statusMutation.isError && <p role="alert" className="mt-2 text-sm text-destructive">{text(statusMutation.error.message)}</p>}
             </CardContent>
           </Card>
 
@@ -232,11 +247,10 @@ function StaffDealPage() {
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <Percent className="size-5 text-primary" />
-                <h3 className="font-bold">Special fee offer</h3>
+                <h3 className="font-bold">{text("Special fee offer")}</h3>
               </div>
               <p key={`fee-${effectiveFee}`} className="mt-1 text-sm text-muted-foreground">
-                Fee for this deal is {money(effectiveFee)}. Set a percentage or a fixed
-                amount for high-value deals.
+                {text("Fee for this deal", "رسوم هذه الصفقة")}: <bdi>{money(effectiveFee)}</bdi>. {text("Set a percentage or a fixed amount for high-value deals.", "حدد نسبة أو مبلغاً ثابتاً للصفقات الكبيرة.")}
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <label className="text-sm">
@@ -263,7 +277,7 @@ function StaffDealPage() {
               <Input
                 value={offerNote}
                 onChange={(e) => setOfferNote(e.target.value)}
-                placeholder="Note shown to the client (optional)"
+                placeholder={text("Note shown to the client (optional)")}
                 className="mt-3"
               />
               <div className="mt-3 flex flex-wrap gap-2">
@@ -298,7 +312,7 @@ function StaffDealPage() {
                 </Button>
               </div>
               <p key={`charged-${effectiveFee}`} className="mt-3 text-sm">
-                Fee charged to this deal:{" "}
+                {text("Fee charged to this deal", "الرسوم المحصلة لهذه الصفقة")}:{" "}
                 <b>
                   {money(effectiveFee)}
                   {hasOverride ? " (special offer active)" : ""}
@@ -314,7 +328,7 @@ function StaffDealPage() {
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <Receipt className="size-5 text-primary" />
-                <h3 className="font-bold">Payment records</h3>
+                <h3 className="font-bold">{text("Payment records")}</h3>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {simulated
@@ -352,26 +366,26 @@ function StaffDealPage() {
                         className="max-w-sm"
                         value={noteText[t.id] ?? ""}
                         onChange={(e) => setNoteText((prev) => ({ ...prev, [t.id]: e.target.value }))}
-                        placeholder="Internal reconciliation note"
+                        placeholder={text("Internal reconciliation note")}
                       />
                       <Button
                         size="sm"
                         variant="outline"
                         disabled={noteMutation.isPending || (noteText[t.id] ?? "").trim().length < 2}
-                        onClick={() => noteMutation.mutate({ transactionId: t.id, note: noteText[t.id]!.trim() })}
+                        onClick={() => noteMutation.mutate({ transactionId: t.id, note: (noteText[t.id] ?? "").trim() })}
                       >
                         Add note
                       </Button>
                     </div>
                     {simulated && t.kind === "funding" && (t.status === "pending" || t.status === "processing") && (
                       <div className="mt-3 space-y-2 rounded-md border border-dashed border-warning/50 p-3">
-                        <p className="text-xs font-semibold text-warning">Testing tool — simulated provider</p>
+                        <p className="text-xs font-semibold text-warning">{text("Testing tool — simulated provider")}</p>
                         <Input
                           value={settleReason[t.id] ?? ""}
                           onChange={(e) =>
                             setSettleReason((prev) => ({ ...prev, [t.id]: e.target.value }))
                           }
-                          placeholder="Decline reason code, e.g. CARD_DECLINED"
+                          placeholder={text("Decline reason code, e.g. CARD_DECLINED")}
                         />
                         <Button
                           size="sm"
@@ -382,7 +396,7 @@ function StaffDealPage() {
                               transactionId: t.id,
                               outcome: "failed",
                               providerRef: null,
-                              reason: `Simulated provider decline: ${settleReason[t.id]!.trim()}`,
+                              reason: `Simulated provider decline: ${(settleReason[t.id] ?? "").trim()}`,
                             })
                           }
                         >
@@ -391,7 +405,7 @@ function StaffDealPage() {
                       </div>
                     )}
                     {!simulated && (t.status === "pending" || t.status === "processing") && (
-                      <p className="mt-2 text-xs text-muted-foreground">Waiting for the payment provider.</p>
+                      <p className="mt-2 text-xs text-muted-foreground">{text("Waiting for the payment provider.")}</p>
                     )}
                   </div>
                 ))}
@@ -408,7 +422,7 @@ function StaffDealPage() {
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <MessageSquare className="size-5 text-primary" />
-                <h3 className="font-bold">Conversation</h3>
+                <h3 className="font-bold">{text("Conversation")}</h3>
               </div>
               <div className="mt-4 space-y-3">
                 {messages.length ? (
@@ -425,13 +439,13 @@ function StaffDealPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">No messages on this deal yet.</p>
+                  <p className="text-sm text-muted-foreground">{text("No messages on this deal yet.")}</p>
                 )}
               </div>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Reply as Insight support"
+                placeholder={text("Reply as Insight support")}
                 className="mt-4"
                 rows={3}
               />
@@ -449,9 +463,9 @@ function StaffDealPage() {
         <aside className="space-y-4">
           <Card>
             <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">Deal value</p>
-              <p className="mt-1 text-3xl font-extrabold">
-                <bdi dir="ltr">{money(deal.amount)}</bdi>
+              <p className="text-sm text-muted-foreground">{text("Deal value")}</p>
+              <p className="mt-1 text-3xl font-extrabold tabular-nums">
+                <bdi dir="ltr" data-no-localize>{money(deal.amount)}</bdi>
               </p>
               <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
                 <Row label="Created" value={formatDate(deal.createdAt)} />
@@ -476,7 +490,7 @@ function StaffDealPage() {
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
                 <Users className="size-5 text-primary" />
-                <h3 className="font-bold">Parties</h3>
+                <h3 className="font-bold">{text("Parties")}</h3>
               </div>
               <Row label="Created by" value={deal.createdByName ?? deal.createdByEmail ?? "—"} />
               <Row label="Buyer" value={deal.buyerName ?? deal.buyerEmail ?? "Not joined"} />
@@ -490,7 +504,7 @@ function StaffDealPage() {
           {deal.disputedReason && (
             <Card className="border-destructive/30 bg-destructive/5">
               <CardContent className="p-5">
-                <p className="font-semibold">Dispute reason</p>
+                <p className="font-semibold">{text("Dispute reason")}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{deal.disputedReason}</p>
               </CardContent>
             </Card>
@@ -498,12 +512,12 @@ function StaffDealPage() {
 
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-bold">Activity log</h3>
-              <ol className="mt-5 space-y-5 border-l border-border pl-5">
+              <h3 className="font-bold">{text("Activity log")}</h3>
+              <ol className="mt-5 space-y-5 border-s border-border ps-5">
                 {events.map((e) => (
                   <li key={e.id} className="relative">
-                    <span className="absolute -left-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
-                    <p className="text-sm font-medium">{e.title}</p>
+                    <span className="absolute start-[-1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
+                    <p className="text-sm font-medium">{text(e.title)}</p>
                     <p className="text-xs text-muted-foreground">
                       {formatDate(e.createdAt)}
                       {e.actorName ? ` · ${e.actorName}` : ""}
@@ -512,7 +526,7 @@ function StaffDealPage() {
                   </li>
                 ))}
                 {events.length === 0 && (
-                  <li className="text-sm text-muted-foreground">No activity recorded.</li>
+                  <li className="text-sm text-muted-foreground">{text("No activity recorded.")}</li>
                 )}
               </ol>
             </CardContent>
@@ -524,10 +538,11 @@ function StaffDealPage() {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const { text } = useLocale();
   return (
     <div className="mt-3 flex items-start justify-between gap-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="break-all text-right text-sm font-semibold">{value}</dd>
+      <dt className="text-sm text-muted-foreground">{text(label)}</dt>
+      <dd className="break-all text-end text-sm font-semibold tabular-nums" data-no-localize>{text(value)}</dd>
     </div>
   );
 }
