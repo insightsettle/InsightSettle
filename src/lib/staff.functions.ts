@@ -9,6 +9,31 @@ export const getStaffAccess = createServerFn({ method: "GET" })
     return { isStaff: await isStaffUser(context) };
   });
 
+export const getStaffAuctions = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { requireStaffAccess } = await import('@/lib/staff-auth.server');
+    const db = await requireStaffAccess(context);
+    async function read(table: string, columns: string, key: string = 'id') {
+      const rows: any[] = [];
+      for (let offset = 0; ; offset += 1000) {
+        const { data, error } = await (db as any).from(table).select(columns).order(key).range(offset, offset + 999);
+        if (error) throw error;
+        rows.push(...(data ?? []));
+        if ((data ?? []).length < 1000) return rows;
+      }
+    }
+    const [auctions,lots,bidders,profiles,payouts,deals] = await Promise.all([
+      read('auctions','id,title,organiser_id,status,currency'),
+      read('auction_lots','id,auction_id,title,owner_id,status,deal_id,funded_deal_id,owner_pct,organiser_pct'),
+      read('lot_bidders','id,lot_id,rank,platform_handle,status,price,offered_at,deadline_at,deal_id'),
+      read('profiles','id,full_name,verification_status'),
+      read('payout_accounts','user_id','user_id'),
+      read('deals','id,ref,status,amount,currency,auction_lot_id,cancelled_at'),
+    ]);
+    return { auctions,lots,bidders,profiles,payouts,deals: deals.filter(d=>d.auction_lot_id) };
+  });
+
 /** Read-only operational snapshot. Paginate so reconciliation never silently checks only 1,000 rows. */
 export const getStaffOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

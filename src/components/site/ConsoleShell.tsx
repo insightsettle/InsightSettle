@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, Coins, FileBarChart, FileCheck, History, LayoutDashboard, Percent, ScanSearch, Users, Wallet } from "lucide-react";
+import { AlertTriangle, Coins, FileBarChart, FileCheck, Gavel, History, LayoutDashboard, Percent, ScanSearch, Users, Wallet } from "lucide-react";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { useLocale } from "@/lib/locale";
 
@@ -8,6 +8,7 @@ const groups = [
     { to: "/console", label: "Overview", exact: true, icon: LayoutDashboard },
     { to: "/console/deals", label: "All deals", exact: false, icon: Wallet },
     { to: "/console/disputes", label: "Disputes", exact: false, icon: AlertTriangle },
+    { to: "/console/auctions", label: "Auctions", exact: false, icon: Gavel },
   ] },
   { label: "Customers", items: [
     { to: "/console/users", label: "Members", exact: false, icon: Users },
@@ -30,7 +31,7 @@ export function ConsoleShell({ children, title, subtitle }: { children: React.Re
     {groups.map((group) => <div key={group.label}>
       <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">{text(group.label)}</p>
       <div className="space-y-1">{group.items.map((tab) => <Link key={tab.to} to={tab.to} activeOptions={{ exact: tab.exact }} className={shellNavClass}>
-        <tab.icon className="size-4" />{text(tab.label)}
+        <tab.icon className="size-4" />{text(tab.label, tab.label === 'Auctions' ? 'المزادات' : undefined)}
       </Link>)}</div>
     </div>)}
   </nav>;
