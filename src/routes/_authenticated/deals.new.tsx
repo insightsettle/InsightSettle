@@ -13,6 +13,9 @@ import { DEAL_TYPE_META, MilestoneEditor, toInput, type EditableMilestone } from
 import { createTypedDeal } from "@/lib/deal-milestones.functions";
 import { DEAL_TYPES, DEAL_TYPE_DEFAULTS, validateMilestones, type DealType } from "@/lib/milestones";
 
+import { CustodyNote, FormStepper } from "@/components/deal/DealPresentation";
+import { useLocale } from "@/lib/locale";
+import { formatMoney } from "@/lib/money";
 import { fxCurrencies } from "@/lib/fx";
 
 export const Route = createFileRoute("/_authenticated/deals/new")({
@@ -35,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/deals/new")({
 const blankRow = (): EditableMilestone => ({ title: "", amount: "", dueDate: "", evidenceRequired: "", kind: "work" });
 
 function NewDeal() {
+  const { text } = useLocale();
   const [dealType, setDealType] = useState<DealType | null>(null);
   const [useMilestones, setUseMilestones] = useState(false);
   const [rows, setRows] = useState<EditableMilestone[]>([blankRow(), blankRow()]);
@@ -156,14 +160,16 @@ function NewDeal() {
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-2xl px-4 py-12">
+      <div className="min-w-0">
         <h1 className="text-3xl font-extrabold">Create a deal</h1>
         <p className="mt-2 text-muted-foreground">
           Describe what is being delivered, set the value and the terms, then invite the other
           party.
         </p>
 
-        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+        <div className="mt-6"><FormStepper current={!dealType ? 0 : title && counterpartyEmail && acceptanceCriteria ? 3 : title ? 2 : 1} /></div>
+        <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <form className="min-w-0 space-y-5" onSubmit={handleSubmit}>
           <fieldset>
             <legend className="text-sm font-semibold">Deal type</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
@@ -171,11 +177,11 @@ function NewDeal() {
                 const M = DEAL_TYPE_META[t];
                 const Icon = M.icon;
                 return (
-                  <button type="button" key={t} role="radio" aria-checked={dealType === t} onClick={() => chooseType(t)}
-                    className={`flex items-start gap-3 rounded-lg border p-4 text-start transition ${dealType === t ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                  <Button variant="outline" type="button" key={t} role="radio" aria-checked={dealType === t} onClick={() => chooseType(t)}
+                    className={`h-auto justify-start whitespace-normal items-start gap-3 rounded-lg border p-4 text-start transition ${dealType === t ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
                     <Icon className="mt-0.5 size-6 shrink-0 text-primary" />
                     <span><b className="block">{M.label}</b><span className="mt-1 block text-xs text-muted-foreground">{M.hint}</span></span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -230,7 +236,7 @@ function NewDeal() {
               <Label htmlFor="quantity">Quantity</Label>
               <Input id="quantity" type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
               <p className="text-xs text-muted-foreground" dir="ltr">
-                Unit price: {(numericAmount / Math.max(1, Number(quantity) || 1)).toFixed(2)} {currency}
+                {text("Unit price", "سعر الوحدة")}: {formatMoney(numericAmount / Math.max(1, Number(quantity) || 1), currency)}
               </p>
             </div>
             <div className="space-y-2">
@@ -401,6 +407,8 @@ function NewDeal() {
             {busy ? "Saving…" : "Create deal and get invite link"}
           </Button>
         </form>
+        <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{[["Total fee", "إجمالي الرسوم"], ["Buyer fee share + VAT", "حصة المشتري + الضريبة"], ["Supplier fee share + VAT", "حصة المورد + الضريبة"], ["Supplier receives", "يستلم المورد"], ["Buyer pays", "يدفع المشتري"]].map(([en,ar]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd>—</dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Final pricing appears on the deal quote after both parties join.", "تظهر الأسعار النهائية في عرض الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
+        </div>
       </div>
     </SiteShell>
   );

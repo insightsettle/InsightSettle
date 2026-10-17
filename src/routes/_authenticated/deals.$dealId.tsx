@@ -135,7 +135,7 @@ function DealPage() {
     queryFn: async () => {
       const ids = [deal?.buyer_id, deal?.seller_id].filter((id): id is string => !!id);
       if (!ids.length) return [];
-      return (await sbClient.from("profiles").select("id, full_name, country, verification_status, company_name").in("id", ids)).data ?? [];
+      return (await sbClient.from("profiles").select("id, full_name, country, verification_status").in("id", ids)).data ?? [];
     },
   });
   const [message, setMessage] = useState("");
@@ -837,7 +837,7 @@ function DealPage() {
                       : "Awaiting seller"
                   }
                 />
-                {partyProfiles.data?.map((p) => <div data-no-localize key={p.id} className="mt-4 border-t pt-4"><p className="text-xs text-muted-foreground">{text(p.id === deal.buyer_id ? "Buyer" : "Supplier", p.id === deal.buyer_id ? "المشتري" : "المورد")}</p><p className="mt-1 text-sm font-medium">{p.full_name ?? "—"}</p><p className="mt-1 text-xs text-muted-foreground">{p.company_name ?? "—"} · {text(p.country ?? "—")}</p>{p.verification_status === "verified" && <p className="mt-2 flex items-center gap-1 text-xs text-primary"><BadgeCheck className="size-3" />{text("Verified", "موثق")}</p>}</div>)}
+                {partyProfiles.data?.map((p) => <div data-no-localize key={p.id} className="mt-4 border-t pt-4"><p className="text-xs text-muted-foreground">{text(p.id === deal.buyer_id ? "Buyer" : "Supplier", p.id === deal.buyer_id ? "المشتري" : "المورد")}</p><p className="mt-1 text-sm font-medium">{p.full_name ?? "—"}</p><p className="mt-1 text-xs text-muted-foreground">{text(p.country ?? "—")}</p>{p.verification_status === "verified" && <p className="mt-2 flex items-center gap-1 text-xs text-primary"><BadgeCheck className="size-3" />{text("Verified", "موثق")}</p>}</div>)}
                 {isCreator && <Info label="You invited" value={deal.counterparty_email ?? "—"} />}
               </CardContent>
             </Card>
