@@ -130,4 +130,23 @@ describe('auction database rules (actual migration)', () => {
     await bid(); await makeDeal();
     await expect(db.exec(`INSERT INTO deal_transactions(deal_id,kind,status,amount,currency) VALUES ('${deal}','release','processing',1000,'BHD')`)).rejects.toThrow(/not enabled/);
   });
+  it('does not change ordinary deal funding or release', async () => {
+    await db.exec(`INSERT INTO deals(id,amount,currency) VALUES ('${deal}',1000,'BHD');
+      INSERT INTO deal_transactions(deal_id,kind,status,amount,currency) VALUES ('${deal}','funding','succeeded',1000,'BHD'),('${deal}','release','succeeded',984.699,'BHD');`);
+    expect((await db.query('SELECT count(*)::integer n FROM deal_transactions')).rows[0]).toEqual({n:2});
+  });
+  it('permits only the winner to pay the existing Insight fee', async () => {
+    await bid(); await makeDeal();
+    await expect(db.exec(`UPDATE deals SET fee_payer='split' WHERE id='${deal}'`)).rejects.toThrow(/buyer-paid fee/);
+  });
+  it('rejects a fourth bidder: exactly two backup slots', async () => {
+    await bid(); await bid(2,'waiting',950); await bid(3,'waiting',900);
+    await expect(bid(4,'waiting',850)).rejects.toThrow();
+    expect((await db.query('SELECT count(*)::integer n FROM lot_bidders')).rows[0]).toEqual({n:3});
+  });
+  it('exposes only safe FX columns anonymously', async () => {
+    const r = await db.query(`SELECT has_column_privilege('anon','public.fx_rates','code','SELECT') safe,
+      has_column_privilege('anon','public.fx_rates','updated_by','SELECT') private`);
+    expect(r.rows[0]).toEqual({safe:true,private:false});
+  });
 });
