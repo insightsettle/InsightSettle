@@ -1,6 +1,8 @@
 # Roadmap
 
-- [ ] UX-B: client home, goods/contracting layouts, new-deal visual grouping, D22 quote display, bilingual custody/VAT; tests and signed-in bilingual screenshots; no publishing.
+- [x] UX-B: client home, goods/contracting presentation, new-deal grouping, D22 quote display, bilingual custody/VAT; 33 tests and automatic type check/build clean; signed-in EN/AR dashboard, AR goods/new reviewed, mobile navigation checked; no publishing.
+- [ ] UX-B live-summary fee figures: existing new-deal form has no server price preview. Requires permission to add a server preview (excluded by presentation-only scope); show unavailable values rather than invent pricing.
+- [ ] UX-B contracting screenshot/approval-state verification: DL-14746 exists but is cancelled, has no buyer, and is inaccessible to the requested buyer account. Requires an accessible contracting deal; no test deal or party writes were created.
 
 - [x] UX-A: apply v1 tokens, bilingual client/staff shells, statuses, cards/tables; verify automatic type check/build and 31 unit tests. No publishing or business logic changes.
 - [ ] UX-A signed-in EN/AR dashboard and console screenshots (maximum three): blocked by unavailable test-account session approval; owner must sign into the preview. No screenshots taken or mock sessions used.
