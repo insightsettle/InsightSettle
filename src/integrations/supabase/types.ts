@@ -14,6 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_lots: {
+        Row: {
+          auction_id: string
+          deal_id: string | null
+          description: string
+          funded_deal_id: string | null
+          funding_tx_id: string | null
+          id: string
+          images: string[]
+          organiser_pct: number | null
+          owner_id: string
+          owner_pct: number | null
+          split_locked_at: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          auction_id: string
+          deal_id?: string | null
+          description?: string
+          funded_deal_id?: string | null
+          funding_tx_id?: string | null
+          id?: string
+          images?: string[]
+          organiser_pct?: number | null
+          owner_id: string
+          owner_pct?: number | null
+          split_locked_at?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          auction_id?: string
+          deal_id?: string | null
+          description?: string
+          funded_deal_id?: string | null
+          funding_tx_id?: string | null
+          id?: string
+          images?: string[]
+          organiser_pct?: number | null
+          owner_id?: string
+          owner_pct?: number | null
+          split_locked_at?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_lots_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_lots_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_lots_funded_deal_id_fkey"
+            columns: ["funded_deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_lots_funding_tx_id_fkey"
+            columns: ["funding_tx_id"]
+            isOneToOne: false
+            referencedRelation: "deal_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auctions: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          inspection_hours: number
+          organiser_commission_pct: number
+          organiser_id: string
+          payment_deadline_hours: number
+          platform: string
+          status: string
+          stream_url: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          id?: string
+          inspection_hours?: number
+          organiser_commission_pct?: number
+          organiser_id: string
+          payment_deadline_hours?: number
+          platform: string
+          status?: string
+          stream_url?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          inspection_hours?: number
+          organiser_commission_pct?: number
+          organiser_id?: string
+          payment_deadline_hours?: number
+          platform?: string
+          status?: string
+          stream_url?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -283,6 +402,54 @@ export type Database = {
           },
         ]
       }
+      deal_payout_splits: {
+        Row: {
+          amount: number
+          beneficiary_id: string
+          currency: string
+          deal_id: string
+          id: string
+          pct: number
+          release_tx_id: string | null
+          role: string
+        }
+        Insert: {
+          amount: number
+          beneficiary_id: string
+          currency: string
+          deal_id: string
+          id?: string
+          pct: number
+          release_tx_id?: string | null
+          role: string
+        }
+        Update: {
+          amount?: number
+          beneficiary_id?: string
+          currency?: string
+          deal_id?: string
+          id?: string
+          pct?: number
+          release_tx_id?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_payout_splits_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_payout_splits_release_tx_id_fkey"
+            columns: ["release_tx_id"]
+            isOneToOne: true
+            referencedRelation: "deal_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_ratings: {
         Row: {
           comment: string | null
@@ -460,6 +627,7 @@ export type Database = {
         Row: {
           acceptance_criteria: string | null
           amount: number
+          auction_lot_id: string | null
           auto_release_at: string | null
           auto_release_enabled: boolean
           buyer_id: string | null
@@ -489,6 +657,7 @@ export type Database = {
           id: string
           inspection_days: number
           invite_token: string
+          payment_deadline_at: string | null
           quantity: number
           ref: string
           refund_conditions: string | null
@@ -521,6 +690,7 @@ export type Database = {
         Insert: {
           acceptance_criteria?: string | null
           amount: number
+          auction_lot_id?: string | null
           auto_release_at?: string | null
           auto_release_enabled?: boolean
           buyer_id?: string | null
@@ -550,6 +720,7 @@ export type Database = {
           id?: string
           inspection_days?: number
           invite_token?: string
+          payment_deadline_at?: string | null
           quantity?: number
           ref?: string
           refund_conditions?: string | null
@@ -582,6 +753,7 @@ export type Database = {
         Update: {
           acceptance_criteria?: string | null
           amount?: number
+          auction_lot_id?: string | null
           auto_release_at?: string | null
           auto_release_enabled?: boolean
           buyer_id?: string | null
@@ -611,6 +783,7 @@ export type Database = {
           id?: string
           inspection_days?: number
           invite_token?: string
+          payment_deadline_at?: string | null
           quantity?: number
           ref?: string
           refund_conditions?: string | null
@@ -640,7 +813,15 @@ export type Database = {
           unit_price?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "deals_auction_lot_id_fkey"
+            columns: ["auction_lot_id"]
+            isOneToOne: false
+            referencedRelation: "auction_lots"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dispute_evidence: {
         Row: {
@@ -993,6 +1174,53 @@ export type Database = {
           },
         ]
       }
+      lot_bidders: {
+        Row: {
+          deadline_at: string | null
+          email: string
+          id: string
+          lot_id: string
+          offered_at: string | null
+          platform_handle: string
+          price: number
+          rank: number
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          deadline_at?: string | null
+          email: string
+          id?: string
+          lot_id: string
+          offered_at?: string | null
+          platform_handle: string
+          price: number
+          rank: number
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          deadline_at?: string | null
+          email?: string
+          id?: string
+          lot_id?: string
+          offered_at?: string | null
+          platform_handle?: string
+          price?: number
+          rank?: number
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lot_bidders_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "auction_lots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1259,6 +1487,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auction_can_read_lot: { Args: { lid: string }; Returns: boolean }
+      auction_is_organiser: { Args: { aid: string }; Returns: boolean }
+      auction_require_beneficiary: {
+        Args: { cur: string; uid: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1277,7 +1511,7 @@ export type Database = {
         | "finance"
         | "compliance"
         | "super_admin"
-      deal_type: "goods" | "services" | "contracting" | "freelance"
+      deal_type: "goods" | "services" | "contracting" | "freelance" | "auction"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1413,7 +1647,7 @@ export const Constants = {
         "compliance",
         "super_admin",
       ],
-      deal_type: ["goods", "services", "contracting", "freelance"],
+      deal_type: ["goods", "services", "contracting", "freelance", "auction"],
     },
   },
 } as const

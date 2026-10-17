@@ -36,6 +36,13 @@
       "when": 1792023689042,
       "tag": "0004_deals_amount_numeric_18_3",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792272087597,
+      "tag": "0005_auction_model_and_rules",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,9 @@
 # Roadmap
 
+- [x] Auctions step 1: migration 0005 applied; locked direct beneficiary shares, verified beneficiaries, ordered bidders and funding reservations/deadlines, C01 public-read grants; actual-migration isolated database tests; no screens, settlement changes or publishing. True parallel live-provider race testing belongs to the later funding integration step.
+
 - [x] UX-D: homepage/navigation/footer and pricing v1; shared existing fee engine adapter; Arabic-first with saved-language preservation; 40 tests and two Arabic captures; no publishing.
-- [ ] UX-D public calculator/bands: existing fee_rules/vat_rates/fx_rates policies deny anonymous reads. Requires authorization for a narrow public-read permission change (outside presentation scope). No fallback figures or privileged bypass used; live-data test vectors match USD 197.50 and BHD 27.820.
+- [x] UX-D public pricing permission blocker: C01 / D-51 anonymous read policies and safe-column grants mirrored in migration 0005; no fallback figures or privileged bypass used.
 
 - [x] UX-C: staff overview and paginated guarded read-only reconciliation, deal milestones/retention, dispute positions/timeline/decision presentation; D21 cancel routing tested through existing guard without writes; Arabic overview/contract screenshots reviewed; automatic type/build checks clean; no publishing.
 - [ ] UX-C open dispute decision/evidence verification: no live dispute exists. Needs a real test case; no fictional dispute or financial mutation created. R2 remains unverified without an independent provider statement; R4/R5 existing-data exceptions are displayed, not changed.
