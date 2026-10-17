@@ -159,6 +159,21 @@ export const startDealFunding = createServerFn({ method: "POST" })
       quote = q;
     }
 
+    if (deal.deal_type === 'auction') {
+      const { data: transactionId, error: reserveError } = await admin.rpc('reserve_auction_funding', {
+        _deal: deal.id, _buyer: context.userId, _quote: quote.id, _provider: provider.id, _note: provider.notice,
+      });
+      if (reserveError) throw reserveError;
+      if (!transactionId) throw new Error('Auction payment was not reserved.');
+      await notify.notifyDealParties(admin, deal.id, { title: `Funding started for ${deal.ref}`, body: provider.notice, kind: 'payment' });
+      if (!provider.connected) {
+        const { simulateProviderConfirm } = await import('@/lib/settlement.server');
+        await simulateProviderConfirm(admin, notify, [transactionId]);
+      }
+      return { ok: true, status: provider.connected ? 'processing' : 'succeeded', provider: provider.id, providerLabel: provider.label, transactionId,
+        message: provider.connected ? 'Payment submitted. Paying accepts the lot terms.' : 'Payment confirmed (simulated). Paying accepts the lot terms; no real money moves.' };
+    }
+
     // Claim the quote atomically so one quote can never fund two payments.
     if (quote) {
       const { data: claimed } = await admin

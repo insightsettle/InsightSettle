@@ -20,12 +20,14 @@ export const Route = createFileRoute("/api/public/auto-release")({
             import("@/lib/settlement.server"),
           ]);
           const admin = supabaseAdmin as any;
+          const { sweepAuctionDeadlines } = await import('@/lib/auction-deadlines.server');
+          const auctions = await sweepAuctionDeadlines(admin);
           const { data: started, error } = await admin.rpc("run_auto_release");
           if (error) throw error;
           const { runMilestoneJobs } = await import("@/lib/milestones.server");
           const milestones = await runMilestoneJobs(admin, notify);
           const confirmed = await sweepSimulatedTransactions(admin, notify);
-          return Response.json({ ok: true, started: started ?? 0, milestones, confirmed });
+          return Response.json({ ok: true, started: started ?? 0, milestones, confirmed, auctions });
         } catch (e) {
           console.error("auto-release job failed", e);
           return Response.json({ ok: false }, { status: 500 });

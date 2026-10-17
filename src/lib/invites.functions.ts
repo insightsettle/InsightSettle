@@ -20,6 +20,12 @@ export const acceptDealInvite = createServerFn({ method: "POST" })
     if (error) throw error;
     if (!deal) return { ok: false as const, reason: "not_found" as const };
 
+    if (deal.deal_type === 'auction') {
+      const { data: ref, error: claimError } = await supabaseAdmin.rpc('claim_auction_invite', { _token: data.token, _user: context.userId });
+      if (claimError) throw claimError;
+      return { ok: true as const, ref };
+    }
+
     if (deal.buyer_id === context.userId || deal.seller_id === context.userId) {
       return { ok: true as const, ref: deal.ref };
     }

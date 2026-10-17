@@ -26,6 +26,12 @@ export const PAYOUT_ACCOUNT_MESSAGE =
 export async function fundingGuard(admin: any, dealId: string) {
   const { data: deal } = await admin.from("deals").select("*").eq("id", dealId).maybeSingle();
   if (!deal) return "Deal not found.";
+  if (deal.deal_type === 'auction') {
+    if (deal.status !== 'pending_funding' || !deal.buyer_id || !deal.seller_id) return 'Auction is not ready for payment.';
+    if (!deal.payment_deadline_at || new Date(deal.payment_deadline_at).getTime() <= Date.now()) return 'Auction payment deadline expired.';
+    // Acceptance is recorded atomically with the funding reservation, not before payment.
+    return await supplierPayoutOk(admin, deal) ? null : PAYOUT_ACCOUNT_MESSAGE;
+  }
   const terms = await latestTerms(admin, dealId);
   return fundingBlockReason({
     status: deal.status,
