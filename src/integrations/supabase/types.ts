@@ -538,6 +538,7 @@ export type Database = {
       deal_transactions: {
         Row: {
           amount: number
+          auction_dispute_id: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -551,6 +552,7 @@ export type Database = {
           milestone_id: string | null
           note: string | null
           original_transaction_id: string | null
+          payout_split_id: string | null
           provider: string
           provider_ref: string | null
           release_part: string | null
@@ -559,6 +561,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          auction_dispute_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -572,6 +575,7 @@ export type Database = {
           milestone_id?: string | null
           note?: string | null
           original_transaction_id?: string | null
+          payout_split_id?: string | null
           provider?: string
           provider_ref?: string | null
           release_part?: string | null
@@ -580,6 +584,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          auction_dispute_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -593,6 +598,7 @@ export type Database = {
           milestone_id?: string | null
           note?: string | null
           original_transaction_id?: string | null
+          payout_split_id?: string | null
           provider?: string
           provider_ref?: string | null
           release_part?: string | null
@@ -600,6 +606,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deal_transactions_auction_dispute_id_fkey"
+            columns: ["auction_dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deal_transactions_deal_id_fkey"
             columns: ["deal_id"]
@@ -619,6 +632,13 @@ export type Database = {
             columns: ["original_transaction_id"]
             isOneToOne: false
             referencedRelation: "deal_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_payout_split_id_fkey"
+            columns: ["payout_split_id"]
+            isOneToOne: false
+            referencedRelation: "deal_payout_splits"
             referencedColumns: ["id"]
           },
         ]
@@ -1492,6 +1512,19 @@ export type Database = {
       auction_require_beneficiary: {
         Args: { cur: string; uid: string }
         Returns: undefined
+      }
+      create_auction_release: {
+        Args: {
+          _actor_id?: string
+          _buyer_percent?: number
+          _deal_id: string
+          _dispute_id?: string
+          _note?: string
+          _outcome?: string
+        }
+        Returns: {
+          id: string
+        }[]
       }
       has_role: {
         Args: {
