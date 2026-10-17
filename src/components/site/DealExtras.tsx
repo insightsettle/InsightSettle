@@ -16,6 +16,7 @@ import {
   uploadDealFile,
 } from "@/lib/deal-actions";
 import type { DealRow } from "@/lib/deals";
+import { formatMoney } from "@/lib/money";
 import { cancelDeal, openDisputeCase } from "@/lib/operations.functions";
 
 const reasonLabels: Record<string, string> = {
@@ -304,7 +305,7 @@ export function TermVersionsCard({ deal }: { deal: DealRow }) {
                   {v.version === deal.terms_version && " · current"}
                 </p>
                 <p className="mt-1 text-muted-foreground" dir="ltr">
-                  {s["currency"]} {Number(s["amount"]).toLocaleString()} · qty {s["quantity"] ?? 1} · inspection {s["inspection_days"]}d
+                  {formatMoney(Number(s["amount"]), s["currency"] ?? deal.currency)} · qty {s["quantity"] ?? 1} · inspection {s["inspection_days"]}d
                   {s["due_at"] ? ` · due ${s["due_at"]}` : ""}
                 </p>
                 {v.note && <p className="mt-1 text-xs">{v.note}</p>}
@@ -330,9 +331,9 @@ export function InvoiceCard({ deal }: { deal: DealRow }) {
           <h2 className="font-bold">Tax invoice</h2>
         </div>
         <p className="mt-2 text-sm" dir="ltr">
-          {i.invoice_number} · fee {Number(i.fee).toFixed(2)} + VAT {(Number(i.vat_rate) * 100).toFixed(0)}% {Number(i.vat).toFixed(2)} ={" "}
+          {i.invoice_number} · fee {formatMoney(Number(i.fee), i.currency)} + VAT {(Number(i.vat_rate) * 100).toFixed(0)}% {formatMoney(Number(i.vat), i.currency)} ={" "}
           <b>
-            {i.currency} {Number(i.total).toFixed(2)}
+            {formatMoney(Number(i.total), i.currency)}
           </b>
         </p>
         <Button asChild variant="outline" size="sm" className="mt-3">

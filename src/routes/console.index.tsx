@@ -18,6 +18,7 @@ import { StatusBadge } from "@/components/site/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getPlatformSummary } from "@/lib/admin.functions";
 import { formatSAR, statusLabels, type DealStatus } from "@/lib/demo-data";
+import { formatMoney } from "@/lib/money";
 import { daysSince, usePlatformSettings } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/console/")({
@@ -248,7 +249,7 @@ function AdminOverview() {
                       <span className="block text-xs text-muted-foreground">{deal.title}</span>
                     </td>
                     <td className="px-5 py-3" dir="ltr">
-                      {deal.currency} {deal.amount.toLocaleString("en-GB")}
+                      {formatMoney(deal.amount, deal.currency)}
                     </td>
                     <td className="px-5 py-3">
                       <StatusBadge status={deal.status as DealStatus} />
