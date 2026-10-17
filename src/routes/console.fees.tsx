@@ -11,6 +11,15 @@ import { PROVISIONAL_SCHEDULE, feeUsd, type FeeSchedule } from "@/lib/fees";
 import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/fees")({
+  head: () => ({ meta: [
+    { title: "Fee rules | Insight staff console" },
+    { name: "description", content: "Review Insight fee rules and provisional bands." },
+    { property: "og:title", content: "Fee rules | Insight staff console" },
+    { property: "og:description", content: "Review Insight fee rules and provisional bands." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: FeesPage,
 });
 

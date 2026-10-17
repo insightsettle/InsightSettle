@@ -1,40 +1,31 @@
-import { statusLabels, statusTone, type DealStatus } from "@/lib/demo-data";
+import { statusLabels, type DealStatus } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/locale";
 
 const toneClass = {
-  muted: "bg-muted text-muted-foreground border-border",
-  primary: "bg-primary/12 text-primary border-primary/30",
-  warning: "bg-warning/12 text-warning border-warning/30",
-  destructive: "bg-destructive/12 text-destructive border-destructive/30",
+  success: "bg-success-subtle text-primary",
+  warning: "bg-warning-subtle text-warning",
+  danger: "bg-danger-subtle text-destructive",
+  info: "bg-info-subtle text-info",
+  neutral: "bg-muted text-muted-foreground",
+  brand: "bg-secondary text-primary",
+  gold: "bg-gold-subtle text-gold-foreground",
 };
-
-export function StatusBadge({ status, className }: { status: DealStatus; className?: string }) {
-  const { locale } = useLocale();
-  const arabicLabels: Record<DealStatus, string> = {
-    pending_funding: "بانتظار التمويل",
-    held: "الأموال محجوزة",
-    delivered: "تم التسليم",
-    under_review: "قيد المراجعة",
-    released: "تم الإفراج",
-    refunded: "تم الاسترداد",
-    disputed: "متنازع عليها",
-    in_progress: "قيد التنفيذ",
-    completed: "مكتملة",
-    cancelled: "ملغاة",
-    rejected: "مرفوضة",
-    partially_refunded: "مستردة جزئياً",
-  };
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold",
-        toneClass[statusTone[status] ?? "muted"],
-        className,
-      )}
-    >
-      <span className="size-1.5 rounded-full bg-current" />
-      {(locale === "ar" ? arabicLabels[status] : statusLabels[status]) ?? status}
-    </span>
-  );
+const statusTones: Record<string, keyof typeof toneClass> = {
+  released: "success", completed: "success", refunded: "neutral",
+  pending_acceptance: "warning", pending_funding: "warning", awaiting_action: "warning", under_review: "warning", partially_refunded: "warning",
+  disputed: "danger", failed: "danger", rejected: "danger",
+  shipped: "info", delivered: "info", in_inspection: "info", in_progress: "info",
+  draft: "neutral", cancelled: "neutral", held: "brand", milestones: "gold", auctions: "gold",
+};
+const additionalLabels: Record<string, string> = { pending_acceptance: "Pending acceptance", awaiting_action: "Awaiting action", shipped: "Shipped", in_inspection: "In inspection", draft: "Draft", failed: "Failed", milestones: "Milestones", auctions: "Auctions" };
+const arabicLabels: Record<DealStatus, string> = {
+  pending_funding: "بانتظار التمويل", held: "الأموال محجوزة", delivered: "تم التسليم", under_review: "قيد المراجعة", released: "تم الإفراج", refunded: "تم الاسترداد", disputed: "متنازع عليها", in_progress: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة", rejected: "مرفوضة", partially_refunded: "مستردة جزئياً",
+};
+export function StatusBadge({ status, className }: { status: DealStatus | keyof typeof additionalLabels; className?: string }) {
+  const { text } = useLocale();
+  const label = statusLabels[status as DealStatus] ?? additionalLabels[status] ?? status;
+  return <span data-no-localize className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", toneClass[statusTones[status] ?? "neutral"], className)}>
+    <span className="size-1.5 shrink-0 rounded-full bg-current" />{text(label, arabicLabels[status as DealStatus])}
+  </span>;
 }

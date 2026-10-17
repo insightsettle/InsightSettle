@@ -17,3 +17,5 @@
 - All fee, VAT, FX pay-in and ledger figures come from src/lib/fees.ts via src/lib/pricing.server.ts and are locked in fx_quotes.breakdown at funding; screens only display server results so quote, invoice, release and ledger always agree.
 - Parties never write deals directly (no party UPDATE policy + enforce_deal_transition trigger); every party step is a server function in src/lib/deal-party.functions.ts that checks side and status.
 - Dispute releases are identified by their decision key and recomputed from locked pricing plus that decision, never from a net transaction amount; this prevents confirmation from paying the whole deal or charging fees twice.
+
+- Authenticated client chrome is owned by the pathless client layout and shared AppShell; SiteShell omits public chrome there, while ConsoleShell supplies staff navigation to AppShell, keeping all routes and actions unchanged.

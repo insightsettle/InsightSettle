@@ -11,6 +11,15 @@ import { formatSAR } from "@/lib/demo-data";
 import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/console/reports")({
+  head: () => ({ meta: [
+    { title: "Finance reports | Insight staff console" },
+    { name: "description", content: "Review Insight operational and financial reports." },
+    { property: "og:title", content: "Finance reports | Insight staff console" },
+    { property: "og:description", content: "Review Insight operational and financial reports." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: ReportsPage,
 });
 

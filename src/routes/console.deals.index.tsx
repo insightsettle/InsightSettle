@@ -12,6 +12,15 @@ import { formatDate, formatSAR, statusLabels, type DealStatus } from "@/lib/demo
 import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/deals/")({
+  head: () => ({ meta: [
+    { title: "All deals | Insight staff console" },
+    { name: "description", content: "Review all deals in the Insight staff console." },
+    { property: "og:title", content: "All deals | Insight staff console" },
+    { property: "og:description", content: "Review all deals in the Insight staff console." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: ConsoleDeals,
 });
 

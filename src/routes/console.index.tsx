@@ -22,6 +22,15 @@ import { formatMoney } from "@/lib/money";
 import { daysSince, usePlatformSettings } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/console/")({
+  head: () => ({ meta: [
+    { title: "Operations overview | Insight staff console" },
+    { name: "description", content: "Insight staff overview of deals, revenue and operational controls." },
+    { property: "og:title", content: "Operations overview | Insight staff console" },
+    { property: "og:description", content: "Insight staff overview of deals, revenue and operational controls." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: AdminOverview,
 });
 
@@ -74,9 +83,9 @@ function AdminOverview() {
 
   return (
     <div className="mt-8 space-y-8">
-      <Card className="border-foreground/20 bg-foreground text-background">
-        <CardContent className="p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-background/60">
+      <section className="border-b border-border pb-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Live platform data
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -87,9 +96,9 @@ function AdminOverview() {
               { label: "Deal volume", value: v((l) => formatSAR(l.dealVolume)) },
               { label: "Deals in dispute", value: v((l) => String(l.disputed)) },
             ].map((item) => (
-              <div key={item.label} className="rounded-lg bg-background/10 p-4">
-                <p className="text-xs text-background/70">{item.label}</p>
-                <p className="mt-1 text-xl font-extrabold">{item.value}</p>
+              <div key={item.label} className="rounded-lg bg-card border border-border p-4">
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">{item.value}</p>
               </div>
             ))}
           </div>
@@ -104,8 +113,8 @@ function AdminOverview() {
               Run risk screening →
             </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {summary.isError && <p className="text-sm text-destructive">Could not load live data.</p>}
 
@@ -114,10 +123,10 @@ function AdminOverview() {
           <Card key={k.label}>
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{k.label}</span>
-                <k.icon className="size-5 text-primary" />
+                <span className="text-xs text-muted-foreground">{k.label}</span>
+                <span className="grid size-8 place-items-center rounded-lg bg-accent"><k.icon className="size-4 text-primary" /></span>
               </div>
-              <p className="mt-3 text-2xl font-extrabold">{k.value}</p>
+              <p className="mt-3 text-2xl font-semibold tabular-nums">{k.value}</p>
             </CardContent>
           </Card>
         ))}

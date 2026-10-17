@@ -18,6 +18,15 @@ import {
 } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/console/rates")({
+  head: () => ({ meta: [
+    { title: "Currency rates | Insight staff console" },
+    { name: "description", content: "Review and manage Insight currency rates." },
+    { property: "og:title", content: "Currency rates | Insight staff console" },
+    { property: "og:description", content: "Review and manage Insight currency rates." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: RatesPage,
 });
 

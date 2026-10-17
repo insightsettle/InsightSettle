@@ -14,6 +14,15 @@ import { disputeCases, disputeStageLabels, type DisputeCase } from "@/lib/disput
 import { usePlatformSettings } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/console/disputes")({
+  head: () => ({ meta: [
+    { title: "Dispute operations | Insight staff console" },
+    { name: "description", content: "Review dispute cases and policies in Insight." },
+    { property: "og:title", content: "Dispute operations | Insight staff console" },
+    { property: "og:description", content: "Review dispute cases and policies in Insight." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: DisputeOpsPage,
 });
 

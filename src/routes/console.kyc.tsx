@@ -16,6 +16,15 @@ import {
 } from "@/lib/kyc";
 
 export const Route = createFileRoute("/console/kyc")({
+  head: () => ({ meta: [
+    { title: "Identity documents | Insight staff console" },
+    { name: "description", content: "Review member identity documents in Insight." },
+    { property: "og:title", content: "Identity documents | Insight staff console" },
+    { property: "og:description", content: "Review member identity documents in Insight." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: ConsoleKyc,
 });
 
