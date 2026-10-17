@@ -298,6 +298,9 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
 
     if (deal.deal_type === 'auction') {
       const { createAuctionRelease } = await import('./auction-settlement.server');
+      const { data: inspection } = await admin.from('deals').select('status,frozen,auto_release_at').eq('id', deal.id).single();
+      const { auctionCompletionState } = await import('./auction-completion');
+      if (!inspection || !auctionCompletionState(inspection, true, false, Date.now()).accept) throw new Error('Accept the auction lot during its inspection window.');
       const legs = await createAuctionRelease(admin, deal.id, context.userId);
       if (!provider.connected) {
         const { simulateProviderConfirm } = await import('./settlement.server');

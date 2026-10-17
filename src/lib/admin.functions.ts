@@ -30,7 +30,7 @@ export type PlatformUser = {
   isStaff: boolean;
   dealCount: number;
   dealValue: number;
-  businessStatus?: string;
+  businessStatus?: string | undefined;
   payoutVerified?: boolean;
   hasPayout?: boolean;
 };
