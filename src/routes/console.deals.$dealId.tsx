@@ -250,8 +250,7 @@ function StaffDealPage() {
                 <h3 className="font-bold">{text("Special fee offer")}</h3>
               </div>
               <p key={`fee-${effectiveFee}`} className="mt-1 text-sm text-muted-foreground">
-                Fee for this deal is {money(effectiveFee)}. Set a percentage or a fixed
-                amount for high-value deals.
+                {text("Fee for this deal", "رسوم هذه الصفقة")}: <bdi>{money(effectiveFee)}</bdi>. {text("Set a percentage or a fixed amount for high-value deals.", "حدد نسبة أو مبلغاً ثابتاً للصفقات الكبيرة.")}
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <label className="text-sm">
@@ -313,7 +312,7 @@ function StaffDealPage() {
                 </Button>
               </div>
               <p key={`charged-${effectiveFee}`} className="mt-3 text-sm">
-                Fee charged to this deal:{" "}
+                {text("Fee charged to this deal", "الرسوم المحصلة لهذه الصفقة")}:{" "}
                 <b>
                   {money(effectiveFee)}
                   {hasOverride ? " (special offer active)" : ""}
@@ -465,7 +464,7 @@ function StaffDealPage() {
           <Card>
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground">{text("Deal value")}</p>
-              <p className="mt-1 text-3xl font-extrabold">
+              <p className="mt-1 text-3xl font-extrabold tabular-nums">
                 <bdi dir="ltr">{money(deal.amount)}</bdi>
               </p>
               <dl className="mt-5 space-y-3 border-t pt-4 text-sm">

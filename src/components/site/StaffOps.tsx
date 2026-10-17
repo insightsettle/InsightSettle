@@ -50,13 +50,13 @@ export function StaffDealActions({ dealId, frozen }: { dealId: string; frozen: b
         <Textarea rows={2} className="mt-3" value={note} onChange={(e) => setNote(e.target.value)} placeholder={text("Reason / note")} />
         <div className="mt-3 flex flex-wrap gap-2">
           <Button size="sm" variant={frozen ? "outline" : "destructive"} disabled={!ok} onClick={() => act.mutate(frozen ? "unfreeze" : "freeze")}>
-            {frozen ? "Unfreeze deal" : "Freeze deal"}
+            {text(frozen ? "Unfreeze deal" : "Freeze deal")}
           </Button>
           <Button size="sm" variant="outline" disabled={!ok} onClick={() => act.mutate("request_documents")}>
-            Request documents
+            {text("Request documents")}
           </Button>
           <Button size="sm" variant="outline" disabled={!ok} onClick={() => act.mutate("internal_note")}>
-            Add internal note
+            {text("Add internal note")}
           </Button>
         </div>
         {msg && <p className="mt-2 text-sm text-muted-foreground">{msg}</p>}
