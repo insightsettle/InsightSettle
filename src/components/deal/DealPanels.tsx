@@ -16,7 +16,7 @@ import {
 } from "@/lib/deal-milestones.functions";
 import { formatDate } from "@/lib/demo-data";
 import { escrowStep, type DealType } from "@/lib/milestones";
-import { formatMoney, roundMoney } from "@/lib/money";
+import { formatMoney, minorUnitsFor, roundMoney } from "@/lib/money";
 import { openDisputeCase } from "@/lib/operations.functions";
 
 export const CUSTODY_LINE = "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.";
@@ -275,7 +275,11 @@ export function MilestoneEditor({ rows, onChange, currency, total, allowAdvance 
       {rows.map((r, i) => (
         <div key={i} className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
           <Input aria-label="Milestone title" placeholder="Milestone title" value={r.title} disabled={r.locked} onChange={(e) => set(i, { title: e.target.value })} />
-          <Input aria-label="Amount" type="number" min={0} step="0.001" dir="ltr" value={r.amount} disabled={r.locked} onChange={(e) => set(i, { amount: e.target.value })} />
+          <div className="min-w-0">
+            <Input aria-label="Amount" type="number" min={0} step={10 ** -minorUnitsFor(currency)} dir="ltr" value={r.amount} disabled={r.locked} onChange={(e) => set(i, { amount: e.target.value })}
+              onBlur={() => { if (r.amount.trim() && Number.isFinite(Number(r.amount))) set(i, { amount: Number(r.amount).toFixed(minorUnitsFor(currency)) }); }} />
+            {r.amount.trim() && Number.isFinite(Number(r.amount)) && <p className="mt-1 text-xs text-muted-foreground" dir="ltr">{formatMoney(Number(r.amount), currency)}</p>}
+          </div>
           <Input aria-label="Due date" type="date" value={r.dueDate} disabled={r.locked} onChange={(e) => set(i, { dueDate: e.target.value })} />
           <Button type="button" size="icon" variant="ghost" aria-label="Remove milestone" disabled={r.locked || rows.length <= 2} onClick={() => onChange(rows.filter((_, j) => j !== i))}><Trash2 /></Button>
           <Input className="sm:col-span-3" aria-label="Evidence required" placeholder="Evidence required (e.g. site photos, inspection sign-off)" value={r.evidenceRequired} disabled={r.locked} onChange={(e) => set(i, { evidenceRequired: e.target.value })} />

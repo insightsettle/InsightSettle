@@ -10,7 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { listDealsForRisk, setDealRisk, type RiskDeal } from "@/lib/admin.functions";
-import { formatDate, formatSAR } from "@/lib/demo-data";
+import { formatDate } from "@/lib/demo-data";
+import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/risk")({
   component: RiskReviewPage,
@@ -136,7 +137,7 @@ function RiskReviewPage() {
                   <span className="text-sm">
                     <b>{d.ref}</b> · {d.title}
                     <span className="block text-xs text-muted-foreground">
-                      <bdi dir="ltr">{formatSAR(d.amount)}</bdi> · {d.status} · {d.messages.length}{" "}
+                      <bdi dir="ltr">{formatMoney(d.amount, d.currency)}</bdi> · {d.status} · {d.messages.length}{" "}
                       messages
                       {d.riskLevel ? ` · flagged ${d.riskLevel}` : ""}
                     </span>
