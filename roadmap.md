@@ -1,6 +1,7 @@
 # Roadmap
 
-- [ ] UX-C: staff overview and read-only reconciliation, deal milestones/retention, dispute positions/timeline/decision; D21 cancel routing; tests and two signed-in Arabic screenshots; no publishing.
+- [x] UX-C: staff overview and paginated guarded read-only reconciliation, deal milestones/retention, dispute positions/timeline/decision presentation; D21 cancel routing tested through existing guard without writes; Arabic overview/contract screenshots reviewed; automatic type/build checks clean; no publishing.
+- [ ] UX-C open dispute decision/evidence verification: no live dispute exists. Needs a real test case; no fictional dispute or financial mutation created. R2 remains unverified without an independent provider statement; R4/R5 existing-data exceptions are displayed, not changed.
 
 - [x] UX-B: client home, goods/contracting presentation, new-deal grouping, D22 quote display, bilingual custody/VAT; 33 tests and automatic type check/build clean; signed-in EN/AR dashboard, AR goods/new reviewed, mobile navigation checked; no publishing.
 - [ ] UX-B live-summary fee figures: existing new-deal form has no server price preview. Requires permission to add a server preview (excluded by presentation-only scope); show unavailable values rather than invent pricing.

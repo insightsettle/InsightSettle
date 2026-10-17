@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { submitStaffStatus } from "./staff-display";
+import { splitDisplay, submitStaffStatus } from "./staff-display";
 
 describe("C09-D21 status control", () => {
   it("sends Cancelled to staffAction cancel with the required reason", async () => {
@@ -23,5 +23,12 @@ describe("C09-D21 status control", () => {
     await expect(submitStaffStatus({ dealId: "deal", status: "cancelled", reason: " " }, cancel, generic)).rejects.toThrow();
     expect(cancel).not.toHaveBeenCalled();
     expect(generic).not.toHaveBeenCalled();
+  });
+});
+
+describe("decision gross allocation display", () => {
+  it("shows 70/30 on BHD 1,000.000 with the remainder in the refund", () => {
+    expect(splitDisplay(1000, 30, "BHD")).toEqual({ release: 700, refund: 300 });
+    expect(splitDisplay(1.001, 30, "BHD")).toEqual({ release: 0.701, refund: 0.3 });
   });
 });
