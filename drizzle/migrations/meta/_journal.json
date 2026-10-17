@@ -50,6 +50,13 @@
       "when": 1792272535011,
       "tag": "0006_auction_direct_payout",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792272616704,
+      "tag": "0007_auction_payout_query_qualification",
+      "breakpoints": true
     }
   ]
 }
