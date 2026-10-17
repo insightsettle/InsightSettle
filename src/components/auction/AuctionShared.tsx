@@ -4,7 +4,7 @@ import { countdown } from '@/lib/auction-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock3, ListOrdered, ShieldCheck, Truck } from 'lucide-react';
 export function useAuctionClock() { const [now, setNow] = useState(0); useEffect(() => { setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []); return now; }
-export function AuctionCountdown({ deadline }: { deadline?: string | null }) { const now = useAuctionClock(); return <bdi className="font-medium tabular-nums text-warning" dir="ltr">{countdown(deadline, now)}</bdi>; }
+export function AuctionCountdown({ deadline }: { deadline?: string | null | undefined }) { const now = useAuctionClock(); return <bdi className="font-medium tabular-nums text-warning" dir="ltr">{countdown(deadline, now)}</bdi>; }
 export function AuctionStatus({ status, backup = false }: { status: string; backup?: boolean }) {
   const { text } = useLocale();
   const labels: Record<string,[string,string]> = { draft:['Draft','مسودة'],open:['Open','مفتوحة'],offered:['Awaiting payment','بانتظار الدفع'],pending_funding:['Awaiting payment','بانتظار الدفع'],funded:['Paid','مدفوعة'],held:['Paid','مدفوعة'],paid:['Paid','مدفوعة'],delivered:['In inspection','قيد الفحص'],under_review:['In inspection','قيد الفحص'],disputed:['Disputed','متنازع عليها'],released:['Completed','مكتملة'],closed:['Completed','مكتملة'],expired:['Expired','انتهت المهلة'],declined:['Declined','مرفوضة'],waiting:['Waiting','بانتظار الدور'],unsold:['Unsold','غير مباعة'],cancelled:['Cancelled','ملغاة'],refunded:['Refunded','مستردة'] };
