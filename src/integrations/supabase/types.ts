@@ -1545,6 +1545,10 @@ export type Database = {
           id: string
         }[]
       }
+      decline_auction_deal: {
+        Args: { _buyer: string; _deal: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

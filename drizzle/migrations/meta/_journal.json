@@ -85,6 +85,13 @@
       "when": 1792273382120,
       "tag": "0011_auction_offer_terms_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792273402417,
+      "tag": "0012_auction_decline_identity_guard",
+      "breakpoints": true
     }
   ]
 }
