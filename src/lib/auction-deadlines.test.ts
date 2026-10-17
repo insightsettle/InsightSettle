@@ -50,6 +50,7 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
       CREATE TABLE notifications(user_id uuid,deal_id uuid,kind text,title text,body text); CREATE TABLE deal_events(deal_id uuid,actor_id uuid,title text);
       CREATE TABLE fx_quotes(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),deal_id uuid,total numeric,fee numeric,target_currency text,expires_at timestamptz,used_at timestamptz,breakdown jsonb);
       ALTER TABLE deal_transactions ADD COLUMN fx_quote_id uuid;
+      ALTER TABLE deals ADD COLUMN fee_override_percent numeric, ADD COLUMN fee_override_flat numeric;
       CREATE FUNCTION run_auto_release() RETURNS integer LANGUAGE plpgsql AS $$ DECLARE r record; BEGIN
     INSERT INTO deal_transactions(deal_id, kind, amount, currency, status, provider, note, idempotency_key)
     VALUES (r.id, 'release', r.amount, r.currency, 'processing', 'manual', 'Automatic release after the inspection period', r.ref || '-RELEASE-AUTO'); RETURN 0; END; $$;`);
