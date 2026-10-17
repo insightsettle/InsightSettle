@@ -14,7 +14,7 @@
 ## Architecture decisions
 
 - Auction invariants live in database triggers with auction/lot row locks and immutable funding reservations; tests execute the migration in isolated PostgreSQL-compatible PGlite so writes cannot bypass bidder, split or deadline guards.
-- Auction payout splits store separate beneficiary legs, and legacy auction release/payout transactions are blocked until direct provider settlement is implemented; ordinary deal settlement remains unchanged.
+- Auction payouts are created atomically by the service-only create_auction_release database function; settlement confirms immutable owner/organiser legs independently and writes direct payable ledger accounts, while ordinary deal settlement remains unchanged.
 
 - All displayed language state is owned by the shared locale provider; this keeps English/Arabic selection and document direction consistent across public, customer, and staff views.
 - All fee, VAT, FX pay-in and ledger figures come from src/lib/fees.ts via src/lib/pricing.server.ts and are locked in fx_quotes.breakdown at funding; screens only display server results so quote, invoice, release and ledger always agree.

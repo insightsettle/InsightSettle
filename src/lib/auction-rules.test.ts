@@ -34,6 +34,7 @@ beforeAll(async () => {
     VALUES (r.id, 'release', r.amount, r.currency, 'processing', 'manual', 'Automatic release after the inspection period', r.ref || '-RELEASE-AUTO');
     RETURN 0; END; $$;`);
   await db.exec(readFileSync(new URL('../../drizzle/migrations/0006_auction_direct_payout.sql',import.meta.url),'utf8'));
+  await db.exec(readFileSync(new URL('../../drizzle/migrations/0007_auction_payout_query_qualification.sql',import.meta.url),'utf8'));
 }, 30_000);
 afterAll(async () => { await db?.close(); });
 beforeEach(async () => {
