@@ -166,6 +166,16 @@ describe('auction database rules (actual migration)', () => {
     const second=await db.query(`SELECT * FROM create_auction_release('${deal}')`);
     expect(first.rows).toHaveLength(2); expect(second.rows).toHaveLength(2);
     expect((await db.query(`SELECT amount::text amount,idempotency_key FROM deal_transactions WHERE kind='release' ORDER BY amount DESC`)).rows).toEqual([
-      {amount:'900',idempotency_key:'DL-test-RELEASE-OWNER'},{amount:'100',idempotency_key:'DL-test-RELEASE-ORG'}]);
+      {amount:'900.000',idempotency_key:'DL-test-RELEASE-OWNER'},{amount:'100.000',idempotency_key:'DL-test-RELEASE-ORG'}]);
+  });
+  it('creates dispute refund and beneficiary shares from the locked percentages',async()=>{
+    await bid(); await makeDeal(); await fund('succeeded');
+    await db.exec(`INSERT INTO deal_payout_splits(deal_id,beneficiary_id,role,pct,amount,currency) VALUES ('${deal}','${owner}','owner',90,900,'BHD'),('${deal}','${organiser}','organiser',10,100,'BHD');
+      UPDATE deals SET status='disputed' WHERE id='${deal}';
+      INSERT INTO disputes(id,deal_id,status) VALUES ('00000000-0000-0000-0000-000000000020','${deal}','open');`);
+    await db.query(`SELECT * FROM create_auction_release('${deal}',NULL,'00000000-0000-0000-0000-000000000020','partial_settlement',70,'Split decision')`);
+    expect((await db.query(`SELECT kind,amount::text amount FROM deal_transactions WHERE kind<>'funding' ORDER BY amount DESC`)).rows).toEqual([
+      {kind:'refund',amount:'700.000'},{kind:'release',amount:'270.000'},{kind:'release',amount:'30.000'}]);
+    expect((await db.query(`SELECT status,buyer_percent::text pct FROM disputes WHERE id='00000000-0000-0000-0000-000000000020'`)).rows[0]).toEqual({status:'resolved',pct:'70'});
   });
 });

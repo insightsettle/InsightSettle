@@ -57,7 +57,7 @@ export type DealPricing = { breakdown: FeeBreakdown; payIn: PayInQuote; usdPerUn
 /** The one place a deal is priced. */
 export async function priceDeal(admin: any, deal: any): Promise<DealPricing> {
   const inputs = await loadPricingInputs(admin, deal.currency);
-  const fee = dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, inputs.schedule, {
+  const fee = dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, inputs.schedule, deal.deal_type === 'auction' ? {} : {
     percent: deal.fee_override_percent == null ? null : Number(deal.fee_override_percent),
     flat: deal.fee_override_flat == null ? null : Number(deal.fee_override_flat),
   });
