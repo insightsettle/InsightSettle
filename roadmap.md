@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Auctions step 1: migration 0005, locked direct-split model, verified beneficiaries, ordered bidders and funding deadlines/concurrency, C01 public-read grants, rule tests; no screens, settlement changes or publishing.
+
 - [x] UX-D: homepage/navigation/footer and pricing v1; shared existing fee engine adapter; Arabic-first with saved-language preservation; 40 tests and two Arabic captures; no publishing.
 - [ ] UX-D public calculator/bands: existing fee_rules/vat_rates/fx_rates policies deny anonymous reads. Requires authorization for a narrow public-read permission change (outside presentation scope). No fallback figures or privileged bypass used; live-data test vectors match USD 197.50 and BHD 27.820.
 
