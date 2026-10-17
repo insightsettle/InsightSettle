@@ -50,7 +50,7 @@ function AdminOverview() {
     ["R4", text("Tax invoices = fees collected", "الفواتير الضريبية = الرسوم المحصّلة"), live?.reconciliation.r4],
     ["R5", text("No held balance on closed deals", "لا رصيد محتجز للصفقات المغلقة"), live?.reconciliation.r5],
   ] as const;
-  return <div className="mt-6 space-y-6">
+  return <div className="mt-6 space-y-6" data-no-localize>
     <div className="rounded-2xl bg-brand-strong px-5 py-4 text-sm text-primary-foreground">{text("Demo environment — the payment provider is simulated and all data is fictional.", "بيئة تجريبية — مزوّد الدفع محاكى وجميع البيانات وهمية.")}</div>
     <h2 className="text-2xl font-semibold">{text("Operations overview", "نظرة عامة على العمليات")}</h2>
     {query.isError && <p role="alert" className="text-destructive">{text("Could not load staff data.", "تعذر تحميل بيانات الموظفين.")}</p>}

@@ -119,7 +119,7 @@ export function LiveDisputes() {
   const [pick, setPick] = useState<Record<string, { outcome: string; pct: string; note: string }>>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  return <div className="space-y-5"><h2 className="text-xl font-semibold">{text("Dispute cases", "قضايا النزاعات")}</h2>
+  return <div className="space-y-5" data-no-localize><h2 className="text-xl font-semibold">{text("Dispute cases", "قضايا النزاعات")}</h2>
     {error && <p role="alert" className="text-sm text-destructive">{text(error)}</p>}
     {cases.isLoading && <p>{text("Loading…", "جارٍ التحميل…")}</p>}
     {cases.isError && <p role="alert" className="text-destructive">{text("Could not load disputes", "تعذر تحميل النزاعات")}</p>}

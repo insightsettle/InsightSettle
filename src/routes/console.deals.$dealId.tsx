@@ -179,7 +179,7 @@ function StaffDealPage() {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-primary">{deal.ref}</p>
+          <p className="text-sm font-semibold text-primary" data-no-localize>{deal.ref}</p>
           <h2 className="mt-1 text-2xl font-extrabold">{deal.title}</h2>
           <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
             {deal.description || "No description was added."}
@@ -465,7 +465,7 @@ function StaffDealPage() {
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground">{text("Deal value")}</p>
               <p className="mt-1 text-3xl font-extrabold tabular-nums">
-                <bdi dir="ltr">{money(deal.amount)}</bdi>
+                <bdi dir="ltr" data-no-localize>{money(deal.amount)}</bdi>
               </p>
               <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
                 <Row label="Created" value={formatDate(deal.createdAt)} />
@@ -542,7 +542,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="mt-3 flex items-start justify-between gap-4">
       <dt className="text-sm text-muted-foreground">{text(label)}</dt>
-      <dd className="break-all text-end text-sm font-semibold">{value}</dd>
+      <dd className="break-all text-end text-sm font-semibold tabular-nums" data-no-localize>{text(value)}</dd>
     </div>
   );
 }
