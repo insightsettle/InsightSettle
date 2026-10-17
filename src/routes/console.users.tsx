@@ -7,7 +7,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { listPlatformUsers, setStaffRole, setVerificationStatus } from "@/lib/admin.functions";
+import { listPlatformUsers, setStaffRole, setVerificationStatus, verifyBusinessProfile, verifyPayoutAccount } from "@/lib/admin.functions";
+import { useLocale } from '@/lib/locale';
 import { formatDate, formatSAR } from "@/lib/demo-data";
 import { AccountStateControl } from "@/components/site/StaffOps";
 
@@ -31,11 +32,15 @@ const statusTone: Record<string, string> = {
 };
 
 function ConsoleUsers() {
+  const { text } = useLocale();
   const queryClient = useQueryClient();
   const fetchUsers = useServerFn(listPlatformUsers);
   const updateVerification = useServerFn(setVerificationStatus);
   const updateStaff = useServerFn(setStaffRole);
   const [term, setTerm] = useState("");
+  const businessFn = useServerFn(verifyBusinessProfile);
+  const payoutFn = useServerFn(verifyPayoutAccount);
+  const approval = useMutation({ mutationFn: (v: { userId: string; kind: 'business' | 'payout' }) => v.kind === 'business' ? businessFn({ data: { userId: v.userId } }) : payoutFn({ data: { userId: v.userId } }), onSuccess: () => { refresh(); queryClient.invalidateQueries({ queryKey: ['audit-log'] }); } });
 
   const users = useQuery({ queryKey: ["platform-users"], queryFn: () => fetchUsers({}) });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["platform-users"] });
@@ -82,6 +87,7 @@ function ConsoleUsers() {
         <p className="mt-6 text-sm text-destructive">Could not load members.</p>
       ) : (
         <div className="mt-5 space-y-3">
+          {approval.isError && <p role="alert" className="text-destructive">{text('Verification failed. Approve identity and check submitted details first.', 'تعذّر التوثيق. وافق على الهوية وتحقق من البيانات المقدّمة أولًا.')}</p>}
           {rows.map((u) => (
             <Card key={u.id}>
               <CardContent className="grid gap-4 p-5 lg:grid-cols-[1.4fr_1fr_auto] lg:items-center">
@@ -115,6 +121,8 @@ function ConsoleUsers() {
                   <p className="text-muted-foreground">{formatSAR(u.dealValue)} total value</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  {u.businessStatus && u.businessStatus !== 'verified' && <Button size="sm" variant="outline" disabled={approval.isPending || u.verificationStatus !== 'verified'} onClick={() => approval.mutate({ userId: u.id, kind: 'business' })}><BadgeCheck />{text('Verify business profile','توثيق السجل التجاري')}</Button>}
+                  {u.hasPayout && !u.payoutVerified && <div className="space-y-1"><Button size="sm" variant="outline" disabled={approval.isPending || u.verificationStatus !== 'verified'} onClick={() => approval.mutate({ userId: u.id, kind: 'payout' })}><BadgeCheck />{text('Verify payout account','توثيق حساب الصرف')}</Button><p className="text-xs text-warning">{text('Demo: provider check simulated','تجريبي: تحقق مزوّد الدفع محاكى')}</p></div>}
                   {u.verificationStatus !== "verified" && (
                     <Button
                       size="sm"

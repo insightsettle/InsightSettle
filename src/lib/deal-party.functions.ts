@@ -18,7 +18,7 @@ function snapshot(d: any) {
   };
 }
 
-async function load(context: Ctx, dealId: string) {
+async function load(context: Ctx, dealId: string, shipping = false) {
   const [{ supabaseAdmin }, notify] = await Promise.all([
     import("@/integrations/supabase/client.server"),
     import("@/lib/notify.server"),
@@ -27,7 +27,12 @@ async function load(context: Ctx, dealId: string) {
   const { data: deal } = await admin.from("deals").select("*").eq("id", dealId).maybeSingle();
   if (!deal) throw new Error("Deal not found.");
   const isBuyer = deal.buyer_id === context.userId;
-  const isSeller = deal.seller_id === context.userId;
+  let isSeller = deal.seller_id === context.userId;
+  if (shipping && deal.deal_type === 'auction') {
+    const { data: lot } = await admin.from('auction_lots').select('auction_id').eq('id', deal.auction_lot_id).single();
+    const { data: auction } = await admin.from('auctions').select('organiser_id').eq('id', lot?.auction_id).single();
+    isSeller = auction?.organiser_id === context.userId;
+  }
   if (!isBuyer && !isSeller) throw new Error("You are not a party to this deal.");
   if (deal.frozen) throw new Error("This deal is frozen by Insight.");
   return { admin, notify, deal, isBuyer, isSeller };
@@ -50,7 +55,7 @@ export const acceptTerms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { dealId: string }) => idOnly.parse(i))
   .handler(async ({ data, context }) => {
-    const { admin, notify, deal, isSeller } = await load(context, data.dealId);
+    const { admin, notify, deal, isSeller } = await load(context, data.dealId, true);
     if (deal.status !== "pending_funding" && deal.status !== "in_progress") throw new Error("Terms can only be accepted before funding.");
     if (!deal.buyer_id || !deal.seller_id) throw new Error("Both parties must join before the terms can be accepted.");
     const { latestTerms, supplierPayoutOk, PAYOUT_ACCOUNT_MESSAGE } = await import("@/lib/deal-rules.server");
@@ -152,7 +157,7 @@ export const updateShipping = createServerFn({ method: "POST" })
     if (!isSeller) throw new Error("Only the seller can update shipping.");
     if (deal.status !== "held") throw new Error("Shipping can be updated once the funds are held.");
     if (deal.shipping_status === "not_required") throw new Error("This deal does not need shipping.");
-    await admin
+    const { error } = await admin
       .from("deals")
       .update({
         shipping_carrier: data.carrier || null,
@@ -162,6 +167,7 @@ export const updateShipping = createServerFn({ method: "POST" })
         ...(data.status !== "preparing" && !deal.shipped_at ? { shipped_at: new Date().toISOString() } : {}),
       })
       .eq("id", deal.id);
+    if (error) throw error;
     const note = `${data.carrier || "Carrier"} · ${data.tracking || "no tracking number"} · ${data.status}`;
     await record(admin, notify, deal.id, context.userId, "Shipping details updated", note);
     return { ok: true };
@@ -172,12 +178,12 @@ export const confirmDelivery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { dealId: string }) => idOnly.parse(i))
   .handler(async ({ data, context }) => {
-    const { admin, notify, deal, isSeller } = await load(context, data.dealId);
+    const { admin, notify, deal, isSeller } = await load(context, data.dealId, true);
     if (!isSeller) throw new Error("Only the seller can confirm delivery.");
     if (deal.status !== "held" && deal.status !== "under_review") throw new Error("Delivery can be confirmed only while the funds are held.");
     const now = new Date();
     const autoRelease = new Date(now.getTime() + Number(deal.inspection_days) * 86_400_000);
-    await admin
+    const { error } = await admin
       .from("deals")
       .update({
         status: "delivered",
@@ -187,6 +193,7 @@ export const confirmDelivery = createServerFn({ method: "POST" })
       })
       .eq("id", deal.id)
       .in("status", ["held", "under_review"]);
+    if (error) throw error;
     await record(admin, notify, deal.id, context.userId, deal.status === "under_review" ? "Seller resubmitted the delivery — a new full inspection period started" : "Seller confirmed delivery", `Buyer inspection period ends ${autoRelease.toISOString().slice(0, 10)}`);
     return { ok: true };
   });

@@ -30,6 +30,9 @@ export type PlatformUser = {
   isStaff: boolean;
   dealCount: number;
   dealValue: number;
+  businessStatus?: string;
+  payoutVerified?: boolean;
+  hasPayout?: boolean;
 };
 
 export const listPlatformUsers = createServerFn({ method: "GET" })
@@ -44,6 +47,7 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
     const { data: profiles } = await admin.from("profiles").select("*");
     const { data: roles } = await admin.from("user_roles").select("user_id, role");
     const { data: deals } = await admin.from("deals").select("buyer_id, seller_id, amount");
+    const [{ data: businesses }, { data: payouts }] = await Promise.all([admin.from('business_profiles').select('user_id,verification_status'), admin.from('payout_accounts').select('user_id,verified')]);
 
     return authData.users.map((u) => {
       const profile = profiles?.find((p) => p.id === u.id);
@@ -54,6 +58,9 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
         fullName: profile?.full_name ?? (u.user_metadata?.["full_name"] as string) ?? null,
         phone: profile?.phone ?? null,
         verificationStatus: profile?.verification_status ?? "pending",
+        businessStatus: businesses?.find((b) => b.user_id === u.id)?.verification_status,
+        hasPayout: payouts?.some((p) => p.user_id === u.id) ?? false,
+        payoutVerified: payouts?.find((p) => p.user_id === u.id)?.verified ?? false,
         accountState: (profile as { account_state?: string } | undefined)?.account_state ?? "active",
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at ?? null,
@@ -102,6 +109,24 @@ export const setStaffRole = createServerFn({ method: "POST" })
       if (error) throw error;
     }
     return { ok: true };
+  });
+
+export const verifyBusinessProfile = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertStaff(context);
+    const { verifyMemberRecord } = await import('./staff-verification.server');
+    return verifyMemberRecord(admin, context.userId, data.userId, 'business', false);
+  });
+
+export const verifyPayoutAccount = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertStaff(context);
+    const [{ verifyMemberRecord }, { getPaymentProvider }] = await Promise.all([import('./staff-verification.server'), import('./payment-provider.server')]);
+    return verifyMemberRecord(admin, context.userId, data.userId, 'payout', !getPaymentProvider().connected);
   });
 
 export type AdminDeal = {
