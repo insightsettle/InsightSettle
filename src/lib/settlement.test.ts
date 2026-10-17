@@ -167,4 +167,18 @@ describe('T22 auction real confirmation path', () => {
   it('assigns the 3-decimal rounding remainder to the owner',()=>{
     expect(auctionReleaseAmounts(1000.001,'BHD',85,15)).toEqual({owner:850.001,organiser:150});
   });
+  it('does not mark the deal released when one provider leg fails',async()=>{
+    const {db,tables,notify}=await fixture();
+    await settleTransactionCore(db,notify,{transactionId:'owner-release',outcome:'succeeded',actorId:null});
+    await settleTransactionCore(db,notify,{transactionId:'org-release',outcome:'failed',reason:'Provider refused',actorId:null});
+    expect(tables['deals']?.[0].status).toBe('held');
+    expect(tables['ledger_entries']?.filter(r=>r.account==='escrow_held').reduce((s,r)=>s+r.credit-r.debit,0)).toBe(7200);
+  });
+  it('preserves I-33 final dispute outcome while independently confirming legs',async()=>{
+    const {db,tables,notify}=await fixture(48000,70);
+    tables['deals']?.forEach(d=>{d.status='partially_refunded';});
+    for (const transactionId of ['owner-release','org-release','refund']) await settleTransactionCore(db,notify,{transactionId,outcome:'succeeded',actorId:null});
+    expect(tables['deals']?.[0].status).toBe('partially_refunded');
+    expect(ledgerBalance(tables['ledger_entries']??[])).toEqual({SAR:0});
+  });
 });

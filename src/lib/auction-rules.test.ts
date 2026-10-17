@@ -174,7 +174,7 @@ describe('auction database rules (actual migration)', () => {
       UPDATE deals SET status='disputed' WHERE id='${deal}';
       INSERT INTO disputes(id,deal_id,status) VALUES ('00000000-0000-0000-0000-000000000020','${deal}','open');`);
     await db.query(`SELECT * FROM create_auction_release('${deal}',NULL,'00000000-0000-0000-0000-000000000020','partial_settlement',70,'Split decision')`);
-    expect((await db.query(`SELECT kind,amount::text amount FROM deal_transactions WHERE kind<>'funding' ORDER BY amount DESC`)).rows).toEqual([
+    expect((await db.query(`SELECT kind,amount::text amount FROM deal_transactions WHERE kind<>'funding' ORDER BY deal_transactions.amount DESC`)).rows).toEqual([
       {kind:'refund',amount:'700.000'},{kind:'release',amount:'270.000'},{kind:'release',amount:'30.000'}]);
     expect((await db.query(`SELECT status,buyer_percent::text pct FROM disputes WHERE id='00000000-0000-0000-0000-000000000020'`)).rows[0]).toEqual({status:'resolved',pct:'70'});
   });
