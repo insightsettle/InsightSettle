@@ -104,6 +104,10 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
   });
   it('funding holding lot lock wins against an expiry sweep; no successor funded', async () => {
     await record(); const q = await quote(offer.dealId);
+    await db.unsafe(`ALTER TABLE lot_bidders DISABLE TRIGGER guard_lot_bidder; ALTER TABLE deals DISABLE TRIGGER guard_auction_deal;
+      UPDATE lot_bidders SET deadline_at=clock_timestamp()+interval '300 milliseconds' WHERE status='offered';
+      UPDATE deals SET payment_deadline_at=(SELECT deadline_at FROM lot_bidders WHERE deal_id=deals.id) WHERE id='${offer.dealId}';
+      ALTER TABLE lot_bidders ENABLE TRIGGER guard_lot_bidder; ALTER TABLE deals ENABLE TRIGGER guard_auction_deal;`);
     let releaseLock: () => void = () => {};
     let acquired: () => void = () => {};
     const ready = new Promise<void>(resolve=>{acquired=resolve;});
@@ -113,11 +117,12 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
       acquired(); await continueTx; return true;
     });
     await ready;
+    await new Promise(resolve=>setTimeout(resolve,350));
     // Start the second connection on the SAME lot while payment still holds its lock.
-    const sweep = db`SELECT advance_auction_bidder(${lot},${buyer}) value`.execute();
+    const sweep = db`SELECT sweep_auction_deadlines() value`.execute();
     await new Promise(resolve=>setTimeout(resolve,30)); releaseLock();
     const [paid,moved] = await Promise.all([payment,sweep]);
-    expect(paid).toBe(true); expect(moved[0]?.value).toBeNull();
+    expect(paid).toBe(true); expect(moved[0]?.value).toEqual([]);
     expect(await db`SELECT * FROM deal_transactions`).toHaveLength(1);
     expect((await db`SELECT status FROM lot_bidders ORDER BY rank`).map(b=>b.status)).toEqual(['offered','waiting','waiting']);
   });

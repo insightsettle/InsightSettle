@@ -14,6 +14,7 @@
 ## Architecture decisions
 
 - Auction invariants live in database triggers with auction/lot row locks and immutable funding reservations; tests execute the migration in isolated PostgreSQL-compatible PGlite so writes cannot bypass bidder, split or deadline guards.
+- Auction offers, expiry/decline advancement, invite claims and quote/funding reservations are service-only atomic database functions locking auction then lot then deal; deadline races use independent PostgreSQL sessions, and the existing managed callback runs the deadline sweep without adding a schedule.
 - Auction payouts are created atomically by the service-only create_auction_release database function; settlement confirms immutable owner/organiser legs independently and writes direct payable ledger accounts, while ordinary deal settlement remains unchanged.
 
 - All displayed language state is owned by the shared locale provider; this keeps English/Arabic selection and document direction consistent across public, customer, and staff views.
