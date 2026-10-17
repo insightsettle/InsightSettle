@@ -1531,6 +1531,10 @@ export type Database = {
       auction_is_organiser: { Args: { aid: string }; Returns: boolean }
       auction_is_verified_business: { Args: { uid: string }; Returns: boolean }
       auction_offer_bidder: { Args: { _bidder: string }; Returns: Json }
+      auction_owner_by_email: {
+        Args: { _actor: string; _auction: string; _email: string }
+        Returns: string
+      }
       auction_require_beneficiary: {
         Args: { cur: string; uid: string }
         Returns: undefined

@@ -113,6 +113,13 @@
       "when": 1792273727129,
       "tag": "0015_auction_photo_access",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792273770074,
+      "tag": "0016_auction_owner_lookup",
+      "breakpoints": true
     }
   ]
 }
