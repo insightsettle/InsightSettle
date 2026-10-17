@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DealStatus } from "@/lib/demo-data";
+import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
@@ -68,6 +69,7 @@ const desc: Partial<Record<DealStatus, string>> = {
   disputed: "The deal is paused for mediation.",
 };
 function Page() {
+  const { text } = useLocale();
   return (
     <SiteShell>
       <div className="mx-auto max-w-4xl px-4 py-16">
@@ -104,6 +106,14 @@ function Page() {
             </Card>
           ))}
         </div>
+        <section id="contracting" className="mt-12 scroll-mt-24 border-t border-border pt-8">
+          <h2 className="text-2xl font-semibold">{text("Contracting", "المقاولات")}</h2>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("2–20 milestones, advance up to 20%, retention and a defects period.", "من 2 إلى 20 مرحلة، دفعة مقدّمة حتى 20%، واحتفاظ وفترة ضمان عيوب.")}</p>
+        </section>
+        <section id="auctions" className="mt-12 scroll-mt-24 border-t border-border pt-8">
+          <h2 className="text-2xl font-semibold">{text("Auctions — coming soon", "المزادات — قريباً")}</h2>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("For organisers: a 24-hour payment link for the winner, two backup bidders in order, and inspection before release. This proposed workflow is not available in the current demo.", "للمنظّمين: رابط دفع لمدة 24 ساعة للفائز، ومزايدان احتياطيان بالترتيب، وفحص قبل الإفراج. هذا المسار المقترح غير متاح في النسخة التجريبية الحالية.")}</p>
+        </section>
         <div className="mt-10 flex gap-3">
           <Button asChild>
             <Link to="/services">Review fees</Link>

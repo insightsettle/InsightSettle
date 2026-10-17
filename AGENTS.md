@@ -23,3 +23,4 @@
 
 - Staff overview reads are paginated and guarded by the existing staff authorization; reconciliation must mark provider balance unverified without an independent provider statement, never infer a match from internal ledger data.
 - The staff status control routes cancellation to the existing staff cancel action; other statuses retain the existing setter so financial and permission checks remain server-owned.
+- Public pricing shares one display component and reuses loadPricingInputs/dealFee/splitFee via a validated read-only server function; anonymous pricing reads respect existing RLS and show unavailable rather than fallback or bypass blocked access.
