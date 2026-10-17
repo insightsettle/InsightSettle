@@ -1197,6 +1197,7 @@ export type Database = {
       lot_bidders: {
         Row: {
           deadline_at: string | null
+          deal_id: string | null
           email: string
           id: string
           lot_id: string
@@ -1209,6 +1210,7 @@ export type Database = {
         }
         Insert: {
           deadline_at?: string | null
+          deal_id?: string | null
           email: string
           id?: string
           lot_id: string
@@ -1221,6 +1223,7 @@ export type Database = {
         }
         Update: {
           deadline_at?: string | null
+          deal_id?: string | null
           email?: string
           id?: string
           lot_id?: string
@@ -1232,6 +1235,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lot_bidders_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lot_bidders_lot_id_fkey"
             columns: ["lot_id"]
@@ -1507,11 +1517,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_auction_bidder: {
+        Args: { _decliner?: string; _lot: string }
+        Returns: Json
+      }
       auction_can_read_lot: { Args: { lid: string }; Returns: boolean }
       auction_is_organiser: { Args: { aid: string }; Returns: boolean }
+      auction_offer_bidder: { Args: { _bidder: string }; Returns: Json }
       auction_require_beneficiary: {
         Args: { cur: string; uid: string }
         Returns: undefined
+      }
+      claim_auction_invite: {
+        Args: { _token: string; _user: string }
+        Returns: string
       }
       create_auction_release: {
         Args: {
@@ -1526,6 +1545,10 @@ export type Database = {
           id: string
         }[]
       }
+      decline_auction_deal: {
+        Args: { _buyer: string; _deal: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1534,7 +1557,22 @@ export type Database = {
         Returns: boolean
       }
       iban_is_valid: { Args: { _iban: string }; Returns: boolean }
+      record_auction_winner: {
+        Args: { _actor: string; _bidders: Json; _lot: string }
+        Returns: Json
+      }
+      reserve_auction_funding: {
+        Args: {
+          _buyer: string
+          _deal: string
+          _note: string
+          _provider: string
+          _quote: string
+        }
+        Returns: string
+      }
       run_auto_release: { Args: never; Returns: number }
+      sweep_auction_deadlines: { Args: never; Returns: Json }
     }
     Enums: {
       app_role:
