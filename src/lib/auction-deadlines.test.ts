@@ -22,10 +22,10 @@ async function record(count = 3, guest = false) {
 }
 async function expire() {
   // Only the isolated fixture moves its clock: production guards remain enabled and tested.
-  await db.unsafe(`ALTER TABLE lot_bidders DISABLE TRIGGER guard_lot_bidder; ALTER TABLE deals DISABLE TRIGGER guard_auction_deal;
+  await db.unsafe(`ALTER TABLE lot_bidders DISABLE TRIGGER guard_lot_bidder; ALTER TABLE deals DISABLE TRIGGER guard_auction_deal; ALTER TABLE deals DISABLE TRIGGER guard_auction_offer_terms;
     UPDATE lot_bidders SET offered_at=now()-interval '25 hours',deadline_at=now()-interval '1 hour' WHERE status='offered';
     UPDATE deals SET payment_deadline_at=now()-interval '1 hour' WHERE status='pending_funding';
-    ALTER TABLE lot_bidders ENABLE TRIGGER guard_lot_bidder; ALTER TABLE deals ENABLE TRIGGER guard_auction_deal;`);
+    ALTER TABLE lot_bidders ENABLE TRIGGER guard_lot_bidder; ALTER TABLE deals ENABLE TRIGGER guard_auction_deal; ALTER TABLE deals ENABLE TRIGGER guard_auction_offer_terms;`);
 }
 async function quote(dealId: string) {
   const rows = await db`INSERT INTO fx_quotes(deal_id,total,fee,target_currency,expires_at,breakdown) VALUES(${dealId},1015,15,'BHD',now()+interval '15 minutes','{"terms_version":1,"breakdown":{"feePayer":"buyer"}}') RETURNING id`;
@@ -104,10 +104,10 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
   });
   it('funding holding lot lock wins against an expiry sweep; no successor funded', async () => {
     await record(); const q = await quote(offer.dealId);
-    await db.unsafe(`ALTER TABLE lot_bidders DISABLE TRIGGER guard_lot_bidder; ALTER TABLE deals DISABLE TRIGGER guard_auction_deal;
+    await db.unsafe(`ALTER TABLE lot_bidders DISABLE TRIGGER guard_lot_bidder; ALTER TABLE deals DISABLE TRIGGER guard_auction_deal; ALTER TABLE deals DISABLE TRIGGER guard_auction_offer_terms;
       UPDATE lot_bidders SET deadline_at=clock_timestamp()+interval '300 milliseconds' WHERE status='offered';
       UPDATE deals SET payment_deadline_at=(SELECT deadline_at FROM lot_bidders WHERE deal_id=deals.id) WHERE id='${offer.dealId}';
-      ALTER TABLE lot_bidders ENABLE TRIGGER guard_lot_bidder; ALTER TABLE deals ENABLE TRIGGER guard_auction_deal;`);
+      ALTER TABLE lot_bidders ENABLE TRIGGER guard_lot_bidder; ALTER TABLE deals ENABLE TRIGGER guard_auction_deal; ALTER TABLE deals ENABLE TRIGGER guard_auction_offer_terms;`);
     let releaseLock: () => void = () => {};
     let acquired: () => void = () => {};
     const ready = new Promise<void>(resolve=>{acquired=resolve;});
