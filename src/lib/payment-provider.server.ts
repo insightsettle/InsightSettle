@@ -26,6 +26,6 @@ export function getPaymentProvider(): PaymentProvider {
     label: "Payment provider simulation",
     connected: false,
     notice:
-      "Payment is confirmed by the payment provider (simulated in this demo). Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
+      "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.",
   };
 }
