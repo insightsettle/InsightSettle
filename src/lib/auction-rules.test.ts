@@ -26,6 +26,14 @@ beforeAll(async () => {
     CREATE TABLE public.fee_rules(currency text); CREATE TABLE public.vat_rates(country_code text);
     CREATE TABLE public.fx_rates(code text,name text,provider_rate numeric,spread numeric,minor_units integer,active boolean,updated_by uuid);`);
   await db.exec(sql);
+  await db.exec(`ALTER TABLE deals ADD COLUMN ref text DEFAULT 'DL-test', ADD COLUMN frozen boolean DEFAULT false, ADD COLUMN auto_release_enabled boolean DEFAULT true, ADD COLUMN refunded_amount numeric DEFAULT 0, ADD COLUMN released_at timestamptz;
+    ALTER TABLE deal_transactions ADD COLUMN fee numeric DEFAULT 0, ADD COLUMN provider text, ADD COLUMN created_by uuid, ADD COLUMN note text, ADD COLUMN idempotency_key text;
+    CREATE TABLE disputes(id uuid PRIMARY KEY,deal_id uuid,milestone_id uuid,status text,outcome text,buyer_percent numeric,resolution_note text,resolved_by uuid,resolved_at timestamptz,review_started_at timestamptz);
+    CREATE FUNCTION run_auto_release() RETURNS integer LANGUAGE plpgsql AS $$ DECLARE r record; BEGIN
+    INSERT INTO deal_transactions(deal_id, kind, amount, currency, status, provider, note, idempotency_key)
+    VALUES (r.id, 'release', r.amount, r.currency, 'processing', 'manual', 'Automatic release after the inspection period', r.ref || '-RELEASE-AUTO');
+    RETURN 0; END; $$;`);
+  await db.exec(readFileSync(new URL('../../drizzle/migrations/0006_auction_direct_payout.sql',import.meta.url),'utf8'));
 }, 30_000);
 afterAll(async () => { await db?.close(); });
 beforeEach(async () => {
@@ -126,9 +134,9 @@ describe('auction database rules (actual migration)', () => {
     await bid(); await makeDeal();
     await expect(db.exec(`INSERT INTO deal_payout_splits(deal_id,beneficiary_id,role,pct,amount,currency) VALUES ('${deal}','${owner}','owner',90,900,'BHD')`)).rejects.toThrow(/Two direct payout/);
   });
-  it('blocks legacy single-beneficiary releases until direct settlement exists', async () => {
+  it('blocks legacy single-beneficiary releases without direct split links', async () => {
     await bid(); await makeDeal();
-    await expect(db.exec(`INSERT INTO deal_transactions(deal_id,kind,status,amount,currency) VALUES ('${deal}','release','processing',1000,'BHD')`)).rejects.toThrow(/not enabled/);
+    await expect(db.exec(`INSERT INTO deal_transactions(deal_id,kind,status,amount,currency) VALUES ('${deal}','release','processing',1000,'BHD')`)).rejects.toThrow(/direct beneficiary split/);
   });
   it('does not change ordinary deal funding or release', async () => {
     await db.exec(`INSERT INTO deals(id,amount,currency) VALUES ('${deal}',1000,'BHD');
@@ -148,5 +156,15 @@ describe('auction database rules (actual migration)', () => {
     const r = await db.query(`SELECT has_column_privilege('anon','public.fx_rates','code','SELECT') safe,
       has_column_privilege('anon','public.fx_rates','updated_by','SELECT') private`);
     expect(r.rows[0]).toEqual({safe:true,private:false});
+  });
+  it('creates direct release transactions atomically with immutable links and keys',async()=>{
+    await bid(); await makeDeal(); await fund('succeeded');
+    await db.exec(`INSERT INTO deal_payout_splits(deal_id,beneficiary_id,role,pct,amount,currency) VALUES ('${deal}','${owner}','owner',90,900,'BHD'),('${deal}','${organiser}','organiser',10,100,'BHD');
+      UPDATE deals SET status='held' WHERE id='${deal}';`);
+    const first=await db.query(`SELECT * FROM create_auction_release('${deal}')`);
+    const second=await db.query(`SELECT * FROM create_auction_release('${deal}')`);
+    expect(first.rows).toHaveLength(2); expect(second.rows).toHaveLength(2);
+    expect((await db.query(`SELECT amount::text amount,idempotency_key FROM deal_transactions WHERE kind='release' ORDER BY amount DESC`)).rows).toEqual([
+      {amount:'900',idempotency_key:'DL-test-RELEASE-OWNER'},{amount:'100',idempotency_key:'DL-test-RELEASE-ORG'}]);
   });
 });

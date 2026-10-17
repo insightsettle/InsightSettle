@@ -289,7 +289,7 @@ export const requestFundsRelease = createServerFn({ method: "POST" })
         await simulateProviderConfirm(admin, notify, legs.map(l => l.id));
       }
       return { ok: true, status: provider.connected ? 'processing' : 'succeeded', provider: provider.id,
-        providerLabel: provider.label, transactionId: legs[0]?.id,
+        providerLabel: provider.label, ...(legs[0] ? { transactionId: legs[0].id } : {}),
         message: 'Separate owner and organiser payouts submitted to the payment provider.' };
     }
 
