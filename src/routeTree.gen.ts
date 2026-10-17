@@ -26,6 +26,7 @@ import { Route as RolesRouteImport } from './routes/roles'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedAuctionsRouteImport } from './routes/_authenticated/auctions'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
@@ -44,6 +45,7 @@ import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
 import { Route as ConsoleReportsRouteImport } from './routes/console.reports'
 import { Route as ConsoleRiskRouteImport } from './routes/console.risk'
 import { Route as ConsoleUsersRouteImport } from './routes/console.users'
+import { Route as AuthenticatedAuctionsIdRouteImport } from './routes/_authenticated/auctions_.$id'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
@@ -139,6 +141,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAuctionsRoute = AuthenticatedAuctionsRouteImport.update({
+  id: '/auctions',
+  path: '/auctions',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -230,6 +237,11 @@ const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const AuthenticatedAuctionsIdRoute = AuthenticatedAuctionsIdRouteImport.update({
+  id: '/auctions_/$id',
+  path: '/auctions/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDealsDealIdRoute =
   AuthenticatedDealsDealIdRouteImport.update({
     id: '/deals/$dealId',
@@ -301,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/auctions': typeof AuthenticatedAuctionsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -319,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
+  '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -346,6 +360,7 @@ export interface FileRoutesByTo {
   '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/auctions': typeof AuthenticatedAuctionsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -364,6 +379,7 @@ export interface FileRoutesByTo {
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console': typeof ConsoleIndexRoute
+  '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -394,6 +410,7 @@ export interface FileRoutesById {
   '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/auctions': typeof AuthenticatedAuctionsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
@@ -412,6 +429,7 @@ export interface FileRoutesById {
   '/console/risk': typeof ConsoleRiskRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
+  '/_authenticated/auctions_/$id': typeof AuthenticatedAuctionsIdRoute
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
   '/_authenticated/deals/new': typeof AuthenticatedDealsNewRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -442,6 +460,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/services'
     | '/terms'
+    | '/auctions'
     | '/dashboard'
     | '/disputes'
     | '/documents'
@@ -460,6 +479,7 @@ export interface FileRouteTypes {
     | '/console/risk'
     | '/console/users'
     | '/console/'
+    | '/auctions/$id'
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
@@ -487,6 +507,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/services'
     | '/terms'
+    | '/auctions'
     | '/dashboard'
     | '/disputes'
     | '/documents'
@@ -505,6 +526,7 @@ export interface FileRouteTypes {
     | '/console/risk'
     | '/console/users'
     | '/console'
+    | '/auctions/$id'
     | '/deals/$dealId'
     | '/deals/new'
     | '/invite/$token'
@@ -534,6 +556,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/services'
     | '/terms'
+    | '/_authenticated/auctions'
     | '/_authenticated/dashboard'
     | '/_authenticated/disputes'
     | '/_authenticated/documents'
@@ -552,6 +575,7 @@ export interface FileRouteTypes {
     | '/console/risk'
     | '/console/users'
     | '/console/'
+    | '/_authenticated/auctions_/$id'
     | '/_authenticated/deals/$dealId'
     | '/_authenticated/deals/new'
     | '/_authenticated/invite/$token'
@@ -712,6 +736,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/auctions': {
+      id: '/_authenticated/auctions'
+      path: '/auctions'
+      fullPath: '/auctions'
+      preLoaderRoute: typeof AuthenticatedAuctionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -838,6 +869,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleUsersRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/_authenticated/auctions_/$id': {
+      id: '/_authenticated/auctions_/$id'
+      path: '/auctions/$id'
+      fullPath: '/auctions/$id'
+      preLoaderRoute: typeof AuthenticatedAuctionsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/deals/$dealId': {
       id: '/_authenticated/deals/$dealId'
       path: '/deals/$dealId'
@@ -912,10 +950,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAuctionsRoute: typeof AuthenticatedAuctionsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
+  AuthenticatedAuctionsIdRoute: typeof AuthenticatedAuctionsIdRoute
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
   AuthenticatedDealsNewRoute: typeof AuthenticatedDealsNewRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
@@ -923,10 +963,12 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAuctionsRoute: AuthenticatedAuctionsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
+  AuthenticatedAuctionsIdRoute: AuthenticatedAuctionsIdRoute,
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
   AuthenticatedDealsNewRoute: AuthenticatedDealsNewRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
