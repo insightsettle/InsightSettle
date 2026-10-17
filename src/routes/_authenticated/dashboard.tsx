@@ -20,6 +20,7 @@ import { useSessionUser } from "@/hooks/use-session";
 import { useStaffAccess } from "@/hooks/use-staff";
 import { supabase } from "@/integrations/supabase/client";
 
+import { formatMoney } from "@/lib/money";
 import { listMyDeals } from "@/lib/deals";
 import { formatSAR } from "@/lib/demo-data";
 import { listNotifications } from "@/lib/notifications";
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
-  const { locale } = useLocale();
+  const { locale, text } = useLocale();
   const { user } = useSessionUser();
   const { isStaff } = useStaffAccess();
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ function Dashboard() {
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-primary">WORKSPACE OVERVIEW</p>
+            <p className="text-sm font-semibold text-primary">{text("Workspace overview", "نظرة عامة على مساحة العمل")}</p>
             <h1 className="mt-2 text-3xl font-extrabold">
               Welcome back{firstName ? `, ${firstName}` : ""}
             </h1>
@@ -119,9 +120,9 @@ function Dashboard() {
         )}
 
         {user && !user.email_confirmed_at && (
-          <Card className="mt-6 border-amber-500/40 bg-amber-50 dark:bg-amber-950/30">
+          <Card className="mt-6 border-warning/40 bg-warning-subtle">
             <CardContent className="flex items-center gap-3 p-4">
-              <AlertCircle className="size-5 shrink-0 text-amber-600" />
+              <AlertCircle className="size-5 shrink-0 text-warning" />
               <p className="text-sm">
                 Please confirm your email address. Open the confirmation link we sent to your
                 inbox to activate all account features.
@@ -136,12 +137,12 @@ function Dashboard() {
           {buckets.map((b) => (
             <div key={b.label} className="rounded-xl border border-border p-4">
               <p className="text-xs text-muted-foreground">{b.label}</p>
-              <p className="mt-1 text-2xl font-extrabold">{b.n}</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums">{b.n}</p>
             </div>
           ))}
         </div>
 
-        <section className="mt-8">
+        <section id="saved-deals" className="mt-8">
           <h2 className="text-xl font-bold">Your saved deals</h2>
 
           {myDeals.length === 0 ? (
@@ -158,7 +159,7 @@ function Dashboard() {
                   key={deal.id}
                   to="/deals/$dealId"
                   params={{ dealId: deal.ref }}
-                  className="group grid gap-3 rounded-lg border border-border bg-card p-4 transition hover:border-primary/40 sm:grid-cols-[1fr_auto] sm:items-center"
+                  className="group grid gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-primary/40 sm:grid-cols-[1fr_auto] sm:items-center"
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -172,9 +173,8 @@ function Dashboard() {
                         : "Waiting for the other party"}
                     </p>
                   </div>
-                  <p className="font-bold sm:text-right">
-                    {deal.currency}{" "}
-                    {Number(deal.amount).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB")}
+                  <p className="font-semibold tabular-nums sm:text-end">
+                    {formatMoney(Number(deal.amount), deal.currency)}
                   </p>
                 </Link>
               ))}
@@ -186,10 +186,10 @@ function Dashboard() {
             <Card key={s.label}>
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{s.label}</span>
-                  <s.icon className="size-5 text-primary" />
+                  <span className="text-xs text-muted-foreground">{s.label}</span>
+                  <span className="grid size-8 place-items-center rounded-lg bg-accent"><s.icon className="size-4 text-primary" /></span>
                 </div>
-                <p className="mt-3 text-2xl font-extrabold">{s.value}</p>
+                <p className="mt-3 text-2xl font-semibold tabular-nums">{s.value}</p>
               </CardContent>
             </Card>
           ))}

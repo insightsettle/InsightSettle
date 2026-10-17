@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { Menu, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 
@@ -223,6 +223,9 @@ export function SiteShell({
   children: React.ReactNode;
   className?: string;
 }) {
+  const { pathname } = useLocation();
+  // Client chrome is owned by the authenticated parent; keep public chrome unchanged.
+  if (["/dashboard", "/disputes", "/documents", "/verification"].includes(pathname) || ["/deals/", "/invoice/", "/invite/"].some((prefix) => pathname.startsWith(prefix))) return <>{children}</>;
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
