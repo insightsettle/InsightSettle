@@ -62,7 +62,7 @@ export function FrozenBanner({ deal }: { deal: DealRow }) {
   );
 }
 
-export function DisputePanel({ deal, isParty }: { deal: DealRow; isParty: boolean }) {
+export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: string }; isParty: boolean }) {
   const { text } = useLocale();
   const refresh = useRefresh(deal);
   const open = useServerFn(openDisputeCase);
@@ -152,7 +152,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow; isParty: boolea
             {text(v)}
           </option>
         ))}
-        {auctionDisputeOptions(deal.deal_type).map(o => <option key={o.value} value={o.value}>{text(o.en,o.ar)}</option>)}
+        {auctionDisputeOptions(deal.deal_type ?? '').map(o => <option key={o.value} value={o.value}>{text(o.en,o.ar)}</option>)}
       </select>
       <Textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} className="mt-2" placeholder="Explain the problem in detail" />
       <Button
