@@ -22,6 +22,15 @@ import { formatMoney } from "@/lib/money";
 import { daysSince, usePlatformSettings } from "@/lib/platform-settings";
 
 export const Route = createFileRoute("/console/")({
+  head: () => ({ meta: [
+    { title: "Operations overview | Insight staff console" },
+    { name: "description", content: "Insight staff overview of deals, revenue and operational controls." },
+    { property: "og:title", content: "Operations overview | Insight staff console" },
+    { property: "og:description", content: "Insight staff overview of deals, revenue and operational controls." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: AdminOverview,
 });
 

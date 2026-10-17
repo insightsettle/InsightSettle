@@ -27,6 +27,15 @@ import { getDealPricing } from "@/lib/fx-quotes.functions";
 import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/deals/$dealId")({
+  head: () => ({ meta: [
+    { title: "Deal operations | Insight staff console" },
+    { name: "description", content: "Review and manage a deal in the Insight staff console." },
+    { property: "og:title", content: "Deal operations | Insight staff console" },
+    { property: "og:description", content: "Review and manage a deal in the Insight staff console." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: StaffDealPage,
 });
 

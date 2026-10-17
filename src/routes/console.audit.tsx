@@ -12,6 +12,15 @@ import { downloadCsv } from "@/lib/csv";
 import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/console/audit")({
+  head: () => ({ meta: [
+    { title: "Staff history | Insight staff console" },
+    { name: "description", content: "Review the Insight staff action history." },
+    { property: "og:title", content: "Staff history | Insight staff console" },
+    { property: "og:description", content: "Review the Insight staff action history." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: AuditPage,
 });
 

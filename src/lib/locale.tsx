@@ -7,6 +7,8 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "Workspace overview": "نظرة عامة على مساحة العمل",
+  "Close": "إغلاق",
   "Failed": "فشلت",
   "Draft": "مسودة",
   "In inspection": "قيد الفحص",

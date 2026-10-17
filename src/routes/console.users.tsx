@@ -12,6 +12,15 @@ import { formatDate, formatSAR } from "@/lib/demo-data";
 import { AccountStateControl } from "@/components/site/StaffOps";
 
 export const Route = createFileRoute("/console/users")({
+  head: () => ({ meta: [
+    { title: "Members | Insight staff console" },
+    { name: "description", content: "Review Insight members and account status." },
+    { property: "og:title", content: "Members | Insight staff console" },
+    { property: "og:description", content: "Review Insight members and account status." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: ConsoleUsers,
 });
 

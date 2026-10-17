@@ -27,7 +27,7 @@ export function AppShell({ children, navigation, title, staff = false }: { child
     navigate({ to: "/auth", replace: true });
   }
   const sidebar = (
-    <div className="flex min-h-full flex-col p-5">
+    <div className="flex min-h-full flex-col p-5" data-no-localize>
       <Link to={staff ? "/console" : "/dashboard"} className="mb-6 flex items-center gap-2.5 text-2xl font-semibold" aria-label="Insight">
         <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><TrendingUp className="size-6" /></span>
         <span data-no-localize>Insight</span>
@@ -53,7 +53,7 @@ export function AppShell({ children, navigation, title, staff = false }: { child
         </SheetContent>
       </Sheet>
       <div className="app-column min-w-0 lg:ms-[264px]">
-        <header className="app-topbar flex h-[68px] items-center gap-3 border-b border-border bg-card px-4 lg:px-8">
+        <header data-no-localize className="app-topbar flex h-[68px] items-center gap-3 border-b border-border bg-card px-4 lg:px-8">
           <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setOpen(true)} aria-label={text("Open navigation")}><Menu /></Button>
           <p className="min-w-0 truncate text-base font-semibold">{text(title)}</p>
           <div className="ms-auto flex shrink-0 items-center gap-2">

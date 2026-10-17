@@ -14,6 +14,15 @@ import { formatDate } from "@/lib/demo-data";
 import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/risk")({
+  head: () => ({ meta: [
+    { title: "Risk review | Insight staff console" },
+    { name: "description", content: "Review deal risk in the Insight staff console." },
+    { property: "og:title", content: "Risk review | Insight staff console" },
+    { property: "og:description", content: "Review deal risk in the Insight staff console." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: RiskReviewPage,
 });
 

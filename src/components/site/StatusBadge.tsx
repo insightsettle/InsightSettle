@@ -25,7 +25,7 @@ const arabicLabels: Record<DealStatus, string> = {
 export function StatusBadge({ status, className }: { status: DealStatus | keyof typeof additionalLabels; className?: string }) {
   const { text } = useLocale();
   const label = statusLabels[status as DealStatus] ?? additionalLabels[status] ?? status;
-  return <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", toneClass[statusTones[status] ?? "neutral"], className)}>
+  return <span data-no-localize className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", toneClass[statusTones[status] ?? "neutral"], className)}>
     <span className="size-1.5 shrink-0 rounded-full bg-current" />{text(label, arabicLabels[status as DealStatus])}
   </span>;
 }
