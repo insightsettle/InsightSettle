@@ -162,10 +162,7 @@ function NewDeal() {
     <SiteShell>
       <div className="min-w-0">
         <h1 className="text-3xl font-extrabold">Create a deal</h1>
-        <p className="mt-2 text-muted-foreground">
-          Describe what is being delivered, set the value and the terms, then invite the other
-          party.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{text("Describe what is being delivered, set the value and the terms, then invite the other party.", "حدّد ما سيتم تسليمه والمبلغ والشروط، ثم ادعُ الطرف الآخر.")}</p>
 
         <div className="mt-6"><FormStepper current={!dealType ? 0 : title && counterpartyEmail && acceptanceCriteria ? 3 : title ? 2 : 1} /></div>
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
