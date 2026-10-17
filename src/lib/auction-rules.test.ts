@@ -35,6 +35,7 @@ beforeAll(async () => {
     RETURN 0; END; $$;`);
   await db.exec(readFileSync(new URL('../../drizzle/migrations/0006_auction_direct_payout.sql',import.meta.url),'utf8'));
   await db.exec(readFileSync(new URL('../../drizzle/migrations/0007_auction_payout_query_qualification.sql',import.meta.url),'utf8'));
+  await db.exec(readFileSync(new URL('../../drizzle/migrations/0008_auction_final_confirmation_guard.sql',import.meta.url),'utf8'));
 }, 30_000);
 afterAll(async () => { await db?.close(); });
 beforeEach(async () => {
@@ -165,6 +166,7 @@ describe('auction database rules (actual migration)', () => {
     const first=await db.query(`SELECT * FROM create_auction_release('${deal}')`);
     const second=await db.query(`SELECT * FROM create_auction_release('${deal}')`);
     expect(first.rows).toHaveLength(2); expect(second.rows).toHaveLength(2);
+    await expect(db.exec(`UPDATE deals SET status='released' WHERE id='${deal}'`)).rejects.toThrow(/must be confirmed/);
     expect((await db.query(`SELECT amount::text amount,idempotency_key FROM deal_transactions WHERE kind='release' ORDER BY amount DESC`)).rows).toEqual([
       {amount:'900.000',idempotency_key:'DL-test-RELEASE-OWNER'},{amount:'100.000',idempotency_key:'DL-test-RELEASE-ORG'}]);
   });
