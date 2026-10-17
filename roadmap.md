@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] UX-C: staff overview and read-only reconciliation, deal milestones/retention, dispute positions/timeline/decision; D21 cancel routing; tests and two signed-in Arabic screenshots; no publishing.
+
 - [x] UX-B: client home, goods/contracting presentation, new-deal grouping, D22 quote display, bilingual custody/VAT; 33 tests and automatic type check/build clean; signed-in EN/AR dashboard, AR goods/new reviewed, mobile navigation checked; no publishing.
 - [ ] UX-B live-summary fee figures: existing new-deal form has no server price preview. Requires permission to add a server preview (excluded by presentation-only scope); show unavailable values rather than invent pricing.
 - [ ] UX-B contracting screenshot/approval-state verification: DL-14746 exists but is cancelled, has no buyer, and is inaccessible to the requested buyer account. Requires an accessible contracting deal; no test deal or party writes were created.
