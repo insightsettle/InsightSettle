@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { PROVISIONAL_SCHEDULE, feeUsd, type FeeSchedule } from "@/lib/fees";
+import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/console/fees")({
   component: FeesPage,
@@ -122,7 +123,7 @@ function FeesPage() {
           <Label htmlFor="test" className="mt-3 block">Deal value (USD)</Label>
           <Input id="test" type="number" className="mt-1 max-w-xs" value={test} onChange={(e) => setTest(Number(e.target.value))} />
           <p className="mt-3 text-sm">
-            Fee <b dir="ltr">USD {fee.toFixed(2)}</b> · effective rate {test > 0 ? ((fee / test) * 100).toFixed(2) : "0.00"}%
+            Fee <b dir="ltr">{formatMoney(fee, "USD")}</b> · effective rate {test > 0 ? ((fee / test) * 100).toFixed(2) : "0.00"}%
           </p>
         </CardContent>
       </Card>
