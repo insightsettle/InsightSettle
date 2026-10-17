@@ -7,6 +7,9 @@ import {
   requestTermsChange as requestTermsChangeFn,
   updateShipping as updateShippingFn,
 } from "@/lib/deal-party.functions";
+import { CustodyNote } from "@/components/deal/DealPresentation";
+import { quoteAmountLine } from "@/lib/deal-display";
+import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import {
   AttachmentsCard,
@@ -84,6 +87,7 @@ export const Route = createFileRoute("/_authenticated/deals/$dealId")({
 
 function DealPage() {
   const { dealId } = Route.useParams();
+  const { locale, text } = useLocale();
   const queryClient = useQueryClient();
   const { user } = useSessionUser();
 
@@ -92,18 +96,18 @@ function DealPage() {
 
   const timeline = useQuery({
     queryKey: ["deal-timeline", deal?.id],
-    queryFn: () => listTimeline(deal!.id),
+    queryFn: () => listTimeline(deal?.id ?? ""),
     enabled: !!deal,
   });
   const messages = useQuery({
     queryKey: ["deal-messages", deal?.id],
-    queryFn: () => listDealMessages(deal!.id),
+    queryFn: () => listDealMessages(deal?.id ?? ""),
     enabled: !!deal,
   });
 
   const transactions = useQuery({
     queryKey: ["deal-transactions", deal?.id],
-    queryFn: () => listDealTransactions(deal!.id),
+    queryFn: () => listDealTransactions(deal?.id ?? ""),
     enabled: !!deal,
   });
 
@@ -111,20 +115,29 @@ function DealPage() {
   const termsQ = useQuery({
     queryKey: ["deal-terms-all", deal?.id],
     enabled: !!deal,
-    queryFn: async () => (await sbClient.from("deal_term_versions").select("*").eq("deal_id", deal!.id).order("version")).data ?? [],
+    queryFn: async () => (await sbClient.from("deal_term_versions").select("*").eq("deal_id", deal?.id ?? "").order("version")).data ?? [],
   });
   const filesQ = useQuery({
     queryKey: ["deal-files-list", deal?.id],
     enabled: !!deal,
-    queryFn: async () => ((await sbClient.from("deal_attachments").select("id, file_name, category").eq("deal_id", deal!.id)).data ?? []) as any[],
+    queryFn: async () => ((await sbClient.from("deal_attachments").select("id, file_name, category").eq("deal_id", deal?.id ?? "")).data ?? []) as any[],
   });
 
   const ratings = useQuery({
     queryKey: ["deal-ratings", deal?.id],
-    queryFn: () => listDealRatings(deal!.id),
+    queryFn: () => listDealRatings(deal?.id ?? ""),
     enabled: !!deal,
   });
 
+  const partyProfiles = useQuery({
+    queryKey: ["deal-party-profiles", deal?.buyer_id, deal?.seller_id],
+    enabled: !!deal,
+    queryFn: async () => {
+      const ids = [deal?.buyer_id, deal?.seller_id].filter((id): id is string => !!id);
+      if (!ids.length) return [];
+      return (await sbClient.from("profiles").select("id, full_name, country, verification_status").in("id", ids)).data ?? [];
+    },
+  });
   const [message, setMessage] = useState("");
   const [reviewNote, setReviewNote] = useState("");
   const [disputeReason, setDisputeReason] = useState("");
@@ -173,7 +186,7 @@ function DealPage() {
   const pricingFn = useServerFn(getDealPricing);
   const pricing = useQuery({
     queryKey: ["deal-pricing", deal?.id, deal?.status, deal?.terms_version],
-    queryFn: () => pricingFn({ data: { dealId: deal!.id } }),
+    queryFn: () => pricingFn({ data: { dealId: deal?.id ?? "" } }),
     enabled: !!deal,
   });
   const release = useServerFn(requestFundsRelease);
@@ -247,30 +260,144 @@ function DealPage() {
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
-        <Button asChild variant="ghost" className="mb-6">
-          <Link to="/dashboard">
-            <ArrowLeft /> Back to dashboard
-          </Link>
-        </Button>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold text-primary">{deal.ref}</p>
-            <h1 className="mt-2 text-3xl font-extrabold">{deal.title}</h1>
-            <p className="mt-2 max-w-3xl text-muted-foreground">
-              {deal.description || "No description was added for this deal."}
-            </p>
-          </div>
-          <StatusBadge status={status} className="px-4 py-2" />
-        </div>
-
+      <div className="min-w-0">
+        <nav className="mb-5 flex items-center gap-2 text-xs text-muted-foreground" data-no-localize><Link to="/dashboard" hash="saved-deals">{text("Deals", "الصفقات")}</Link><span>‹</span><bdi>{deal.ref}</bdi></nav>
+        <header className="flex flex-wrap items-start justify-between gap-4" data-no-localize>
+          <div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h2 className="text-2xl font-semibold">{deal.title}</h2><StatusBadge status={status} /><span className="rounded-full bg-gold-subtle px-3 py-1 text-xs font-medium text-gold-foreground">{text(({goods:"Goods",contracting:"Contracting & fit-out",services:"Services",freelance:"Freelance & digital work"} as Record<string,string>)[(deal as any).deal_type ?? "goods"] ?? "Goods")}</span></div><p className="mt-2 text-xs leading-6 text-muted-foreground">{text("with", "مع")} {partyProfiles.data?.find((p) => p.id === counterpartyId)?.full_name ?? deal.counterparty_email ?? text("Other party", "الطرف الآخر")} ({text(partyProfiles.data?.find((p) => p.id === counterpartyId)?.country ?? (isBuyer ? deal.supplier_country : deal.delivery_country) ?? "—")}) · {text("created", "أُنشئت")} {new Date(deal.created_at).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB")} · <bdi>{deal.ref}</bdi></p><p className="mt-2 text-sm text-muted-foreground">{deal.description}</p></div>
+          <div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={() => document.getElementById("deal-actions")?.scrollIntoView({ behavior: "smooth", block: "start" })}>{text("Deal actions", "إجراءات الصفقة")}</Button>{canDecideTerms && <Button onClick={() => action.mutate(() => agreeFn({ data: { dealId: deal.id } }))}>{text("Accept the terms", "قبول الشروط")}</Button>}{isSeller && status === "held" && <Button onClick={() => action.mutate(() => deliverFn({ data: { dealId: deal.id } }))}>{text("Confirm delivery", "تأكيد التسليم")}</Button>}{isBuyer && ["delivered", "under_review"].includes(status) && <Button disabled={payment.isPending} onClick={() => payment.mutate(() => release({ data: { dealId: deal.id } }))}>{text("Release the funds", "الإفراج عن الأموال")}</Button>}</div>
+        </header>
+        {status === "delivered" && inspectionEnds && <div data-no-localize className="mt-5 flex gap-3 rounded-lg border border-warning/30 bg-warning-subtle p-4 text-warning"><Timer className="size-5 shrink-0" /><div><p className="text-sm font-medium">{text("Inspection ends", "ينتهي الفحص")} {inspectionEnds.toLocaleString(locale === "ar" ? "ar-SA" : "en-GB", { timeZone: "Asia/Riyadh", dateStyle: "medium", timeStyle: "short" })} · {text("Riyadh time", "بتوقيت الرياض")}</p><p className="mt-1 text-xs">{text(deal.auto_release_enabled ? "If the buyer takes no action, the funds are released to the seller." : "Auto-release is off — the buyer must accept manually.", deal.auto_release_enabled ? "إذا لم يتخذ المشتري إجراءً، يُفرج عن الأموال للمورد." : "الإفراج التلقائي معطل — يجب قبول المشتري يدوياً.")}</p></div></div>}
         <div className="mt-6"><EscrowStepper status={deal.status} termsStatus={deal.terms_status} /></div>
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_.8fr]">
-          <div className="space-y-6">
-            {(milestonesQ.data?.length ?? 0) > 0 && (
-              <ContractDashboard deal={deal} milestones={milestonesQ.data ?? []} isBuyer={isBuyer} isSeller={isSeller} termVersions={termsQ.data ?? []} onDone={refresh} />
+        {(milestonesQ.data?.length ?? 0) > 0 && <div className="mt-6"><ContractDashboard deal={deal} milestones={milestonesQ.data ?? []} isBuyer={isBuyer} isSeller={isSeller} termVersions={termsQ.data ?? []} onDone={refresh} /></div>}
+        <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="min-w-0 space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold">{text("Amount summary", "ملخص المبلغ")}</h3><CustodyNote className="mt-3" /><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">
+                  <bdi dir="ltr">{money(amount)}</bdi>
+                </p>
+                <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
+                  {fb && <><Info label={text("Your fee share", "حصتك من الرسوم")} value={money(isBuyer ? fb.buyerShare : fb.sellerShare)} /><Info label={(isBuyer ? fb.buyerVatRate : fb.sellerVatRate) === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${Math.round((isBuyer ? fb.buyerVatRate : fb.sellerVatRate)*100)}% · ${text((isBuyer ? deal.delivery_country : deal.supplier_country) ?? "SA")}`} value={money(isBuyer ? fb.buyerVat : fb.sellerVat)} /><Info label="Platform fee" value={money(fb.fee)} /></>}
+                  <Info
+                    label="Fee paid by"
+                    value={feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee"}
+                  />
+                  {fb && (
+                    <>
+                      <Info label={text("Buyer fee share", "حصة المشتري من الرسوم")} value={`${money(fb.buyerShare)} + ${fb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `VAT ${Math.round(fb.buyerVatRate * 100)}% ${text(deal.delivery_country ?? "SA")} ${money(fb.buyerVat)}`}`} />
+                      <Info label={text("Supplier fee share", "حصة المورد من الرسوم")} value={`${money(fb.sellerShare)} + ${fb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `VAT ${Math.round(fb.sellerVatRate * 100)}% ${text(deal.supplier_country ?? "SA")} ${money(fb.sellerVat)}`}`} />
+                      <Info label="Buyer pays" value={pin && pin.payCurrency !== deal.currency ? `${money(fb.buyerTotal)} ≈ ${money(pin.total, pin.payCurrency)}` : money(fb.buyerTotal)} />
+                      <Info label="Supplier receives" value={money(fb.supplierNet)} />
+                    </>
+                  )}
+                  <Info label="Inspection period" value={`${deal.inspection_days} day(s)`} />
+                <Info label="Quantity" value={String(deal.quantity ?? 1)} />
+                <Info label="Auto-release" value={deal.auto_release_enabled ? "On" : "Off — buyer must accept"} />
+                {deal.acceptance_criteria && <Info label="Acceptance criteria" value={deal.acceptance_criteria} />}
+                {deal.refund_conditions && <Info label="Refund conditions" value={deal.refund_conditions} />}
+                  <Info label="Created" value={formatDate(deal.created_at)} />
+                  <Info label="Due" value={deal.due_at ? formatDate(deal.due_at) : "No due date"} />
+                </dl>
+                {(deal.fee_override_flat != null || deal.fee_override_percent != null) && (
+                  <p className="mt-3 rounded-md bg-primary/10 p-3 text-xs text-primary">
+                    Insight applied a special fee to this deal.
+                    {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
+                  </p>
+                )}
+                {pin && <div data-no-localize className="mt-5 border-t pt-4"><p className="text-xs text-muted-foreground">{text(isBuyer ? "Total paid" : "Supplier receives", isBuyer ? "إجمالي المدفوع" : "يستلم المورد")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{isBuyer ? money(pin.total, pin.payCurrency) : fb ? money(fb.supplierNet) : "—"}</bdi></p><p className="mt-3 text-xs leading-6 text-muted-foreground">{text("FX rate and spread belong to the payment provider.", "سعر الصرف والفارق يعودان لمزوّد الدفع.")} <bdi>1 {deal.currency} = {pin.customerRate} {pin.payCurrency}</bdi></p></div>}
+                {transactions.data?.filter((t) => t.kind === "funding" && t.status === "succeeded").map((t) => <p key={t.id} className="mt-3 text-xs text-muted-foreground">{text("Provider confirmation", "تأكيد مزوّد الدفع")}: <bdi>{t.provider_ref ?? "—"}</bdi> · {formatDate(t.created_at)}</p>)}
+              </CardContent>
+            </Card>
+
+            {shippingNeeded && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2">
+                    <Truck className="size-5 text-primary" />
+                    <h2 className="font-bold">{text("Shipping & delivery", "الشحن والتسليم")}</h2>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                    <p className="rounded-lg bg-muted p-3">
+                      <span className="text-muted-foreground">Status: </span>
+                      {shippingStatusLabels[deal.shipping_status ?? "preparing"] ??
+                        deal.shipping_status}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Carrier: </span>
+                      {deal.shipping_carrier || "—"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Tracking: </span>
+                      <bdi dir="ltr">{deal.shipping_tracking || "—"}</bdi>
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Shipped: </span>
+                      {deal.shipped_at ? formatDate(deal.shipped_at) : "—"}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Estimated delivery: </span>
+                      {deal.estimated_delivery_at ? formatDate(deal.estimated_delivery_at) : "—"}
+                    </p>
+                  </div>
+                  <div data-no-localize className="mt-3 grid gap-3 sm:grid-cols-2">{[[text("Delivered", "تم التسليم"), deal.delivered_at ? formatDate(deal.delivered_at) : "—"], [text("Destination", "الوجهة"), text(deal.delivery_country ?? "—")]].map(([label,value]) => <div key={label} className="rounded-lg bg-muted p-3"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-sm font-medium">{value}</p></div>)}</div>
+                  {isSeller && status !== "released" && status !== "refunded" && (
+                    <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                      <Input
+                        value={carrier}
+                        onChange={(e) => setCarrier(e.target.value)}
+                        placeholder="Carrier (e.g. Aramex)"
+                      />
+                      <Input
+                        value={tracking}
+                        onChange={(e) => setTracking(e.target.value)}
+                        placeholder="Tracking number"
+                      />
+                      <select
+                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={shippingState}
+                        onChange={(e) => setShippingState(e.target.value)}
+                      >
+                        {Object.entries(shippingStatusLabels)
+                          .filter(([key]) => key !== "not_required")
+                          .map(([key, label]) => (
+                            <option key={key} value={key}>
+                              {label}
+                            </option>
+                          ))}
+                      </select>
+                      <Input
+                        type="date"
+                        value={shipEta}
+                        onChange={(e) => setShipEta(e.target.value)}
+                        aria-label="Estimated delivery"
+                        className="sm:col-span-3"
+                      />
+                      <Button
+                        className="sm:col-span-3"
+                        variant="outline"
+                        onClick={() =>
+                          action.mutate(() =>
+                            shipFn({
+                              data: {
+                                dealId: deal.id,
+                                carrier: carrier.trim(),
+                                tracking: tracking.trim(),
+                                status: shippingState,
+                                eta: shipEta || null,
+                              },
+                            }),
+                          )
+                        }
+                      >
+                        Update shipping
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
-            {(deal as any).deal_type === "goods" && shippingNeeded && <ShipmentTracker deal={deal} />}
+
             {(deal as any).deal_type === "freelance" && !milestonesQ.data?.length && <FreelancePanel deal={deal} files={filesQ.data ?? []} />}
             {(deal as any).deal_type === "services" && !milestonesQ.data?.length && <ServicesPanel deal={deal} files={filesQ.data ?? []} />}
             {!termsAgreed && (
@@ -278,7 +405,7 @@ function DealPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2">
                     <FileSignature className="size-5 text-warning" />
-                    <h2 className="font-bold">Deal terms need agreement</h2>
+                    <h2 className="font-bold">{text("Deal terms need agreement")}</h2>
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">
                     No money can be funded until both sides accept the terms: value{" "}
@@ -337,7 +464,7 @@ function DealPage() {
 
             <Card>
               <CardContent className="p-6">
-                <h2 className="font-bold">What you can do now</h2>
+                <h2 id="deal-actions" className="scroll-mt-6 font-bold">{text("Deal actions", "إجراءات الصفقة")}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Actions depend on your side of the deal and its current status. Every money
                   movement is recorded below with its status.
@@ -346,19 +473,13 @@ function DealPage() {
                   {isBuyer && status === "pending_funding" && (
                     <div className="w-full rounded-lg border p-4 text-sm">
                       {quote && !quoteExpired ? (
-                        <div className="space-y-1" dir="ltr">
-                          <div>
-                            {money(quote.breakdown.buyerTotal)} × {quote.customer_rate} = {money(quote.total, quote.target_currency)}
-                          </div>
-                          <div>
-                            Deal amount {money(quote.payIn.escrowConversion + quote.payIn.fxSpread, quote.target_currency)} · Your fee share{" "}
-                            {money(quote.fee, quote.target_currency)} · VAT {Math.round(quote.breakdown.buyerVatRate * 100)}%{" "}
-                            {money(quote.vat, quote.target_currency)}
-                          </div>
-                          <div className="font-bold">Total {money(quote.total, quote.target_currency)}</div>
-                          <div className="text-muted-foreground">
-                            Rate locked until {new Date(quote.expires_at).toLocaleTimeString()}
-                          </div>
+                        <div className="space-y-3" data-no-localize>
+                          <Info label={text("Deal amount (provider conversion + provider spread)", "مبلغ الصفقة (تحويل المزوّد + فارق المزوّد)")} value={money(quoteAmountLine(quote), quote.target_currency)} />
+                          <Info label={text("Your fee share", "حصتك من الرسوم")} value={money(quote.fee, quote.target_currency)} />
+                          <Info label={quote.breakdown.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${Math.round(quote.breakdown.buyerVatRate * 100)}%`} value={money(quote.vat, quote.target_currency)} />
+                          <div className="border-t pt-3"><Info label={text("Total", "الإجمالي")} value={money(quote.total, quote.target_currency)} /></div>
+                          <p className="text-xs leading-6 text-muted-foreground">{text("Rate", "السعر")}: <bdi>1 {deal.currency} = {quote.customer_rate} {quote.target_currency}</bdi> ({text("provider rate", "سعر المزوّد")} <bdi>{quote.payIn.providerRate}</bdi>; {text("the difference is kept by the provider", "الفارق يحتفظ به المزوّد")}). {text("Fees and VAT converted at the provider rate; the provider spread is included in the deal amount line.", "تُحوّل الرسوم والضريبة بسعر المزوّد؛ ويُدرج فارق المزوّد في بند مبلغ الصفقة.")}</p>
+                          <p className="text-xs text-muted-foreground">{text("Rate locked until", "السعر ثابت حتى")} {new Date(quote.expires_at).toLocaleTimeString(locale === "ar" ? "ar-SA" : "en-GB")}</p>
                         </div>
                       ) : (
                         <div className="flex flex-wrap items-center gap-3">
@@ -443,7 +564,7 @@ function DealPage() {
                     </p>
                   )}
                 </div>
-                <p className="mt-3 text-xs text-warning">In this demo the payment provider is simulated and no real money moves.</p>
+                <CustodyNote className="mt-3" />
 
                 {action.error && (
                   <p className="mt-3 text-sm text-destructive">{(action.error as Error).message}</p>
@@ -461,7 +582,7 @@ function DealPage() {
                       <p className="mt-1 text-sm text-muted-foreground">
                         {inspectionExpired
                           ? "The funds can now be released to the seller. If something is wrong, open a dispute before releasing."
-                          : `Ends ${formatDate(deal.auto_release_at!)}. If the buyer takes no action, the funds are released to the seller.`}
+                          : `Ends ${formatDate(deal.auto_release_at ?? "")}. If the buyer takes no action, the funds are released to the seller.`}
                       </p>
                     </div>
                   </div>
@@ -509,103 +630,17 @@ function DealPage() {
 
             <FrozenBanner deal={deal} />
             <CancelPanel deal={deal} isParty={isBuyer || isSeller} />
-            <AttachmentsCard deal={deal} isParty={isBuyer || isSeller} />
+
             <TermVersionsCard deal={deal} />
             <InvoiceCard deal={deal} />
 
-            {shippingNeeded && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2">
-                    <Truck className="size-5 text-primary" />
-                    <h2 className="font-bold">Shipping and tracking</h2>
-                  </div>
-                  <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
-                    <p>
-                      <span className="text-muted-foreground">Status: </span>
-                      {shippingStatusLabels[deal.shipping_status ?? "preparing"] ??
-                        deal.shipping_status}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Carrier: </span>
-                      {deal.shipping_carrier || "—"}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Tracking: </span>
-                      <bdi dir="ltr">{deal.shipping_tracking || "—"}</bdi>
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Shipped: </span>
-                      {deal.shipped_at ? formatDate(deal.shipped_at) : "—"}
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Estimated delivery: </span>
-                      {deal.estimated_delivery_at ? formatDate(deal.estimated_delivery_at) : "—"}
-                    </p>
-                  </div>
-                  {isSeller && status !== "released" && status !== "refunded" && (
-                    <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                      <Input
-                        value={carrier}
-                        onChange={(e) => setCarrier(e.target.value)}
-                        placeholder="Carrier (e.g. Aramex)"
-                      />
-                      <Input
-                        value={tracking}
-                        onChange={(e) => setTracking(e.target.value)}
-                        placeholder="Tracking number"
-                      />
-                      <select
-                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                        value={shippingState}
-                        onChange={(e) => setShippingState(e.target.value)}
-                      >
-                        {Object.entries(shippingStatusLabels)
-                          .filter(([key]) => key !== "not_required")
-                          .map(([key, label]) => (
-                            <option key={key} value={key}>
-                              {label}
-                            </option>
-                          ))}
-                      </select>
-                      <Input
-                        type="date"
-                        value={shipEta}
-                        onChange={(e) => setShipEta(e.target.value)}
-                        aria-label="Estimated delivery"
-                        className="sm:col-span-3"
-                      />
-                      <Button
-                        className="sm:col-span-3"
-                        variant="outline"
-                        onClick={() =>
-                          action.mutate(() =>
-                            shipFn({
-                              data: {
-                                dealId: deal.id,
-                                carrier: carrier.trim(),
-                                tracking: tracking.trim(),
-                                status: shippingState,
-                                eta: shipEta || null,
-                              },
-                            }),
-                          )
-                        }
-                      >
-                        Update shipping
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
             {dealClosed && bothJoined && (
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2">
                     <Star className="size-5 text-primary" />
-                    <h2 className="font-bold">Rate the other party</h2>
+                    <h2 className="font-bold">{text("Rate the other party")}</h2>
                   </div>
                   {myRating ? (
                     <p className="mt-2 text-sm text-muted-foreground">
@@ -662,12 +697,12 @@ function DealPage() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Receipt className="size-5 text-primary" />
-                  <h2 className="font-bold">Payment records</h2>
+                  <h2 className="font-bold">{text("Payment records")}</h2>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Funding, payouts, and refunds with the exact status both parties can see.
                 </p>
-                <p className="mt-1 text-xs text-warning">In this demo the payment provider is simulated and no real money moves.</p>
+                <CustodyNote className="mt-3" />
                 <div className="mt-4 space-y-3">
                   {(transactions.data ?? []).map((t) => (
                     <div key={t.id} className="rounded-md border border-border p-4">
@@ -708,36 +743,12 @@ function DealPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="font-bold">Timeline</h2>
-                {timeline.isLoading ? (
-                  <p className="mt-3 text-sm text-muted-foreground">Loading activity…</p>
-                ) : (
-                  <ol className="mt-5 space-y-5 border-l border-border pl-5">
-                    {(timeline.data ?? []).map((e) => (
-                      <li key={e.id} className="relative">
-                        <span className="absolute -left-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
-                        <p className="font-medium">{e.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(e.created_at)}
-                          {e.note ? ` · ${e.note}` : ""}
-                        </p>
-                      </li>
-                    ))}
-                    {(timeline.data ?? []).length === 0 && (
-                      <li className="text-sm text-muted-foreground">No activity yet.</li>
-                    )}
-                  </ol>
-                )}
-              </CardContent>
-            </Card>
 
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="size-5 text-primary" />
-                  <h2 className="font-bold">Deal conversation</h2>
+                  <h2 className="font-bold">{text("Deal conversation")}</h2>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Talk to the other party and to Insight support in one place.
@@ -777,53 +788,12 @@ function DealPage() {
             </Card>
           </div>
 
-          <aside className="space-y-4">
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-sm text-muted-foreground">Deal value</p>
-                <p className="mt-1 text-3xl font-extrabold">
-                  <bdi dir="ltr">{money(amount)}</bdi>
-                </p>
-                <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
-                  {fb && <Info label="Platform fee" value={money(fb.fee)} />}
-                  <Info
-                    label="Fee paid by"
-                    value={feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee"}
-                  />
-                  {fb && (
-                    <>
-                      <Info label="Buyer fee share" value={`${money(fb.buyerShare)} + VAT ${Math.round(fb.buyerVatRate * 100)}% ${money(fb.buyerVat)}`} />
-                      <Info label="Supplier fee share" value={`${money(fb.sellerShare)} + VAT ${Math.round(fb.sellerVatRate * 100)}% ${money(fb.sellerVat)}`} />
-                      <Info label="Buyer pays" value={pin && pin.payCurrency !== deal.currency ? `${money(fb.buyerTotal)} ≈ ${money(pin.total, pin.payCurrency)}` : money(fb.buyerTotal)} />
-                      <Info label="Supplier receives" value={money(fb.supplierNet)} />
-                    </>
-                  )}
-                  <Info label="Inspection period" value={`${deal.inspection_days} day(s)`} />
-                <Info label="Quantity" value={String(deal.quantity ?? 1)} />
-                <Info label="Auto-release" value={deal.auto_release_enabled ? "On" : "Off — buyer must accept"} />
-                {deal.acceptance_criteria && <Info label="Acceptance criteria" value={deal.acceptance_criteria} />}
-                {deal.refund_conditions && <Info label="Refund conditions" value={deal.refund_conditions} />}
-                  <Info label="Created" value={formatDate(deal.created_at)} />
-                  <Info label="Due" value={deal.due_at ? formatDate(deal.due_at) : "No due date"} />
-                </dl>
-                {(deal.fee_override_flat != null || deal.fee_override_percent != null) && (
-                  <p className="mt-3 rounded-md bg-primary/10 p-3 text-xs text-primary">
-                    Insight applied a special fee to this deal.
-                    {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
-                  </p>
-                )}
-                <p className="mt-4 text-xs text-warning">
-                  Payment is confirmed by the payment provider (simulated in this demo). Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.
-                </p>
-                <p className="mt-2 text-xs text-warning">In this demo the payment provider is simulated and no real money moves.</p>
-              </CardContent>
-            </Card>
-
+          <aside className="min-w-0 space-y-4">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <Users className="size-5 text-primary" />
-                  <h2 className="font-bold">Parties</h2>
+                  <h2 className="font-bold">{text("Parties")}</h2>
                 </div>
                 <Info
                   label="Buyer"
@@ -841,9 +811,38 @@ function DealPage() {
                       : "Awaiting seller"
                   }
                 />
+                {partyProfiles.data?.map((p) => <div data-no-localize key={p.id} className="mt-4 border-t pt-4"><p className="text-xs text-muted-foreground">{text(p.id === deal.buyer_id ? "Buyer" : "Supplier", p.id === deal.buyer_id ? "المشتري" : "المورد")}</p><p className="mt-1 text-sm font-medium">{p.full_name ?? "—"}</p><p className="mt-1 text-xs text-muted-foreground">{text(p.country ?? "—")}</p>{p.verification_status === "verified" && <p className="mt-2 flex items-center gap-1 text-xs text-primary"><BadgeCheck className="size-3" />{text("Verified", "موثق")}</p>}</div>)}
                 {isCreator && <Info label="You invited" value={deal.counterparty_email ?? "—"} />}
               </CardContent>
             </Card>
+
+            <AttachmentsCard deal={deal} isParty={isBuyer || isSeller} />
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="font-bold">{text("Deal log", "سجل الصفقة")}</h2>
+                {timeline.isLoading ? (
+                  <p className="mt-3 text-sm text-muted-foreground">Loading activity…</p>
+                ) : (
+                  <ol className="mt-5 space-y-5 border-s border-border ps-5">
+                    {(timeline.data ?? []).map((e) => (
+                      <li key={e.id} className="relative">
+                        <span className="absolute -start-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
+                        <p className="text-sm font-medium" data-no-localize>{text(e.title)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(e.created_at)}
+                          {e.note ? ` · ${text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note)}` : ""}
+                        </p>
+                      </li>
+                    ))}
+                    {(timeline.data ?? []).length === 0 && (
+                      <li className="text-sm text-muted-foreground">No activity yet.</li>
+                    )}
+                  </ol>
+                )}
+              </CardContent>
+            </Card>
+
+
 
             {!bothJoined && (
               <Card className="border-warning/40 bg-warning/5">
@@ -865,7 +864,7 @@ function DealPage() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <LifeBuoy className="size-5 text-primary" />
-                  <h2 className="font-bold">Note for Insight</h2>
+                  <h2 className="font-bold">{text("Note for Insight")}</h2>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Add a note about this deal for the Insight team to review.
@@ -895,10 +894,11 @@ function DealPage() {
 }
 
 function Info({ label, value }: { label: string; value: string }) {
+  const { text } = useLocale();
   return (
     <div className="mt-3 flex items-center justify-between gap-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-right text-sm font-semibold">{value}</dd>
+      <dt className="text-sm text-muted-foreground">{text(label)}</dt>
+      <dd className="min-w-0 break-words text-end text-sm font-semibold tabular-nums">{text(value)}</dd>
     </div>
   );
 }

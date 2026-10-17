@@ -17,9 +17,11 @@ import {
 import { formatDate } from "@/lib/demo-data";
 import { escrowStep, type DealType } from "@/lib/milestones";
 import { formatMoney, minorUnitsFor, roundMoney } from "@/lib/money";
+import { CustodyNote, DEMO_CUSTODY_EN } from "@/components/deal/DealPresentation";
+import { useLocale } from "@/lib/locale";
 import { openDisputeCase } from "@/lib/operations.functions";
 
-export const CUSTODY_LINE = "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.";
+export const CUSTODY_LINE = DEMO_CUSTODY_EN;
 
 export const DEAL_TYPE_META: Record<DealType, { label: string; hint: string; icon: typeof Package }> = {
   goods: { label: "Goods", hint: "Shipping, tracking and inspection on arrival.", icon: Package },
@@ -40,43 +42,41 @@ export function useMilestones(dealId: string | undefined) {
     queryKey: ["deal-milestones", dealId],
     enabled: !!dealId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("deal_milestones").select("*").eq("deal_id", dealId!).order("seq");
+      const { data, error } = await supabase.from("deal_milestones").select("*").eq("deal_id", dealId ?? "").order("seq");
       if (error) throw error;
       return (data ?? []) as unknown as Milestone[];
     },
   });
 }
 
-const STEPS = ["Agree", "Fund", "Deliver", "Inspect", "Release"];
+const STEPS: [string, string][] = [["Terms accepted", "قبول الشروط"], ["Funded", "التمويل"], ["Shipped & delivered", "الشحن والتسليم"], ["Inspection", "الفحص"], ["Released", "الإفراج"]];
 
 export function EscrowStepper({ status, termsStatus }: { status: string; termsStatus: string }) {
+  const { text } = useLocale();
   const current = escrowStep(status, termsStatus);
   const done = ["released", "completed", "refunded"].includes(status);
   return (
-    <div>
-      <ol className="flex items-center gap-1" aria-label="Escrow steps">
+    <Card data-no-localize><CardContent className="p-5">
+      <ol className="grid grid-cols-5 gap-2" aria-label="Escrow steps">
         {STEPS.map((s, i) => {
           const state = done || i < current ? "done" : i === current ? "current" : "next";
           return (
-            <li key={s} className="flex flex-1 items-center gap-1">
+            <li key={s[0]} className="flex min-w-0 items-center gap-1">
               <span
                 aria-current={state === "current" ? "step" : undefined}
-                className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border px-2 py-1.5 text-xs font-semibold ${
+                className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-3 text-xs font-semibold ${
                   state === "current" ? "border-primary bg-primary text-primary-foreground" : state === "done" ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground"
                 }`}
               >
                 {state === "done" ? <CheckCircle2 className="size-3.5 shrink-0" /> : <Circle className="size-3.5 shrink-0" />}
-                <span className="truncate">{s}</span>
+                <span className="min-w-0 break-words leading-5">{text(s[0], s[1])}</span>
               </span>
             </li>
           );
         })}
       </ol>
-      <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-        <span>{CUSTODY_LINE}</span>
-      </p>
-    </div>
+      <CustodyNote className="mt-4" />
+    </CardContent></Card>
   );
 }
 
@@ -97,6 +97,7 @@ export function ContractDashboard(props: {
   deal: any; milestones: Milestone[]; isBuyer: boolean; isSeller: boolean; termVersions: any[]; onDone: () => void;
 }) {
   const { deal, milestones, isBuyer, isSeller } = props;
+  const { text } = useLocale();
   const c = deal.currency;
   const money = (n: number) => formatMoney(n, c);
   const total = Number(deal.amount);
@@ -131,32 +132,29 @@ export function ContractDashboard(props: {
   const variations = props.termVersions.filter((v: any) => v.snapshot?.variation);
 
   return (
-    <Card>
-      <CardContent className="space-y-5 p-6">
-        <div className="flex items-center gap-2"><HardHat className="size-5 text-primary" /><h2 className="font-bold">Contract dashboard</h2></div>
+    <section className="space-y-5">
+      <div className="space-y-5">
+        <div className="flex items-center gap-2"><HardHat className="size-5 text-primary" /><h2 className="font-bold">{text("Contract dashboard", "لوحة العقد")}</h2></div>
         {next && <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm"><b>Next action: </b><span>{next}</span></div>}
         <div>
           <div className="flex justify-between text-xs text-muted-foreground"><span>Contract value released</span><span dir="ltr">{pct}%</span></div>
           <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-            <div className="h-full bg-primary" style={{ width: `${Math.min(100, pct)}%` }} />
+            <div className="flex h-full"><span className="h-full bg-primary" style={{ width: `${total ? Math.min(100,releasedGross/total*100) : 0}%` }} /><span className="h-full bg-gold" style={{ width: `${total ? Math.max(0,Math.min(100,(funded-releasedGross)/total*100)) : 0}%` }} /></div>
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {[["Contract value", total], ["Funded", funded], ["Released to contractor", paidOut], ["Retention held", retentionHeld], ["Remaining", remaining]].map(([l, v]) => (
-            <div key={l as string} className="rounded-md border border-border p-3">
-              <p className="text-xs text-muted-foreground">{l as string}</p>
-              <p className="mt-1 font-bold" dir="ltr">{money(v as number)}</p>
-            </div>
-          ))}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" data-no-localize>
+          {[[text("Contract value", "قيمة العقد"), total], [text("Held with the provider", "محفوظة لدى مزوّد الدفع"), funded - releasedGross + retentionHeld], [text("Released to contractor", "المُفرج عنه للمقاول"), paidOut], [text("Retention held", "المحتجزات"), retentionHeld]].map(([l,v]) => <Card key={String(l)}><CardContent className="p-5"><div className="flex items-center justify-between gap-2"><p className="text-xs text-muted-foreground">{l}</p><span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent"><HardHat className="size-4 text-primary" /></span></div><p className="mt-3 break-words text-2xl font-semibold tabular-nums"><bdi>{money(Number(v))}</bdi></p><p className="mt-2 text-xs text-muted-foreground">{text("Defects liability period", "فترة ضمان العيوب")}: {deal.defects_liability_days} {text("days", "أيام")}</p></CardContent></Card>)}
         </div>
+        <div data-no-localize className="flex flex-wrap gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-primary" />{text("Released", "تم الإفراج")}: <bdi>{money(releasedGross)}</bdi></span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-gold" />{text("Funded", "ممول")}: <bdi>{money(funded - releasedGross)}</bdi></span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-muted-foreground" />{text("Not funded", "غير ممول")}: <bdi>{money(total-funded)}</bdi></span></div>
         <p className="text-xs text-muted-foreground">
           <span>Retention</span> <span dir="ltr">{Number(deal.retention_percent)}%</span> · <span>Defects liability period</span>{" "}
           <span dir="ltr">{deal.defects_liability_days}</span> <span>days</span> · <span>Fund all upfront</span>
         </p>
 
-        <ol className="space-y-3">
+        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <Card className="min-w-0 overflow-hidden"><CardContent className="p-0"><div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-muted text-xs text-muted-foreground"><tr>{[text("Milestones", "المراحل"), "%", text("Amount", "المبلغ"), text("Retention", "المحتجزات"), text("Status", "الحالة")].map((l) => <th key={l} className="p-4 text-start font-medium">{l}</th>)}</tr></thead><tbody>
           {milestones.map((m) => (
-            <li key={m.id} className="rounded-md border border-border p-4">
+            <tr key={m.id} className={`border-t ${isBuyer && m.status === "submitted" ? "bg-warning-subtle" : ""}`}><td className="min-w-64 p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold"><span dir="ltr">{m.seq}.</span> {m.title} {m.kind === "advance" && <span className="text-xs text-primary">(Advance payment)</span>}</p>
@@ -206,13 +204,14 @@ export function ContractDashboard(props: {
                   </div>
                 </div>
               )}
-            </li>
+            </td><td className="p-4 tabular-nums">{total ? Math.round(Number(m.amount)/total*1000)/10 : 0}%</td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(Number(m.amount))}</bdi></td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(Number(m.retention_amount))}</bdi></td><td className="p-4"><MilestoneChip status={m.status} /></td></tr>
           ))}
-        </ol>
+        </tbody></table></div></CardContent></Card>
+        <aside className="space-y-4">{milestones.filter((m) => isBuyer && m.status === "submitted").slice(0,1).map((m) => <Card key={m.id} data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text(`Approve milestone ${m.seq}`, `اعتماد المرحلة ${m.seq}`)}</h3><dl className="mt-4 space-y-3 text-sm">{[[text("Amount", "المبلغ"), money(Number(m.amount))], [text("Retention", "المحتجزات"), money(Number(m.retention_amount))], [text("Net released", "صافي الإفراج"), Number(m.net_released) > 0 ? money(Number(m.net_released)) : text("Confirmed at release", "يُحدد عند الإفراج")]].map(([l,v]) => <div key={l} className="flex justify-between gap-3"><dt className="text-muted-foreground">{l}</dt><dd className="tabular-nums"><bdi>{v}</bdi></dd></div>)}</dl><p className="mt-4 text-xs text-muted-foreground">{m.evidence_note ?? m.evidence_required}</p><Button className="mt-4 w-full" disabled={act.isPending} onClick={() => act.mutate(() => approveFn({ data: { dealId: deal.id, milestoneId: m.id } }))}>{text("Approve and release", "اعتماد وإفراج")}</Button><Button className="mt-2 w-full" variant="secondary" onClick={() => { setOpenId(m.id); setMode("revision"); }}>{text("Request changes", "طلب تعديلات")}</Button><p className="mt-3 text-xs text-muted-foreground">{text("Review window: 7 days. A revision request pauses auto-release.", "مهلة المراجعة: 7 أيام. طلب التعديل يوقف الإفراج التلقائي.")}</p></CardContent></Card>)}<CustodyNote /><Card data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text("Defects liability period", "فترة ضمان العيوب")}</h3><p className="mt-2 text-sm text-muted-foreground">{deal.defects_liability_days} {text("days", "أيام")} · {deal.retention_percent}%</p>{deal.retention_release_at && <p className="mt-2 text-xs text-muted-foreground">{formatDate(deal.retention_release_at)}</p>}</CardContent></Card></aside></div>
         {act.error && <p className="text-sm text-destructive">{(act.error as Error).message}</p>}
 
-        <div>
-          <h3 className="text-sm font-semibold">Variation history</h3>
+        <Card><CardContent className="p-5">
+          <h3 className="text-sm font-semibold">{text("Variation history", "سجل أوامر التغيير")}</h3>
           {variations.length === 0 ? (
             <p className="mt-1 text-xs text-muted-foreground">No variations yet.</p>
           ) : (
@@ -225,9 +224,9 @@ export function ContractDashboard(props: {
           {(isBuyer || isSeller) && ["pending_funding", "in_progress"].includes(deal.status) && (
             <VariationForm deal={deal} milestones={milestones} onDone={props.onDone} />
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent></Card>
+      </div>
+    </section>
   );
 }
 

@@ -13,6 +13,9 @@ import { DEAL_TYPE_META, MilestoneEditor, toInput, type EditableMilestone } from
 import { createTypedDeal } from "@/lib/deal-milestones.functions";
 import { DEAL_TYPES, DEAL_TYPE_DEFAULTS, validateMilestones, type DealType } from "@/lib/milestones";
 
+import { CustodyNote, FormStepper } from "@/components/deal/DealPresentation";
+import { useLocale } from "@/lib/locale";
+import { formatMoney } from "@/lib/money";
 import { fxCurrencies } from "@/lib/fx";
 
 export const Route = createFileRoute("/_authenticated/deals/new")({
@@ -35,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/deals/new")({
 const blankRow = (): EditableMilestone => ({ title: "", amount: "", dueDate: "", evidenceRequired: "", kind: "work" });
 
 function NewDeal() {
+  const { text } = useLocale();
   const [dealType, setDealType] = useState<DealType | null>(null);
   const [useMilestones, setUseMilestones] = useState(false);
   const [rows, setRows] = useState<EditableMilestone[]>([blankRow(), blankRow()]);
@@ -132,7 +136,7 @@ function NewDeal() {
           </p>
           <Card className="mt-6">
             <CardContent className="p-6">
-              <Label htmlFor="invite">Invitation link</Label>
+              <Label htmlFor="invite">{text("Invitation link")}</Label>
               <Input id="invite" readOnly value={inviteUrl} className="mt-2" />
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button type="button" onClick={() => navigator.clipboard?.writeText(inviteUrl)}>
@@ -156,37 +160,36 @@ function NewDeal() {
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-2xl px-4 py-12">
+      <div className="min-w-0">
         <h1 className="text-3xl font-extrabold">Create a deal</h1>
-        <p className="mt-2 text-muted-foreground">
-          Describe what is being delivered, set the value and the terms, then invite the other
-          party.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{text("Describe what is being delivered, set the value and the terms, then invite the other party.", "حدّد ما سيتم تسليمه والمبلغ والشروط، ثم ادعُ الطرف الآخر.")}</p>
 
-        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+        <div className="mt-6"><FormStepper current={!dealType ? 0 : title && counterpartyEmail && acceptanceCriteria ? 3 : title ? 2 : 1} /></div>
+        <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <form className="min-w-0 space-y-5" onSubmit={handleSubmit}>
           <fieldset>
-            <legend className="text-sm font-semibold">Deal type</legend>
+            <legend className="text-sm font-semibold">{text("Deal type")}</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
               {DEAL_TYPES.map((t) => {
                 const M = DEAL_TYPE_META[t];
                 const Icon = M.icon;
                 return (
-                  <button type="button" key={t} role="radio" aria-checked={dealType === t} onClick={() => chooseType(t)}
-                    className={`flex items-start gap-3 rounded-lg border p-4 text-start transition ${dealType === t ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                  <Button variant="outline" type="button" key={t} role="radio" aria-checked={dealType === t} onClick={() => chooseType(t)}
+                    className={`h-auto justify-start whitespace-normal items-start gap-3 rounded-lg border p-4 text-start transition ${dealType === t ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
                     <Icon className="mt-0.5 size-6 shrink-0 text-primary" />
                     <span><b className="block">{M.label}</b><span className="mt-1 block text-xs text-muted-foreground">{M.hint}</span></span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
           </fieldset>
           {dealType && (<>
           <div className="space-y-2">
-            <Label htmlFor="title">Deal title</Label>
+            <Label htmlFor="title">{text("Deal title")}</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">What is being delivered</Label>
+            <Label htmlFor="description">{text("What is being delivered")}</Label>
             <Textarea
               id="description"
               rows={4}
@@ -197,7 +200,7 @@ function NewDeal() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="amount">Deal value</Label>
+              <Label htmlFor="amount">{text("Deal value")}</Label>
               <Input
                 id="amount"
                 type="number"
@@ -209,14 +212,14 @@ function NewDeal() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
+              <Label htmlFor="currency">{text("Currency")}</Label>
               <select
                 id="currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="SAR">SAR — Saudi riyal</option>
+                <option value="SAR">{text("SAR \u2014 Saudi riyal")}</option>
                 {fxCurrencies.map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -227,20 +230,20 @@ function NewDeal() {
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
+              <Label htmlFor="quantity">{text("Quantity")}</Label>
               <Input id="quantity" type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
               <p className="text-xs text-muted-foreground" dir="ltr">
-                Unit price: {(numericAmount / Math.max(1, Number(quantity) || 1)).toFixed(2)} {currency}
+                {text("Unit price", "سعر الوحدة")}: {formatMoney(numericAmount / Math.max(1, Number(quantity) || 1), currency)}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="supplierCountry">Supplier country</Label>
+              <Label htmlFor="supplierCountry">{text("Supplier country")}</Label>
               <select id="supplierCountry" value={supplierCountry} onChange={(e) => setSupplierCountry(e.target.value)} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
                 {gccCountries.map((c) => (<option key={c.code} value={c.code}>{c.name}</option>))}
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="deliveryCountry">Delivery country</Label>
+              <Label htmlFor="deliveryCountry">{text("Delivery country")}</Label>
               <select id="deliveryCountry" value={deliveryCountry} onChange={(e) => setDeliveryCountry(e.target.value)} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
                 {gccCountries.map((c) => (<option key={c.code} value={c.code}>{c.name}</option>))}
               </select>
@@ -248,19 +251,19 @@ function NewDeal() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="role">Your side of the deal</Label>
+              <Label htmlFor="role">{text("Your side of the deal")}</Label>
               <select
                 id="role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as "buyer" | "seller")}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="buyer">I am paying (buyer)</option>
-                <option value="seller">I am delivering (seller)</option>
+                <option value="buyer">{text("I am paying (buyer)")}</option>
+                <option value="seller">{text("I am delivering (seller)")}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dueAt">Delivery date</Label>
+              <Label htmlFor="dueAt">{text("Delivery date")}</Label>
               <Input
                 id="dueAt"
                 type="date"
@@ -271,20 +274,20 @@ function NewDeal() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="feePayer">Who pays the escrow fee</Label>
+              <Label htmlFor="feePayer">{text("Who pays the escrow fee")}</Label>
               <select
                 id="feePayer"
                 value={feePayer}
                 onChange={(e) => setFeePayer(e.target.value as FeePayer)}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="buyer">Buyer pays the fee</option>
-                <option value="seller">Seller pays the fee</option>
-                <option value="split">Split 50/50</option>
+                <option value="buyer">{text("Buyer pays the fee")}</option>
+                <option value="seller">{text("Seller pays the fee")}</option>
+                <option value="split">{text("Split 50/50")}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="inspection">Buyer inspection period (days)</Label>
+              <Label htmlFor="inspection">{text("Buyer inspection period (days)")}</Label>
               <Input
                 id="inspection"
                 type="number"
@@ -308,45 +311,45 @@ function NewDeal() {
               className="mt-0.5 size-4"
             />
             <span>
-              <b>This deal needs shipping</b>
+              <b>{text("This deal needs shipping")}</b>
               <span className="mt-1 block text-muted-foreground">
                 The seller adds the carrier and tracking number before confirming delivery.
               </span>
             </span>
           </label>)}
           {dealType === "goods" && shippingRequired && (<div className="space-y-2">
-            <Label htmlFor="shipResp">Shipping responsibility</Label>
+            <Label htmlFor="shipResp">{text("Shipping responsibility")}</Label>
             <select id="shipResp" value={shippingResponsibility} onChange={(e) => setShippingResponsibility(e.target.value as "seller" | "buyer" | "none")} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
-              <option value="seller">Seller arranges and pays shipping</option>
-              <option value="buyer">Buyer arranges shipping</option>
-              <option value="none">No shipping (service or digital)</option>
+              <option value="seller">{text("Seller arranges and pays shipping")}</option>
+              <option value="buyer">{text("Buyer arranges shipping")}</option>
+              <option value="none">{text("No shipping (service or digital)")}</option>
             </select>
           </div>)}
           <div className="space-y-2">
-            <Label htmlFor="acceptance">Acceptance criteria</Label>
+            <Label htmlFor="acceptance">{text("Acceptance criteria")}</Label>
             <Textarea id="acceptance" rows={2} value={acceptanceCriteria} onChange={(e) => setAcceptanceCriteria(e.target.value)} placeholder="What must be true for the buyer to accept the delivery." />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="refundCond">Refund conditions</Label>
+              <Label htmlFor="refundCond">{text("Refund conditions")}</Label>
               <Textarea id="refundCond" rows={2} value={refundConditions} onChange={(e) => setRefundConditions(e.target.value)} placeholder="When the buyer gets the money back." />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cancelCond">Cancellation conditions</Label>
+              <Label htmlFor="cancelCond">{text("Cancellation conditions")}</Label>
               <Textarea id="cancelCond" rows={2} value={cancellationConditions} onChange={(e) => setCancellationConditions(e.target.value)} placeholder="What happens if either side cancels before shipment." />
             </div>
           </div>
           <label className="flex items-start gap-3 rounded-md border border-border p-4 text-sm">
             <input type="checkbox" checked={autoRelease} onChange={(e) => setAutoRelease(e.target.checked)} className="mt-0.5 size-4" />
             <span>
-              <b>Release automatically when the inspection period ends</b>
+              <b>{text("Release automatically when the inspection period ends")}</b>
               <span className="mt-1 block text-muted-foreground">
                 Turn off if the buyer must always accept manually.
               </span>
             </span>
           </label>
           <div className="space-y-2">
-            <Label htmlFor="counterparty">Other party email</Label>
+            <Label htmlFor="counterparty">{text("Other party email")}</Label>
             <Input
               id="counterparty"
               type="email"
@@ -358,14 +361,14 @@ function NewDeal() {
 
           {dealType === "freelance" && (
             <div className="space-y-2">
-              <Label htmlFor="revisions">Included revisions</Label>
+              <Label htmlFor="revisions">{text("Included revisions")}</Label>
               <Input id="revisions" type="number" min={0} max={20} dir="ltr" value={revisions} onChange={(e) => setRevisions(e.target.value)} />
             </div>
           )}
           {(dealType === "services" || dealType === "freelance") && (
             <label className="flex items-start gap-3 rounded-md border border-border p-4 text-sm">
               <input type="checkbox" checked={useMilestones} onChange={(e) => setUseMilestones(e.target.checked)} className="mt-0.5 size-4" />
-              <span><b>Pay in milestones</b><span className="mt-1 block text-muted-foreground">Split the deal into 2–20 milestones released one by one.</span></span>
+              <span><b>{text("Pay in milestones")}</b><span className="mt-1 block text-muted-foreground">Split the deal into 2–20 milestones released one by one.</span></span>
             </label>
           )}
           {milestonesOn && (
@@ -375,17 +378,17 @@ function NewDeal() {
               {dealType === "contracting" && (
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-2">
-                    <Label htmlFor="retention">Retention %</Label>
+                    <Label htmlFor="retention">{text("Retention %")}</Label>
                     <Input id="retention" type="number" min={0} max={10} step="0.5" dir="ltr" value={retention} onChange={(e) => setRetention(e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="dlp">Defects liability period (days)</Label>
+                    <Label htmlFor="dlp">{text("Defects liability period (days)")}</Label>
                     <Input id="dlp" type="number" min={0} max={365} dir="ltr" value={dlp} onChange={(e) => setDlp(e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="funding">Funding</Label>
+                    <Label htmlFor="funding">{text("Funding")}</Label>
                     <select id="funding" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value="upfront" onChange={() => undefined}>
-                      <option value="upfront">Fund all upfront</option>
+                      <option value="upfront">{text("Fund all upfront")}</option>
                     </select>
                   </div>
                 </div>
@@ -401,6 +404,8 @@ function NewDeal() {
             {busy ? "Saving…" : "Create deal and get invite link"}
           </Button>
         </form>
+        <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{[["Total fee", "إجمالي الرسوم"], ["Buyer fee share + VAT", "حصة المشتري + الضريبة"], ["Supplier fee share + VAT", "حصة المورد + الضريبة"], ["Supplier receives", "يستلم المورد"], ["Buyer pays", "يدفع المشتري"]].map(([en,ar]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en ?? "",ar)}</dt><dd>—</dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Final pricing appears on the deal quote after both parties join.", "تظهر الأسعار النهائية في عرض الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
+        </div>
       </div>
     </SiteShell>
   );

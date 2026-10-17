@@ -19,3 +19,4 @@
 - Dispute releases are identified by their decision key and recomputed from locked pricing plus that decision, never from a net transaction amount; this prevents confirmation from paying the whole deal or charging fees twice.
 
 - Authenticated client chrome is owned by the pathless client layout and shared AppShell; SiteShell omits public chrome there, while ConsoleShell supplies staff navigation to AppShell, keeping all routes and actions unchanged.
+- Client layout helpers in DealPresentation and deal-display are presentation-only; they reuse server pricing and existing action eligibility without authorizing mutations or calculating new charges.
