@@ -54,7 +54,7 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
       CREATE FUNCTION run_auto_release() RETURNS integer LANGUAGE plpgsql AS $$ DECLARE r record; BEGIN
     INSERT INTO deal_transactions(deal_id, kind, amount, currency, status, provider, note, idempotency_key)
     VALUES (r.id, 'release', r.amount, r.currency, 'processing', 'manual', 'Automatic release after the inspection period', r.ref || '-RELEASE-AUTO'); RETURN 0; END; $$;`);
-    for (const file of ['0005_auction_model_and_rules.sql','0006_auction_direct_payout.sql','0007_auction_payout_query_qualification.sql','0008_auction_final_confirmation_guard.sql','0009_auction_bidder_deadlines.sql','0010_auction_funded_bidder_confirmation.sql','0011_auction_offer_terms_guards.sql','0012_auction_decline_identity_guard.sql']) {
+    for (const file of ['0005_auction_model_and_rules.sql','0006_auction_direct_payout.sql','0007_auction_payout_query_qualification.sql','0008_auction_final_confirmation_guard.sql','0009_auction_bidder_deadlines.sql','0010_auction_funded_bidder_confirmation.sql','0011_auction_offer_terms_guards.sql','0012_auction_decline_identity_guard.sql','0013_auction_backup_price_validation.sql']) {
       await db.unsafe(readFileSync(new URL(`../../drizzle/migrations/${file}`, import.meta.url),'utf8'));
     }
   }, 30000);
@@ -161,5 +161,10 @@ suite('auction deadline workflow — actual PostgreSQL concurrent connections', 
     await db`SELECT decline_auction_deal(${old},${buyer})`;
     await expect(db`SELECT decline_auction_deal(${old},${buyer})`).rejects.toThrow(/no longer current/);
     expect((await db`SELECT status FROM lot_bidders ORDER BY rank`).map(b=>b.status)).toEqual(['declined','offered','waiting']);
+  });
+  it('validates backup price precision before recording any bidder', async () => {
+    const bidders=[{rank:1,handle:'one',email:'bid1@example.test',price:1000},{rank:2,handle:'two',email:'bid2@example.test',price:900.0001}];
+    await expect(db`SELECT record_auction_winner(${lot},${organiser},${db.json(bidders)})`).rejects.toThrow(/minor units/);
+    expect(await db`SELECT * FROM lot_bidders`).toHaveLength(0);
   });
 });
