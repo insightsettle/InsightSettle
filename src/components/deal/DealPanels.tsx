@@ -49,7 +49,7 @@ export function useMilestones(dealId: string | undefined) {
   });
 }
 
-const STEPS = [["Terms accepted", "قبول الشروط"], ["Funded", "التمويل"], ["Shipped & delivered", "الشحن والتسليم"], ["Inspection", "الفحص"], ["Released", "الإفراج"]];
+const STEPS: [string, string][] = [["Terms accepted", "قبول الشروط"], ["Funded", "التمويل"], ["Shipped & delivered", "الشحن والتسليم"], ["Inspection", "الفحص"], ["Released", "الإفراج"]];
 
 export function EscrowStepper({ status, termsStatus }: { status: string; termsStatus: string }) {
   const { text } = useLocale();
