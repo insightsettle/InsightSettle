@@ -104,10 +104,9 @@ function VerificationPage() {
     <SiteShell>
       <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
         <AccountSummary name={(user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email?.split("@")[0] ?? ""} email={user?.email ?? ""} />
-        <h1 id="identity" className="mt-10 scroll-mt-24 text-3xl font-extrabold">Identity verification</h1>
-        <p className="mt-2 text-muted-foreground">
-          Verification protects both sides of every deal. Upload a clear photo or PDF of your
-          documents; only you and the Insight review team can open them.
+        <h1 id="identity" className="mt-10 scroll-mt-24 text-3xl font-extrabold" data-no-localize>{text("Identity verification", "توثيق الهوية")}</h1>
+        <p className="mt-2 text-muted-foreground" data-no-localize>
+          {text("Verification protects both sides of every deal. Upload a clear photo or PDF of your documents; only you and the Insight review team can open them.", "التوثيق يحمي طرفي كل صفقة. ارفع صورة واضحة أو ملف PDF لمستنداتك، ولا يطّلع عليها إلا أنت وفريق المراجعة في إنسايت.")}
         </p>
 
         <Card className="mt-6">

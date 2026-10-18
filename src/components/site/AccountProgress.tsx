@@ -75,7 +75,7 @@ export function AccountSummary({ name, email }: { name: string; email: string })
     <div className="space-y-5" data-no-localize>
       <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-5">
         <span className="gradient-brand grid size-16 shrink-0 place-items-center rounded-full text-2xl font-bold text-white">{name.charAt(0).toUpperCase()}</span>
-        <div className="min-w-0 flex-1"><p className="truncate text-xl font-bold">{name}</p><p className="truncate text-sm text-muted-foreground" dir="ltr">{email}</p>
+        <div className="min-w-0 flex-1"><p dir="auto" className="truncate text-xl font-bold">{name}</p><p className="truncate text-sm text-muted-foreground" dir="ltr">{email}</p>
           <p className={cn("mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", done === steps.length ? "bg-accent text-primary" : "bg-warning/10 text-warning")}>{done === steps.length ? <><BadgeCheck className="size-3.5" />{text("Account ready", "الحساب جاهز")}</> : <><CircleAlert className="size-3.5" />{text(`${done} of ${steps.length} steps done`, `اكتملت ${done} من ${steps.length} خطوات`)}</>}</p>
         </div>
         <ProgressRing done={done} total={steps.length} size={56} />
