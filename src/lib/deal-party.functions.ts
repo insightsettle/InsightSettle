@@ -55,7 +55,7 @@ export const acceptTerms = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { dealId: string }) => idOnly.parse(i))
   .handler(async ({ data, context }) => {
-    const { admin, notify, deal, isSeller } = await load(context, data.dealId, true);
+    const { admin, notify, deal, isSeller } = await load(context, data.dealId);
     if (deal.status !== "pending_funding" && deal.status !== "in_progress") throw new Error("Terms can only be accepted before funding.");
     if (!deal.buyer_id || !deal.seller_id) throw new Error("Both parties must join before the terms can be accepted.");
     const { latestTerms, supplierPayoutOk, PAYOUT_ACCOUNT_MESSAGE } = await import("@/lib/deal-rules.server");
@@ -153,7 +153,7 @@ export const updateShipping = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
-    const { admin, notify, deal, isSeller } = await load(context, data.dealId);
+    const { admin, notify, deal, isSeller } = await load(context, data.dealId, true);
     if (!isSeller) throw new Error("Only the seller can update shipping.");
     if (deal.status !== "held") throw new Error("Shipping can be updated once the funds are held.");
     if (deal.shipping_status === "not_required") throw new Error("This deal does not need shipping.");
