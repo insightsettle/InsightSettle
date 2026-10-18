@@ -43,8 +43,8 @@ function AuditPage() {
             {text("Every change made by the team, newest first (last 500).")}
           </p>
         </div>
-        <div className="flex gap-2">
-          <div className="relative w-64">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={term} onChange={(e) => setTerm(e.target.value)} placeholder={text("Search")} className="ps-9" />
           </div>
@@ -53,8 +53,8 @@ function AuditPage() {
           </Button>
         </div>
       </div>
-      <Card className="mt-5">
-        <CardContent className="overflow-x-auto p-0">
+      <Card className="mt-5 min-w-0 max-w-full">
+        <CardContent className="max-w-full overflow-x-auto p-0">
           {log.isLoading ? (
             <p className="p-5 text-sm text-muted-foreground">{text("Loading…")}</p>
           ) : log.isError ? (
