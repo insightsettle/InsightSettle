@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -45,7 +46,11 @@ class InsightApi {
     if (token == null) throw ApiException('Sign in required.', status: 401);
     final res = await _client.post(
       Uri.parse('${AppConfig.siteUrl}/api/v1/$name'),
-      headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        if (!kIsWeb) 'User-Agent': 'InsightMobile/1.0 (Flutter)',
+      },
       body: jsonEncode(body),
     );
     Map<String, dynamic> data;

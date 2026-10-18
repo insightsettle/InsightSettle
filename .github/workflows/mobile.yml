@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write  # only to publish the web preview to the separate mobile-preview branch
 
 concurrency:
   group: mobile-${{ github.ref }}
@@ -21,8 +21,8 @@ jobs:
       run:
         working-directory: mobile
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -80,7 +80,7 @@ jobs:
       - name: Build web
         run: |
           set -o pipefail
-          flutter build web --release 2>&1 | tee ../web.log
+          flutter build web --release --no-web-resources-cdn 2>&1 | tee ../web.log
       - name: Report web failure
         if: failure()
         run: msg=$(tail -c 7000 ../web.log | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g'); echo "::error title=web::$msg"
@@ -97,6 +97,17 @@ jobs:
           name: insight-web-build
           path: mobile/build/web
           retention-days: 14
+      - name: Publish web preview branch (never main)
+        if: github.ref == 'refs/heads/main'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd build/web
+          git init -q
+          git checkout -q -b mobile-preview
+          git add -A
+          git -c user.name="Insight CI" -c user.email="ci@insightsettle.com" commit -qm "Mobile web preview from ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" mobile-preview
       - name: Summary
         run: |
           ls -la build/app/outputs/flutter-apk/

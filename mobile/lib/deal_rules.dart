@@ -106,7 +106,7 @@ bool needsMyAction(Deal d, List<Milestone> ms, String? userId) {
   return ms.any((m) => milestoneActions(d, m, userId).any((a) => a != MilestoneAction.openDispute));
 }
 
-/// Extracts an invitation token from a pasted link (https://insightsettle.com/invite/<token>) or the token itself.
+/// Extracts an invitation token from a pasted link (`https://insightsettle.com/invite/TOKEN`) or the token itself.
 String? inviteTokenFrom(String input) {
   final s = input.trim();
   if (s.isEmpty) return null;

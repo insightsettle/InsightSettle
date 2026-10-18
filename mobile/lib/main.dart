@@ -14,7 +14,7 @@ Future<void> main() async {
   await AppLocale.load();
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
-    anonKey: AppConfig.supabaseKey,
+    publishableKey: AppConfig.supabaseKey,
     httpClient: PublishableKeyClient(),
   );
   runApp(const InsightApp());
