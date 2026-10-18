@@ -1,5 +1,7 @@
 # Roadmap
-- [ ] Platform follow-up audit: branded bilingual auth, reset/sign-in/sign-out verification; public/customer/staff page and action audit, phone layouts, translations and runtime errors; preserve money logic/mobile and report unverified flows.
+- [x] Platform follow-up audit: 96 EN/AR public/customer/staff page visits at desktop/390px, no page overflow or runtime errors; auth follow-up route nesting corrected, public/legal/KYC/invoice localization and error feedback restored, services calculator shares live pricing. All four deal-type wizards reach step 3 in EN/AR; real invoices/invite checked. Three accounts signed in/out and changed/restored passwords via UI with current-password verification. 123 regression tests passed; automatic TypeScript/build clean. Money logic/mobile unchanged; no publication.
+- [ ] Platform audit email-recovery verification: recovery request acknowledged but client mailbox bounced; valid email-link session requires a reachable recipient. Signed-in password updates tested and restored, not a substitute for email-link E2E.
+- [ ] Platform audit remaining action verification: new open-dispute/four-eyes decision, auction mutation, document AI analysis and future retention/per-milestone funding require eligible fixtures/service availability; existing goods/contracting fixtures already completed in restoration, no repeated funding/release.
 - [x] 18 Oct customer restoration: six-screen audit completed; visible deal breakdown, inspection timer, milestone schedule, mobile summary, FX widget, terms and controls restored; reference removed.
 - [x] 18 Oct staff separation: customer prompts/tabs suppressed; admin client pages redirect to console; requested console pages verified in English/Arabic at desktop/390px.
 - [x] 18 Oct verification: 123/123 Vitest tests passed including PostgreSQL races, automatic TypeScript/build OK, named goods and four contracting milestones completed through UI. EN/AR desktop/390px pages and wizard validation passed without page overflow or runtime errors. BHD 500 retention remains held until 16 Jan 2027 by existing terms; future retention/automatic deadline release not time-travel tested; per-milestone funding display/unit coverage only (named contract is upfront). No publication or money-logic/mobile changes.
@@ -82,6 +84,6 @@
 
 - [x] Batch B: one USD marginal fee calculator, fee-payer split with per-party VAT, balanced FX-B ledger, server-only deal actions, payout-currency check, new-deal defaults.
 - [ ] Owner/pricing: confirm provisional USD fee bands and VAT treatment (legal review).
-- [ ] Public pricing/services calculators still use the old SAR bands (marketing copy frozen) — align when copy may change.
+- [x] Public pricing/services calculators now share the existing live USD-based pricing adapter; no duplicated fee logic.
 
 - [x] Daily: sync deals.amount numeric(18,3) in migration files; verify new-deal form (goods + contracting) as supplier.
