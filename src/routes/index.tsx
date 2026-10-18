@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Insight | ادفع حين تطمئن، واستلم حين تُسلِّم" },
-      { name: "description", content: "Buying from a supplier in the Gulf or anywhere in the world? Insight keeps the agreement, the payment and the delivery in one place: you pay in your own currency, and the supplier is paid after you receive and inspect. Demo with a simulated payment provider." },
+      { name: "description", content: "Buying from a supplier you have never met? Insight keeps the agreement, the payment and the delivery in one place: you pay in your own currency, and the supplier is paid after you receive and inspect. Demo with a simulated payment provider." },
       { property: "og:title", content: "Insight | Pay with confidence. Get paid on delivery." },
       { property: "og:description", content: "Clear terms, payment in your currency and payout after inspection — for imports, Gulf trade, contracting, services and freelance work. Demo; no real money moves." },
       { property: "og:type", content: "website" },
@@ -54,8 +54,8 @@ function HomePage() {
     ]],
   ];
   const types: [typeof Package, string, string, string, string][] = [
-    [Globe, "Importing from the world", "الاستيراد من العالم", "Agreed a shipment in US dollars with a factory in China or Turkey? Pay into the deal; the factory is paid only after the shipment arrives and you inspect it.", "اتفقت مع مصنع في الصين أو تركيا على شحنة بالدولار؟ ادفع في الصفقة، ولا يُحوَّل المبلغ للمصنع إلا بعد وصول الشحنة وفحصها."],
-    [Package, "Trade across the Gulf", "التجارة بين دول الخليج", "Buying from a supplier in Dubai or selling to a buyer in Kuwait? Each side pays and gets paid in its own currency, at a rate locked for 15 minutes.", "تشتري من مورد في دبي أو تبيع لمشترٍ في الكويت؟ كلٌّ يدفع ويستلم بعملته، بسعر صرف ثابت 15 دقيقة."],
+    [Globe, "Importing from a factory abroad", "الاستيراد من مصنع في الخارج", "Agreed a shipment in US dollars with a factory in China or Turkey? Pay into the deal; the factory is paid only after the shipment arrives and you inspect it.", "اتفقت مع مصنع في الصين أو تركيا على شحنة بالدولار؟ ادفع في الصفقة، ولا يُحوَّل المبلغ للمصنع إلا بعد وصول الشحنة وفحصها."],
+    [Package, "Buying from a neighbouring country", "الشراء من دولة مجاورة", "Buying from a supplier in Dubai or selling to a buyer in Kuwait? Each side pays and gets paid in its own currency, at a rate locked for 15 minutes.", "تشتري من مورد في دبي أو تبيع لمشترٍ في الكويت؟ كلٌّ يدفع ويستلم بعملته، بسعر صرف ثابت 15 دقيقة."],
     [HardHat, "Contracting & fit-out", "المقاولات والتجهيز", "Fit out your showroom or office in stages: each milestone is paid when you approve it, and retention is released after the defects period.", "جهّز معرضك أو مكتبك على مراحل: كل مرحلة تُدفع حين تعتمدها، والمحتجز يُصرف بعد فترة ضمان العيوب."],
     [BriefcaseBusiness, "Business services", "خدمات الشركات", "Marketing, software, consulting: clear deliverables and a set date, with payment after acceptance.", "تسويق، برمجة، استشارات: مخرجات واضحة وموعد محدد، والدفع بعد القبول."],
     [PenTool, "Freelance", "العمل الحر", "Freelancers start knowing the client has paid; clients pay knowing nothing moves until they accept the work.", "المستقل يبدأ وهو يعلم أن العميل دفع، والعميل يدفع وهو يعلم أن المبلغ لن يُحوَّل قبل أن يقبل العمل."],
@@ -90,9 +90,9 @@ function HomePage() {
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-24">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-accent-foreground"><ShieldCheck className="size-4 shrink-0" />{text("Deal management for businesses and individuals across the Gulf, and from the Gulf to the world", "إدارة الصفقات للشركات والأفراد بين دول الخليج، ومن الخليج إلى العالم")}</span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-accent-foreground"><ShieldCheck className="size-4 shrink-0" />{text("For businesses and individuals: the supplier is paid only after you receive", "للشركات والأفراد: لا يصل المبلغ للمورد قبل أن تستلم")}</span>
           <h1 className="mt-6 text-4xl leading-[1.3] font-bold sm:text-[3.4rem]">{text("Pay with confidence.", "ادفع حين تطمئن،")}<br /><span className="text-primary">{text("Get paid on delivery.", "واستلم حين تُسلِّم.")}</span></h1>
-          <p className="mt-6 max-w-xl text-lg leading-9 text-foreground/80">{text("Whether you are importing from a factory abroad or selling to a buyer next door: agree the terms, pay in your own currency, and the supplier is paid only after you receive and inspect.", "سواء كنت تستورد من مصنع في الخارج أو تبيع لمشترٍ في دولة مجاورة: اتفقا على الشروط، وادفع بعملتك، ولا يُحوَّل المبلغ للمورد إلا بعد أن تستلم وتتأكد.")}</p>
+          <p className="mt-6 max-w-xl text-lg leading-9 text-foreground/80">{text("Agree the terms, pay in your own currency, and the money waits in the deal until you receive and check what you bought. If something goes wrong, it stays there until the matter is settled.", "اتفقا على الشروط، وادفع بعملتك، ويبقى المبلغ في الصفقة حتى تستلم ما اشتريته وتتأكد منه. وإن حدثت مشكلة، يبقى حيث هو حتى تُحسم.")}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" className="h-12 px-6 text-base"><Link to="/auth" search={{ mode: "signup" }}>{text("Start your first deal", "ابدأ صفقتك الأولى")}<ArrowUpRight className="size-4" /></Link></Button>
             <Button asChild size="lg" variant="outline" className="h-12 bg-card px-6 text-base"><Link to="/how-it-works">{text("See how it works", "شاهد كيف تعمل")}</Link></Button>
@@ -114,7 +114,7 @@ function HomePage() {
     </section>
 
     {/* Currencies */}
-    <section className="border-b border-border bg-card"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-6"><p className="text-sm text-muted-foreground">{text("Pay and get paid in the six Gulf currencies — and in US dollars with suppliers anywhere in the world", "ادفع واستلم بعملات الخليج الست، وبالدولار الأمريكي مع مورديك في أي مكان من العالم")}</p><div className="flex flex-wrap gap-2" dir="ltr">{["SAR", "AED", "BHD", "KWD", "QAR", "OMR", "USD"].map(c => <span key={c} className="rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold">{c}</span>)}</div></div></section>
+    <section className="border-b border-border bg-card"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-6"><p className="text-sm text-muted-foreground">{text("You pay in your currency. The supplier is paid in theirs.", "أنت تدفع بعملتك، والمورد يستلم بعملته.")}</p><div className="flex flex-wrap gap-2" dir="ltr">{["SAR", "AED", "BHD", "KWD", "QAR", "OMR", "USD"].map(c => <span key={c} className="rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold">{c}</span>)}</div></div></section>
 
     {/* Pain points */}
     <section className="mx-auto max-w-7xl px-5 pt-16 lg:pt-20">
@@ -140,7 +140,7 @@ function HomePage() {
     {/* Use cases */}
     <section className="bg-brand-strong text-primary-foreground"><div className="mx-auto max-w-7xl px-5 py-16 lg:py-20">
       <h2 className="text-3xl font-bold sm:text-4xl">{text("Whatever you are buying or selling", "أياً كان ما تشتريه أو تبيعه")}</h2>
-      <p className="mt-3 max-w-2xl text-lg leading-8 text-white/75">{text("Across the Gulf, and from the Gulf to suppliers anywhere in the world.", "بين دول الخليج، ومن الخليج إلى مورديك في أي مكان من العالم.")}</p>
+      <p className="mt-3 max-w-2xl text-lg leading-8 text-white/75">{text("Whether the supplier is in your city or on the other side of the world.", "سواء كان المورد في مدينتك أو في الطرف الآخر من العالم.")}</p>
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{types.map(([I, en, ar, d, da]) => <article key={en} className="rounded-2xl bg-white/[0.06] p-6"><span aria-hidden="true" className="gradient-brand block h-1 w-12 rounded" /><I className="mt-5 size-7 text-brand-mint" /><h3 className="mt-4 text-lg font-semibold">{text(en, ar)}</h3><p className="mt-3 leading-7 text-white/75">{text(d, da)}</p></article>)}</div>
       <div className="mt-8 flex flex-wrap gap-3"><Button asChild variant="secondary"><Link to="/auth" search={{ mode: "signup" }}>{text("Start your deal", "ابدأ صفقتك")}<ArrowUpRight className="size-4" /></Link></Button><Button asChild variant="ghost" className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"><Link to="/how-it-works" hash="auctions">{text("How auctions work", "كيف تعمل المزادات")}</Link></Button></div>
     </div></section>
