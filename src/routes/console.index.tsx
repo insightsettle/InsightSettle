@@ -6,7 +6,9 @@ import { Wallet, BriefcaseBusiness, Gavel, ShieldCheck, Clock, ArrowUpRight, Che
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/site/StatusBadge";
-import { getStaffOverview } from "@/lib/staff.functions";
+import { getStaffOverview, resetDemoData } from "@/lib/staff.functions";
+import { useQueryClient } from "@tanstack/react-query";
+import { RotateCcw } from "lucide-react";
 import { formatMoney } from "@/lib/money";
 import { useLocale } from "@/lib/locale";
 import type { DealStatus } from "@/lib/demo-data";
@@ -30,6 +32,22 @@ function AdminOverview() {
   const query = useQuery({ queryKey: ["staff-overview"], queryFn: () => fetch() });
   const live = query.data;
   const [type, setType] = useState("all");
+  const qc = useQueryClient();
+  const resetFn = useServerFn(resetDemoData);
+  const [resetState, setResetState] = useState<"idle" | "confirm" | "running" | "done" | "error">("idle");
+  const [resetNote, setResetNote] = useState("");
+  async function runReset() {
+    setResetState("running"); setResetNote("");
+    try {
+      const r = await resetFn();
+      setResetNote(text(`Demo data reset in ${(r.ms / 1000).toFixed(1)} s: ${r.removed} deals removed; ${r.deals} demo deals, ${r.auctions} auction and ${r.lots} lot loaded.`, `أُعيد ضبط بيانات العرض خلال ${(r.ms / 1000).toFixed(1)} ث: حُذفت ${r.removed} صفقة، وحُمّلت ${r.deals} صفقات تجريبية و${r.auctions} مزاد و${r.lots} قطعة.`));
+      setResetState("done");
+      await qc.invalidateQueries();
+    } catch (e) {
+      setResetNote(e instanceof Error ? e.message : text("Reset failed.", "تعذّرت إعادة الضبط."));
+      setResetState("error");
+    }
+  }
   const now = Date.now();
   const open = live?.disputes.filter(d => d.status !== "resolved") ?? [];
   const active = live?.deals.filter(d => !["released", "completed", "refunded", "partially_refunded", "cancelled", "rejected"].includes(d.status)) ?? [];
@@ -51,7 +69,13 @@ function AdminOverview() {
     ["R5", text("No held balance on closed deals", "لا رصيد محتجز للصفقات المغلقة"), live?.reconciliation.r5],
   ] as const;
   return <div className="mt-6 space-y-6" data-no-localize>
-    <div className="rounded-2xl bg-brand-strong px-5 py-4 text-sm text-primary-foreground">{text("Demo environment — the payment provider is simulated and all data is fictional.", "بيئة تجريبية — مزوّد الدفع محاكى وجميع البيانات وهمية.")}</div>
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-brand-strong px-5 py-4 text-sm text-primary-foreground">
+      <span>{text("Demo environment — the payment provider is simulated and all data is fictional.", "بيئة تجريبية — مزوّد الدفع محاكى وجميع البيانات وهمية.")}</span>
+      {resetState === "confirm"
+        ? <span className="flex flex-wrap items-center gap-2"><span>{text("Remove every deal and load the demo dataset?", "حذف كل الصفقات وتحميل بيانات العرض؟")}</span><Button size="sm" variant="secondary" onClick={runReset}>{text("Yes, reset", "نعم، أعد الضبط")}</Button><Button size="sm" variant="ghost" className="text-primary-foreground" onClick={() => setResetState("idle")}>{text("Cancel", "إلغاء")}</Button></span>
+        : <Button size="sm" variant="secondary" disabled={resetState === "running"} onClick={() => setResetState("confirm")}><RotateCcw className="size-4" />{resetState === "running" ? text("Resetting…", "جارٍ إعادة الضبط…") : text("Reset demo data", "إعادة ضبط بيانات العرض")}</Button>}
+    </div>
+    {resetNote && <p role={resetState === "error" ? "alert" : "status"} className={resetState === "error" ? "text-sm text-destructive" : "text-sm text-primary"}>{resetNote}</p>}
     <h2 className="text-2xl font-semibold">{text("Operations overview", "نظرة عامة على العمليات")}</h2>
     {query.isError && <p role="alert" className="text-destructive">{text("Could not load staff data.", "تعذر تحميل بيانات الموظفين.")}</p>}
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[

@@ -100,3 +100,16 @@ export const getStaffOverview = createServerFn({ method: "GET" })
       asOf: new Date().toISOString(),
     };
   });
+
+/** T20: staff-only demo reset. Refused when a live payment provider is connected. */
+export const resetDemoData = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { requireStaffAccess } = await import('@/lib/staff-auth.server');
+    const db = await requireStaffAccess(context);
+    const { getPaymentProvider } = await import('@/lib/payment-provider.server');
+    if (getPaymentProvider().connected) throw new Error('The demo reset is disabled when a live payment provider is connected.');
+    const { data, error } = await (db as any).rpc('reset_demo_data', { _actor: context.userId });
+    if (error) throw error;
+    return data as { removed: number; deals: number; auctions: number; lots: number; ms: number };
+  });
