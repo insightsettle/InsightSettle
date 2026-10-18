@@ -134,7 +134,7 @@ function Dashboard() {
                 const ac = actionCopyFor(rolesFor((deal as any).deal_type)); const c = ac[next ?? ""] ?? ac["View deal"]!;
                 const due = deal.auto_release_at && next === "Release the funds" ? text(` Inspection ends ${new Date(deal.auto_release_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`, ` تنتهي مدة الفحص ${new Date(deal.auto_release_at).toLocaleDateString("ar-SA", { day: "numeric", month: "long" })}.`) : "";
                 return (
-                  <article key={deal.id} className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+                  <article key={deal.id} className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
                     <div className="flex items-center gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent"><FileCheck2 className="size-5 text-primary" /></span><div className="min-w-0"><p className="truncate font-semibold">{deal.title}</p><p className="truncate text-xs text-muted-foreground">{text(typeLabels[(deal as typeof deal & { deal_type?: string }).deal_type ?? "goods"] ?? "Goods")} · <bdi>{deal.ref}</bdi> · <bdi className="tabular-nums" dir="ltr">{formatMoney(Number(deal.amount), deal.currency)}</bdi></p></div></div>
                     <p className="leading-8">{text(c[0], c[1])}{due && <span className="font-semibold text-warning">{due}</span>}</p>
                     <div><Button asChild><Link to="/deals/$dealId" params={{ dealId: deal.ref }}>{text(c[2], c[3])}</Link></Button></div>
