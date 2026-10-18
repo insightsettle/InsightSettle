@@ -12,6 +12,10 @@ export const Route = createFileRoute("/auth/reset")({
   head: () => ({
     meta: [
       { title: "Set a new password | Insight" },
+      { property: "og:title", content: "Set a new password | Insight" },
+      { property: "og:description", content: "Choose a new password for your Insight account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "description", content: "Choose a new password for your Insight account." },
       { name: "robots", content: "noindex" },
     ],

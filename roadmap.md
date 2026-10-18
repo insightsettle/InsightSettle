@@ -1,7 +1,7 @@
 # Roadmap
-- [ ] 18 Oct customer restoration: compare six reference screens and restore all missing/collapsed/mobile-unreachable information while keeping new design; remove reference after audit.
-- [ ] 18 Oct staff separation: suppress customer prompts and phone tabs for staff; verify console pages.
-- [ ] 18 Oct verification: run Vitest, automatic TypeScript checks, and EN/AR desktop/390px preview goods + milestone flows using requested accounts and deals; report blockers honestly.
+- [x] 18 Oct customer restoration: six-screen audit completed; visible deal breakdown, inspection timer, milestone schedule, mobile summary, FX widget, terms and controls restored; reference removed.
+- [x] 18 Oct staff separation: customer prompts/tabs suppressed; admin client pages redirect to console; requested console pages verified in English/Arabic at desktop/390px.
+- [x] 18 Oct verification: 123/123 Vitest tests passed including PostgreSQL races, automatic TypeScript/build OK, named goods and four contracting milestones completed through UI. EN/AR desktop/390px pages and wizard validation passed without page overflow or runtime errors. BHD 500 retention remains held until 16 Jan 2027 by existing terms; future retention/automatic deadline release not time-travel tested; per-milestone funding display/unit coverage only (named contract is upfront). No publication or money-logic/mobile changes.
 - [x] C09-D26: corrected only acceptTerms/updateShipping load arguments; full suite once: 82 passed, 10 skipped, test-only RPC mock failed then isolated regression rerun passed (83 passing tests across runs). DL-44255 shipped/delivered/accepted via parties; direct legs succeeded with DL-44255-RELEASE-OWNER SAR 40800 and DL-44255-RELEASE-ORG SAR 7200. T22-a/b/c PASS; organiser-session split update refused and unverified fictional owner refused via lot UI. SAR escrow_held 0, ledger debit-credit 0; INV-1004 matches locked quote fee 845.63/VAT 0. All temporary passwords invalidated, final Arabic screenshot reviewed; no repeated funding, data patches or publishing.
 - [x] C09-D25: align auction and public calculator money input minimum/step; SAR 48000 and BHD 1000.500 regression passes. 82 tests passed, 10 skipped; preview build OK; no publishing.
 - [x] T22 continuation: existing lot 08ff680a-3b38-48f9-ba3c-5314f026f742 and DL-44255 completed after C09-D26; a/b/c all passed with no repeated funding or data patches.
@@ -23,11 +23,11 @@
 - [ ] UX-C open dispute decision/evidence verification: no live dispute exists. Needs a real test case; no fictional dispute or financial mutation created. R2 remains unverified without an independent provider statement; R4/R5 existing-data exceptions are displayed, not changed.
 
 - [x] UX-B: client home, goods/contracting presentation, new-deal grouping, D22 quote display, bilingual custody/VAT; 33 tests and automatic type check/build clean; signed-in EN/AR dashboard, AR goods/new reviewed, mobile navigation checked; no publishing.
-- [ ] UX-B live-summary fee figures: existing new-deal form has no server price preview. Requires permission to add a server preview (excluded by presentation-only scope); show unavailable values rather than invent pricing.
-- [ ] UX-B contracting screenshot/approval-state verification: DL-14746 exists but is cancelled, has no buyer, and is inaccessible to the requested buyer account. Requires an accessible contracting deal; no test deal or party writes were created.
+- [x] UX-B live-summary fee figures: current shared server preview restored visibly on phone step 2 and before submission; no new pricing logic.
+- [x] UX-B contracting screenshot/approval-state verification: verified through authorised DL-30512 four-milestone flow on 18 Oct.
 
 - [x] UX-A: apply v1 tokens, bilingual client/staff shells, statuses, cards/tables; verify automatic type check/build and 31 unit tests. No publishing or business logic changes.
-- [ ] UX-A signed-in EN/AR dashboard and console screenshots (maximum three): blocked by unavailable test-account session approval; owner must sign into the preview. No screenshots taken or mock sessions used.
+- [x] UX-A signed-in EN/AR dashboard and console verification completed using authorised accounts on 18 Oct.
 
 - [x] Display-only: format deal history, invoices, milestone editor and console amounts with currency minor units; verify types and tests.
 

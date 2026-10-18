@@ -10,7 +10,12 @@ import { downloadCsv } from "@/lib/csv";
 import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/console/interest")({
-  head: () => ({ meta: [{ title: "Interest register | Insight staff console" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Interest register | Insight staff console" },
+      { name: "description", content: "Review registrations of interest in Insight in the staff console." },
+      { property: "og:title", content: "Interest register | Insight staff console" },
+      { property: "og:description", content: "Review registrations of interest in Insight in the staff console." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: InterestConsole,
 });
 
