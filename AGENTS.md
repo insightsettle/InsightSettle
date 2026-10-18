@@ -12,6 +12,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Positive currency inputs share moneyInputStep for minimum and step so native validation uses an aligned minor-unit base.
 - Auction shipping and delivery reuse goods party actions with server-authorized organiser shipping access; buyer acceptance reuses the existing split-release branch, and shared completion controls serve both auction surfaces.
 - Staff business and demo payout verification reuse the existing staff guard and append explicit actor/time audit records; live payout verification cannot substitute a simulated provider check.
 - Staff auction tabs use the shared staff guard and paginated read-only projections; authenticity copy maps to the existing quality-issue dispute flow so decision and payment logic remain unchanged.
