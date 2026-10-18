@@ -13,6 +13,27 @@ TextDirection dirFor(String text) {
   return AppLocale.isArabic ? TextDirection.rtl : TextDirection.ltr;
 }
 
+/// User-entered text (titles, notes): its own direction for punctuation, aligned to the page's start.
+class UserText extends StatelessWidget {
+  const UserText(this.text, {super.key, this.style, this.maxLines, this.overflow});
+  final String text;
+  final TextStyle? style;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: double.infinity,
+        child: Text(
+          text,
+          textDirection: dirFor(text),
+          textAlign: Directionality.of(context) == TextDirection.rtl ? TextAlign.right : TextAlign.left,
+          style: style,
+          maxLines: maxLines,
+          overflow: overflow,
+        ),
+      );
+}
+
 /// Official Insight logo (assets copied from the website's public/brand).
 class BrandLogo extends StatelessWidget {
   const BrandLogo({super.key, this.height = 36, this.light = false});
@@ -71,7 +92,7 @@ class InfoRow extends StatelessWidget {
             child: Text(
               value,
               textDirection: ltr ? TextDirection.ltr : dirFor(value),
-              textAlign: TextAlign.end,
+              textAlign: Directionality.of(context) == TextDirection.rtl ? TextAlign.left : TextAlign.right,
               style: TextStyle(
                 fontSize: strong ? 16 : 14,
                 fontWeight: strong ? FontWeight.w700 : FontWeight.w500,

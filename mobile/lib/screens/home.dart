@@ -169,7 +169,7 @@ class DealCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Expanded(child: Text(deal.title, maxLines: 2, overflow: TextOverflow.ellipsis, textDirection: dirFor(deal.title), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15))),
+              Expanded(child: UserText(deal.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15))),
               const SizedBox(width: 8),
               StatusBadge(deal.status),
             ]),

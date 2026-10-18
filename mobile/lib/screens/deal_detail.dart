@@ -119,13 +119,13 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
     final gap = const SizedBox(height: 14);
     return [
       // Header
-      Text(d.title, textDirection: dirFor(d.title), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+      UserText(d.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
       const SizedBox(height: 8),
       Align(alignment: AlignmentDirectional.centerStart, child: StatusBadge(d.status)),
       const SizedBox(height: 6),
       Text('${dealTypeLabel(d.dealType)} · ${isBuyer ? tr('You are the buyer') : tr('You are the supplier')}',
           style: const TextStyle(color: InsightColors.muted)),
-      if (d.description.isNotEmpty) ...[const SizedBox(height: 8), Text(d.description, textDirection: dirFor(d.description))],
+      if (d.description.isNotEmpty) ...[const SizedBox(height: 8), UserText(d.description)],
       gap,
       _Stepper(deal: d),
       gap,
@@ -333,7 +333,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
             decoration: BoxDecoration(border: Border.all(color: InsightColors.border), borderRadius: BorderRadius.circular(10)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               Row(children: [
-                Expanded(child: Text('${m.seq}. ${m.title}', style: const TextStyle(fontWeight: FontWeight.w700))),
+                Expanded(child: UserText('${m.seq}. ${m.title}', style: const TextStyle(fontWeight: FontWeight.w700))),
                 StatusBadge(m.status, milestone: true),
               ]),
               const SizedBox(height: 4),

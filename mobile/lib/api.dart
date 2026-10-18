@@ -78,7 +78,7 @@ class InsightApi {
 
   Future<Map<String, List<Milestone>>> milestonesFor(List<String> dealIds) async {
     if (dealIds.isEmpty) return {};
-    final rows = await sb.from('deal_milestones').select().inFilter('deal_id', dealIds).order('seq');
+    final rows = await sb.from('deal_milestones').select().inFilter('deal_id', dealIds).order('seq', ascending: true);
     final out = <String, List<Milestone>>{};
     for (final r in rows as List) {
       final m = Milestone((r as Map).cast<String, dynamic>());
@@ -92,9 +92,9 @@ class InsightApi {
     if (row == null) return null;
     final deal = Deal(row);
     final results = await Future.wait<List<dynamic>>([
-      sb.from('deal_milestones').select().eq('deal_id', deal.id).order('seq'),
+      sb.from('deal_milestones').select().eq('deal_id', deal.id).order('seq', ascending: true),
       sb.from('deal_transactions').select().eq('deal_id', deal.id).order('created_at', ascending: false),
-      sb.from('tax_invoices').select().eq('deal_id', deal.id).order('issued_at'),
+      sb.from('tax_invoices').select().eq('deal_id', deal.id).order('issued_at', ascending: true),
       sb.from('deal_events').select().eq('deal_id', deal.id).order('created_at', ascending: false).limit(30),
     ]);
     Pricing? pricing;

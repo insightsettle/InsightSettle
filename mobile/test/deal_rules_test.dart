@@ -55,6 +55,8 @@ void main() {
     final d = deal({'terms_status': 'agreed', 'status': 'in_progress', 'funding_mode': 'per_milestone', 'deal_type': 'services', 'shipping_status': 'not_required'});
     final list = [ms(1, 'released'), ms(2, 'pending')];
     expect(nextMilestoneToFund(d, list)?.seq, 2);
+    // Lowest sequence wins whatever order the rows arrive in.
+    expect(nextMilestoneToFund(d, [ms(3, 'pending'), ms(1, 'released'), ms(2, 'pending')])?.seq, 2);
     expect(dealActions(d, list, buyer), contains(DealAction.fund));
     final done = [ms(1, 'released'), ms(2, 'funded')];
     expect(dealActions(d, done, buyer), isNot(contains(DealAction.fund)));

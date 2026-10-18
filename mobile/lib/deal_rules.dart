@@ -21,10 +21,11 @@ bool isClosed(Deal d) => _closed.contains(d.status);
 /// Next milestone waiting for funding on a per-milestone deal.
 Milestone? nextMilestoneToFund(Deal d, List<Milestone> ms) {
   if (!d.perMilestone) return null;
+  Milestone? next;
   for (final m in ms) {
-    if (m.status == 'pending') return m;
+    if (m.status == 'pending' && (next == null || m.seq < next.seq)) next = m;
   }
-  return null;
+  return next;
 }
 
 List<DealAction> dealActions(Deal d, List<Milestone> ms, String? userId) {
