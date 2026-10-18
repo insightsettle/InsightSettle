@@ -140,6 +140,25 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
     const { data: dispute } = await db.from("disputes").select("*").eq("id", data.disputeId).maybeSingle();
     if (!dispute || dispute.status === "resolved") throw new Error("This dispute is already closed.");
     const { data: deal } = await db.from("deals").select("*").eq("id", dispute.deal_id).single();
+    // Four-eyes (CL-10): the first staff decision is a proposal; a different staff member applies it.
+    const { fourEyesStep } = await import("@/lib/dispute-four-eyes");
+    const step = fourEyesStep(dispute, context.userId, data.outcome, data.buyerPercent);
+    if (step.kind === "mismatch") throw new Error("The approval must match the proposed decision. Propose a new decision instead.");
+    if (step.kind === "propose") {
+      const now = new Date().toISOString();
+      const { error: pErr } = await db.from("disputes").update({
+        proposed_outcome: data.outcome, proposed_buyer_percent: step.pct, proposed_note: data.note, proposed_by: context.userId,
+        proposed_at: now, status: "under_review", review_started_at: dispute.review_started_at ?? now,
+      }).eq("id", dispute.id).neq("status", "resolved");
+      if (pErr) throw pErr;
+      await db.from("deal_events").insert({
+        deal_id: deal.id, actor_id: context.userId,
+        title: `Dispute decision proposed — buyer ${step.pct}% · supplier ${100 - step.pct}% — awaiting a second staff approval`,
+        note: data.note,
+      });
+      return { ok: true, pending: true };
+    }
+    data.note = `${dispute.proposed_note}${data.note && data.note !== dispute.proposed_note ? ` · Approval note: ${data.note}` : ""}`.slice(0, 2000);
     if (deal.deal_type === 'auction') {
       const { createAuctionRelease } = await import('./auction-settlement.server');
       const pct = data.outcome === 'full_refund' ? 100 : data.outcome === 'full_release' ? 0 : (data.buyerPercent ?? 50);
