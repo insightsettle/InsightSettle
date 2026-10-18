@@ -1,3 +1,4 @@
+import { BadgeCheck } from "lucide-react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -159,28 +160,18 @@ function NewDeal() {
     const inviteUrl = `${typeof window === "undefined" ? "" : window.location.origin}/invite/${created.invite_token}`;
     return (
       <SiteShell>
-        <div className="mx-auto max-w-2xl px-4 py-12">
-          <h1 className="text-3xl font-extrabold">Deal {created.ref} is ready</h1>
-          <p className="mt-2 text-muted-foreground">
-            Share this link with the other party. When they sign in they review the terms and accept
-            them before any money moves.
-          </p>
+        <div className="mx-auto max-w-2xl px-4 py-12" data-no-localize>
+          <span className="grid size-14 place-items-center rounded-2xl bg-accent"><BadgeCheck className="size-7 text-primary" /></span>
+          <h1 className="mt-5 text-3xl font-bold">{text("Your deal is ready", "صفقتك جاهزة")} <bdi className="text-muted-foreground">{created.ref}</bdi></h1>
+          <p className="mt-3 text-lg leading-8 text-muted-foreground">{text("Send this link to the other party. They sign in, review the terms and accept them — nothing is paid before you both agree.", "أرسل هذا الرابط للطرف الآخر. يسجّل دخوله ويراجع الشروط ويوافق عليها، ولا يُدفع أي مبلغ قبل موافقتكما.")}</p>
           <Card className="mt-6">
             <CardContent className="p-6">
-              <Label htmlFor="invite">{text("Invitation link")}</Label>
-              <Input id="invite" readOnly value={inviteUrl} className="mt-2" />
+              <Label htmlFor="invite">{text("Invitation link", "رابط الدعوة")}</Label>
+              <Input id="invite" readOnly value={inviteUrl} className="mt-2" dir="ltr" />
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button type="button" onClick={() => navigator.clipboard?.writeText(inviteUrl)}>
-                  Copy link
-                </Button>
-                <Button asChild variant="outline">
-                  <Link to="/deals/$dealId" params={{ dealId: created.ref }}>
-                    Open the deal
-                  </Link>
-                </Button>
-                <Button asChild variant="ghost">
-                  <Link to="/dashboard">Back to dashboard</Link>
-                </Button>
+                <Button type="button" onClick={() => navigator.clipboard?.writeText(inviteUrl)}>{text("Copy link", "انسخ الرابط")}</Button>
+                <Button asChild variant="outline"><Link to="/deals/$dealId" params={{ dealId: created.ref }}>{text("Open the deal", "افتح الصفقة")}</Link></Button>
+                <Button asChild variant="ghost"><Link to="/dashboard">{text("Back to home", "العودة للرئيسية")}</Link></Button>
               </div>
             </CardContent>
           </Card>
@@ -450,8 +441,8 @@ function NewDeal() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5" data-no-localize>
             {step > 0 ? <Button type="button" variant="ghost" onClick={() => { setError(null); setStep((v) => v - 1); }}>{text("Back", "رجوع")}</Button> : <span />}
             {step < 2
-              ? <Button type="button" size="lg" className="h-11 px-6" disabled={!dealType} onClick={goNext}>{step === 0 ? text("Next: amount and terms", "التالي: المبلغ والشروط") : text("Next: the other party", "التالي: الطرف الآخر")}</Button>
-              : <Button type="submit" size="lg" className="h-11 px-6" disabled={busy || !dealType || !!planError}>{busy ? text("Saving…", "جارٍ الحفظ…") : text("Create deal and get invite link", "أنشئ الصفقة واحصل على رابط الدعوة")}</Button>}
+              ? <Button key="next" type="button" size="lg" className="h-11 px-6" disabled={!dealType} onClick={(e) => { e.preventDefault(); goNext(); }}>{step === 0 ? text("Next: amount and terms", "التالي: المبلغ والشروط") : text("Next: the other party", "التالي: الطرف الآخر")}</Button>
+              : <Button key="submit" type="submit" size="lg" className="h-11 px-6" disabled={busy || !dealType || !!planError}>{busy ? text("Saving…", "جارٍ الحفظ…") : text("Create deal and get invite link", "أنشئ الصفقة واحصل على رابط الدعوة")}</Button>}
           </div>
         </form>
         <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{([["Total fee", "إجمالي الرسوم", lb ? formatMoney(lb.fee, currency) : null], ["Buyer fee share + VAT", "حصة المشتري + الضريبة", lb ? `${formatMoney(lb.buyerShare, currency)} + ${lb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.buyerVat, currency)}` : null], ["Supplier fee share + VAT", "حصة المورد + الضريبة", lb ? `${formatMoney(lb.sellerShare, currency)} + ${lb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.sellerVat, currency)}` : null], ["Supplier receives", "يستلم المورد", lb ? formatMoney(lb.supplierNet, currency) : null], ["Buyer pays", "يدفع المشتري", lb ? formatMoney(lb.buyerTotal, currency) : null]] as const).map(([en,ar,v]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd className="tabular-nums"><bdi>{v ?? "—"}</bdi></dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Indicative, from the published fee table. The locked quote appears on the deal after both parties join.", "تقديرية من جدول الرسوم المنشور. يظهر العرض المقفل في الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
