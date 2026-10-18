@@ -20,7 +20,7 @@ const statusTones: Record<string, keyof typeof toneClass> = {
 };
 const additionalLabels: Record<string, string> = { pending_acceptance: "Pending acceptance", awaiting_action: "Awaiting action", shipped: "Shipped", in_inspection: "In inspection", draft: "Draft", failed: "Failed", milestones: "Milestones", auctions: "Auctions" };
 const arabicLabels: Record<DealStatus, string> = {
-  pending_funding: "بانتظار التمويل", held: "الأموال محجوزة", delivered: "تم التسليم", under_review: "قيد المراجعة", released: "تم الإفراج", refunded: "تم الاسترداد", disputed: "متنازع عليها", in_progress: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة", rejected: "مرفوضة", partially_refunded: "مستردة جزئياً",
+  pending_funding: "بانتظار الدفع", held: "المبلغ محفوظ", delivered: "تم التسليم", under_review: "قيد المراجعة", released: "تم التحويل للمورد", refunded: "تم الاسترداد", disputed: "متنازع عليها", in_progress: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة", rejected: "مرفوضة", partially_refunded: "مستردة جزئياً",
 };
 export function StatusBadge({ status, className }: { status: DealStatus | keyof typeof additionalLabels; className?: string }) {
   const { text } = useLocale();
