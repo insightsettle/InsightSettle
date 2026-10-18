@@ -12,6 +12,6 @@ export function CustodyNote({ className = "" }: { className?: string }) {
 
 export function FormStepper({ current }: { current: number }) {
   const { text } = useLocale();
-  const steps: [string, string][] = [["Type & party", "النوع والطرف"], ["Terms & amount", "الشروط والمبلغ"], ["Delivery & inspection", "التسليم والفحص"], ["Review & send", "المراجعة والإرسال"]];
-  return <Card data-no-localize><CardContent className="p-4"><ol className="grid grid-cols-2 gap-4 sm:grid-cols-4">{steps.map(([en, ar], i) => <li key={en} className="flex items-center gap-2 text-xs"><span aria-current={i === current ? "step" : undefined} className={`grid size-7 shrink-0 place-items-center rounded-full ${i <= current ? "bg-accent text-primary" : "bg-muted text-muted-foreground"}`}>{i + 1}</span><span className={i <= current ? "font-medium text-primary" : "text-muted-foreground"}>{text(en, ar)}</span></li>)}</ol></CardContent></Card>;
+  const steps: [string, string][] = [["What is the deal?", "ماذا تبيع أو تشتري؟"], ["Amount and terms", "المبلغ والشروط"], ["The other party", "الطرف الآخر والإرسال"]];
+  return <Card data-no-localize><CardContent className="p-4"><ol className="grid grid-cols-3 gap-3">{steps.map(([en, ar], i) => <li key={en} className="flex items-center gap-2 text-sm"><span aria-current={i === current ? "step" : undefined} className={`grid size-8 shrink-0 place-items-center rounded-full font-bold ${i === current ? "bg-primary text-primary-foreground" : i < current ? "bg-accent text-primary" : "bg-muted text-muted-foreground"}`}>{i + 1}</span><span className={i === current ? "font-semibold text-foreground" : i < current ? "text-primary" : "text-muted-foreground"}>{text(en, ar)}</span></li>)}</ol></CardContent></Card>;
 }

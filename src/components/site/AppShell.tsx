@@ -53,11 +53,12 @@ export function AppShell({ children, navigation, title, staff = false }: { child
         </SheetContent>
       </Sheet>
       <div className="app-column min-w-0 lg:ms-[264px]">
+        <div data-no-localize className="flex items-center justify-center gap-2 bg-brand-strong px-4 py-2 text-center text-xs text-white"><span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-brand-mint" />{text("Demo: the payment provider is simulated and no real money moves.", "نسخة تجريبية: مزوّد الدفع محاكى ولا تتحرك أموال حقيقية.")}</div>
         <header data-no-localize className="app-topbar flex h-[68px] items-center gap-3 border-b border-border bg-card px-4 lg:px-8">
           <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setOpen(true)} aria-label={text("Open navigation")}><Menu /></Button>
-          <p className="min-w-0 truncate text-base font-semibold">{text(title)}</p>
+          <p className="min-w-0 truncate text-lg font-bold">{text(title)}</p>
           <div className="ms-auto flex shrink-0 items-center gap-2">
-            <div className="relative hidden w-[260px] xl:block"><Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label={text("Search")} placeholder={text("Search by deal ref or party…")} className="bg-background ps-9 text-[11px]" /></div>
+            <div className="relative hidden w-[260px] xl:block"><Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label={text("Search")} placeholder={text("Search by deal ref or party…")} className="h-10 bg-background ps-9 text-sm" /></div>
             <NotificationBell /><LanguageToggle />
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gold-subtle text-sm font-medium text-gold-foreground" data-no-localize>{name.charAt(0)}</span>
             <div className="hidden max-w-36 sm:block"><p className="truncate text-xs font-medium" data-no-localize>{name}</p><p className="text-xs text-muted-foreground">{text(staff ? "Staff console" : "Customer view")}</p></div>

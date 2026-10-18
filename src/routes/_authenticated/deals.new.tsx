@@ -69,6 +69,7 @@ function NewDeal() {
   const [cancellationConditions, setCancellationConditions] = useState("");
   const [autoRelease, setAutoRelease] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<{ ref: string; invite_token: string } | null>(null);
 
@@ -100,8 +101,21 @@ function NewDeal() {
     setRevisions(String(d.revisions || 2));
   }
 
+  const stepError = (k: number): string | null => {
+    if (k === 0) return !dealType ? text("Choose a deal type first.", "اختر نوع الصفقة أولاً.") : title.trim().length < 3 ? text("Give the deal a short name (3 characters or more).", "اكتب اسماً مختصراً للصفقة (3 أحرف على الأقل).") : null;
+    if (k === 1) return !(numericAmount > 0) ? text("Enter the deal amount.", "أدخل مبلغ الصفقة.") : planError;
+    return null;
+  };
+  function goNext() {
+    const err = stepError(step);
+    if (err) { setError(err); return; }
+    setError(null);
+    setStep((v) => Math.min(2, v + 1));
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (step < 2) { goNext(); return; }
     setBusy(true);
     setError(null);
     try {
@@ -178,12 +192,13 @@ function NewDeal() {
   return (
     <SiteShell>
       <div className="min-w-0">
-        <h1 className="text-3xl font-extrabold">Create a deal</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{text("Describe what is being delivered, set the value and the terms, then invite the other party.", "حدّد ما سيتم تسليمه والمبلغ والشروط، ثم ادعُ الطرف الآخر.")}</p>
+        <h1 className="text-3xl font-bold">{text("New deal", "صفقة جديدة")}</h1>
+        <p className="mt-2 text-base text-muted-foreground">{text("Three short steps, then you get an invitation link for the other party.", "ثلاث خطوات قصيرة، ثم تحصل على رابط دعوة للطرف الآخر.")}</p>
 
-        <div className="mt-6"><FormStepper current={!dealType ? 0 : title && counterpartyEmail && acceptanceCriteria ? 3 : title ? 2 : 1} /></div>
+        <div className="mt-6"><FormStepper current={step} /></div>
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <form className="min-w-0 space-y-5" onSubmit={handleSubmit}>
+          <div hidden={step !== 0} className="space-y-5">
           <fieldset>
             <legend className="text-sm font-semibold">{text("Deal type")}</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
@@ -200,7 +215,9 @@ function NewDeal() {
               })}
             </div>
           </fieldset>
+          </div>
           {dealType && (<>
+          <div hidden={step !== 0} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="title">{text("Deal title")}</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -215,6 +232,8 @@ function NewDeal() {
               placeholder="Scope, revisions, release conditions, refund conditions."
             />
           </div>
+          </div>
+          <div hidden={step !== 1} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="amount">{text("Deal value")}</Label>
@@ -245,6 +264,8 @@ function NewDeal() {
               </select>
             </div>
           </div>
+          </div>
+          <div hidden={step !== 0} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="quantity">{text("Quantity")}</Label>
@@ -289,6 +310,8 @@ function NewDeal() {
               />
             </div>
           </div>
+          </div>
+          <div hidden={step !== 1} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="feePayer">{text("Who pays the escrow fee")}</Label>
@@ -365,6 +388,8 @@ function NewDeal() {
               </span>
             </span>
           </label>
+          </div>
+          <div hidden={step !== 2} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="counterparty">{text("Other party email")}</Label>
             <Input
@@ -376,6 +401,8 @@ function NewDeal() {
             />
           </div>
 
+          </div>
+          <div hidden={step !== 1} className="space-y-5">
           {dealType === "freelance" && (
             <div className="space-y-2">
               <Label htmlFor="revisions">{text("Included revisions")}</Label>
@@ -415,13 +442,17 @@ function NewDeal() {
               {planError && <p className="text-sm text-destructive">{planError}</p>}
             </div>
           )}
+          </div>
           </>)}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button type="submit" disabled={busy || !dealType || !!planError}>
-            {busy ? "Saving…" : "Create deal and get invite link"}
-          </Button>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5" data-no-localize>
+            {step > 0 ? <Button type="button" variant="ghost" onClick={() => { setError(null); setStep((v) => v - 1); }}>{text("Back", "رجوع")}</Button> : <span />}
+            {step < 2
+              ? <Button type="button" size="lg" className="h-11 px-6" disabled={!dealType} onClick={goNext}>{step === 0 ? text("Next: amount and terms", "التالي: المبلغ والشروط") : text("Next: the other party", "التالي: الطرف الآخر")}</Button>
+              : <Button type="submit" size="lg" className="h-11 px-6" disabled={busy || !dealType || !!planError}>{busy ? text("Saving…", "جارٍ الحفظ…") : text("Create deal and get invite link", "أنشئ الصفقة واحصل على رابط الدعوة")}</Button>}
+          </div>
         </form>
         <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{([["Total fee", "إجمالي الرسوم", lb ? formatMoney(lb.fee, currency) : null], ["Buyer fee share + VAT", "حصة المشتري + الضريبة", lb ? `${formatMoney(lb.buyerShare, currency)} + ${lb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.buyerVat, currency)}` : null], ["Supplier fee share + VAT", "حصة المورد + الضريبة", lb ? `${formatMoney(lb.sellerShare, currency)} + ${lb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.sellerVat, currency)}` : null], ["Supplier receives", "يستلم المورد", lb ? formatMoney(lb.supplierNet, currency) : null], ["Buyer pays", "يدفع المشتري", lb ? formatMoney(lb.buyerTotal, currency) : null]] as const).map(([en,ar,v]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd className="tabular-nums"><bdi>{v ?? "—"}</bdi></dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Indicative, from the published fee table. The locked quote appears on the deal after both parties join.", "تقديرية من جدول الرسوم المنشور. يظهر العرض المقفل في الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
         </div>

@@ -32,6 +32,8 @@
 
 @theme inline {
   --color-brand-strong: var(--brand-strong);
+  --color-brand-mint: var(--brand-mint);
+  --color-brand-teal: var(--brand-teal);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
   --color-gold-subtle: var(--gold-subtle);
@@ -104,55 +106,60 @@ html[dir="rtl"] [data-ltr] {
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.977 0.002 165.1);
-  --foreground: oklch(0.185 0.015 180.7);
-  --card: oklch(1 0 0);
+  /* Brand palette from the official logo (C04 v1.1): mint #55BD8A and turquoise #5CC4BA for the brand,
+     a deeper green from the same family for actions so white text stays readable (4.9:1). */
+  --radius: 0.75rem;
+  --background: #F6FAF8;
+  --foreground: #0C2A22;
+  --card: #FFFFFF;
   --card-foreground: var(--foreground);
-  --surface: oklch(0.955 0.005 165.0);
+  --surface: #EEF5F2;
   --surface-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.471 0.090 169.8);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.976 0.012 164.8);
+  --primary: #138065;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F2FBF6;
   --secondary-foreground: var(--foreground);
   --muted: var(--surface);
-  --muted-foreground: oklch(0.523 0.021 170.8);
-  --accent: oklch(0.945 0.026 169.3);
-  --accent-foreground: var(--primary);
-  --destructive: oklch(0.540 0.176 28.6);
-  --destructive-foreground: oklch(0.99 0 0);
+  --muted-foreground: #4B625C;
+  --accent: #E9F7F0;
+  --accent-foreground: #0F6B53;
+  --destructive: #B42318;
+  --destructive-foreground: #FFFFFF;
   --success: var(--primary);
-  --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.626 0.125 70.4);
-  --warning-foreground: oklch(0.145 0 0);
-  --border: oklch(0.910 0.009 168.7);
-  --input: oklch(0.811 0.013 172.3);
-  --ring: var(--primary);
-  --chart-1: oklch(0.66 0.14 168);
-  --chart-2: oklch(0.6 0.11 215);
-  --chart-3: oklch(0.77 0.16 70);
-  --chart-4: oklch(0.64 0.21 25);
-  --chart-5: oklch(0.6 0.05 170);
+  --success-foreground: #FFFFFF;
+  --warning: #8A4F00;
+  --warning-foreground: #1F1300;
+  --border: #DCEBE5;
+  --input: #C9DDD6;
+  --ring: #55BD8A;
+  --chart-1: #55BD8A;
+  --chart-2: #5CC4BA;
+  --chart-3: #E3A33B;
+  --chart-4: #D6573F;
+  --chart-5: #117A6E;
   --sidebar: var(--card);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: var(--accent);
-  --sidebar-accent-foreground: var(--primary);
+  --sidebar-accent-foreground: #0C2A22;
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
-  --gradient-mint: linear-gradient(135deg, var(--primary), var(--brand-strong));
-  --glow-mint: 0 1px 2px oklch(0.2 0.02 170 / 0.05), 0 18px 48px -24px oklch(0.5 0.12 168 / 0.32);
-  --brand-strong: oklch(0.295 0.053 172.9);
-  --gold: oklch(0.730 0.101 81.1);
-  --gold-foreground: oklch(0.544 0.087 80.8);
-  --gold-subtle: oklch(0.977 0.011 84.6);
-  --info: oklch(0.496 0.127 253.7);
-  --info-subtle: oklch(0.932 0.022 250.2);
-  --warning-subtle: oklch(0.956 0.036 83.8);
-  --danger-subtle: oklch(0.937 0.026 26.5);
+  --brand-mint: #55BD8A;
+  --brand-teal: #5CC4BA;
+  --gradient-brand: linear-gradient(90deg, #5CC4BA, #55BD8A);
+  --gradient-mint: linear-gradient(135deg, #138065, #117A6E);
+  --glow-mint: 0 1px 2px rgb(12 42 34 / 0.05), 0 18px 48px -24px rgb(19 128 101 / 0.35);
+  --brand-strong: #0C2A22;
+  --gold: #E3A33B;
+  --gold-foreground: #8A4F00;
+  --gold-subtle: #FFF4E0;
+  --info: #117A6E;
+  --info-subtle: #EAF8F6;
+  --warning-subtle: #FFF4E0;
+  --danger-subtle: #FDECEA;
   --success-subtle: var(--accent);
 }
 
@@ -207,6 +214,10 @@ html[dir="rtl"] [data-ltr] {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+}
+
+@utility gradient-brand {
+  background-image: var(--gradient-brand);
 }
 
 @utility gradient-mint {

@@ -18,8 +18,6 @@ const nav = [
   { to: "/how-it-works", label: "How it works", ar: "كيف تعمل؟", hash: "" },
   { to: "/for-buyers", label: "For buyers", ar: "للمشترين", hash: "" },
   { to: "/for-suppliers", label: "For suppliers", ar: "للموردين", hash: "" },
-  { to: "/how-it-works", label: "Contracting", ar: "المقاولات", hash: "contracting" },
-  { to: "/how-it-works", label: "Auctions", ar: "المزادات", hash: "auctions" },
   { to: "/pricing", label: "Pricing", ar: "الرسوم", hash: "" },
   { to: "/help", label: "Help", ar: "المساعدة", hash: "" },
 ] as const;
@@ -52,7 +50,7 @@ export function SiteHeader() {
               to={item.to}
               hash={item.hash}
               activeOptions={{ exact: item.to === "/" }}
-              className="rounded-lg px-2 py-2 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground"
+              className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground"
             >
               {text(item.label, item.ar)}
             </Link>

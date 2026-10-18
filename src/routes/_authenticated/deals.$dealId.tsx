@@ -12,6 +12,8 @@ import {
   updateShipping as updateShippingFn,
 } from "@/lib/deal-party.functions";
 import { CustodyNote } from "@/components/deal/DealPresentation";
+import { NextStepCard } from "@/components/deal/NextStep";
+import { ACCEPT_LABEL, DELIVER_LABEL, RELEASE_LABEL, nextStepFor, type NextStepAction } from "@/lib/next-step";
 import { quoteAmountLine } from "@/lib/deal-display";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
@@ -276,6 +278,21 @@ function OrdinaryDealPage() {
   const perMilestone = (deal as any).funding_mode === "per_milestone";
   const nextToFund = perMilestone ? (milestonesQ.data ?? []).find((m: any) => m.status === "pending") ?? null : null;
   const canFund = isBuyer && (perMilestone ? ["pending_funding", "in_progress"].includes(status) && !!nextToFund : status === "pending_funding");
+  const deadlineFmt = (l: string) => inspectionEnds ? inspectionEnds.toLocaleString(l, { timeZone: "Asia/Riyadh", weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) : "";
+  const nextStep = nextStepFor({
+    status, termsAgreed, isBuyer, isSeller, bothJoined, canDecideTerms, shippingNeeded,
+    shipped: !!deal.shipped_at || ["shipped", "in_transit", "out_for_delivery", "delivered"].includes(deal.shipping_status ?? ""),
+    autoRelease: !!deal.auto_release_enabled, frozen: !!(deal as any).frozen, hasMilestones: (milestonesQ.data?.length ?? 0) > 0,
+    nextMilestoneToFund: nextToFund ? Number(nextToFund.seq) : null,
+    deadline: inspectionEnds ? [deadlineFmt("en-GB"), deadlineFmt("ar-SA")] : null,
+  });
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const onNextStep = (a: NextStepAction) => {
+    if (a === "accept-terms") action.mutate(() => agreeFn({ data: { dealId: deal.id } }));
+    else if (a === "deliver") action.mutate(() => deliverFn({ data: { dealId: deal.id } }));
+    else if (a === "release") payment.mutate(() => release({ data: { dealId: deal.id } }));
+    else scrollTo(a === "scroll-pay" ? "deal-actions" : a === "scroll-ship" ? "shipping" : a === "scroll-terms" ? "terms" : "dispute");
+  };
 
   return (
     <SiteShell>
@@ -283,50 +300,66 @@ function OrdinaryDealPage() {
         <nav className="mb-5 flex items-center gap-2 text-xs text-muted-foreground" data-no-localize><Link to="/dashboard" hash="saved-deals">{text("Deals", "الصفقات")}</Link><span>‹</span><bdi>{deal.ref}</bdi></nav>
         <header className="flex flex-wrap items-start justify-between gap-4" data-no-localize>
           <div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h2 className="text-2xl font-semibold">{deal.title}</h2><StatusBadge status={status} /><span className="rounded-full bg-gold-subtle px-3 py-1 text-xs font-medium text-gold-foreground">{text(({goods:"Goods",contracting:"Contracting & fit-out",services:"Services",freelance:"Freelance & digital work"} as Record<string,string>)[(deal as any).deal_type ?? "goods"] ?? "Goods")}</span></div><p className="mt-2 text-xs leading-6 text-muted-foreground">{text("with", "مع")} {partyProfiles.data?.find((p) => p.id === counterpartyId)?.full_name ?? deal.counterparty_email ?? text("Other party", "الطرف الآخر")} ({text(partyProfiles.data?.find((p) => p.id === counterpartyId)?.country ?? (isBuyer ? deal.supplier_country : deal.delivery_country) ?? "—")}) · {text("created", "أُنشئت")} {new Date(deal.created_at).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB")} · <bdi>{deal.ref}</bdi></p><p className="mt-2 text-sm text-muted-foreground">{deal.description}</p></div>
-          <div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={() => document.getElementById("deal-actions")?.scrollIntoView({ behavior: "smooth", block: "start" })}>{text("Deal actions", "إجراءات الصفقة")}</Button>{canDecideTerms && <Button onClick={() => action.mutate(() => agreeFn({ data: { dealId: deal.id } }))}>{text("Accept the terms", "قبول الشروط")}</Button>}{isSeller && status === "held" && <Button onClick={() => action.mutate(() => deliverFn({ data: { dealId: deal.id } }))}>{text("Confirm delivery", "تأكيد التسليم")}</Button>}{isBuyer && ["delivered", "under_review"].includes(status) && <Button disabled={payment.isPending} onClick={() => payment.mutate(() => release({ data: { dealId: deal.id } }))}>{text("Release the funds", "الإفراج عن الأموال")}</Button>}</div>
+          <div className="text-end"><p className="text-xs text-muted-foreground">{text("Deal value", "قيمة الصفقة")}</p><p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr">{money(amount)}</bdi></p></div>
         </header>
         {status === "delivered" && inspectionEnds && <div data-no-localize className="mt-5 flex gap-3 rounded-lg border border-warning/30 bg-warning-subtle p-4 text-warning"><Timer className="size-5 shrink-0" /><div><p className="text-sm font-medium">{text("Inspection ends", "ينتهي الفحص")} {inspectionEnds.toLocaleString(locale === "ar" ? "ar-SA" : "en-GB", { timeZone: "Asia/Riyadh", dateStyle: "medium", timeStyle: "short" })} · {text("Riyadh time", "بتوقيت الرياض")}</p><p className="mt-1 text-xs">{text(deal.auto_release_enabled ? "If the buyer takes no action, the funds are released to the seller." : "Auto-release is off — the buyer must accept manually.", deal.auto_release_enabled ? "إذا لم يتخذ المشتري إجراءً، يُفرج عن الأموال للمورد." : "الإفراج التلقائي معطل — يجب قبول المشتري يدوياً.")}</p></div></div>}
         <div className="mt-6"><EscrowStepper status={deal.status} termsStatus={deal.terms_status} /></div>
+        <div className="mt-6"><NextStepCard step={nextStep} onAction={onNextStep} busy={action.isPending || payment.isPending} /></div>
+        {(action.error || paymentNotice) && <div className="mt-3" data-no-localize>{action.error && <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{(action.error as Error).message}</p>}{paymentNotice && <p role="status" className={`rounded-xl border p-4 text-sm ${paymentNotice.ok ? "border-primary/40 bg-accent" : "border-destructive/40 bg-destructive/5"}`}><b>{paymentNotice.ok ? text("Payment recorded", "تم تسجيل الدفع") : text("Payment could not be completed", "تعذّر إكمال الدفع")}</b> · {paymentNotice.message}</p>}</div>}
         {(milestonesQ.data?.length ?? 0) > 0 && <div className="mt-6"><ContractDashboard deal={deal} milestones={milestonesQ.data ?? []} isBuyer={isBuyer} isSeller={isSeller} termVersions={termsQ.data ?? []} onDone={refresh} /></div>}
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-w-0 space-y-6">
-            <Card>
+            <Card data-no-localize>
               <CardContent className="p-6">
-                <h3 className="font-semibold">{text("Amount summary", "ملخص المبلغ")}</h3><CustodyNote className="mt-3" /><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">
-                  <bdi dir="ltr">{money(amount)}</bdi>
-                </p>
-                <dl className="mt-5 space-y-3 border-t pt-4 text-sm">
-                  {fb && <><Info label={text("Your fee share", "حصتك من الرسوم")} value={money(isBuyer ? fb.buyerShare : fb.sellerShare)} /><Info label={(isBuyer ? fb.buyerVatRate : fb.sellerVatRate) === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${Math.round((isBuyer ? fb.buyerVatRate : fb.sellerVatRate)*100)}% · ${text((isBuyer ? deal.delivery_country : deal.supplier_country) ?? "SA")}`} value={money(isBuyer ? fb.buyerVat : fb.sellerVat)} /><Info label="Platform fee" value={money(fb.fee)} /></>}
-                  <Info
-                    label="Fee paid by"
-                    value={feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee"}
-                  />
-                  {fb && (
-                    <>
-                      <Info label={text("Buyer fee share", "حصة المشتري من الرسوم")} value={`${money(fb.buyerShare)} + ${fb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `VAT ${Math.round(fb.buyerVatRate * 100)}% ${text(deal.delivery_country ?? "SA")} ${money(fb.buyerVat)}`}`} />
-                      <Info label={text("Supplier fee share", "حصة المورد من الرسوم")} value={`${money(fb.sellerShare)} + ${fb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `VAT ${Math.round(fb.sellerVatRate * 100)}% ${text(deal.supplier_country ?? "SA")} ${money(fb.sellerVat)}`}`} />
-                      <Info label="Buyer pays" value={pin && !perMilestone && pin.payCurrency !== deal.currency ? `${money(fb.buyerTotal)} ≈ ${money(pin.total, pin.payCurrency)}` : money(fb.buyerTotal)} />
-                      <Info label="Supplier receives" value={money(fb.supplierNet)} />
-                    </>
-                  )}
-                  <Info label="Inspection period" value={`${deal.inspection_days} day(s)`} />
-                <Info label="Quantity" value={String(deal.quantity ?? 1)} />
-                <Info label="Auto-release" value={deal.auto_release_enabled ? "On" : "Off — buyer must accept"} />
-                {deal.acceptance_criteria && <Info label="Acceptance criteria" value={deal.acceptance_criteria} />}
-                {deal.refund_conditions && <Info label="Refund conditions" value={deal.refund_conditions} />}
-                  <Info label="Created" value={formatDate(deal.created_at)} />
-                  <Info label="Due" value={deal.due_at ? formatDate(deal.due_at) : "No due date"} />
-                </dl>
+                <h3 className="text-lg font-bold">{text("The amount", "المبلغ")}</h3>
+                {fb && (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl bg-background p-4">
+                      <p className="text-sm text-muted-foreground">{isBuyer ? (status === "pending_funding" || perMilestone ? text("You pay", "تدفع") : text("You paid", "دفعتَ")) : text("The buyer pays", "يدفع المشتري")}</p>
+                      <p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr">{pin && !perMilestone ? money(pin.total, pin.payCurrency) : money(fb.buyerTotal)}</bdi></p>
+                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{pin && !perMilestone && pin.payCurrency !== deal.currency ? <>{text("Includes the fee share and VAT, at", "يشمل حصة الرسوم والضريبة، بسعر")} <bdi dir="ltr">1 {deal.currency} = {pin.customerRate} {pin.payCurrency}</bdi></> : text("Includes the buyer's fee share and VAT", "يشمل حصة المشتري من الرسوم والضريبة")}</p>
+                    </div>
+                    <div className="rounded-xl bg-background p-4">
+                      <p className="text-sm text-muted-foreground">{isSeller ? text("You receive", "تستلم") : text("The supplier receives", "يستلم المورد")}</p>
+                      <p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr">{money(fb.supplierNet)}</bdi></p>
+                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{text("After the supplier's fee share and VAT, once the buyer confirms", "بعد حصة المورد من الرسوم وضريبتها، عند تأكيد المشتري")}</p>
+                    </div>
+                  </div>
+                )}
+                {perMilestone && <p className="mt-4 rounded-xl bg-accent p-4 text-sm leading-7 text-accent-foreground">{text("This contract is paid milestone by milestone. Each milestone is paid at that day's exchange rate with its share of the fee, and each payment gets its own tax invoice.", "يُدفع هذا العقد مرحلةً بمرحلة. تُدفع كل مرحلة بسعر صرف يومها مع حصتها من الرسوم، ولكل دفعة فاتورة ضريبية مستقلة.")}</p>}
+                {fb && (
+                  <details className="group mt-4 border-t border-border pt-4">
+                    <summary className="cursor-pointer list-none text-sm font-semibold text-primary">{text("Fee and VAT details", "تفاصيل الرسوم والضريبة")}</summary>
+                    <dl className="mt-3 space-y-3 text-sm">
+                      <Info label={text("Insight fee", "رسوم إنسايت")} value={money(fb.fee)} />
+                      <Info label={text("Who pays the fee", "من يدفع الرسوم")} value={text(feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee")} />
+                      <Info label={text("Buyer's share", "حصة المشتري")} value={`${money(fb.buyerShare)} + ${fb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "ضريبة")} ${Math.round(fb.buyerVatRate * 100)}% ${money(fb.buyerVat)}`}`} />
+                      <Info label={text("Supplier's share", "حصة المورد")} value={`${money(fb.sellerShare)} + ${fb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "ضريبة")} ${Math.round(fb.sellerVatRate * 100)}% ${money(fb.sellerVat)}`}`} />
+                      {pin && pin.payCurrency !== deal.currency && <Info label={text("Exchange rate", "سعر الصرف")} value={`1 ${deal.currency} = ${pin.customerRate} ${pin.payCurrency}`} />}
+                    </dl>
+                    <p className="mt-3 text-xs leading-6 text-muted-foreground">{text("The exchange rate and its spread belong to the payment provider.", "سعر الصرف وفارقه يعودان لمزوّد الدفع.")}</p>
+                  </details>
+                )}
+                <details className="group mt-3 border-t border-border pt-4">
+                  <summary className="cursor-pointer list-none text-sm font-semibold text-primary">{text("What you agreed", "ما اتفقتما عليه")}</summary>
+                  <dl className="mt-3 space-y-3 text-sm">
+                    {deal.acceptance_criteria && <Info label={text("Accepted when", "متى يُقبل التسليم")} value={deal.acceptance_criteria} />}
+                    <Info label={text("Inspection period", "مدة الفحص")} value={text(`${deal.inspection_days} day(s) after delivery`, `${deal.inspection_days} يوم بعد التسليم`)} />
+                    <Info label={text("Automatic payout", "التحويل التلقائي")} value={deal.auto_release_enabled ? text("On, at the end of the inspection period", "مفعّل عند نهاية مدة الفحص") : text("Off — the buyer confirms", "غير مفعّل، يؤكد المشتري")} />
+                    {Number(deal.quantity ?? 1) !== 1 && <Info label={text("Quantity", "الكمية")} value={String(deal.quantity)} />}
+                    {deal.refund_conditions && <Info label={text("Refund conditions", "شروط الاسترداد")} value={deal.refund_conditions} />}
+                    <Info label={text("Delivery by", "التسليم قبل")} value={deal.due_at ? formatDate(deal.due_at) : text("No date set", "بدون موعد")} />
+                    <Info label={text("Created", "أُنشئت")} value={formatDate(deal.created_at)} />
+                  </dl>
+                </details>
                 {(deal.fee_override_flat != null || deal.fee_override_percent != null) && (
-                  <p className="mt-3 rounded-md bg-primary/10 p-3 text-xs text-primary">
-                    Insight applied a special fee to this deal.
+                  <p className="mt-3 rounded-md bg-accent p-3 text-xs text-accent-foreground">
+                    {text("Insight applied a special fee to this deal.", "طبّقت إنسايت رسوماً خاصة على هذه الصفقة.")}
                     {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
                   </p>
                 )}
-                {perMilestone && <p data-no-localize className="mt-5 border-t pt-4 text-xs leading-6 text-muted-foreground">{text("This contract is funded milestone by milestone. Each milestone is paid at that day's exchange rate with its share of the fee; each funding gets its own tax invoice.", "يُموَّل هذا العقد مرحلةً بمرحلة. تُدفع كل مرحلة بسعر صرف يومها مع حصتها من الرسوم، ولكل تمويل فاتورة ضريبية مستقلة.")}</p>}
-                {pin && !perMilestone && <div data-no-localize className="mt-5 border-t pt-4"><p className="text-xs text-muted-foreground">{text(isBuyer ? "Total paid" : "Supplier receives", isBuyer ? "إجمالي المدفوع" : "يستلم المورد")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{isBuyer ? money(pin.total, pin.payCurrency) : fb ? money(fb.supplierNet) : "—"}</bdi></p><p className="mt-3 text-xs leading-6 text-muted-foreground">{text("FX rate and spread belong to the payment provider.", "سعر الصرف والفارق يعودان لمزوّد الدفع.")} <bdi>1 {deal.currency} = {pin.customerRate} {pin.payCurrency}</bdi></p></div>}
                 {transactions.data?.filter((t) => t.kind === "funding" && t.status === "succeeded").map((t) => <p key={t.id} className="mt-3 text-xs text-muted-foreground">{text("Provider confirmation", "تأكيد مزوّد الدفع")}: <bdi>{t.provider_ref ?? "—"}</bdi> · {formatDate(t.created_at)}</p>)}
+                <CustodyNote className="mt-4 border-t border-border pt-4" />
               </CardContent>
             </Card>
 
@@ -334,7 +367,7 @@ function OrdinaryDealPage() {
               <PayoutPlan lines={planDealPayouts({ currency: deal.currency, supplierNet: fb.supplierNet, amount: Number(deal.amount), sellerShare: fb.sellerShare, sellerVat: fb.sellerVat, retentionPercent: Number((deal as any).retention_percent ?? 0), milestones: (milestonesQ.data ?? []).map((m: any) => ({ seq: m.seq, title: m.title, amount: Number(m.amount) })) })} />
             )}
             {shippingNeeded && (
-              <Card>
+              <Card id="shipping" className="scroll-mt-24">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2">
                     <Truck className="size-5 text-primary" />
@@ -424,7 +457,7 @@ function OrdinaryDealPage() {
             {(deal as any).deal_type === "freelance" && !milestonesQ.data?.length && <FreelancePanel deal={deal} files={filesQ.data ?? []} />}
             {(deal as any).deal_type === "services" && !milestonesQ.data?.length && <ServicesPanel deal={deal} files={filesQ.data ?? []} />}
             {!termsAgreed && (
-              <Card className="border-warning/40 bg-warning/5">
+              <Card id="terms" className="scroll-mt-24 border-warning/40 bg-warning/5">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2">
                     <FileSignature className="size-5 text-warning" />
@@ -452,7 +485,7 @@ function OrdinaryDealPage() {
                       />
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button onClick={() => action.mutate(() => agreeFn({ data: { dealId: deal.id } }))}>
-                          <BadgeCheck /> Accept the terms
+                          <BadgeCheck /> {text(ACCEPT_LABEL[0], ACCEPT_LABEL[1])}
                         </Button>
                         <Button
                           variant="outline"
@@ -487,10 +520,9 @@ function OrdinaryDealPage() {
 
             <Card>
               <CardContent className="p-6">
-                <h2 id="deal-actions" className="scroll-mt-6 font-bold">{text("Deal actions", "إجراءات الصفقة")}</h2>
+                <h2 id="deal-actions" className="scroll-mt-24 font-bold">{text("Payment and actions", "الدفع والإجراءات")}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Actions depend on your side of the deal and its current status. Every money
-                  movement is recorded below with its status.
+                  {text("Every payment is recorded below with its status.", "يُسجَّل كل دفع وتحويل أدناه مع حالته.")}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {canFund && (
@@ -543,7 +575,7 @@ function OrdinaryDealPage() {
                               }
                             }}
                           >
-                            {text("Get exchange-rate quote", "اطلب عرض سعر الصرف")}
+                            {text("Show my amount", "اعرض المبلغ بعملتك")}
                           </Button>
                         </div>
                       )}
@@ -568,7 +600,7 @@ function OrdinaryDealPage() {
                         !quote || quoteExpired
                       }
                     >
-                      <Wallet /> {payment.isPending ? text("Starting payment…", "جارٍ بدء الدفع…") : nextToFund ? text(`Fund milestone ${nextToFund.seq}`, `موّل المرحلة ${nextToFund.seq}`) : text("Fund the deal", "موّل الصفقة")}
+                      <Wallet /> {payment.isPending ? text("Starting payment…", "جارٍ بدء الدفع…") : nextToFund ? text(`Pay milestone ${nextToFund.seq}`, `ادفع المرحلة ${nextToFund.seq}`) : text("Pay for the deal", "ادفع مبلغ الصفقة")}
                     </Button>
                   )}
                   {canFund && quote && !quoteExpired && (
@@ -589,7 +621,7 @@ function OrdinaryDealPage() {
                         action.mutate(() => deliverFn({ data: { dealId: deal.id } }))
                       }
                     >
-                      <BadgeCheck /> Confirm delivery
+                      <BadgeCheck /> {text(DELIVER_LABEL[0], DELIVER_LABEL[1])}
                     </Button>
                   )}
                   {isBuyer && (status === "delivered" || status === "under_review") && (
@@ -599,7 +631,7 @@ function OrdinaryDealPage() {
                       }
                       disabled={payment.isPending}
                     >
-                      <Wallet /> {payment.isPending ? "Requesting provider payout…" : "Release the funds"}
+                      <Wallet /> {payment.isPending ? text("Requesting the payout…", "جارٍ طلب التحويل…") : text(RELEASE_LABEL[0], RELEASE_LABEL[1])}
                     </Button>
                   )}
                   {status === "released" && (
@@ -613,11 +645,7 @@ function OrdinaryDealPage() {
                     </p>
                   )}
                 </div>
-                <CustodyNote className="mt-3" />
 
-                {action.error && (
-                  <p className="mt-3 text-sm text-destructive">{(action.error as Error).message}</p>
-                )}
 
                 {status === "delivered" && inspectionEnds && (
                   <div className="mt-4 flex gap-2 rounded-md border border-primary/30 bg-primary/5 p-4">
@@ -637,20 +665,6 @@ function OrdinaryDealPage() {
                   </div>
                 )}
 
-                {paymentNotice && (
-                  <div
-                    className={`mt-4 rounded-md border p-4 text-sm ${
-                      paymentNotice.ok
-                        ? "border-primary/40 bg-primary/5"
-                        : "border-destructive/40 bg-destructive/5"
-                    }`}
-                  >
-                    <p className="font-semibold">
-                      {paymentNotice.ok ? "Payment recorded" : "Payment could not be completed"}
-                    </p>
-                    <p className="mt-1 text-muted-foreground">{paymentNotice.message}</p>
-                  </div>
-                )}
 
                 {isBuyer && status === "delivered" && (
                   <div className="mt-5 rounded-md border border-border p-4">
@@ -673,7 +687,7 @@ function OrdinaryDealPage() {
                   </div>
                 )}
 
-                <DisputePanel deal={deal} isParty={isBuyer || isSeller} />
+                <div id="dispute" className="scroll-mt-24"><DisputePanel deal={deal} isParty={isBuyer || isSeller} /></div>
               </CardContent>
             </Card>
 
@@ -751,7 +765,6 @@ function OrdinaryDealPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Funding, payouts, and refunds with the exact status both parties can see.
                 </p>
-                <CustodyNote className="mt-3" />
                 <div className="mt-4 space-y-3">
                   {(transactions.data ?? []).map((t) => (
                     <div key={t.id} className="rounded-md border border-border p-4">

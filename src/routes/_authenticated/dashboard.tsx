@@ -24,7 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/money";
 import { listMyDeals } from "@/lib/deals";
 import { listNotifications } from "@/lib/notifications";
-import { CustodyNote } from "@/components/deal/DealPresentation";
+import { escrowStep } from "@/lib/milestones";
 import { clientAction } from "@/lib/deal-display";
 import { useLocale } from "@/lib/locale";
 
@@ -86,52 +86,85 @@ function Dashboard() {
     out[type] = (out[type] ?? 0) + 1;
     return out;
   }, {})).map(([type, n]) => `${text(typeLabels[type] ?? type)}: ${n}`).join(" · ");
+  const hour = Number(new Date().toLocaleString("en-GB", { hour: "2-digit", hour12: false, timeZone: "Asia/Riyadh" }));
+  const morning = hour >= 4 && hour < 12;
+  const n = actionDeals.length;
+  const waitingAr = n === 0 ? "لا شيء ينتظرك الآن." : n === 1 ? "لديك خطوة واحدة تنتظرك." : n === 2 ? "لديك خطوتان تنتظرانك." : n <= 10 ? `لديك ${n} خطوات تنتظرك.` : `لديك ${n} خطوة تنتظرك.`;
+  const waitingEn = n === 0 ? "Nothing is waiting for you right now." : n === 1 ? "You have one step waiting." : `You have ${n} steps waiting.`;
+  const releasedCount = myDeals.filter((d) => ["released", "completed"].includes(d.status) && d.released_at?.startsWith(month)).length;
+  const heldCount = active.filter((d) => ["held", "in_progress", "delivered", "under_review", "disputed"].includes(d.status)).length;
   const stats = [
-    { label: text("Held with the provider", "محفوظة لدى مزوّد الدفع"), value: heldMain ? formatMoney(heldMain[1], heldMain[0]) : "—", note: `${active.filter((d) => ["held", "in_progress", "delivered", "under_review", "disputed"].includes(d.status)).length} ${text("active deals", "صفقات نشطة")}`, extra: held.slice(1).map(([c, n]) => formatMoney(n, c)).join(" · "), icon: ShieldCheck },
-    { label: text("Waiting for you", "بانتظارك"), value: String(actionDeals.length), note: text("Actions needing your attention", "إجراءات تتطلب اهتمامك"), icon: AlertCircle },
-    { label: text("Active deals", "الصفقات النشطة"), value: String(active.length), note: typeCounts || text("No active deals", "لا توجد صفقات نشطة"), icon: BriefcaseBusiness },
-    { label: text("Released this month", "المُفرج عنه هذا الشهر"), value: releasedMain ? formatMoney(releasedMain[1], releasedMain[0]) : "—", note: released.slice(1).map(([c, n]) => formatMoney(n, c)).join(" · ") || text("Completed releases", "عمليات الإفراج المكتملة"), icon: Wallet },
+    { label: text("In your deals right now", "محفوظ لصفقاتك الآن"), value: heldMain ? formatMoney(heldMain[1], heldMain[0]) : "—", note: heldCount ? text(`${heldCount} paid deal(s), with the payment provider (simulated) until each one completes`, `${heldCount} صفقة مدفوعة، لدى مزوّد الدفع (محاكى) حتى تكتمل كل صفقة`) : text("Nothing paid in yet", "لا توجد مبالغ مدفوعة بعد"), extra: held.slice(1).map(([c, v]) => formatMoney(v, c)).join(" · "), icon: ShieldCheck },
+    { label: text("Active deals", "صفقات جارية"), value: String(active.length), note: typeCounts || text("No active deals", "لا توجد صفقات جارية"), icon: BriefcaseBusiness },
+    { label: text("Completed this month", "اكتملت هذا الشهر"), value: String(releasedCount), note: releasedMain ? `${formatMoney(releasedMain[1], releasedMain[0])}${released.length > 1 ? " · " + released.slice(1).map(([c, v]) => formatMoney(v, c)).join(" · ") : ""}` : text("No payouts yet this month", "لا تحويلات بعد هذا الشهر"), icon: Wallet },
   ];
   return (
     <SiteShell>
-      <div className="space-y-6" data-no-localize>
+      <div className="space-y-8" data-no-localize>
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold">{text(`Good evening, ${firstName}`, `مساء الخير، ${firstName}`)}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{text(`You have ${actionDeals.length} actions waiting today`, `لديك ${actionDeals.length} إجراءات بانتظارك اليوم`)}</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">{morning ? text(`Good morning, ${firstName}`, `صباح الخير يا ${firstName}`) : text(`Good evening, ${firstName}`, `مساء الخير يا ${firstName}`)}</h2>
+            <p className="mt-2 text-base text-muted-foreground">{text(waitingEn, waitingAr)}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild><Link to="/deals/new"><Plus />{text("New deal", "صفقة جديدة")}</Link></Button>
-            <Button asChild variant="secondary"><Link to="/deals/new"><Users />{text("Invite a supplier", "دعوة مورد")}</Link></Button>
-          </div>
+          <Button asChild size="lg" className="h-11"><Link to="/deals/new"><Plus />{text("New deal", "صفقة جديدة")}</Link></Button>
         </header>
-        <Card>
-          <CardContent className="p-0">
-            <h3 className="border-b px-6 py-5 font-semibold">{text("Needs your action", "المطلوب منك الآن")}</h3>
-            {actionDeals.length === 0 ? <div className="flex items-center gap-3 p-6 text-sm text-muted-foreground"><CheckCircle2 className="size-6 text-primary" />{text("Nothing needs your action", "لا يوجد إجراء مطلوب منك")}</div> : actionDeals.map(({ deal, action: next }, i) => <div key={deal.id} className="flex flex-wrap items-center gap-4 border-t p-5 first:border-t-0">
-              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-accent text-primary"><FileCheck2 className="size-5" /></span>
-              <div className="min-w-0 flex-1"><p className="font-medium">{deal.title}</p><p className="mt-1 break-words text-xs text-muted-foreground">{deal.ref} · {deal.counterparty_email ?? text("Other party", "الطرف الآخر")} · <bdi className="tabular-nums">{formatMoney(Number(deal.amount), deal.currency)}</bdi></p><p className="mt-1 text-xs text-warning">{deal.auto_release_at ? text(`Inspection ends ${new Date(deal.auto_release_at).toLocaleDateString("en-GB")}`, `ينتهي الفحص ${new Date(deal.auto_release_at).toLocaleDateString("ar-SA")}`) : deal.due_at ? text(`Due ${new Date(deal.due_at).toLocaleDateString("en-GB")}`, `الموعد ${new Date(deal.due_at).toLocaleDateString("ar-SA")}`) : text("Awaiting your action", "بانتظار إجرائك")}</p></div>
-              <Button asChild variant={i === 0 ? "default" : "secondary"}><Link to="/deals/$dealId" params={{ dealId: deal.ref }}>{text(next ?? "View deal")}</Link></Button>
-            </div>)}
-          </CardContent>
-        </Card>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{stats.map((s) => <Card key={s.label}><CardContent className="p-5"><div className="flex items-center justify-between gap-2"><span className="text-xs text-muted-foreground">{s.label}</span><span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent"><s.icon className="size-4 text-primary" /></span></div><p className="mt-4 break-words text-2xl font-semibold tabular-nums"><bdi>{s.value}</bdi></p><p className="mt-2 text-xs leading-5 text-muted-foreground">{s.note}</p>{s.extra && <p className="mt-1 text-xs tabular-nums text-muted-foreground">{s.extra}</p>}</CardContent></Card>)}</div>
+
+        <section aria-labelledby="next-steps" className="space-y-4">
+          <h3 id="next-steps" className="text-lg font-bold">{text("Your next steps", "خطوتك التالية")}</h3>
+          {n === 0 ? (
+            <Card><CardContent className="flex flex-wrap items-center gap-4 p-6"><CheckCircle2 className="size-8 shrink-0 text-primary" /><div className="min-w-0 flex-1"><p className="font-semibold">{text("You are all caught up", "كل شيء على ما يرام")}</p><p className="mt-1 text-sm text-muted-foreground">{text("We will notify you as soon as a deal needs you.", "سنخبرك فور احتياج أي صفقة لإجراء منك.")}</p></div><Button asChild variant="outline"><Link to="/deals/new"><Users />{text("Invite a supplier or buyer", "ادعُ مورداً أو مشترياً")}</Link></Button></CardContent></Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {actionDeals.map(({ deal, action: next }) => {
+                const c = actionCopy[next ?? ""] ?? actionCopy["View deal"]!;
+                const due = deal.auto_release_at && next === "Release the funds" ? text(` Inspection ends ${new Date(deal.auto_release_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`, ` تنتهي مدة الفحص ${new Date(deal.auto_release_at).toLocaleDateString("ar-SA", { day: "numeric", month: "long" })}.`) : "";
+                return (
+                  <article key={deal.id} className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+                    <div className="flex items-center gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent"><FileCheck2 className="size-5 text-primary" /></span><div className="min-w-0"><p className="truncate font-semibold">{deal.title}</p><p className="truncate text-xs text-muted-foreground">{text(typeLabels[(deal as typeof deal & { deal_type?: string }).deal_type ?? "goods"] ?? "Goods")} · <bdi>{deal.ref}</bdi> · <bdi className="tabular-nums" dir="ltr">{formatMoney(Number(deal.amount), deal.currency)}</bdi></p></div></div>
+                    <p className="leading-8">{text(c[0], c[1])}{due && <span className="font-semibold text-warning">{due}</span>}</p>
+                    <div><Button asChild><Link to="/deals/$dealId" params={{ dealId: deal.ref }}>{text(c[2], c[3])}</Link></Button></div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <div className="grid gap-4 md:grid-cols-3">{stats.map((s) => <Card key={s.label}><CardContent className="p-5"><div className="flex items-center justify-between gap-2"><span className="text-sm text-muted-foreground">{s.label}</span><span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent"><s.icon className="size-4 text-primary" /></span></div><p className="mt-3 break-words text-2xl font-bold tabular-nums"><bdi dir="ltr">{s.value}</bdi></p><p className="mt-2 text-xs leading-5 text-muted-foreground">{s.note}</p>{s.extra && <p className="mt-1 text-xs tabular-nums text-muted-foreground">{s.extra}</p>}</CardContent></Card>)}</div>
+
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <Card className="min-w-0"><CardContent className="p-0"><h3 className="px-6 py-5 font-semibold">{text("My active deals", "صفقاتي النشطة")}</h3><div className="overflow-x-auto"><table className="w-full text-start text-sm"><thead className="bg-muted text-xs text-muted-foreground"><tr>{[text("Deal", "الصفقة"), text("Counterparty", "الطرف الآخر"), text("Amount", "المبلغ"), text("Status", "الحالة")].map((l) => <th className="px-5 py-3 text-start font-medium" key={l}>{l}</th>)}</tr></thead><tbody>{active.map((d) => <tr className="border-t" key={d.id}><td className="p-4"><Link className="font-medium hover:text-primary" to="/deals/$dealId" params={{ dealId: d.ref }}>{d.title}<span className="mt-1 block text-xs text-muted-foreground">{d.ref}</span></Link></td><td className="max-w-48 break-words p-4 text-muted-foreground">{d.counterparty_email ?? text("Other party", "الطرف الآخر")}</td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{formatMoney(Number(d.amount), d.currency)}</bdi></td><td className="p-4"><StatusBadge status={d.status as never} /></td></tr>)}{!active.length && <tr><td colSpan={4} className="p-6 text-sm text-muted-foreground">{text("No active deals", "لا توجد صفقات نشطة")}</td></tr>}</tbody></table></div></CardContent></Card>
-          <Card><CardContent className="p-6"><h3 className="font-semibold">{text("Recent activity", "النشاط الأخير")}</h3><ol className="mt-5 space-y-5 border-s ps-5">{myActivity.map((item) => <li className="relative" key={item.id}><span className="absolute -start-[25px] top-1 size-2 rounded-full bg-primary" /><p className="text-sm font-medium">{text(item.title)}</p>{item.body && <p className="mt-1 text-xs leading-5 text-muted-foreground">{text(item.body)}</p>}<p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB", { dateStyle: "medium", timeStyle: "short" })}</p></li>)}{!myActivity.length && <li className="text-sm text-muted-foreground">{text("No activity yet.", "لا يوجد نشاط بعد.")}</li>}</ol><CustodyNote className="mt-6 border-t pt-4" /></CardContent></Card>
+          <Card className="min-w-0"><CardContent className="p-0">
+            <div className="flex items-center justify-between px-6 py-5"><h3 className="text-lg font-bold">{text("My deals", "صفقاتي")}</h3></div>
+            <div className="overflow-x-auto"><table className="w-full min-w-[620px] text-start text-sm"><thead className="bg-muted text-xs text-muted-foreground"><tr>{[text("Deal", "الصفقة"), text("Amount", "المبلغ"), text("Status", "الحالة"), text("Progress", "المرحلة")].map((l) => <th className="px-5 py-3 text-start font-medium" key={l}>{l}</th>)}</tr></thead>
+              <tbody>{active.map((d) => { const st = escrowStep(d.status, d.terms_status); return <tr className="border-t" key={d.id}><td className="p-4"><Link className="font-semibold hover:text-primary" to="/deals/$dealId" params={{ dealId: d.ref }}>{d.title}</Link><p className="mt-1 text-xs text-muted-foreground"><bdi>{d.ref}</bdi> · {d.buyer_id === uid ? text("You are the buyer", "أنت المشتري") : text("You are the supplier", "أنت المورد")}</p></td><td className="p-4 font-semibold tabular-nums"><bdi dir="ltr">{formatMoney(Number(d.amount), d.currency)}</bdi></td><td className="p-4"><StatusBadge status={d.status as never} /></td><td className="p-4"><div className="flex gap-1" aria-label={text(`Step ${st + 1} of 5`, `الخطوة ${st + 1} من 5`)}>{[0, 1, 2, 3, 4].map((k) => <span key={k} className={`h-1.5 flex-1 rounded ${k < st ? "bg-brand-mint" : k === st ? "gradient-brand" : "bg-surface"}`} />)}</div></td></tr>; })}
+                {!active.length && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{text("No active deals yet. Create your first one in a few minutes.", "لا توجد صفقات جارية بعد. أنشئ صفقتك الأولى في دقائق.")}</td></tr>}</tbody></table></div>
+          </CardContent></Card>
+          <Card><CardContent className="p-6"><h3 className="text-lg font-bold">{text("Latest updates", "آخر التحديثات")}</h3><ol className="mt-5 space-y-5 border-s ps-5">{myActivity.map((item) => <li className="relative" key={item.id}><span className="absolute -start-[25px] top-1.5 size-2 rounded-full bg-brand-mint" /><p className="text-sm font-medium">{text(item.title)}</p>{item.body && <p className="mt-1 text-xs leading-5 text-muted-foreground">{text(item.body)}</p>}<p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB", { dateStyle: "medium", timeStyle: "short" })}</p></li>)}{!myActivity.length && <li className="text-sm text-muted-foreground">{text("No updates yet.", "لا توجد تحديثات بعد.")}</li>}</ol></CardContent></Card>
         </div>
         <VerificationCard />
         {user && !user.email_confirmed_at && <p className="rounded-lg bg-warning-subtle p-4 text-sm text-warning">{text("Please confirm your email address.", "يرجى تأكيد بريدك الإلكتروني.")}</p>}
-        <details id="saved-deals"><summary className="cursor-pointer text-sm font-medium text-primary">{text("All deals", "جميع الصفقات")}</summary><div className="mt-3 space-y-2">{myDeals.map((d) => <Link className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4 text-sm" key={d.id} to="/deals/$dealId" params={{ dealId: d.ref }}><span>{d.title} · {d.ref}</span><StatusBadge status={d.status as never} /><bdi className="tabular-nums">{formatMoney(Number(d.amount), d.currency)}</bdi></Link>)}</div></details>
+        <details id="saved-deals" className="scroll-mt-24"><summary className="cursor-pointer text-sm font-semibold text-primary">{text("All deals, including completed ones", "كل الصفقات، بما فيها المكتملة")}</summary><div className="mt-3 space-y-2">{myDeals.map((d) => <Link className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4 text-sm" key={d.id} to="/deals/$dealId" params={{ dealId: d.ref }}><span>{d.title} · <bdi>{d.ref}</bdi></span><StatusBadge status={d.status as never} /><bdi className="tabular-nums" dir="ltr">{formatMoney(Number(d.amount), d.currency)}</bdi></Link>)}</div></details>
       </div>
       <FxCustomerQuote />
     </SiteShell>
   );
 }
 
+/** Plain wording for each dashboard action (keys are clientAction's results). [en, ar, button en, button ar] */
+const actionCopy: Record<string, [string, string, string, string]> = {
+  "Accept the terms": ["The other party sent the terms. Review them and accept to move to payment.", "أرسل الطرف الآخر الشروط. راجعها ووافق عليها للانتقال إلى الدفع.", "Review the terms", "راجع الشروط"],
+  "Approve and release": ["The supplier delivered a milestone. Review it and approve to pay it out.", "سلّم المورد مرحلة. راجعها واعتمدها ليُحوَّل مبلغها.", "Review the milestone", "راجع المرحلة"],
+  "Fund the deal": ["You both agreed the terms. Pay the amount so the supplier can start.", "اتفقتما على الشروط. ادفع المبلغ ليبدأ المورد التنفيذ.", "Pay now", "ادفع الآن"],
+  "Update shipping": ["The buyer has paid. Ship the order and add the tracking number.", "دفع المشتري المبلغ. اشحن الطلب وأضف رقم التتبع.", "Add shipping details", "أضف بيانات الشحن"],
+  "Confirm delivery": ["Confirm once you have delivered, so the buyer's inspection period starts.", "أكّد عندما تُسلِّم لتبدأ مدة الفحص لدى المشتري.", "Confirm delivery", "أكّد التسليم"],
+  "Release the funds": ["Your delivery has arrived. Inspect it, then confirm receipt to pay the supplier.", "وصل التسليم. افحصه ثم أكّد الاستلام ليُحوَّل المبلغ للمورد.", "Confirm receipt", "أكّد الاستلام"],
+  "View deal": ["Open the deal to see what is needed.", "افتح الصفقة لترى المطلوب.", "Open the deal", "افتح الصفقة"],
+};
+
 const typeLabels: Record<string, string> = { goods: "Goods", services: "Services", contracting: "Contracting & fit-out", freelance: "Freelance & digital work" };
 
 function VerificationCard() {
+  const { text } = useLocale();
   const { data } = useQuery({
     queryKey: ["my-profile"],
     queryFn: async () => {
@@ -149,7 +182,7 @@ function VerificationCard() {
       <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
         <div>
           <p className="flex items-center gap-2 font-semibold">
-            <ShieldCheck className="size-4 text-warning" /> Verify your identity
+            <ShieldCheck className="size-4 text-warning" /> {text("Verify your identity", "وثّق هويتك")}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {status === "rejected"

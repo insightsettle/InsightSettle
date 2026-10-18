@@ -41,7 +41,7 @@ String trf(String en, Map<String, Object> values) {
 
 const Map<String, String> kStatusEn = {
   'pending_funding': 'Pending funding',
-  'held': 'Held by the payment provider',
+  'held': 'Paid into the deal',
   'delivered': 'Delivered',
   'under_review': 'Under review',
   'released': 'Released',

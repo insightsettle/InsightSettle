@@ -148,7 +148,7 @@ class CustodyNote extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            tr('Demo of the escrow service: the payment provider is simulated and no real money moves. At launch, funds are held by a licensed payment provider; Insight runs the deal rules and keeps the record.'),
+            tr('Demo of the escrow service: the payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.'),
             style: const TextStyle(fontSize: 12.5, color: InsightColors.primary, height: 1.5),
           ),
         ),
