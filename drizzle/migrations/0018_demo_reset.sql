@@ -74,25 +74,25 @@ begin
 
   select count(*) into removed from public.deals;
 
-  -- Break the lot <-> deal links, then remove every deal-related row (children first).
-  update public.auction_lots set deal_id = null, funded_deal_id = null, funding_tx_id = null;
+  -- Break the lot <-> deal links (every statement carries WHERE: PostgREST runs pg_safeupdate), then remove every deal-related row (children first).
+  update public.auction_lots set deal_id = null, funded_deal_id = null, funding_tx_id = null where true;
   update public.deal_payout_splits set release_tx_id = null where release_tx_id is not null;
-  delete from public.ledger_entries;
-  delete from public.tax_invoices;
-  delete from public.dispute_evidence;
-  delete from public.deal_transactions;
-  delete from public.deal_payout_splits;
-  delete from public.disputes;
-  delete from public.fx_quotes;
-  delete from public.lot_bidders;
-  delete from public.risk_flags;
-  delete from public.deal_attachments;
-  delete from public.deal_term_versions;
-  delete from public.deal_milestones;
+  delete from public.ledger_entries where true;
+  delete from public.tax_invoices where true;
+  delete from public.dispute_evidence where true;
+  delete from public.deal_transactions where true;
+  delete from public.deal_payout_splits where true;
+  delete from public.disputes where true;
+  delete from public.fx_quotes where true;
+  delete from public.lot_bidders where true;
+  delete from public.risk_flags where true;
+  delete from public.deal_attachments where true;
+  delete from public.deal_term_versions where true;
+  delete from public.deal_milestones where true;
   delete from public.notifications where deal_id is not null;
-  delete from public.deals;
-  delete from public.auction_lots;
-  delete from public.auctions;
+  delete from public.deals where true;
+  delete from public.auction_lots where true;
+  delete from public.auctions where true;
 
   perform set_config('insight.demo_reset', 'off', true);
 
