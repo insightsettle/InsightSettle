@@ -219,14 +219,17 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
       rows.push({
         kind: "refund",
         amount: refund,
+        fee: 0,
+        release_part: null,
         idempotency_key: `${deal.ref}-REFUND-${dispute.id.slice(0, 8)}`,
         original_transaction_id: funding?.id ?? null,
       });
     if (release > 0)
-      rows.push({ kind: "release", amount: split.supplierNet, fee: split.sellerShare, release_part: "dispute", idempotency_key: `${deal.ref}-RELEASE-${dispute.id.slice(0, 8)}` });
+      // Same keys on every row: a bulk insert sends NULL for missing keys, and fee is NOT NULL (C09-D27).
+      rows.push({ kind: "release", amount: split.supplierNet, fee: split.sellerShare, release_part: "dispute", idempotency_key: `${deal.ref}-RELEASE-${dispute.id.slice(0, 8)}`, original_transaction_id: null });
     let createdIds: string[] = [];
     if (rows.length) {
-      const { data: created } = await db
+      const { data: created, error: insertError } = await db
         .from("deal_transactions")
         .insert(
           rows.map((r) => ({
@@ -240,6 +243,8 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
           })),
         )
         .select("id");
+      // C09-D27: never mark a dispute resolved unless its refund/release rows were created.
+      if (insertError) throw new Error(`Could not record the dispute payments: ${insertError.message}`);
       createdIds = (created ?? []).map((r: any) => r.id);
     }
 
