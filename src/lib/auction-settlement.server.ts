@@ -64,10 +64,5 @@ export async function settleAuctionLeg(admin: any, tx: any, deal: any, account: 
       ...(status !== 'refunded' ? { released_at: new Date().toISOString() } : {}) }).eq('id', deal.id);
     if (updateError) throw updateError;
   }
-  // Polish (row 20): a lot whose deal is settled is closed, so the console no longer shows it as funded.
-  if (deal.auction_lot_id) {
-    const { error: lotCloseError } = await admin.from('auction_lots').update({ status: 'closed' }).eq('id', deal.auction_lot_id).eq('status', 'funded');
-    if (lotCloseError) throw lotCloseError;
-  }
   return status;
 }
