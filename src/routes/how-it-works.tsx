@@ -111,8 +111,8 @@ function Page() {
           <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("2–20 milestones, advance up to 20%, retention and a defects period.", "من 2 إلى 20 مرحلة، دفعة مقدّمة حتى 20%، واحتفاظ وفترة ضمان عيوب.")}</p>
         </section>
         <section id="auctions" className="mt-12 scroll-mt-24 border-t border-border pt-8">
-          <h2 className="text-2xl font-semibold">{text("Auctions — coming soon", "المزادات — قريباً")}</h2>
-          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("For organisers: a 24-hour payment link for the winner, two backup bidders in order, and inspection before release. This proposed workflow is not available in the current demo.", "للمنظّمين: رابط دفع لمدة 24 ساعة للفائز، ومزايدان احتياطيان بالترتيب، وفحص قبل الإفراج. هذا المسار المقترح غير متاح في النسخة التجريبية الحالية.")}</p>
+          <h2 className="text-2xl font-semibold">{text("Auctions", "المزادات")}</h2>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("Live auctions: the winner gets a payment link with a 24-hour deadline. If they don't pay, the offer passes to the backup bidder automatically. After inspection, the provider pays the item owner and the organiser separately. Available in the demo; payments are simulated.", "المزادات المباشرة: يحصل الفائز على رابط دفع بمهلة 24 ساعة، وإن لم يدفع ينتقل العرض تلقائياً إلى المزايد الاحتياطي. بعد الفحص يصرف مزوّد الدفع لمالك القطعة وللمنظّم كلٌّ على حدة. متاحة في النسخة التجريبية، والدفع فيها محاكى.")}</p>
         </section>
         <div className="mt-10 flex gap-3">
           <Button asChild>
