@@ -13,6 +13,11 @@ export function minorUnitsFor(currency: string, table?: Record<string, number>) 
   return table?.[currency] ?? DEFAULT_MINOR_UNITS[currency] ?? 2;
 }
 
+/** Minimum positive amount and input step share the currency's minor unit. */
+export function moneyInputStep(currency: string) {
+  return 10 ** -minorUnitsFor(currency);
+}
+
 /** Rounds an amount to the currency's minor units (half away from zero). */
 export function roundMoney(amount: number, currency: string, table?: Record<string, number>) {
   const f = 10 ** minorUnitsFor(currency, table);

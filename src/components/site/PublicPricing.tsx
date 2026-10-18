@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Calculator, RefreshCw } from "lucide-react";
 import { publicPricing } from "@/lib/public-pricing.functions";
 import { useLocale } from "@/lib/locale";
-import { formatMoney, minorUnitsFor, SUPPORTED_CURRENCIES } from "@/lib/money";
+import { formatMoney, moneyInputStep, SUPPORTED_CURRENCIES } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,7 +51,7 @@ export function PublicPricing() {
     </div>
     <Card><CardContent className="p-6"><form onSubmit={submit} className="space-y-5">
       <h3 className="flex items-center gap-2 text-lg font-semibold"><Calculator className="size-5 text-primary" />{text("Fee calculator", "حاسبة الرسوم")}</h3>
-      <div className="grid grid-cols-[1fr_110px] gap-3"><div className="space-y-2"><Label htmlFor="public-amount">{text("Deal amount", "مبلغ الصفقة")}</Label><Input id="public-amount" type="number" min="0.001" max="1000000000" step={10 ** -minorUnitsFor(currency)} required value={amount} dir="ltr" onChange={(e) => { setAmount(e.target.value); setDirty(true); }} /></div><div className="space-y-2"><Label>{text("Currency", "العملة")}</Label><Select value={currency} onValueChange={(v: typeof currency) => { setCurrency(v); setDirty(true); }}><SelectTrigger aria-label={text("Currency", "العملة")}><SelectValue /></SelectTrigger><SelectContent>{SUPPORTED_CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div></div>
+      <div className="grid grid-cols-[1fr_110px] gap-3"><div className="space-y-2"><Label htmlFor="public-amount">{text("Deal amount", "مبلغ الصفقة")}</Label><Input id="public-amount" type="number" min={moneyInputStep(currency)} max="1000000000" step={moneyInputStep(currency)} required value={amount} dir="ltr" onChange={(e) => { setAmount(e.target.value); setDirty(true); }} /></div><div className="space-y-2"><Label>{text("Currency", "العملة")}</Label><Select value={currency} onValueChange={(v: typeof currency) => { setCurrency(v); setDirty(true); }}><SelectTrigger aria-label={text("Currency", "العملة")}><SelectValue /></SelectTrigger><SelectContent>{SUPPORTED_CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div></div>
       <fieldset><legend className="mb-2 text-sm font-medium">{text("Who pays the fee?", "من يتحمل الرسوم؟")}</legend><div className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1">{([['split','Split','مناصفة'],['buyer','Buyer','المشتري'],['seller','Supplier','المورد']] as const).map(([key,en,ar]) => <Button key={key} type="button" variant={payer === key ? "default" : "ghost"} aria-pressed={payer === key} onClick={() => { setPayer(key); setDirty(true); }}>{text(en,ar)}</Button>)}</div></fieldset>
       <div className="grid grid-cols-2 gap-3">{countrySelect("buyer")}{countrySelect("supplier")}</div>
       <Button className="w-full" disabled={busy} type="submit"><RefreshCw className={busy ? "size-4 animate-spin" : "size-4"} />{text("Calculate fees", "احسب الرسوم")}</Button>
