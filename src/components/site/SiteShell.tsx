@@ -23,6 +23,7 @@ const nav = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
   const { user, loading } = useSessionUser();
   const { isStaff } = useStaffAccess();
   const navigate = useNavigate();
@@ -32,7 +33,8 @@ export function SiteHeader() {
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) { setSignOutError(text("Sign out failed. Please try again.", "تعذّر تسجيل الخروج. حاول مرة أخرى.")); return; }
     navigate({ to: "/auth", replace: true });
   }
   return (
@@ -74,7 +76,7 @@ export function SiteHeader() {
                 </Button>
               )}
               <Button asChild size="sm" className="hidden sm:inline-flex">
-                <Link to="/dashboard">{text("My dashboard")}</Link>
+                <Link to={isStaff ? "/console" : "/dashboard"}>{text(isStaff ? "Staff console" : "My dashboard")}</Link>
               </Button>
               <Button
                 variant="ghost"
@@ -107,6 +109,7 @@ export function SiteHeader() {
         </div>
       </div>
 
+      {signOutError && <p role="alert" className="px-4 py-2 text-sm text-destructive">{signOutError}</p>}
       {open && (
         <nav className="border-t border-border bg-card px-4 py-3 xl:hidden">
           {nav.map((item) => (
@@ -124,11 +127,11 @@ export function SiteHeader() {
             {user ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to={isStaff ? "/console" : "/dashboard"}
                   onClick={() => setOpen(false)}
                   className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary"
                 >
-                  {text("My dashboard")}
+                  {text(isStaff ? "Staff console" : "My dashboard")}
                 </Link>
                 <Button variant="ghost"
                   onClick={() => {
@@ -141,13 +144,10 @@ export function SiteHeader() {
                 </Button>
               </>
             ) : (
-              <Link
-                to="/auth"
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary"
-              >
-                {text("Sign in")} / {text("Create account", "إنشاء حساب")}
-              </Link>
+              <>
+                <Link to="/auth" onClick={() => setOpen(false)} className="block px-3 py-2.5 text-sm font-semibold text-primary">{text("Sign in", "تسجيل الدخول")}</Link>
+                <Link to="/auth" search={{ mode: "signup" }} onClick={() => setOpen(false)} className="block px-3 py-2.5 text-sm font-semibold text-primary">{text("Create account", "إنشاء حساب")}</Link>
+              </>
             )}
           </div>
         </nav>

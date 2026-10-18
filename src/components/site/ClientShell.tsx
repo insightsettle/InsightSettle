@@ -21,11 +21,13 @@ export function ClientShell({ children }: { children: ReactNode }) {
   const { pathname, hash } = useLocation();
   const { user } = useSessionUser();
   const { data: auctionsAccess } = useQuery({ queryKey: ["auction-access"], queryFn: auctionAccess, enabled: !!user });
-  const { data: deals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
-  const { data: actionMilestones = [] } = useQuery({
+  const dealsQuery = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
+  const milestonesQuery = useQuery({
     queryKey: ["my-action-milestones", user?.id], enabled: !!user,
-    queryFn: async () => (await supabase.from("deal_milestones").select("deal_id, status").eq("status", "submitted")).data ?? [],
+    queryFn: async () => { const { data, error } = await supabase.from("deal_milestones").select("deal_id, status").eq("status", "submitted"); if (error) throw error; return data ?? []; },
   });
+  const deals = dealsQuery.data ?? [];
+  const actionMilestones = milestonesQuery.data ?? [];
   // Same action buckets shown by the existing customer dashboard, counted once per deal.
   const actionCount = deals.filter((d) => clientAction(d, user?.id, actionMilestones)).length;
   const onDeals = pathname.startsWith("/deals/") || hash === "saved-deals";
@@ -60,5 +62,5 @@ export function ClientShell({ children }: { children: ReactNode }) {
     </nav>
   );
   if (!showCustomerPrompts(isStaff, staffLoading)) return <p data-no-localize>{text("Loading…", "جارٍ التحميل…")}</p>;
-  return <AppShell navigation={nav} title={title} mobileNav={mobileNav}>{children}</AppShell>;
+  return <AppShell navigation={nav} title={title} mobileNav={mobileNav}>{(dealsQuery.isError || milestonesQuery.isError) && <div data-no-localize role="alert" className="mb-4 flex flex-wrap items-center gap-3 text-sm text-destructive">{text("Some account information could not be loaded.", "تعذّر تحميل بعض معلومات الحساب.")}<Button variant="outline" onClick={() => { void dealsQuery.refetch(); void milestonesQuery.refetch(); }}>{text("Try again", "حاول مرة أخرى")}</Button></div>}{children}</AppShell>;
 }

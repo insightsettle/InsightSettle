@@ -1,11 +1,12 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { MailCheck } from "lucide-react";
 
-import { SiteShell } from "@/components/site/SiteShell";
+import { AuthShell } from "@/components/site/AuthShell";
+import { useLocale } from "@/lib/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const Route = createFileRoute("/auth/check-email")({
+export const Route = createFileRoute("/auth_/check-email")({
   head: () => ({
     meta: [
       { title: "Confirm your email | Insight" },
@@ -27,28 +28,28 @@ export const Route = createFileRoute("/auth/check-email")({
 });
 
 function CheckEmailPage() {
+  const { text } = useLocale();
   return (
-    <SiteShell>
-      <div className="mx-auto max-w-md px-4 py-12 sm:py-16">
+    <AuthShell>
+      <div>
         <Card>
           <CardContent className="p-8 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-primary/10">
               <MailCheck className="size-7 text-primary" />
             </div>
-            <h1 className="mt-5 text-2xl font-extrabold">Your account was created</h1>
+            <h1 className="mt-5 text-2xl font-extrabold">{text('Your account was created', 'تم إنشاء حسابك')}</h1>
             <p className="mt-3 text-muted-foreground">
-              We sent a confirmation link to your email address. Open it and click the link to
-              activate your account, then come back and sign in.
+              {text("We sent a confirmation link to your email address. Open it to activate your account, then come back and sign in.", "أرسلنا رابط تأكيد إلى بريدك. افتحه لتفعيل حسابك، ثم عد وسجّل الدخول.")}
             </p>
             <Button asChild className="mt-6 w-full">
-              <Link to="/auth">Go to sign in</Link>
+              <Link to="/auth">{text('Go to sign in', 'الانتقال إلى تسجيل الدخول')}</Link>
             </Button>
             <p className="mt-4 text-xs text-muted-foreground">
-              Didn't receive the email? Check your spam folder.
+              {text("Didn't receive the email? Check your spam folder.", 'لم تصلك الرسالة؟ تحقّق من البريد غير المرغوب فيه.')}
             </p>
           </CardContent>
         </Card>
       </div>
-    </SiteShell>
+    </AuthShell>
   );
 }

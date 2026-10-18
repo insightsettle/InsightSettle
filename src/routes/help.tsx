@@ -1,3 +1,4 @@
+import { useLocale } from "@/lib/locale";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { LifeBuoy } from "lucide-react";
 
@@ -59,23 +60,21 @@ const faqs = [
 ];
 
 function HelpPage() {
+  const { text } = useLocale();
   return (
     <SiteShell>
-      <div className="mx-auto max-w-3xl px-4 py-14">
+      <div data-no-localize className="mx-auto max-w-3xl px-4 py-14">
         <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-          <LifeBuoy className="size-3.5" /> Help centre
-        </span>
-        <h1 className="mt-4 text-4xl font-extrabold">Questions, answered</h1>
-        <p className="mt-3 text-muted-foreground">
-          Everything you need to know before opening your first deal.
-        </p>
+          <LifeBuoy className="size-3.5" />{text("Help centre")}</span>
+        <h1 className="mt-4 text-4xl font-extrabold">{text("Questions, answered")}</h1>
+        <p className="mt-3 text-muted-foreground">{text("Everything you need to know before opening your first deal.")}</p>
 
         <div className="mt-8 space-y-3">
           {faqs.map((f) => (
-            <Card key={f.q}>
+            <Card key={text(f.q)}>
               <CardContent className="p-6">
-                <h2 className="font-bold">{f.q}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+                <h2 className="font-bold">{text(f.q)}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text(f.a)}</p>
               </CardContent>
             </Card>
           ))}
@@ -84,14 +83,11 @@ function HelpPage() {
         <Card className="mt-8 border-primary/25 bg-primary/5">
           <CardContent className="flex flex-wrap items-center justify-between gap-4 p-6">
             <div>
-              <p className="font-bold">Still stuck?</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Open the deal and use the note box for the Insight team, or create an account to
-                start a conversation.
-              </p>
+              <p className="font-bold">{text("Still stuck?")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{text("Open the deal and use the note box for the Insight team, or create an account to start a conversation.")}</p>
             </div>
             <Button asChild>
-              <Link to="/auth">Sign in</Link>
+              <Link to="/auth">{text("Sign in")}</Link>
             </Button>
           </CardContent>
         </Card>

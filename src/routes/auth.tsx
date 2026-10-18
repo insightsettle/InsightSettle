@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { SiteShell } from "@/components/site/SiteShell";
+import { AuthShell } from "@/components/site/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -66,7 +66,7 @@ function AuthPage() {
     setNotice(null);
     try {
       if (mode === "signup") {
-        if (!consent) throw new Error("Please agree to the terms and privacy policy to continue.");
+        if (!consent) throw new Error(text("Please agree to the terms and privacy policy to continue.", "وافق على الشروط وسياسة الخصوصية للمتابعة."));
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -89,14 +89,14 @@ function AuthPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       if (/email not confirmed/i.test(msg)) {
-        setError("Your email isn't confirmed yet. Open the confirmation link we sent to your inbox, then sign in.");
+        setError(text("Your email isn't confirmed yet. Open the confirmation link we sent to your inbox, then sign in.", "لم يُؤكد بريدك بعد. افتح رابط التأكيد في بريدك ثم سجّل الدخول."));
         return;
       }
       if (/invalid login credentials/i.test(msg)) {
-        setError("The email or password is incorrect. Check them or create a new account.");
+        setError(text("The email or password is incorrect. Check them or create a new account.", "البريد الإلكتروني أو كلمة المرور غير صحيحة. تحقّق منهما أو أنشئ حساباً."));
         return;
       }
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(text("Something went wrong. Please try again.", "تعذّر إكمال الطلب. حاول مرة أخرى."));
     } finally {
       setBusy(false);
     }
@@ -106,7 +106,7 @@ function AuthPage() {
     setError(null);
     setNotice(null);
     if (!email.trim()) {
-      setError("Enter your email above first, then choose \"Forgot password?\".");
+      setError(text("Enter your email above first, then choose \"Forgot password?\".", "أدخل بريدك الإلكتروني أولاً، ثم اختر «نسيت كلمة المرور؟»."));
       return;
     }
     setBusy(true);
@@ -115,9 +115,9 @@ function AuthPage() {
         redirectTo: window.location.origin + "/auth/reset",
       });
       if (resetError) throw resetError;
-      setNotice("If this email has an account, a link to set a new password is on its way. Check your inbox.");
+      setNotice(text("If this email has an account, a link to set a new password is on its way. Check your inbox.", "إذا كان لهذا البريد حساب، فستصلك رسالة لتعيين كلمة مرور جديدة. تحقّق من بريدك."));
     } catch {
-      setError("The reset link could not be sent right now. Please try again in a minute.");
+      setError(text("The reset link could not be sent right now. Please try again in a minute.", "تعذّر إرسال رابط الاستعادة الآن. حاول بعد دقيقة."));
     } finally {
       setBusy(false);
     }
@@ -129,7 +129,7 @@ function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      setError("Google sign-in did not complete. Please try again.");
+      setError(text("Google sign-in did not complete. Please try again.", "لم يكتمل الدخول باستخدام Google. حاول مرة أخرى."));
       return;
     }
     if (result.redirected) return;
@@ -137,8 +137,8 @@ function AuthPage() {
   }
 
   return (
-    <SiteShell>
-      <div data-no-localize className="mx-auto max-w-md px-4 py-12 sm:py-16">
+    <AuthShell>
+      <div>
         <h1 className="text-3xl font-extrabold">
           {mode === "signin" ? text("Welcome back", "مرحبًا بعودتك") : text("Create your account", "أنشئ حسابك")}
         </h1>
@@ -180,6 +180,7 @@ function AuthPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       inputMode="tel"
+                      dir="ltr"
                       autoComplete="tel"
                       placeholder="+966 5X XXX XXXX"
                     />
@@ -191,6 +192,7 @@ function AuthPage() {
                 <Input
                   id="email"
                   type="email"
+                  dir="ltr"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -202,6 +204,7 @@ function AuthPage() {
                 <Input
                   id="password"
                   type="password"
+                  dir="ltr"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -221,26 +224,26 @@ function AuthPage() {
                   <span>
                     {text("I agree to the", "أوافق على")} {" "}
                     <a href="/terms" className="text-primary hover:underline">{text("terms of service", "شروط الخدمة")}</a> {text("and consent to Insight processing my personal data under the", "وأوافق على معالجة إنسايت لبياناتي الشخصية وفق")} {" "}
-                    <a href="/privacy" className="text-primary hover:underline">{text("privacy policy", "سياسة الخصوصية")}</a> (Saudi PDPL).
+                    <a href="/privacy" className="text-primary hover:underline">{text("privacy policy", "سياسة الخصوصية")}</a> ({text("Saudi PDPL", "نظام حماية البيانات الشخصية السعودي")}).
                   </span>
                 </label>
               )}
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              {notice && <p className="text-sm text-primary">{notice}</p>}
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              {notice && <p role="status" className="text-sm text-primary">{notice}</p>}
 
               <Button className="w-full" type="submit" disabled={busy}>
                 {busy ? text("Please wait…", "يرجى الانتظار…") : mode === "signin" ? text("Sign in", "تسجيل الدخول") : text("Create account", "إنشاء حساب")}
               </Button>
               {mode === "signin" && (
-                <button type="button" className="w-full text-center text-sm font-medium text-primary hover:underline" onClick={handleForgot} disabled={busy}>
+                <Button type="button" variant="link" className="w-full whitespace-normal text-center" onClick={handleForgot} disabled={busy}>
                   {text("Forgot password?", "نسيت كلمة المرور؟")}
-                </button>
+                </Button>
               )}
             </form>
 
             <p className="mt-5 text-center text-sm text-muted-foreground">
               {mode === "signin" ? text("New to Insight?", "جديد في إنسايت؟") : text("Already have an account?", "لديك حساب بالفعل؟")}{" "}
-              <button
+              <Button variant="link"
                 type="button"
                 className="font-semibold text-primary hover:underline"
                 onClick={() => {
@@ -250,11 +253,11 @@ function AuthPage() {
                 }}
               >
                 {mode === "signin" ? text("Create an account", "إنشاء حساب") : text("Sign in", "تسجيل الدخول")}
-              </button>
+              </Button>
             </p>
           </CardContent>
         </Card>
       </div>
-    </SiteShell>
+    </AuthShell>
   );
 }

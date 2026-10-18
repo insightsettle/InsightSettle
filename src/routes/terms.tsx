@@ -1,3 +1,4 @@
+import { useLocale } from "@/lib/locale";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { SiteShell } from "@/components/site/SiteShell";
@@ -63,18 +64,17 @@ const sections = [
 ];
 
 function TermsPage() {
+  const { text } = useLocale();
   return (
     <SiteShell>
-      <div className="mx-auto max-w-3xl px-4 py-14">
-        <h1 className="text-4xl font-extrabold">Terms of service</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Plain-language summary of the rules that apply to every Insight deal.
-        </p>
+      <div data-no-localize className="mx-auto max-w-3xl px-4 py-14">
+        <h1 className="text-4xl font-extrabold">{text("Terms of service")}</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{text("Plain-language summary of the rules that apply to every Insight deal.")}</p>
         <div className="mt-8 space-y-7">
           {sections.map((s) => (
-            <section key={s.h}>
-              <h2 className="text-lg font-bold">{s.h}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.p}</p>
+            <section key={text(s.h)}>
+              <h2 className="text-lg font-bold">{text(s.h)}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text(s.p)}</p>
             </section>
           ))}
         </div>

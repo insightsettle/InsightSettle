@@ -1,3 +1,4 @@
+import { useLocale } from "@/lib/locale";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { Check, ShieldCheck, UserCheck, Users } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -68,28 +69,27 @@ const rows = [
   { a: "Access audit records", v: 0, u: 0, m: 1 },
 ];
 function Page() {
+  const { text } = useLocale();
   return (
     <SiteShell>
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <p className="text-sm font-semibold text-primary">ACCESS CONTROL</p>
-        <h1 className="mt-2 text-4xl font-extrabold">Clear roles. Separated responsibilities.</h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          No participant can unilaterally control the other party's funds.
-        </p>
+      <div data-no-localize className="mx-auto max-w-6xl px-4 py-16">
+        <p className="text-sm font-semibold text-primary">{text("ACCESS CONTROL")}</p>
+        <h1 className="mt-2 text-4xl font-extrabold">{text("Clear roles. Separated responsibilities.")}</h1>
+        <p className="mt-3 max-w-2xl text-muted-foreground">{text("No participant can unilaterally control the other party's funds.")}</p>
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
           {roles.map((r) => (
-            <Card key={r.name}>
+            <Card key={text(r.name)}>
               <CardContent className="p-6">
                 <span className="grid size-10 place-items-center rounded-md bg-primary/10 text-primary">
                   <r.icon />
                 </span>
-                <h2 className="mt-4 text-lg font-bold">{r.name}</h2>
-                <p className="text-xs text-muted-foreground">{r.tag}</p>
+                <h2 className="mt-4 text-lg font-bold">{text(r.name)}</h2>
+                <p className="text-xs text-muted-foreground">{text(r.tag)}</p>
                 <ul className="mt-4 space-y-2">
                   {r.items.map((i) => (
                     <li key={i} className="flex gap-2 text-sm text-muted-foreground">
                       <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                      {i}
+                      {text(i)}
                     </li>
                   ))}
                 </ul>
@@ -97,21 +97,21 @@ function Page() {
             </Card>
           ))}
         </div>
-        <h2 className="mt-16 text-2xl font-extrabold">Permission matrix</h2>
+        <h2 className="mt-16 text-2xl font-extrabold">{text("Permission matrix")}</h2>
         <div className="mt-6 overflow-x-auto border border-border">
           <table className="w-full min-w-[34rem] text-left text-sm">
             <thead className="bg-muted">
               <tr className="[&>th]:px-4 [&>th]:py-3">
-                <th>Action</th>
-                <th className="text-center">Visitor</th>
-                <th className="text-center">Verified user</th>
-                <th className="text-center">Administrator</th>
+                <th>{text("Action")}</th>
+                <th className="text-center">{text("Visitor")}</th>
+                <th className="text-center">{text("Verified user")}</th>
+                <th className="text-center">{text("Administrator")}</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.a} className="border-t [&>td]:px-4 [&>td]:py-3">
-                  <td>{r.a}</td>
+                <tr key={text(r.a)} className="border-t [&>td]:px-4 [&>td]:py-3">
+                  <td>{text(r.a)}</td>
                   {[r.v, r.u, r.m].map((x, i) => (
                     <td key={i} className="text-center">
                       {x ? (
@@ -127,7 +127,7 @@ function Page() {
           </table>
         </div>
         <Button asChild className="mt-10">
-          <Link to="/services">Explore services & fees</Link>
+          <Link to="/services">{text("Explore services & fees")}</Link>
         </Button>
       </div>
     </SiteShell>
