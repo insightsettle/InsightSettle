@@ -17,7 +17,11 @@ export type FxQuote = {
   expires_at: string;
   breakdown: FeeBreakdown;
   payIn: PayInQuote;
+  /** Per-milestone funding: the milestone this quote funds (breakdown above is that milestone's share). */
+  milestone?: { id: string; seq: number; title: string; amount: number };
 };
+
+type QuoteMilestone = { id: string; seq: number; title: string; amount: number; breakdown: FeeBreakdown };
 
 export type DealPricingView = {
   breakdown: FeeBreakdown;
@@ -43,17 +47,38 @@ export const requestFxQuote = createServerFn({ method: "POST" })
     const { data: deal, error } = await admin.from("deals").select("*").eq("id", data.dealId).maybeSingle();
     if (error) throw error;
     if (!deal || deal.buyer_id !== context.userId) throw new Error("Only the buyer can request a quote.");
-    if (deal.status !== "pending_funding") throw new Error("This deal is not waiting for funding.");
+    const perMilestone = deal.funding_mode === "per_milestone";
+    if (!perMilestone && deal.status !== "pending_funding") throw new Error("This deal is not waiting for funding.");
 
     const { priceDeal } = await import("@/lib/pricing.server");
     const p = await priceDeal(admin, deal, data.payCurrency);
+    let milestone: QuoteMilestone | null = null;
+    if (perMilestone) {
+      // The next milestone is charged its pro-rata share of the whole-deal fee, locked by the first funding,
+      // converted at today's rate (D-43, C07 rule 8).
+      const { milestoneFundingGuard, getDealPricingLocked } = await import("@/lib/deal-rules.server");
+      const blocked = await milestoneFundingGuard(admin, deal);
+      if (blocked) throw new Error(blocked);
+      const { nextUnfundedMilestone } = await import("@/lib/milestones.server");
+      const next = await nextUnfundedMilestone(admin, deal.id);
+      if (!next) throw new Error("Every milestone is already funded.");
+      const { milestoneFundingBreakdown } = await import("@/lib/milestones");
+      const { payInQuote } = await import("@/lib/fees");
+      const dealBreakdown = deal.status === "pending_funding" ? p.breakdown : await getDealPricingLocked(admin, deal);
+      const mb = milestoneFundingBreakdown(dealBreakdown, next.amounts, next.index);
+      const payIn = payInQuote(mb, p.payIn.payCurrency, p.payIn.providerRate, p.payIn.customerRate);
+      milestone = { id: next.milestone.id, seq: next.milestone.seq, title: next.milestone.title, amount: mb.amount, breakdown: mb };
+      p.breakdown = dealBreakdown;
+      p.payIn = payIn;
+    }
+    const shown = milestone?.breakdown ?? p.breakdown;
     const { data: q, error: qErr } = await admin
       .from("fx_quotes")
       .insert({
         deal_id: deal.id,
         source_currency: deal.currency,
         target_currency: p.payIn.payCurrency,
-        source_amount: Number(deal.amount),
+        source_amount: shown.amount,
         provider_rate: p.payIn.providerRate,
         customer_rate: p.payIn.customerRate,
         provider_amount: p.payIn.escrowConversion,
@@ -62,7 +87,7 @@ export const requestFxQuote = createServerFn({ method: "POST" })
         fee: p.payIn.insightFee,
         vat: p.payIn.vatPayable,
         total: p.payIn.total,
-        breakdown: { ...p, terms_version: deal.terms_version },
+        breakdown: { ...p, terms_version: deal.terms_version, ...(milestone ? { milestone } : {}) },
         expires_at: new Date(Date.now() + QUOTE_MINUTES * 60_000).toISOString(),
         created_by: context.userId,
       })
@@ -80,8 +105,9 @@ export const requestFxQuote = createServerFn({ method: "POST" })
       vat: Number(q.vat),
       total: Number(q.total),
       expires_at: q.expires_at,
-      breakdown: p.breakdown,
+      breakdown: shown,
       payIn: p.payIn,
+      ...(milestone ? { milestone: { id: milestone.id, seq: milestone.seq, title: milestone.title, amount: milestone.amount } } : {}),
     };
   });
 
@@ -105,6 +131,8 @@ export const getDealPricing = createServerFn({ method: "GET" })
       .eq("deal_id", deal.id)
       .eq("kind", "funding")
       .eq("status", "succeeded")
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
     if (fund?.fx_quote_id) {
       const { data: q } = await admin.from("fx_quotes").select("breakdown").eq("id", fund.fx_quote_id).maybeSingle();

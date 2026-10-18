@@ -81,6 +81,39 @@ export function allocateMilestones(b: FeeBreakdown, amounts: number[], retention
   });
 }
 
+/**
+ * Per-milestone funding (D-43): the fee is still computed once on the whole deal and locked by the first
+ * milestone funding. Milestone `index` is funded with its own pro-rata share of the buyer's fee and VAT
+ * (the last milestone takes the rounding remainder) and invoices the supplier's pro-rata share, which is the
+ * same share `allocateMilestones` later deducts on release. Summed over all milestones every figure equals
+ * the whole-deal breakdown exactly.
+ */
+export function milestoneFundingBreakdown(b: FeeBreakdown, amounts: number[], index: number): FeeBreakdown {
+  if (index < 0 || index >= amounts.length) throw new Error("Milestone not found.");
+  const c = b.currency;
+  const seller = allocateMilestones(b, amounts, 0)[index]!;
+  let shareLeft = b.buyerShare;
+  let vatLeft = b.buyerVat;
+  let buyerShare = 0;
+  let buyerVat = 0;
+  amounts.forEach((gross, i) => {
+    const last = i === amounts.length - 1;
+    const share = last ? roundMoney(shareLeft, c) : roundMoney((b.buyerShare * gross) / b.amount, c);
+    const vat = last ? roundMoney(vatLeft, c) : roundMoney((b.buyerVat * gross) / b.amount, c);
+    shareLeft = roundMoney(shareLeft - share, c);
+    vatLeft = roundMoney(vatLeft - vat, c);
+    if (i === index) { buyerShare = share; buyerVat = vat; }
+  });
+  const amount = amounts[index]!;
+  return {
+    currency: c, amount, fee: roundMoney(buyerShare + seller.feeShare, c), feePayer: b.feePayer,
+    buyerShare, sellerShare: seller.feeShare, buyerVatRate: b.buyerVatRate, sellerVatRate: b.sellerVatRate,
+    buyerVat, sellerVat: seller.vat,
+    buyerTotal: roundMoney(amount + buyerShare + buyerVat, c),
+    supplierNet: roundMoney(amount - seller.feeShare - seller.vat, c),
+  };
+}
+
 /** Ledger rows for one milestone release, balanced in the deal currency; retention goes to its own sub-account. */
 export function milestoneReleaseLedger(currency: string, a: Omit<MilestoneAllocation, "seq">) {
   return [

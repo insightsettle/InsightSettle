@@ -163,9 +163,16 @@ export async function addDisputeEvidence(dealId: string, disputeId: string, note
   await announce(dealId, "New dispute evidence was added", note || name, true);
 }
 
+export type TaxInvoiceRow = { invoice_number: string; fee: number; vat_rate: number; vat: number; total: number; currency: string; issued_at: string; milestone_id: string | null };
+
+/** Every tax invoice on a deal, oldest first: one for whole-deal funding, or one per funded milestone. */
+export async function getTaxInvoices(dealId: string) {
+  const { data } = await (supabase as any).from("tax_invoices").select("*").eq("deal_id", dealId).order("issued_at");
+  return (data ?? []) as TaxInvoiceRow[];
+}
+
 export async function getTaxInvoice(dealId: string) {
-  const { data } = await supabase.from("tax_invoices").select("*").eq("deal_id", dealId).maybeSingle();
-  return data as null | { invoice_number: string; fee: number; vat_rate: number; vat: number; total: number; currency: string; issued_at: string };
+  return (await getTaxInvoices(dealId))[0] ?? null;
 }
 
 

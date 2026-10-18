@@ -16,31 +16,37 @@ async function lockedPricing(admin: any, dealId: string): Promise<{ breakdown: F
   return q?.breakdown?.breakdown ? q.breakdown : null;
 }
 
+/**
+ * Tax invoice for one funding, from the locked quote numbers: one per deal for whole-deal funding, one per
+ * milestone for per-milestone funding. A repeat confirmation never issues a second invoice.
+ */
+export async function issueFundingInvoice(admin: any, dealId: string, milestoneId: string | null, b: FeeBreakdown, payIn: PayInQuote) {
+  const lines = [
+    { party: "buyer", fee: payIn.insightFee, vat_rate: b.buyerVatRate, vat: payIn.vatPayable, currency: payIn.payCurrency },
+    { party: "supplier", fee: b.sellerShare, vat_rate: b.sellerVatRate, vat: b.sellerVat, currency: b.currency },
+  ].filter((l) => l.fee > 0);
+  const first = lines[0];
+  if (!first) return;
+  const { error } = await admin.from("tax_invoices").insert({
+    deal_id: dealId,
+    milestone_id: milestoneId,
+    fee: first.fee,
+    vat_rate: first.vat_rate,
+    vat: first.vat,
+    total: roundMoney(first.fee + first.vat, first.currency),
+    currency: first.currency,
+    lines,
+  });
+  if (error && String(error.code) !== "23505") throw error;
+}
+
 /** Ledger rows (balanced per currency) and the tax invoice, from the same locked quote numbers. */
 async function writeLedgerAndInvoice(admin: any, tx: any, ref: string) {
   const pricing = tx.kind === "refund" ? null : await lockedPricing(admin, tx.deal_id);
   let rows: { account: string; debit: number; credit: number; currency: string }[];
   if (tx.kind === "funding" && pricing) {
     rows = fundingLedger(pricing.breakdown, pricing.payIn);
-    const b = pricing.breakdown;
-    const lines = [
-      { party: "buyer", fee: pricing.payIn.insightFee, vat_rate: b.buyerVatRate, vat: pricing.payIn.vatPayable, currency: pricing.payIn.payCurrency },
-      { party: "supplier", fee: b.sellerShare, vat_rate: b.sellerVatRate, vat: b.sellerVat, currency: b.currency },
-    ].filter((l) => l.fee > 0);
-    const first = lines[0];
-    if (first)
-      await admin.from("tax_invoices").upsert(
-        {
-          deal_id: tx.deal_id,
-          fee: first.fee,
-          vat_rate: first.vat_rate,
-          vat: first.vat,
-          total: roundMoney(first.fee + first.vat, first.currency),
-          currency: first.currency,
-          lines,
-        },
-        { onConflict: "deal_id", ignoreDuplicates: true },
-      );
+    await issueFundingInvoice(admin, tx.deal_id, null, pricing.breakdown, pricing.payIn);
   } else if (tx.kind === "release" && pricing) {
     const b = pricing.breakdown;
     // C09-D15: never infer gross from amount: newly created dispute payouts already contain net.

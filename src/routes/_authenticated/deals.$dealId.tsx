@@ -272,6 +272,10 @@ function OrdinaryDealPage() {
   const myRating = (ratings.data ?? []).find((r) => r.rater_id === user?.id);
   const ratingAboutMe = (ratings.data ?? []).find((r) => r.ratee_id === user?.id);
   const dealClosed = status === "released" || status === "refunded";
+  // Per-milestone funding (D-43): the buyer funds the next milestone while the contract is in progress.
+  const perMilestone = (deal as any).funding_mode === "per_milestone";
+  const nextToFund = perMilestone ? (milestonesQ.data ?? []).find((m: any) => m.status === "pending") ?? null : null;
+  const canFund = isBuyer && (perMilestone ? ["pending_funding", "in_progress"].includes(status) && !!nextToFund : status === "pending_funding");
 
   return (
     <SiteShell>
@@ -302,7 +306,7 @@ function OrdinaryDealPage() {
                     <>
                       <Info label={text("Buyer fee share", "حصة المشتري من الرسوم")} value={`${money(fb.buyerShare)} + ${fb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `VAT ${Math.round(fb.buyerVatRate * 100)}% ${text(deal.delivery_country ?? "SA")} ${money(fb.buyerVat)}`}`} />
                       <Info label={text("Supplier fee share", "حصة المورد من الرسوم")} value={`${money(fb.sellerShare)} + ${fb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `VAT ${Math.round(fb.sellerVatRate * 100)}% ${text(deal.supplier_country ?? "SA")} ${money(fb.sellerVat)}`}`} />
-                      <Info label="Buyer pays" value={pin && pin.payCurrency !== deal.currency ? `${money(fb.buyerTotal)} ≈ ${money(pin.total, pin.payCurrency)}` : money(fb.buyerTotal)} />
+                      <Info label="Buyer pays" value={pin && !perMilestone && pin.payCurrency !== deal.currency ? `${money(fb.buyerTotal)} ≈ ${money(pin.total, pin.payCurrency)}` : money(fb.buyerTotal)} />
                       <Info label="Supplier receives" value={money(fb.supplierNet)} />
                     </>
                   )}
@@ -320,7 +324,8 @@ function OrdinaryDealPage() {
                     {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
                   </p>
                 )}
-                {pin && <div data-no-localize className="mt-5 border-t pt-4"><p className="text-xs text-muted-foreground">{text(isBuyer ? "Total paid" : "Supplier receives", isBuyer ? "إجمالي المدفوع" : "يستلم المورد")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{isBuyer ? money(pin.total, pin.payCurrency) : fb ? money(fb.supplierNet) : "—"}</bdi></p><p className="mt-3 text-xs leading-6 text-muted-foreground">{text("FX rate and spread belong to the payment provider.", "سعر الصرف والفارق يعودان لمزوّد الدفع.")} <bdi>1 {deal.currency} = {pin.customerRate} {pin.payCurrency}</bdi></p></div>}
+                {perMilestone && <p data-no-localize className="mt-5 border-t pt-4 text-xs leading-6 text-muted-foreground">{text("This contract is funded milestone by milestone. Each milestone is paid at that day's exchange rate with its share of the fee; each funding gets its own tax invoice.", "يُموَّل هذا العقد مرحلةً بمرحلة. تُدفع كل مرحلة بسعر صرف يومها مع حصتها من الرسوم، ولكل تمويل فاتورة ضريبية مستقلة.")}</p>}
+                {pin && !perMilestone && <div data-no-localize className="mt-5 border-t pt-4"><p className="text-xs text-muted-foreground">{text(isBuyer ? "Total paid" : "Supplier receives", isBuyer ? "إجمالي المدفوع" : "يستلم المورد")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{isBuyer ? money(pin.total, pin.payCurrency) : fb ? money(fb.supplierNet) : "—"}</bdi></p><p className="mt-3 text-xs leading-6 text-muted-foreground">{text("FX rate and spread belong to the payment provider.", "سعر الصرف والفارق يعودان لمزوّد الدفع.")} <bdi>1 {deal.currency} = {pin.customerRate} {pin.payCurrency}</bdi></p></div>}
                 {transactions.data?.filter((t) => t.kind === "funding" && t.status === "succeeded").map((t) => <p key={t.id} className="mt-3 text-xs text-muted-foreground">{text("Provider confirmation", "تأكيد مزوّد الدفع")}: <bdi>{t.provider_ref ?? "—"}</bdi> · {formatDate(t.created_at)}</p>)}
               </CardContent>
             </Card>
@@ -488,11 +493,12 @@ function OrdinaryDealPage() {
                   movement is recorded below with its status.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {isBuyer && status === "pending_funding" && (
+                  {canFund && (
                     <div className="w-full rounded-lg border p-4 text-sm">
                       {quote && !quoteExpired ? (
                         <div className="space-y-3" data-no-localize>
-                          <Info label={text("Deal amount (provider conversion + provider spread)", "مبلغ الصفقة (تحويل المزوّد + فارق المزوّد)")} value={money(quoteAmountLine(quote), quote.target_currency)} />
+                          {quote.milestone && <Info label={text("Milestone", "المرحلة")} value={`${quote.milestone.seq} · ${quote.milestone.title} · ${money(quote.milestone.amount)}`} />}
+                          <Info label={text(quote.milestone ? "Milestone amount (provider conversion + provider spread)" : "Deal amount (provider conversion + provider spread)", quote.milestone ? "مبلغ المرحلة (تحويل المزوّد + فارق المزوّد)" : "مبلغ الصفقة (تحويل المزوّد + فارق المزوّد)")} value={money(quoteAmountLine(quote), quote.target_currency)} />
                           <Info label={text("Your fee share", "حصتك من الرسوم")} value={money(quote.fee, quote.target_currency)} />
                           <Info label={quote.breakdown.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${Math.round(quote.breakdown.buyerVatRate * 100)}%`} value={money(quote.vat, quote.target_currency)} />
                           <div className="border-t pt-3"><Info label={text("Total", "الإجمالي")} value={money(quote.total, quote.target_currency)} /></div>
@@ -504,7 +510,9 @@ function OrdinaryDealPage() {
                           <span className="text-muted-foreground">
                             {quoteExpired
                               ? text("Your exchange rate has expired. Please request a new quote.", "انتهت صلاحية سعر الصرف. اطلب عرضاً جديداً.")
-                              : text("Lock an exchange rate for 15 minutes before paying.", "ثبّت سعر الصرف لمدة 15 دقيقة قبل الدفع.")}
+                              : nextToFund
+                                ? text(`Next: fund milestone ${nextToFund.seq} (${money(Number(nextToFund.amount))}). Lock an exchange rate for 15 minutes before paying.`, `التالي: تمويل المرحلة ${nextToFund.seq} (${money(Number(nextToFund.amount))}). ثبّت سعر الصرف لمدة 15 دقيقة قبل الدفع.`)
+                                : text("Lock an exchange rate for 15 minutes before paying.", "ثبّت سعر الصرف لمدة 15 دقيقة قبل الدفع.")}
                           </span>
                           <label className="flex items-center gap-2" data-no-localize>
                             <span className="text-muted-foreground">{text("Pay in", "الدفع بعملة")}</span>
@@ -541,7 +549,7 @@ function OrdinaryDealPage() {
                       )}
                     </div>
                   )}
-                  {isBuyer && status === "pending_funding" && (
+                  {canFund && (
                     <Button
                       onClick={() =>
                         payment.mutate(() =>
@@ -560,10 +568,10 @@ function OrdinaryDealPage() {
                         !quote || quoteExpired
                       }
                     >
-                      <Wallet /> {payment.isPending ? text("Starting payment…", "جارٍ بدء الدفع…") : text("Fund the deal", "موّل الصفقة")}
+                      <Wallet /> {payment.isPending ? text("Starting payment…", "جارٍ بدء الدفع…") : nextToFund ? text(`Fund milestone ${nextToFund.seq}`, `موّل المرحلة ${nextToFund.seq}`) : text("Fund the deal", "موّل الصفقة")}
                     </Button>
                   )}
-                  {isBuyer && status === "pending_funding" && quote && !quoteExpired && (
+                  {canFund && quote && !quoteExpired && (
                     <Button
                       variant="ghost"
                       className="text-muted-foreground"

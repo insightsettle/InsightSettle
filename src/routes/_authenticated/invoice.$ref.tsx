@@ -4,7 +4,8 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { getTaxInvoice } from "@/lib/deal-actions";
+import { getTaxInvoices, type TaxInvoiceRow } from "@/lib/deal-actions";
+import { useMilestones } from "@/components/deal/DealPanels";
 import { getDealByRef } from "@/lib/deals";
 
 export const Route = createFileRoute("/_authenticated/invoice/$ref")({
@@ -37,28 +38,14 @@ function zatcaTlv(values: string[]) {
   return btoa(bin);
 }
 
-function InvoicePage() {
-  const { ref } = Route.useParams();
-  const deal = useQuery({ queryKey: ["deal", ref], queryFn: () => getDealByRef(ref) });
-  const inv = useQuery({
-    queryKey: ["invoice", deal.data?.id],
-    queryFn: () => getTaxInvoice(deal.data!.id),
-    enabled: !!deal.data,
-  });
+function InvoiceBlock({ i, deal, label }: { i: TaxInvoiceRow; deal: { ref: string; title: string }; label: string | null }) {
   const [qr, setQr] = useState<string | null>(null);
-  const i = inv.data;
-
   useEffect(() => {
-    if (!i) return;
     const payload = zatcaTlv([SELLER, VAT_NUMBER, new Date(i.issued_at).toISOString(), Number(i.total).toFixed(2), Number(i.vat).toFixed(2)]);
     QRCode.toDataURL(payload, { margin: 1, width: 180 }).then(setQr);
   }, [i]);
-
-  if (deal.isLoading || inv.isLoading) return <p className="p-10 text-center">Loading…</p>;
-  if (!i || !deal.data) return <p className="p-10 text-center">No invoice has been issued for this deal yet.</p>;
-
   return (
-    <div className="mx-auto max-w-2xl bg-background p-8 text-foreground" dir="ltr">
+    <section className="break-inside-avoid border-b border-border pb-8 pt-8 first:pt-0 last:border-b-0">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-extrabold">Simplified tax invoice</h1>
@@ -73,14 +60,42 @@ function InvoicePage() {
         <tbody className="divide-y divide-border">
           <tr><td className="py-2 text-muted-foreground">Invoice number</td><td className="py-2 text-right font-semibold">{i.invoice_number}</td></tr>
           <tr><td className="py-2 text-muted-foreground">Issued</td><td className="py-2 text-right">{new Date(i.issued_at).toLocaleString("en-GB")}</td></tr>
-          <tr><td className="py-2 text-muted-foreground">Deal</td><td className="py-2 text-right">{deal.data.ref} — {deal.data.title}</td></tr>
+          <tr><td className="py-2 text-muted-foreground">Deal</td><td className="py-2 text-right">{deal.ref} — {deal.title}</td></tr>
+          {label && <tr><td className="py-2 text-muted-foreground">Funding</td><td className="py-2 text-right">{label}</td></tr>}
           <tr><td className="py-2 text-muted-foreground">Escrow service fee</td><td className="py-2 text-right">{i.currency} {Number(i.fee).toFixed(2)}</td></tr>
           <tr><td className="py-2 text-muted-foreground">VAT ({(Number(i.vat_rate) * 100).toFixed(0)}%)</td><td className="py-2 text-right">{i.currency} {Number(i.vat).toFixed(2)}</td></tr>
           <tr><td className="py-2 font-bold">Total</td><td className="py-2 text-right font-bold">{i.currency} {Number(i.total).toFixed(2)}</td></tr>
         </tbody>
       </table>
+    </section>
+  );
+}
+
+function InvoicePage() {
+  const { ref } = Route.useParams();
+  const deal = useQuery({ queryKey: ["deal", ref], queryFn: () => getDealByRef(ref) });
+  const inv = useQuery({
+    queryKey: ["invoices", deal.data?.id],
+    queryFn: () => getTaxInvoices(deal.data!.id),
+    enabled: !!deal.data,
+  });
+  const milestones = useMilestones(deal.data?.id);
+  const list = inv.data ?? [];
+
+  if (deal.isLoading || inv.isLoading) return <p className="p-10 text-center">Loading…</p>;
+  if (!list.length || !deal.data) return <p className="p-10 text-center">No invoice has been issued for this deal yet.</p>;
+
+  const labelFor = (i: TaxInvoiceRow) => {
+    if (!i.milestone_id) return null;
+    const m = (milestones.data ?? []).find((x: any) => x.id === i.milestone_id);
+    return m ? `Milestone ${m.seq} — ${m.title}` : "Milestone";
+  };
+
+  return (
+    <div className="mx-auto max-w-2xl bg-background p-8 text-foreground" dir="ltr">
+      {list.map((i) => <InvoiceBlock key={i.invoice_number} i={i} deal={deal.data!} label={labelFor(i)} />)}
       <p className="mt-6 text-xs text-muted-foreground">
-        This invoice covers the Insight service fee only. The deal amount itself is held and settled by the payment provider (simulated in this demo).
+        {list.length > 1 ? "These invoices cover" : "This invoice covers"} the Insight service fee only. The deal amount itself is held and settled by the payment provider (simulated in this demo).
       </p>
       <Button className="mt-6 print:hidden" onClick={() => window.print()}>
         Print or save as PDF

@@ -46,6 +46,7 @@ function NewDeal() {
   const [useMilestones, setUseMilestones] = useState(false);
   const [rows, setRows] = useState<EditableMilestone[]>([blankRow(), blankRow()]);
   const [retention, setRetention] = useState("5");
+  const [fundingMode, setFundingMode] = useState<"upfront" | "per_milestone">("upfront");
   const [dlp, setDlp] = useState("90");
   const [revisions, setRevisions] = useState("2");
   const createFn = useServerFn(createTypedDeal);
@@ -129,7 +130,7 @@ function NewDeal() {
         revisionsIncluded: Math.min(20, Math.max(0, Number(revisions) || 0)),
         retentionPercent: Math.min(10, Math.max(0, Number(retention) || 0)),
         defectsLiabilityDays: Math.min(365, Math.max(0, Math.round(Number(dlp) || 0))),
-        fundingMode: "upfront",
+        fundingMode: milestonesOn ? fundingMode : "upfront",
         milestones: milestonesOn ? rows.map(toInput) : [],
       } });
       setCreated(deal);
@@ -401,14 +402,16 @@ function NewDeal() {
                     <Label htmlFor="dlp">{text("Defects liability period (days)")}</Label>
                     <Input id="dlp" type="number" min={0} max={365} dir="ltr" value={dlp} onChange={(e) => setDlp(e.target.value)} />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="funding">{text("Funding")}</Label>
-                    <select id="funding" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value="upfront" onChange={() => undefined}>
-                      <option value="upfront">{text("Fund all upfront")}</option>
-                    </select>
-                  </div>
                 </div>
               )}
+              <div className="space-y-2 sm:max-w-sm">
+                <Label htmlFor="funding">{text("Funding")}</Label>
+                <select id="funding" className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value={fundingMode} onChange={(e) => setFundingMode(e.target.value as "upfront" | "per_milestone")}>
+                  <option value="upfront">{text("Fund all upfront")}</option>
+                  <option value="per_milestone">{text("Fund each milestone when it starts")}</option>
+                </select>
+                <p className="text-xs text-muted-foreground">{fundingMode === "per_milestone" ? text("The buyer funds milestone 1 to start, then each next milestone before work on it begins. Each funding is charged its share of the fee at that day's rate.") : text("The buyer funds the whole contract once; each milestone is released from it.")}</p>
+              </div>
               {planError && <p className="text-sm text-destructive">{planError}</p>}
             </div>
           )}

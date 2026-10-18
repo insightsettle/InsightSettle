@@ -91,8 +91,8 @@ export const createTypedDeal = createServerFn({ method: "POST" })
     const { data: me } = await admin.from("profiles").select("account_state").eq("id", context.userId).maybeSingle();
     if (me && me.account_state !== "active") throw new Error(`Your account is ${me.account_state}, so this action is not available. Contact Insight support.`);
     const type = data.dealType as DealType;
-    if (data.fundingMode === "per_milestone") throw new Error("Funding each milestone separately is not available yet. Choose fund all upfront.");
     const ms = type === "goods" ? [] : data.milestones;
+    if (data.fundingMode === "per_milestone" && ms.length === 0) throw new Error("Funding each milestone separately needs a milestone plan.");
     const invalid = validateMilestones(data.amount, data.currency, ms, type);
     if (invalid) throw new Error(invalid);
     const isContract = type === "contracting";
@@ -115,7 +115,7 @@ export const createTypedDeal = createServerFn({ method: "POST" })
         revisions_included: type === "freelance" ? data.revisionsIncluded : 0,
         retention_percent: isContract ? data.retentionPercent : 0,
         defects_liability_days: isContract ? data.defectsLiabilityDays : 0,
-        funding_mode: "upfront",
+        funding_mode: ms.length ? data.fundingMode : "upfront",
       })
       .select("*")
       .single();
@@ -152,7 +152,9 @@ export const proposeVariation = createServerFn({ method: "POST" })
     if (invalid) throw new Error(invalid);
     const { listMilestones } = await import("@/lib/milestones.server");
     const current = await listMilestones(admin, deal.id);
-    const locked = current.filter((m) => !["pending", "funded"].includes(m.status));
+    // Per-milestone funding: a funded milestone was paid at its own amount, so it is locked too.
+    const open = deal.funding_mode === "per_milestone" ? ["pending"] : ["pending", "funded"];
+    const locked = current.filter((m) => !open.includes(m.status));
     for (const l of locked) {
       const p = data.milestones.find((m) => m.id === l.id);
       if (!p || p.amount !== Number(l.amount) || p.title !== l.title)

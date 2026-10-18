@@ -42,6 +42,22 @@ export async function fundingGuard(admin: any, dealId: string) {
   });
 }
 
+/**
+ * Per-milestone funding (D-43): the first milestone follows the normal funding rules; later milestones can be
+ * funded while the contract is in progress, as long as the latest terms version is accepted, the deal is not
+ * frozen and the supplier's payout account is still verified.
+ */
+export async function milestoneFundingGuard(admin: any, deal: any) {
+  if (deal.funding_mode !== "per_milestone") return "This deal is funded upfront.";
+  if (deal.status === "pending_funding") return fundingGuard(admin, deal.id);
+  if (deal.status !== "in_progress") return "This deal is not waiting for funding.";
+  if (deal.frozen) return "This deal is on hold. Contact Insight support.";
+  const terms = await latestTerms(admin, deal.id);
+  if (deal.terms_status !== "agreed" || !terms || terms.version !== deal.terms_version || !terms.accepted_at)
+    return "The latest terms version must be accepted by both parties before funding.";
+  return (await supplierPayoutOk(admin, deal)) ? null : PAYOUT_ACCOUNT_MESSAGE;
+}
+
 /** Fee breakdown locked by the buyer's funding quote (falls back to a live price). */
 export async function getDealPricingLocked(admin: any, deal: any): Promise<FeeBreakdown> {
   const { data: fund } = await admin

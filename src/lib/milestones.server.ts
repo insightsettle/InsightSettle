@@ -81,6 +81,21 @@ export async function settleMilestoneTx(admin: any, tx: any, ref: string) {
   const c = tx.currency;
   const now = new Date().toISOString();
   let rows: { account: string; debit: number; credit: number; currency: string }[] = [];
+  if (tx.milestone_id && tx.kind === "funding") {
+    // Per-milestone funding: ledger and invoice from this funding's own quote; only this milestone is funded.
+    const { data: q } = await admin.from("fx_quotes").select("breakdown").eq("id", tx.fx_quote_id).maybeSingle();
+    const mb = q?.breakdown?.milestone?.breakdown;
+    const payIn = q?.breakdown?.payIn;
+    if (!mb || !payIn || q.breakdown.milestone.id !== tx.milestone_id) throw new Error("The milestone funding quote is missing.");
+    const { fundingLedger } = await import("@/lib/fees");
+    const { issueFundingInvoice } = await import("@/lib/settlement.server");
+    rows = fundingLedger(mb, payIn);
+    await admin.from("ledger_entries").insert(rows.filter((r) => r.debit || r.credit).map((r) => ({ ...r, deal_id: tx.deal_id, transaction_id: tx.id, reference: ref })));
+    await issueFundingInvoice(admin, tx.deal_id, tx.milestone_id, mb, payIn);
+    await admin.from("deal_milestones").update({ status: "funded", funded_at: now }).eq("id", tx.milestone_id).eq("status", "pending");
+    await admin.from("deals").update({ status: "in_progress" }).eq("id", tx.deal_id).eq("status", "pending_funding");
+    return true;
+  }
   if (tx.release_part === "retention") {
     rows = retentionReleaseLedger(c, Number(tx.amount));
     await admin.from("deals").update({ retention_released_at: now, status: "completed", released_at: now }).eq("id", tx.deal_id);
@@ -110,6 +125,13 @@ export async function markMilestonesFunded(admin: any, dealId: string) {
   await admin.from("deal_milestones").update({ status: "funded", funded_at: new Date().toISOString() }).eq("deal_id", dealId).eq("status", "pending");
   await admin.from("deals").update({ status: "in_progress" }).eq("id", dealId);
   return true;
+}
+
+/** Per-milestone funding: the next milestone waiting for funding (lowest sequence), or null. */
+export async function nextUnfundedMilestone(admin: any, dealId: string) {
+  const ms = await listMilestones(admin, dealId);
+  const index = ms.findIndex((m) => m.status === "pending");
+  return index < 0 ? null : { milestone: ms[index], index, amounts: ms.map((m) => Number(m.amount)) };
 }
 
 /** Hourly/10-minute job: milestone auto-release after inspection, and retention after the defects liability period. */
@@ -177,8 +199,10 @@ export async function runMilestoneJobs(admin: any, notify: any) {
 /** Applies an accepted milestone plan from a terms snapshot (used by acceptTerms). */
 export async function applyMilestoneSnapshot(admin: any, deal: any, planned: any[]) {
   const current = await listMilestones(admin, deal.id);
-  const keep = new Set(current.filter((m) => !["pending", "funded"].includes(m.status)).map((m) => m.id));
-  const funded = deal.status === "in_progress";
+  const open = deal.funding_mode === "per_milestone" ? ["pending"] : ["pending", "funded"];
+  const keep = new Set(current.filter((m) => !open.includes(m.status)).map((m) => m.id));
+  // Upfront: the whole deal is already held, so new milestones are funded. Per milestone: each is funded on its own.
+  const funded = deal.status === "in_progress" && deal.funding_mode !== "per_milestone";
   for (const m of current) await admin.from("deal_milestones").update({ seq: m.seq + 1000 }).eq("id", m.id);
   for (const m of current) if (!keep.has(m.id)) await admin.from("deal_milestones").delete().eq("id", m.id);
   for (const [i, p] of planned.entries()) {

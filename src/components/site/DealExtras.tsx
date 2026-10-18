@@ -10,7 +10,7 @@ import {
   addDisputeEvidence,
   dealFileUrl,
   getOpenDispute,
-  getTaxInvoice,
+  getTaxInvoices,
   listAttachments,
   listTermVersions,
   uploadDealFile,
@@ -325,22 +325,21 @@ export function TermVersionsCard({ deal }: { deal: DealRow }) {
 
 export function InvoiceCard({ deal }: { deal: DealRow }) {
   const { text } = useLocale();
-  const inv = useQuery({ queryKey: ["invoice", deal.id, deal.status], queryFn: () => getTaxInvoice(deal.id) });
-  if (!inv.data) return null;
-  const i = inv.data;
+  const inv = useQuery({ queryKey: ["invoice", deal.id, deal.status], queryFn: () => getTaxInvoices(deal.id), refetchInterval: 20_000 });
+  if (!inv.data?.length) return null;
   return (
     <Card>
       <CardContent className="p-6">
         <div className="flex items-center gap-2">
           <Receipt className="size-5 text-primary" />
-          <h2 className="font-bold">Tax invoice</h2>
+          <h2 className="font-bold">{inv.data.length > 1 ? text("Tax invoices", "الفواتير الضريبية") : text("Tax invoice", "الفاتورة الضريبية")}</h2>
         </div>
-        <p className="mt-2 text-sm" dir="ltr">
-          {i.invoice_number} · fee {formatMoney(Number(i.fee), i.currency)} + {Number(i.vat_rate) === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${(Number(i.vat_rate) * 100).toFixed(0)}%`} {formatMoney(Number(i.vat), i.currency)} ={" "}
-          <b>
-            {formatMoney(Number(i.total), i.currency)}
-          </b>
-        </p>
+        {inv.data.map((i) => (
+          <p key={i.invoice_number} className="mt-2 text-sm" dir="ltr">
+            {i.invoice_number} · fee {formatMoney(Number(i.fee), i.currency)} + {Number(i.vat_rate) === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${(Number(i.vat_rate) * 100).toFixed(0)}%`} {formatMoney(Number(i.vat), i.currency)} ={" "}
+            <b>{formatMoney(Number(i.total), i.currency)}</b>
+          </p>
+        ))}
         <Button asChild variant="outline" size="sm" className="mt-3">
           <a href={`/invoice/${deal.ref}`} target="_blank" rel="noreferrer">
             Open printable invoice

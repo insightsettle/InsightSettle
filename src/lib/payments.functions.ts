@@ -54,7 +54,7 @@ async function releaseFigures(admin: any, deal: any) {
 async function loadDealForParty(context: { supabase: any; userId: string }, dealId: string) {
   const { data, error } = await context.supabase
     .from("deals")
-    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat, fee_payer, terms_version, deal_type, auction_lot_id")
+    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat, fee_payer, terms_version, deal_type, auction_lot_id, funding_mode")
     .eq("id", dealId)
     .maybeSingle();
   if (error) throw error;
@@ -71,6 +71,78 @@ async function serverDeps() {
     import("@/lib/notify.server"),
   ]);
   return { admin: supabaseAdmin as any, provider: getPaymentProvider(), notify };
+}
+
+type Deps = Awaited<ReturnType<typeof serverDeps>>;
+
+/**
+ * Per-milestone funding (D-43): the buyer funds the next milestone from a live quote for that milestone.
+ * Same rules as whole-deal funding: one live funding per milestone, the quote is claimed once, a repeat click
+ * returns the funding already recorded, and the simulated provider confirms (or declines on request).
+ */
+async function fundNextMilestone(
+  userId: string,
+  deal: any,
+  data: { quoteId?: string | undefined; simulateDecline?: boolean | undefined },
+  { admin, provider, notify }: Deps,
+): Promise<PaymentResult> {
+  const fail = (message: string): PaymentResult => ({ ok: false, status: "failed", provider: provider.id, providerLabel: provider.label, message });
+  const { data: full } = await admin.from("deals").select("*").eq("id", deal.id).single();
+  const { milestoneFundingGuard } = await import("@/lib/deal-rules.server");
+  const blocked = await milestoneFundingGuard(admin, full);
+  if (blocked) return fail(blocked);
+  if (!data.quoteId) return fail("Please request an exchange-rate quote before paying.");
+  const { data: q } = await admin.from("fx_quotes").select("*").eq("id", data.quoteId).eq("deal_id", deal.id).maybeSingle();
+  if (!q || new Date(q.expires_at).getTime() <= Date.now() || q.used_at || !q.breakdown?.milestone || Number(q.breakdown.terms_version) !== Number(full.terms_version))
+    return fail("Your exchange rate has expired. Please request a new quote.");
+  const { nextUnfundedMilestone } = await import("@/lib/milestones.server");
+  const next = await nextUnfundedMilestone(admin, deal.id);
+  const m = next?.milestone;
+  if (!m || m.id !== q.breakdown.milestone.id || Number(m.amount) !== Number(q.breakdown.milestone.amount))
+    return fail("This quote is for a milestone that is no longer waiting for funding. Please request a new quote.");
+
+  // A second click returns the funding already in progress for this milestone.
+  const { data: existing } = await admin.from("deal_transactions").select("id, status").eq("milestone_id", m.id)
+    .eq("kind", "funding").in("status", ["pending", "processing", "succeeded"]).limit(1).maybeSingle();
+  if (existing)
+    return { ok: true, status: existing.status, provider: provider.id, providerLabel: provider.label, transactionId: existing.id,
+      message: "This funding is already recorded — no second payment was created." };
+
+  const { data: claimed } = await admin.from("fx_quotes").update({ used_at: new Date().toISOString() }).eq("id", q.id).is("used_at", null).select("id");
+  if (!claimed?.length) return fail("This exchange-rate quote was already used. Please request a new quote.");
+  const { count: failedAttempts } = await admin.from("deal_transactions").select("id", { count: "exact", head: true })
+    .eq("milestone_id", m.id).eq("kind", "funding").in("status", ["failed", "cancelled"]);
+  const attempt = String((failedAttempts ?? 0) + 1).padStart(3, "0");
+  const { data: tx, error } = await admin.from("deal_transactions").insert({
+    deal_id: deal.id, kind: "funding", milestone_id: m.id, amount: Number(q.total), fee: Number(q.fee), currency: q.target_currency,
+    status: "processing", provider: provider.id, note: provider.notice, created_by: userId,
+    idempotency_key: `${deal.ref}-M${m.seq}-PAYMENT-${attempt}`, fx_quote_id: q.id,
+  }).select().maybeSingle();
+  if (error) {
+    if (String(error.code) === "23505")
+      return { ok: true, status: "processing", provider: provider.id, providerLabel: provider.label, message: "This funding is already recorded — no second payment was created." };
+    throw error;
+  }
+  await admin.from("deal_events").insert({ deal_id: deal.id, actor_id: userId, title: `Buyer started funding milestone ${m.seq}`, note: `${m.title} · ${provider.notice}` });
+  await notify.notifyDealParties(admin, deal.id, { title: `Milestone ${m.seq} funding started for ${deal.ref}`, body: provider.notice, kind: "payment" });
+  if (provider.connected) {
+    const staff = await notify.staffUserIds(admin);
+    await notify.notifyUsers(admin, { dealId: deal.id, title: `Milestone funding started — ${deal.ref}`, body: `The buyer started funding milestone ${m.seq}. The payment provider will confirm it.`, kind: "payment", recipients: staff });
+    return { ok: true, status: "processing", provider: provider.id, providerLabel: provider.label, transactionId: tx?.id,
+      message: "Payment submitted to the licensed payment provider, which holds the funds. Insight records the confirmation." };
+  }
+  const { settleTransactionCore, simulateProviderConfirm } = await import("@/lib/settlement.server");
+  if (data.simulateDecline && tx?.id) {
+    await settleTransactionCore(admin, notify, {
+      transactionId: tx.id, outcome: "failed", providerRef: `SIM-DECLINE-${String(tx.id).replace(/-/g, "").slice(0, 8).toUpperCase()}`,
+      reason: "The payment provider declined the payment (simulated decline). No money moved; request a new quote to try again.", actorId: null,
+    });
+    return { ok: false, status: "failed", provider: provider.id, providerLabel: provider.label, transactionId: tx.id,
+      message: "Payment declined by the payment provider (simulated). No money moved. Request a new quote to try again." };
+  }
+  if (tx?.id) await simulateProviderConfirm(admin, notify, [tx.id]);
+  return { ok: true, status: "succeeded", provider: provider.id, providerLabel: provider.label, transactionId: tx?.id,
+    message: `Milestone ${m.seq} funding confirmed by the payment provider (simulated). In this demo no real money moves.` };
 }
 
 /** Buyer starts funding the escrow. The money movement is always recorded. */
@@ -101,6 +173,8 @@ export const startDealFunding = createServerFn({ method: "POST" })
         providerLabel: provider.label,
         message: "Only the buyer can fund this deal.",
       };
+    if (deal.funding_mode === "per_milestone" && deal.deal_type !== "auction")
+      return fundNextMilestone(context.userId, deal, data, { admin, provider, notify });
     if (deal.status !== "pending_funding")
       return {
         ok: false,

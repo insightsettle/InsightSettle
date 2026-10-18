@@ -131,6 +131,8 @@ export function ContractDashboard(props: {
     if (sub) return isBuyer ? `Review milestone ${sub.seq}: approve, ask for a revision, or open a dispute.` : `Waiting for the buyer to review milestone ${sub.seq}.`;
     const work = milestones.find((m) => ["funded", "revision_requested"].includes(m.status));
     if (work) return isSeller ? `Submit milestone ${work.seq} with evidence when the work is done.` : `The contractor is working on milestone ${work.seq}.`;
+    const unfunded = deal.funding_mode === "per_milestone" ? milestones.find((m) => m.status === "pending") : null;
+    if (unfunded) return isBuyer ? `Fund milestone ${unfunded.seq} so the contractor can start it.` : `Waiting for the buyer to fund milestone ${unfunded.seq}.`;
     if (deal.status === "in_progress" && deal.retention_release_at) return `Retention is held until ${formatDate(deal.retention_release_at)} (defects liability period).`;
     return null;
   })();
@@ -154,7 +156,7 @@ export function ContractDashboard(props: {
         <div data-no-localize className="flex flex-wrap gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-primary" />{text("Released", "تم الإفراج")}: <bdi>{money(releasedGross)}</bdi></span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-gold" />{text("Funded", "ممول")}: <bdi>{money(funded - releasedGross)}</bdi></span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-muted-foreground" />{text("Not funded", "غير ممول")}: <bdi>{money(total-funded)}</bdi></span></div>
         <p className="text-xs text-muted-foreground">
           <span>Retention</span> <span dir="ltr">{Number(deal.retention_percent)}%</span> · <span>Defects liability period</span>{" "}
-          <span dir="ltr">{deal.defects_liability_days}</span> <span>days</span> · <span>Fund all upfront</span>
+          <span dir="ltr">{deal.defects_liability_days}</span> <span>days</span> · <span>{deal.funding_mode === "per_milestone" ? "Fund each milestone" : "Fund all upfront"}</span>
         </p>
 
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
