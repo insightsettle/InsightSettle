@@ -895,6 +895,11 @@ export type Database = {
           milestone_id: string | null
           opened_by: string
           outcome: string | null
+          proposed_at: string | null
+          proposed_buyer_percent: number | null
+          proposed_by: string | null
+          proposed_note: string | null
+          proposed_outcome: string | null
           reason: string
           resolution_deadline: string
           resolution_note: string | null
@@ -915,6 +920,11 @@ export type Database = {
           milestone_id?: string | null
           opened_by: string
           outcome?: string | null
+          proposed_at?: string | null
+          proposed_buyer_percent?: number | null
+          proposed_by?: string | null
+          proposed_note?: string | null
+          proposed_outcome?: string | null
           reason: string
           resolution_deadline: string
           resolution_note?: string | null
@@ -935,6 +945,11 @@ export type Database = {
           milestone_id?: string | null
           opened_by?: string
           outcome?: string | null
+          proposed_at?: string | null
+          proposed_buyer_percent?: number | null
+          proposed_by?: string | null
+          proposed_note?: string | null
+          proposed_outcome?: string | null
           reason?: string
           resolution_deadline?: string
           resolution_note?: string | null
@@ -1101,6 +1116,45 @@ export type Database = {
           spread?: number
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      interest_register: {
+        Row: {
+          company: string | null
+          consent_at: string
+          country: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          monthly_volume_band: string | null
+          notice_version: string
+          role: string
+        }
+        Insert: {
+          company?: string | null
+          consent_at: string
+          country: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          monthly_volume_band?: string | null
+          notice_version: string
+          role: string
+        }
+        Update: {
+          company?: string | null
+          consent_at?: string
+          country?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          monthly_volume_band?: string | null
+          notice_version?: string
+          role?: string
         }
         Relationships: []
       }
@@ -1438,6 +1492,7 @@ export type Database = {
           invoice_number: string
           issued_at: string
           lines: Json | null
+          milestone_id: string | null
           total: number
           vat: number
           vat_rate: number
@@ -1450,6 +1505,7 @@ export type Database = {
           invoice_number?: string
           issued_at?: string
           lines?: Json | null
+          milestone_id?: string | null
           total: number
           vat: number
           vat_rate: number
@@ -1462,6 +1518,7 @@ export type Database = {
           invoice_number?: string
           issued_at?: string
           lines?: Json | null
+          milestone_id?: string | null
           total?: number
           vat?: number
           vat_rate?: number
@@ -1470,8 +1527,15 @@ export type Database = {
           {
             foreignKeyName: "tax_invoices_deal_id_fkey"
             columns: ["deal_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_invoices_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "deal_milestones"
             referencedColumns: ["id"]
           },
         ]
@@ -1560,6 +1624,8 @@ export type Database = {
         Args: { _buyer: string; _deal: string }
         Returns: Json
       }
+      demo_quiet: { Args: never; Returns: boolean }
+      demo_reset_active: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1582,6 +1648,7 @@ export type Database = {
         }
         Returns: string
       }
+      reset_demo_data: { Args: { _actor: string }; Returns: Json }
       run_auto_release: { Args: never; Returns: number }
       sweep_auction_deadlines: { Args: never; Returns: Json }
     }

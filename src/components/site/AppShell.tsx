@@ -39,7 +39,7 @@ export function AppShell({ children, navigation, title, staff = false, mobileNav
           <Link to="/help" className="text-sm font-medium text-primary">{text("Need help?")}</Link>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">{text("Support is available Sunday–Thursday, 9am–6pm Riyadh time.")}</p>
         </div>
-        <Button asChild variant="ghost" className="mt-3 h-10 w-full justify-start text-muted-foreground"><Link to="/verification"><Settings />{text("Settings")}</Link></Button>
+        <Button asChild variant="ghost" className="mt-3 h-10 w-full justify-start text-muted-foreground"><Link to={staff ? "/console" : "/verification"}><Settings />{text("Settings")}</Link></Button>
         <Button variant="ghost" className="h-10 w-full justify-start text-muted-foreground" onClick={handleSignOut}><LogOut />{text("Sign out")}</Button>
       </div>
     </div>
@@ -65,7 +65,7 @@ export function AppShell({ children, navigation, title, staff = false, mobileNav
           </div>
         </header>
         <main className={`app-content min-w-0 p-4 lg:p-8 ${mobileNav ? "pb-32 lg:pb-8" : ""}`}>{children}</main>
-        {mobileNav}
+        {!staff && mobileNav}
       </div>
     </div>
   );

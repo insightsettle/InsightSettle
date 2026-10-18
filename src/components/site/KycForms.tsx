@@ -100,6 +100,7 @@ export function PersonalDetailsCard() {
             const { error } = await db.from("profiles").update({ ...f, date_of_birth: f["date_of_birth"] || null }).eq("id", uid);
             setMsg(error ? error.message : "Saved.");
             qc.invalidateQueries({ queryKey: ["kyc-profile"] });
+            qc.invalidateQueries({ queryKey: ["account-steps"] });
           }}
         >
           Save details
@@ -159,6 +160,7 @@ export function BusinessDetailsCard() {
 }
 
 export function PayoutAccountCard() {
+  const qc = useQueryClient();
   const uid = useUid();
   const q = useQuery({
     queryKey: ["payout-account", uid],
@@ -202,6 +204,8 @@ export function PayoutAccountCard() {
             if (iban.slice(0, 2) !== f.country) return setMsg("The IBAN country does not match the bank country.");
             const { error } = await db.from("payout_accounts").upsert({ user_id: uid, ...f, iban, verified: false }, { onConflict: "user_id" });
             setMsg(error ? error.message : "Saved — Insight verifies the account before the first payout.");
+            qc.invalidateQueries({ queryKey: ["payout-account"] });
+            qc.invalidateQueries({ queryKey: ["account-steps"] });
           }}
         >
           Save bank account

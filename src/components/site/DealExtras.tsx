@@ -104,7 +104,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
         {d.status !== "resolved" && isParty && (
           <div className="mt-3 space-y-2">
             <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add your response or evidence note" />
-            <input type="file" accept="image/*,video/*,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-xs" />
+            <input type="file" accept="image/*,video/*,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="w-full min-w-0 text-xs" />
             <Button
               size="sm"
               variant="outline"
@@ -124,7 +124,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
     return (
       <div className="mt-4 rounded-md border p-4 text-sm">
         <p className="font-semibold">
-          {text("Dispute decision: ", "قرار النزاع: ")}{outcomeLabels[d.outcome] ? text(outcomeLabels[d.outcome]![0], outcomeLabels[d.outcome]![1]) : d.outcome}
+          {text("Dispute decision: ", "قرار النزاع: ")}{outcomeLabels[d.outcome] ? text(outcomeLabels[d.outcome]?.[0] ?? d.outcome, outcomeLabels[d.outcome]?.[1] ?? d.outcome) : d.outcome}
           {d.outcome === "partial_settlement" && text(` (payer ${d.buyer_percent}%)`, ` (الدافع ${d.buyer_percent}%)`)}
         </p>
         <p className="mt-1 text-muted-foreground">{d.resolution_note}</p>
@@ -236,10 +236,10 @@ export function AttachmentsCard({ deal, isParty }: { deal: DealRow; isParty: boo
         </div>
         <ul className="mt-3 space-y-2 text-sm">
           {(files.data ?? []).map((f) => (
-            <li key={f.id} className="flex items-center justify-between gap-2">
+            <li key={f.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
               <button
                 type="button"
-                className="truncate text-primary hover:underline"
+                className="min-w-0 break-all text-start text-primary hover:underline"
                 onClick={async () => window.open(await dealFileUrl(f.file_path), "_blank")}
               >
                 <FileText className="me-1 inline size-4" />
@@ -264,7 +264,7 @@ export function AttachmentsCard({ deal, isParty }: { deal: DealRow; isParty: boo
             <input
               type="file"
               disabled={busy}
-              className="text-xs"
+              className="w-full min-w-0 text-xs"
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;

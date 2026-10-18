@@ -3,7 +3,7 @@ import { IconTile } from "@/components/site/Marketing";
 import { PackageCheck, Wallet } from "lucide-react";
 import { cap, feePayerLabel, rolesFor } from "@/lib/roles";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { publicPricing } from "@/lib/public-pricing.functions";
 import { normalizeCountry } from "@/lib/fees";
@@ -46,6 +46,7 @@ const blankRow = (): EditableMilestone => ({ title: "", amount: "", dueDate: "",
 
 function NewDeal() {
   const { text } = useLocale();
+  const formRef = useRef<HTMLFormElement>(null);
   const [dealType, setDealType] = useState<DealType | null>(null);
   const R = rolesFor(dealType);
   const RC = { payer: cap(R.payer), payee: cap(R.payee) };
@@ -113,6 +114,10 @@ function NewDeal() {
     return null;
   };
   function goNext() {
+    const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input,select,textarea");
+    for (const control of controls ?? []) {
+      if (!control.closest("[hidden]") && !control.checkValidity()) { control.reportValidity(); return; }
+    }
     const err = stepError(step);
     if (err) { setError(err); return; }
     setError(null);
@@ -122,6 +127,13 @@ function NewDeal() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (step < 2) { goNext(); return; }
+    const invalid = Array.from(formRef.current?.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input,select,textarea") ?? []).find(control => !control.checkValidity());
+    if (invalid) {
+      const section = invalid.closest<HTMLElement>("[data-step]");
+      if (section) setStep(Number(section.dataset["step"]));
+      setTimeout(() => { invalid.focus(); invalid.reportValidity(); }, 0);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -185,6 +197,9 @@ function NewDeal() {
     );
   }
 
+  const liveSummary = (<aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p>{live.isFetching && <p role="status" className="mt-3 text-xs text-muted-foreground">{text("Updating amounts…", "جارٍ تحديث المبالغ…")}</p>}{!live.isFetching && !lb && <p role="status" className="mt-3 text-xs text-muted-foreground">{text("Pricing unavailable. The final quote will be shown on the deal.", "التسعير غير متاح. يظهر العرض النهائي في الصفقة.")}</p>}<dl className="mt-5 space-y-4 border-t pt-4 text-sm">{([["Total fee", "إجمالي الرسوم", lb ? formatMoney(lb.fee, currency) : null], [`${RC.payer[0]} fee share + VAT`, `حصة ${R.payer.ar} + الضريبة`, lb ? `${formatMoney(lb.buyerShare, currency)} + ${lb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.buyerVat, currency)}` : null], [`${RC.payee[0]} fee share + VAT`, `حصة ${R.payee.ar} + الضريبة`, lb ? `${formatMoney(lb.sellerShare, currency)} + ${lb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.sellerVat, currency)}` : null], [`${RC.payee[0]} receives`, `يستلم ${R.payee.ar}`, lb ? formatMoney(lb.supplierNet, currency) : null], [`${RC.payer[0]} pays`, `يدفع ${R.payer.ar}`, lb ? formatMoney(lb.buyerTotal, currency) : null]] as const).map(([en,ar,v]) => <div key={en} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd className="break-words text-end tabular-nums"><bdi>{v ?? "—"}</bdi></dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Indicative, from the published fee table. The locked quote appears on the deal after both parties join.", "تقديرية من جدول الرسوم المنشور. يظهر العرض المقفل في الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
+  );
+
   return (
     <SiteShell>
       <div className="min-w-0">
@@ -193,17 +208,17 @@ function NewDeal() {
 
         <div className="mt-6"><FormStepper current={step} /></div>
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <form className="min-w-0 space-y-5" onSubmit={handleSubmit}>
-          <div hidden={step !== 0} className="space-y-5">
+        <form ref={formRef} noValidate className="min-w-0 space-y-5" onSubmit={handleSubmit}>
+          <div data-step="0" hidden={step !== 0} className="space-y-5">
           <fieldset data-no-localize>
             <legend className="text-sm font-semibold">{text("Your role in the deal", "دورك في الصفقة")}</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
               {([["buyer", Wallet, ["I am paying", "أنا من يدفع"], ["You pay into the deal; nothing moves until you receive and check.", "تدفع في الصفقة، ولا يتحرك المبلغ قبل أن تستلم وتتأكد."], R.payer], ["seller", PackageCheck, ["I am being paid", "أنا من يستلم المبلغ"], ["You deliver what you agreed, knowing the money is already in the deal.", "تُنجز ما اتفقتما عليه وأنت تعلم أن مستحقك محفوظ في الصفقة."], R.payee]] as const).map(([value, Icon, title, hint, name]) => (
-                <button type="button" key={value} role="radio" aria-checked={role === value} aria-label={text(title[0], title[1])} onClick={() => setRole(value)}
-                  className={`flex items-start gap-4 rounded-2xl border bg-card p-5 text-start transition ${role === value ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                <Button variant="outline" type="button" key={value} role="radio" aria-checked={role === value} aria-label={text(title[0], title[1])} onClick={() => setRole(value)}
+                  className={`h-auto whitespace-normal flex items-start gap-4 rounded-2xl border bg-card p-5 text-start transition ${role === value ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
                   <IconTile icon={Icon} tone={role === value ? "brand" : "soft"} />
                   <span className="min-w-0"><b className="block text-base">{text(title[0], title[1])}{dealType && <span className="ms-1 text-sm font-normal text-muted-foreground">({text(name.en, name.ar)})</span>}</b><span className="mt-1 block text-sm leading-6 text-muted-foreground">{text(hint[0], hint[1])}</span></span>
-                </button>
+                </Button>
               ))}
             </div>
           </fieldset>
@@ -225,7 +240,7 @@ function NewDeal() {
           </fieldset>
           </div>
           {dealType && (<>
-          <div hidden={step !== 0} className="space-y-5">
+          <div data-step="0" hidden={step !== 0} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="title">{text("Deal title")}</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -241,7 +256,7 @@ function NewDeal() {
             />
           </div>
           </div>
-          <div hidden={step !== 1} className="space-y-5">
+          <div data-step="1" hidden={step !== 1} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="amount">{text("Deal value")}</Label>
@@ -273,7 +288,7 @@ function NewDeal() {
             </div>
           </div>
           </div>
-          <div hidden={step !== 0} className="space-y-5">
+          <div data-step="0" hidden={step !== 0} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="quantity">{text("Quantity")}</Label>
@@ -308,7 +323,7 @@ function NewDeal() {
             </div>
           </div>
           </div>
-          <div hidden={step !== 1} className="space-y-5">
+          <div data-step="1" hidden={step !== 1} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="feePayer">{text("Who pays the escrow fee")}</Label>
@@ -386,7 +401,7 @@ function NewDeal() {
             </span>
           </label>
           </div>
-          <div hidden={step !== 2} className="space-y-5">
+          <div data-step="2" hidden={step !== 2} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="counterparty">{text("Other party email")}</Label>
             <Input
@@ -399,7 +414,7 @@ function NewDeal() {
           </div>
 
           </div>
-          <div hidden={step !== 1} className="space-y-5">
+          <div data-step="1" hidden={step !== 1} className="space-y-5">
           {dealType === "freelance" && (
             <div className="space-y-2">
               <Label htmlFor="revisions">{text("Included revisions")}</Label>
@@ -442,6 +457,8 @@ function NewDeal() {
           </div>
           </>)}
 
+          {step >= 1 && <div className="xl:hidden">{liveSummary}</div>}
+
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5" data-no-localize>
@@ -451,7 +468,7 @@ function NewDeal() {
               : <Button key="submit" type="submit" size="lg" className="h-11 px-6" disabled={busy || !dealType || !!planError}>{busy ? text("Saving…", "جارٍ الحفظ…") : text("Create deal and get invite link", "أنشئ الصفقة واحصل على رابط الدعوة")}</Button>}
           </div>
         </form>
-        <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{([["Total fee", "إجمالي الرسوم", lb ? formatMoney(lb.fee, currency) : null], [`${RC.payer[0]} fee share + VAT`, `حصة ${R.payer.ar} + الضريبة`, lb ? `${formatMoney(lb.buyerShare, currency)} + ${lb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.buyerVat, currency)}` : null], [`${RC.payee[0]} fee share + VAT`, `حصة ${R.payee.ar} + الضريبة`, lb ? `${formatMoney(lb.sellerShare, currency)} + ${lb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.sellerVat, currency)}` : null], [`${RC.payee[0]} receives`, `يستلم ${R.payee.ar}`, lb ? formatMoney(lb.supplierNet, currency) : null], [`${RC.payer[0]} pays`, `يدفع ${R.payer.ar}`, lb ? formatMoney(lb.buyerTotal, currency) : null]] as const).map(([en,ar,v]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd className="tabular-nums"><bdi>{v ?? "—"}</bdi></dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Indicative, from the published fee table. The locked quote appears on the deal after both parties join.", "تقديرية من جدول الرسوم المنشور. يظهر العرض المقفل في الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
+        <div className="hidden xl:block">{liveSummary}</div>
         </div>
       </div>
     </SiteShell>

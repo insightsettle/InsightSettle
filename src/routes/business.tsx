@@ -10,6 +10,10 @@ export const Route = createFileRoute("/business")({
   head: () => ({
     meta: [
       { title: "Insight for business | Pay suppliers with confidence, get paid without chasing" },
+      { property: "og:title", content: "Insight for business | Pay suppliers with confidence, get paid without chasing" },
+      { property: "og:description", content: "Imports from factories abroad, suppliers in neighbouring countries and fit-out contracts in stages: documented terms, payment in your currency, a tax invoice for every payment. Demo with a simulated payment provider." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "description", content: "Imports from factories abroad, suppliers in neighbouring countries and fit-out contracts in stages: documented terms, payment in your currency, a tax invoice for every payment. Demo with a simulated payment provider." },
     ],
   }),

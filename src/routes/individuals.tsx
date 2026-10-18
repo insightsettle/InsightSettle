@@ -10,6 +10,10 @@ export const Route = createFileRoute("/individuals")({
   head: () => ({
     meta: [
       { title: "Insight for individuals | Buy and sell with people you don't know" },
+      { property: "og:title", content: "Insight for individuals | Buy and sell with people you don't know" },
+      { property: "og:description", content: "Buying a used car, a watch from an Instagram seller or hiring a freelancer? Pay into the deal; the other side is paid only after you receive and check. Demo with a simulated payment provider." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "description", content: "Buying a used car, a watch from an Instagram seller or hiring a freelancer? Pay into the deal; the other side is paid only after you receive and check. Demo with a simulated payment provider." },
     ],
   }),

@@ -35,9 +35,9 @@ function ReportsPage() {
     <div className="mt-8 grid gap-6 md:grid-cols-2">
       <Card>
         <CardContent className="p-5">
-          <h2 className="text-lg font-bold">{text("Deals report")}</h2>
+          <h2 className="text-lg font-bold">{text("Deals report", "تقرير الصفقات")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {text("All deals with parties, amount, status and dates.")}
+            {text("All deals with parties, amount, status and dates.", "كل الصفقات مع أطرافها ومبالغها وحالاتها وتواريخها.")}
           </p>
           <p className="mt-4 text-3xl font-extrabold">{report.isLoading ? "…" : deals.length}</p>
           <Button className="mt-4" disabled={!deals.length} onClick={() => downloadCsv(`deals-${today}.csv`, deals)}>
@@ -47,9 +47,9 @@ function ReportsPage() {
       </Card>
       <Card>
         <CardContent className="p-5">
-          <h2 className="text-lg font-bold">{text("Revenue report")}</h2>
+          <h2 className="text-lg font-bold">{text("Revenue report", "تقرير الإيرادات")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {text("Completed payments and platform fees by month.")}
+            {text("Completed payments and platform fees by month.", "الدفعات المكتملة ورسوم المنصة حسب الشهر.")}
           </p>
           <p className="mt-4 text-3xl font-extrabold">
             {formatSAR(revenue.reduce((a, r) => a + r.fees, 0))}
@@ -59,15 +59,15 @@ function ReportsPage() {
           </Button>
         </CardContent>
       </Card>
-      <Card className="md:col-span-2">
-        <CardContent className="p-0">
+      <Card className="min-w-0 md:col-span-2">
+        <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead className="bg-secondary text-xs text-muted-foreground">
               <tr>
-                <th className="p-3 text-start">{text("Month")}</th>
-                <th className="p-3 text-start">{text("Payment volume")}</th>
-                <th className="p-3 text-start">{text("Platform fees")}</th>
-                <th className="p-3 text-start">{text("Transactions")}</th>
+                <th className="p-3 text-start">{text("Month", "الشهر")}</th>
+                <th className="p-3 text-start">{text("Payment volume", "حجم الدفعات")}</th>
+                <th className="p-3 text-start">{text("Platform fees", "رسوم المنصة")}</th>
+                <th className="p-3 text-start">{text("Transactions", "المعاملات")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -81,7 +81,7 @@ function ReportsPage() {
               ))}
               {revenue.length === 0 && (
                 <tr><td colSpan={4} className="p-5 text-muted-foreground">
-                  {report.isError ? text("Could not load the report.") : text("No completed payments yet.")}
+                  {report.isError ? text("Could not load the report.", "تعذّر تحميل التقرير.") : text("No completed payments yet.", "لا توجد دفعات مكتملة بعد.")}
                 </td></tr>
               )}
             </tbody>

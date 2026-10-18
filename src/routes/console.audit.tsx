@@ -38,7 +38,7 @@ function AuditPage() {
     <div className="mt-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold">{text("Staff action history")}</h2>
+          <h2 className="text-xl font-bold">{text("Staff action history", "سجل إجراءات الموظفين")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {text("Every change made by the team, newest first (last 500).")}
           </p>

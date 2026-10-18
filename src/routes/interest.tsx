@@ -14,6 +14,10 @@ import { useLocale } from "@/lib/locale";
 export const Route = createFileRoute("/interest")({
   head: () => ({ meta: [
     { title: "Register your interest | Insight" },
+      { property: "og:title", content: "Register your interest | Insight" },
+      { property: "og:description", content: "Register your interest in Insight escrow for Gulf trade." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     { name: "description", content: "Register your interest in Insight escrow for Gulf trade." },
     { name: "robots", content: "noindex" },
   ] }),
