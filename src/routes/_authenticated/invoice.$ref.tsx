@@ -80,7 +80,7 @@ function InvoicePage() {
         </tbody>
       </table>
       <p className="mt-6 text-xs text-muted-foreground">
-        This invoice covers the Insight service fee only. The deal amount itself is held and settled by the licensed payment provider.
+        This invoice covers the Insight service fee only. The deal amount itself is held and settled by the payment provider (simulated in this demo).
       </p>
       <Button className="mt-6 print:hidden" onClick={() => window.print()}>
         Print or save as PDF

@@ -7,6 +7,19 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "At launch, funds will be held by a licensed payment provider; in this demo the provider is simulated and no real money moves. Insight runs the deal rules and keeps the record. We are not a party to the underlying commercial agreement, do not guarantee the quality of goods or services, and our liability is limited to the value of the funds held in the affected deal.": "عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص؛ وفي هذه النسخة التجريبية يكون المزوّد محاكى ولا تُحوَّل أي أموال حقيقية. تدير إنسايت قواعد الصفقة وتحفظ سجلها. لسنا طرفاً في الاتفاق التجاري الأصلي، ولا نتحمّل مسؤولية جودة السلع أو الخدمات، وتقتصر مسؤوليتنا على قيمة الأموال المحتفظ بها في الصفقة المعنية.",
+  "The payment provider (simulated in this demo) releases or refunds the funds; Insight keeps the receipt and the complete timeline.": "يُفرج مزوّد الدفع (محاكى في هذه النسخة التجريبية) عن الأموال أو يعيدها، وتحفظ إنسايت الإيصال والسجل الزمني الكامل.",
+  "The funds are held with the payment provider (simulated in this demo) and work can begin.": "الأموال محفوظة لدى مزوّد الدفع (محاكى في هذه النسخة التجريبية) ويمكن بدء العمل.",
+  "The payment provider released the funds to the seller.": "أفرج مزوّد الدفع عن الأموال للبائع.",
+  "The payment provider returned the funds under the refund policy.": "أعاد مزوّد الدفع الأموال وفق سياسة الاسترداد.",
+  "How Insight reviews dispute evidence and records decisions, with releases and refunds handled by the payment provider.": "كيف تراجع إنسايت أدلة النزاع وتسجّل القرارات، مع تنفيذ الإفراج والاسترداد بواسطة مزوّد الدفع.",
+  "The payment provider handles the release or refund under the recorded decision. Insight keeps the amount, reason and reference in the deal record, visible to both parties.": "يتولى مزوّد الدفع الإفراج أو الاسترداد وفق القرار المسجّل. تحفظ إنسايت المبلغ والسبب والمرجع في سجل الصفقة، ويطّلع عليه الطرفان.",
+  "Insight reviews both sides' evidence under the dispute policy and records the decision, approved by a second staff member. The payment provider handles any release or refund.": "تراجع إنسايت أدلة الطرفين وفق سياسة النزاعات وتسجّل القرار بعد اعتماده من موظف ثانٍ. يتولى مزوّد الدفع أي إفراج أو استرداد.",
+  "Disputes are handled under the published dispute and refund policy. Insight reviews evidence supplied by both parties and records the decision; the payment provider handles any release or refund. Either party keeps the right to go to court.": "تُعالج النزاعات وفق سياسة النزاعات والاسترداد المنشورة. تراجع إنسايت أدلة الطرفين وتسجّل القرار؛ ويتولى مزوّد الدفع أي إفراج أو استرداد. ويحتفظ كل طرف بحقه في اللجوء إلى القضاء.",
+  "At launch, a licensed payment provider will handle cross-border payments; Insight records the deal and the rate shown before funding.": "عند الإطلاق يتولى مزوّد دفع مرخّص المدفوعات العابرة للحدود؛ وتسجّل إنسايت الصفقة وسعر الصرف المعروض قبل التمويل.",
+  "Insight records the dispute decision after a second staff approval; the payment provider handles releases and refunds.": "تسجّل إنسايت قرار النزاع بعد اعتماد موظف ثانٍ، ويتولى مزوّد الدفع الإفراج والاسترداد.",
+  "This invoice covers the Insight service fee only. The deal amount itself is held and settled by the payment provider (simulated in this demo).": "تغطي هذه الفاتورة رسوم خدمة إنسايت فقط. أما مبلغ الصفقة نفسه فيحتفظ به مزوّد الدفع ويسوّيه (محاكى في هذه النسخة التجريبية).",
+  "How a licensed payment provider will hold funds at launch, and how Insight protects identity and deal records.": "كيف سيحتفظ مزوّد دفع مرخّص بالأموال عند الإطلاق، وكيف تحمي إنسايت الهوية وسجلات الصفقات.",
   "Reports": "التقارير",
   "Staff history": "سجل الموظفين",
   "goods": "بضائع",

@@ -35,7 +35,7 @@ const services = [
   {
     icon: CircleDollarSign,
     t: "Single-payment escrow",
-    d: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
+    d: "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.",
     points: ["Full-value protection", "Defined review window", "Receipt and invoice"],
   },
   {
@@ -47,7 +47,7 @@ const services = [
   {
     icon: ArrowRightLeft,
     t: "Cross-border payments",
-    d: "A licensed payment provider handles cross-border payments; Insight records the deal and the rate shown before funding.",
+    d: "At launch, a licensed payment provider will handle cross-border payments; Insight records the deal and the rate shown before funding.",
     points: ["One clear rate before funding", "Riyal total fixed at funding", "Settlement summary"],
   },
 ];

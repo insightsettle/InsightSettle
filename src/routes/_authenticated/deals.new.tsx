@@ -1,5 +1,8 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { publicPricing } from "@/lib/public-pricing.functions";
+import { normalizeCountry } from "@/lib/fees";
 
 import { SiteShell } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
@@ -69,6 +72,19 @@ function NewDeal() {
   const [created, setCreated] = useState<{ ref: string; invite_token: string } | null>(null);
 
   const numericAmount = Number(amount) || 0;
+  // Live summary: the same server pricing as the public calculator (indicative until the deal quote).
+  const pricingFn = useServerFn(publicPricing);
+  const [debounced, setDebounced] = useState(numericAmount);
+  useEffect(() => { const t = setTimeout(() => setDebounced(numericAmount), 400); return () => clearTimeout(t); }, [numericAmount]);
+  const codes = ["SA", "BH", "AE", "KW", "QA", "OM"] as const;
+  const asCode = (c: string) => (codes as readonly string[]).includes(normalizeCountry(c) ?? "") ? (normalizeCountry(c) as (typeof codes)[number]) : "SA";
+  const live = useQuery({
+    queryKey: ["new-deal-pricing", debounced, currency, feePayer, supplierCountry, deliveryCountry],
+    queryFn: () => pricingFn({ data: { amount: debounced, currency: currency as "SAR", payer: feePayer as "buyer", buyerCountry: asCode(deliveryCountry), supplierCountry: asCode(supplierCountry) } }),
+    enabled: debounced > 0,
+    staleTime: 60_000,
+  });
+  const lb = live.data && live.data.available ? live.data.breakdown : null;
   const milestonesOn = dealType === "contracting" || (useMilestones && (dealType === "services" || dealType === "freelance"));
   const planError = dealType && milestonesOn
     ? validateMilestones(numericAmount, currency, rows.map(toInput), dealType)
@@ -404,7 +420,7 @@ function NewDeal() {
             {busy ? "Saving…" : "Create deal and get invite link"}
           </Button>
         </form>
-        <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{[["Total fee", "إجمالي الرسوم"], ["Buyer fee share + VAT", "حصة المشتري + الضريبة"], ["Supplier fee share + VAT", "حصة المورد + الضريبة"], ["Supplier receives", "يستلم المورد"], ["Buyer pays", "يدفع المشتري"]].map(([en,ar]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en ?? "",ar)}</dt><dd>—</dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Final pricing appears on the deal quote after both parties join.", "تظهر الأسعار النهائية في عرض الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
+        <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{([["Total fee", "إجمالي الرسوم", lb ? formatMoney(lb.fee, currency) : null], ["Buyer fee share + VAT", "حصة المشتري + الضريبة", lb ? `${formatMoney(lb.buyerShare, currency)} + ${lb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.buyerVat, currency)}` : null], ["Supplier fee share + VAT", "حصة المورد + الضريبة", lb ? `${formatMoney(lb.sellerShare, currency)} + ${lb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.sellerVat, currency)}` : null], ["Supplier receives", "يستلم المورد", lb ? formatMoney(lb.supplierNet, currency) : null], ["Buyer pays", "يدفع المشتري", lb ? formatMoney(lb.buyerTotal, currency) : null]] as const).map(([en,ar,v]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd className="tabular-nums"><bdi>{v ?? "—"}</bdi></dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Indicative, from the published fee table. The locked quote appears on the deal after both parties join.", "تقديرية من جدول الرسوم المنشور. يظهر العرض المقفل في الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
         </div>
       </div>
     </SiteShell>

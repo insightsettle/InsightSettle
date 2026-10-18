@@ -11,7 +11,7 @@ export const Route = createFileRoute("/dispute-policy")({
       {
         name: "description",
         content:
-          "How Insight reviews dispute evidence and records decisions, with releases and refunds handled by a licensed payment provider.",
+          "How Insight reviews dispute evidence and records decisions, with releases and refunds handled by the payment provider.",
       },
       { property: "og:title", content: "Insight disputes and refunds policy" },
       { property: "og:description", content: "A clear path from disagreement to decision." },
@@ -37,7 +37,7 @@ const steps = [
   },
   {
     h: "4. Decision and payout",
-    p: "The licensed payment provider handles the release or refund under the recorded decision. Insight keeps the amount, reason and reference in the deal record, visible to both parties.",
+    p: "The payment provider handles the release or refund under the recorded decision. Insight keeps the amount, reason and reference in the deal record, visible to both parties.",
   },
 ];
 

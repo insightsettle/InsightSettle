@@ -19,6 +19,11 @@ import { escrowStep, type DealType } from "@/lib/milestones";
 import { formatMoney, minorUnitsFor, roundMoney } from "@/lib/money";
 import { CustodyNote, DEMO_CUSTODY_EN } from "@/components/deal/DealPresentation";
 import { useLocale } from "@/lib/locale";
+
+/** C09-D31: the retention a milestone will withhold, shown from funding (recorded amount once released). */
+function retentionFor(m: { amount: unknown; retention_amount: unknown; status: string }, percent: number, currency: string) {
+  return Number(m.retention_amount) > 0 || m.status === "released" ? Number(m.retention_amount) : roundMoney(Number(m.amount) * percent / 100, currency);
+}
 import { openDisputeCase } from "@/lib/operations.functions";
 
 export const CUSTODY_LINE = DEMO_CUSTODY_EN;
@@ -101,6 +106,7 @@ export function ContractDashboard(props: {
   const c = deal.currency;
   const money = (n: number) => formatMoney(n, c);
   const total = Number(deal.amount);
+  const expectedRetention = (m: any) => retentionFor(m, Number(deal.retention_percent ?? 0), deal.currency);
   const funded = milestones.filter((m) => m.status !== "pending").reduce((s, m) => s + Number(m.amount), 0);
   const releasedGross = milestones.filter((m) => m.status === "released")
     .reduce((s, m) => s + Number(m.net_released) + Number(m.retention_amount) + Number(m.fee_share) + Number(m.vat), 0);
@@ -204,10 +210,10 @@ export function ContractDashboard(props: {
                   </div>
                 </div>
               )}
-            </td><td className="p-4 tabular-nums">{total ? Math.round(Number(m.amount)/total*1000)/10 : 0}%</td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(Number(m.amount))}</bdi></td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(Number(m.retention_amount))}</bdi></td><td className="p-4"><MilestoneChip status={m.status} /></td></tr>
+            </td><td className="p-4 tabular-nums">{total ? Math.round(Number(m.amount)/total*1000)/10 : 0}%</td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(Number(m.amount))}</bdi></td><td className="whitespace-nowrap p-4 tabular-nums"><bdi>{money(expectedRetention(m))}</bdi>{Number(m.retention_amount) === 0 && Number(deal.retention_percent) > 0 && <span className="block text-xs text-muted-foreground">{text("expected", "متوقع")}</span>}</td><td className="p-4"><MilestoneChip status={m.status} /></td></tr>
           ))}
         </tbody></table></div></CardContent></Card>
-        <aside className="space-y-4">{milestones.filter((m) => isBuyer && m.status === "submitted").slice(0,1).map((m) => <Card key={m.id} data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text(`Approve milestone ${m.seq}`, `اعتماد المرحلة ${m.seq}`)}</h3><dl className="mt-4 space-y-3 text-sm">{[[text("Amount", "المبلغ"), money(Number(m.amount))], [text("Retention", "المحتجزات"), money(Number(m.retention_amount))], [text("Net released", "صافي الإفراج"), Number(m.net_released) > 0 ? money(Number(m.net_released)) : text("Confirmed at release", "يُحدد عند الإفراج")]].map(([l,v]) => <div key={l} className="flex justify-between gap-3"><dt className="text-muted-foreground">{l}</dt><dd className="tabular-nums"><bdi>{v}</bdi></dd></div>)}</dl><p className="mt-4 text-xs text-muted-foreground">{m.evidence_note ?? m.evidence_required}</p><Button className="mt-4 w-full" disabled={act.isPending} onClick={() => act.mutate(() => approveFn({ data: { dealId: deal.id, milestoneId: m.id } }))}>{text("Approve and release", "اعتماد وإفراج")}</Button><Button className="mt-2 w-full" variant="secondary" onClick={() => { setOpenId(m.id); setMode("revision"); }}>{text("Request changes", "طلب تعديلات")}</Button><p className="mt-3 text-xs text-muted-foreground">{text("Review window: 7 days. A revision request pauses auto-release.", "مهلة المراجعة: 7 أيام. طلب التعديل يوقف الإفراج التلقائي.")}</p></CardContent></Card>)}<CustodyNote /><Card data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text("Defects liability period", "فترة ضمان العيوب")}</h3><p className="mt-2 text-sm text-muted-foreground">{deal.defects_liability_days} {text("days", "أيام")} · {deal.retention_percent}%</p>{deal.retention_release_at && <p className="mt-2 text-xs text-muted-foreground">{formatDate(deal.retention_release_at)}</p>}</CardContent></Card></aside></div>
+        <aside className="space-y-4">{milestones.filter((m) => isBuyer && m.status === "submitted").slice(0,1).map((m) => <Card key={m.id} data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text(`Approve milestone ${m.seq}`, `اعتماد المرحلة ${m.seq}`)}</h3><dl className="mt-4 space-y-3 text-sm">{[[text("Amount", "المبلغ"), money(Number(m.amount))], [text("Retention", "المحتجزات"), money(expectedRetention(m))], [text("Net released", "صافي الإفراج"), Number(m.net_released) > 0 ? money(Number(m.net_released)) : text("Confirmed at release", "يُحدد عند الإفراج")]].map(([l,v]) => <div key={l} className="flex justify-between gap-3"><dt className="text-muted-foreground">{l}</dt><dd className="tabular-nums"><bdi>{v}</bdi></dd></div>)}</dl><p className="mt-4 text-xs text-muted-foreground">{m.evidence_note ?? m.evidence_required}</p><Button className="mt-4 w-full" disabled={act.isPending} onClick={() => act.mutate(() => approveFn({ data: { dealId: deal.id, milestoneId: m.id } }))}>{text("Approve and release", "اعتماد وإفراج")}</Button><Button className="mt-2 w-full" variant="secondary" onClick={() => { setOpenId(m.id); setMode("revision"); }}>{text("Request changes", "طلب تعديلات")}</Button><p className="mt-3 text-xs text-muted-foreground">{text("Review window: 7 days. A revision request pauses auto-release.", "مهلة المراجعة: 7 أيام. طلب التعديل يوقف الإفراج التلقائي.")}</p></CardContent></Card>)}<CustodyNote /><Card data-no-localize><CardContent className="p-5"><h3 className="font-semibold">{text("Defects liability period", "فترة ضمان العيوب")}</h3><p className="mt-2 text-sm text-muted-foreground">{deal.defects_liability_days} {text("days", "أيام")} · {deal.retention_percent}%</p>{deal.retention_release_at && <p className="mt-2 text-xs text-muted-foreground">{formatDate(deal.retention_release_at)}</p>}</CardContent></Card></aside></div>
         {act.error && <p className="text-sm text-destructive">{(act.error as Error).message}</p>}
 
         <Card><CardContent className="p-5">

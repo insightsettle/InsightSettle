@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     q: "When is my money safe?",
-    a: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record. Payment is confirmed by the payment provider (simulated in this demo).",
+    a: "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.",
   },
   {
     q: "What is the inspection period?",
@@ -42,7 +42,7 @@ const faqs = [
   },
   {
     q: "What happens in a dispute?",
-    a: "Insight reviews both sides' evidence under the dispute policy and records the decision. The licensed payment provider handles any release or refund.",
+    a: "Insight reviews both sides' evidence under the dispute policy and records the decision, approved by a second staff member. The payment provider handles any release or refund.",
   },
   {
     q: "Why do I need to verify my identity?",

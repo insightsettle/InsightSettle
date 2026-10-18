@@ -46,11 +46,11 @@ const sections = [
   },
   {
     h: "7. Disputes",
-    p: "Disputes are handled under the published dispute and refund policy. Insight reviews evidence supplied by both parties and records the decision; the licensed payment provider handles any release or refund.",
+    p: "Disputes are handled under the published dispute and refund policy. Insight reviews evidence supplied by both parties and records the decision; the payment provider handles any release or refund. Either party keeps the right to go to court.",
   },
   {
     h: "8. Liability",
-    p: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record. We are not a party to the underlying commercial agreement, do not guarantee the quality of goods or services, and our liability is limited to the value of the funds held in the affected deal.",
+    p: "At launch, funds will be held by a licensed payment provider; in this demo the provider is simulated and no real money moves. Insight runs the deal rules and keeps the record. We are not a party to the underlying commercial agreement, do not guarantee the quality of goods or services, and our liability is limited to the value of the funds held in the affected deal.",
   },
   {
     h: "9. Changes and termination",

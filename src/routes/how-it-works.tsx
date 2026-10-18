@@ -38,7 +38,7 @@ const steps = [
   },
   {
     t: "Fund the agreement",
-    d: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
+    d: "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.",
   },
   { t: "Deliver the work", d: "The seller confirms delivery with notes and supporting files." },
   {
@@ -47,7 +47,7 @@ const steps = [
   },
   {
     t: "Release or refund",
-    d: "The licensed payment provider releases or refunds funds; Insight keeps the receipt and complete timeline.",
+    d: "The payment provider (simulated in this demo) releases or refunds the funds; Insight keeps the receipt and the complete timeline.",
   },
 ];
 const statuses: DealStatus[] = [
@@ -61,11 +61,11 @@ const statuses: DealStatus[] = [
 ];
 const desc: Partial<Record<DealStatus, string>> = {
   pending_funding: "The agreement is ready but has not been funded.",
-  held: "Funds are held by the licensed payment provider and work can begin.",
+  held: "The funds are held with the payment provider (simulated in this demo) and work can begin.",
   delivered: "The seller marked the work as delivered.",
   under_review: "The buyer is reviewing the submitted work.",
-  released: "The licensed payment provider released funds to the seller.",
-  refunded: "The licensed payment provider returned funds under the refund policy.",
+  released: "The payment provider released the funds to the seller.",
+  refunded: "The payment provider returned the funds under the refund policy.",
   disputed: "The deal is paused for mediation.",
 };
 function Page() {
