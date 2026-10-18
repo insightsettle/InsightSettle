@@ -1,18 +1,23 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Home, Handshake, Scale, Receipt, UserRoundCheck, Plus, Gavel, UserRound } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { Button } from "@/components/ui/button";
+import { useStaffAccess } from "@/hooks/use-staff";
 import { useSessionUser } from "@/hooks/use-session";
 import { listMyDeals } from "@/lib/deals";
 import { useLocale } from "@/lib/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAction } from "@/lib/deal-display";
+import { showCustomerPrompts } from "@/lib/account-display";
 import { auctionAccess } from "@/lib/auction-client";
 
 export function ClientShell({ children }: { children: ReactNode }) {
   const { text } = useLocale();
+  const { isStaff, loading: staffLoading } = useStaffAccess();
+  const navigate = useNavigate();
+  useEffect(() => { if (isStaff) void navigate({ to: "/console", replace: true }); }, [isStaff, navigate]);
   const { pathname, hash } = useLocation();
   const { user } = useSessionUser();
   const { data: auctionsAccess } = useQuery({ queryKey: ["auction-access"], queryFn: auctionAccess, enabled: !!user });
@@ -54,5 +59,6 @@ export function ClientShell({ children }: { children: ReactNode }) {
       {tab("/verification", ["Account", "حسابي"], UserRound, pathname === "/verification")}
     </nav>
   );
+  if (!showCustomerPrompts(isStaff, staffLoading)) return <p data-no-localize>{text("Loading…", "جارٍ التحميل…")}</p>;
   return <AppShell navigation={nav} title={title} mobileNav={mobileNav}>{children}</AppShell>;
 }

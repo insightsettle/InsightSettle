@@ -4,18 +4,17 @@ import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatMoney, moneyInputStep } from "@/lib/money";
+import { useLocale } from "@/lib/locale";
 import { usePlatformSettings } from "@/lib/platform-settings";
 
 type Cur = { code: string; name: string; base: number; spread: number };
 
-const fmt = (n: number, code: string) =>
-  `${code} ${n.toLocaleString("en-GB", {
-    minimumFractionDigits: ["BHD", "KWD", "OMR"].includes(code) ? 3 : 2,
-    maximumFractionDigits: ["BHD", "KWD", "OMR"].includes(code) ? 3 : 2,
-  })}`;
+const fmt = formatMoney;
 
 /** Buyer-facing converter: buyer and supplier currencies, live console rates. No margin shown. */
 export function FxCustomerQuote() {
+  const { text } = useLocale();
   const { settings } = usePlatformSettings();
   const list: Cur[] = useMemo(
     () => [
@@ -28,8 +27,9 @@ export function FxCustomerQuote() {
   const [supplier, setSupplier] = useState("AED");
   const [buyer, setBuyer] = useState("SAR");
 
-  const s = list.find((c) => c.code === supplier) ?? list[0]!;
-  const b = list.find((c) => c.code === buyer) ?? list[0]!;
+  const s = list.find((c) => c.code === supplier) ?? list[0];
+  const b = list.find((c) => c.code === buyer) ?? list[0];
+  if (!s || !b) return null;
   const same = s.code === b.code;
   // SAR per 1 unit, margin applied once on the conversion
   const margin = same ? 0 : Math.max(s.spread, b.spread);
@@ -52,22 +52,22 @@ export function FxCustomerQuote() {
   );
 
   return (
-    <section className="mt-10">
-      <h2 className="text-xl font-bold">Pay a supplier abroad</h2>
+    <section data-no-localize className="mt-4 min-w-0">
+      <h2 className="text-lg font-bold">{text("Pay a supplier abroad", "الدفع لمورد خارج دولتك")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Choose your currency and the supplier's currency to see exactly what you will pay before you
-        fund the deal. The rate is fixed at funding time — no extra charges added later.
+{text("Indicative conversion only. Your payment, fees and VAT are confirmed in the locked deal quote.", "تحويل تقديري فقط. يُؤكّد مبلغ الدفع والرسوم والضريبة في عرض الصفقة المقفل.")}
       </p>
 
       <Card className="mt-4 border-primary/25">
         <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_1fr]">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="cq-amount">Deal value (supplier currency)</Label>
+              <Label htmlFor="cq-amount">{text("Deal value (supplier currency)", "قيمة الصفقة (عملة المورد)")}</Label>
               <Input
                 id="cq-amount"
                 type="number"
                 min={0}
+                step={moneyInputStep(supplier)}
                 value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
                 className="mt-2"
@@ -75,11 +75,11 @@ export function FxCustomerQuote() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="cq-supplier">Supplier currency</Label>
+                <Label htmlFor="cq-supplier">{text("Supplier currency", "عملة المورد")}</Label>
                 {select("cq-supplier", supplier, setSupplier)}
               </div>
               <div>
-                <Label htmlFor="cq-buyer">Your currency (buyer)</Label>
+                <Label htmlFor="cq-buyer">{text("Your currency (buyer)", "عملة الدفع")}</Label>
                 {select("cq-buyer", buyer, setBuyer)}
               </div>
             </div>
@@ -88,28 +88,28 @@ export function FxCustomerQuote() {
           <div className="rounded-lg bg-primary/5 p-5">
             <div className="flex items-center gap-2">
               <Globe2 className="size-5 text-primary" />
-              <p className="font-semibold">Your payment</p>
+              <p className="font-semibold">{text("Your payment", "دفعتك")}</p>
             </div>
             <dl className="mt-4 space-y-3 text-sm">
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-muted-foreground">Supplier receives</dt>
-                <dd className="font-semibold" dir="ltr">{fmt(amount || 0, s.code)}</dd>
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-3">
+                <dt className="text-muted-foreground">{text("Supplier receives", "مبلغ الصفقة بعملة المورد")}</dt>
+                <dd className="break-words text-end font-semibold" dir="ltr">{fmt(amount || 0, s.code)}</dd>
               </div>
-              <div className="flex items-center justify-between gap-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-3">
                 <dt className="text-muted-foreground">
-                  Your rate ({b.code} per 1 {s.code})
+                  {text("Conversion rate", "سعر التحويل")} ({b.code} / {s.code})
                 </dt>
-                <dd className="font-semibold" dir="ltr">
+                <dd className="break-words text-end font-semibold" dir="ltr">
                   {rate.toLocaleString("en-GB", { maximumFractionDigits: 5 })}
                 </dd>
               </div>
               <div className="flex items-center justify-between border-t border-primary/20 pt-3">
-                <dt className="font-semibold">Total you pay</dt>
-                <dd className="text-lg font-extrabold text-primary" dir="ltr">{fmt(total, b.code)}</dd>
+                <dt className="font-semibold">{text("Total you pay", "المبلغ المحوّل قبل الرسوم")}</dt>
+                <dd className="break-words text-end text-lg font-extrabold text-primary" dir="ltr">{fmt(total, b.code)}</dd>
               </div>
             </dl>
             <p className="mt-4 text-xs text-muted-foreground">
-              Rates set by Insight. Escrow fees are shown separately on the deal page.
+              {text("Indicative demo rates. Fees and VAT are shown separately on the deal page.", "أسعار تقديرية تجريبية. تظهر الرسوم والضريبة بصورة منفصلة في صفحة الصفقة.")}
             </p>
           </div>
         </CardContent>

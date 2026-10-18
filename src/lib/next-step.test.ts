@@ -4,6 +4,17 @@ import { nextStepFor, type NextStepInput } from "@/lib/next-step";
 const base: NextStepInput = { status: "pending_funding", termsAgreed: false, isBuyer: true, isSeller: false, bothJoined: true, canDecideTerms: true, shippingNeeded: true, shipped: false, autoRelease: true, frozen: false, hasMilestones: false, nextMilestoneToFund: null, deadline: ["20 Oct, 6pm", "20 أكتوبر، 6 م"] };
 
 describe("next step on a deal page", () => {
+  it("points an active per-milestone buyer to funding and retains the next amount", () => {
+    const s = nextStepFor({ ...base, status: "in_progress", termsAgreed: true, hasMilestones: true, nextMilestoneToFund: 2, nextMilestoneAmount: "BHD 2,500.000" });
+    expect(s?.primary?.action).toBe("scroll-pay");
+    expect(s?.mine).toBe(true);
+    const waiting = nextStepFor({ ...base, status: "in_progress", termsAgreed: true, hasMilestones: true, nextMilestoneToFund: 2, isBuyer: false, isSeller: true });
+    expect(waiting?.primary).toBeUndefined();
+  });
+  it("keeps milestone review and submission controls reachable", () => {
+    expect(nextStepFor({ ...base, status: "in_progress", hasMilestones: true, submittedMilestone: 1 })?.primary?.action).toBe("scroll-milestones");
+    expect(nextStepFor({ ...base, status: "in_progress", hasMilestones: true, workingMilestone: 2, isBuyer: false, isSeller: true })?.primary?.action).toBe("scroll-milestones");
+  });
   it("asks the reviewing party to accept the terms", () => {
     const s = nextStepFor(base)!;
     expect(s.mine).toBe(true);

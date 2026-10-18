@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocale } from "@/lib/locale";
 import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const { text } = useLocale();
   const navigate = useNavigate();
   const search = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">(
@@ -136,25 +138,25 @@ function AuthPage() {
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-md px-4 py-12 sm:py-16">
+      <div data-no-localize className="mx-auto max-w-md px-4 py-12 sm:py-16">
         <h1 className="text-3xl font-extrabold">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+          {mode === "signin" ? text("Welcome back", "مرحبًا بعودتك") : text("Create your account", "أنشئ حسابك")}
         </h1>
         <p className="mt-2 text-muted-foreground">
           {mode === "signin"
-            ? "Sign in to reach your dashboard, deals, and documents."
-            : "One account for creating deals, receiving deals, and tracking delivery."}
+            ? text("Sign in to reach your dashboard, deals, and documents.", "سجّل الدخول للوصول إلى صفقاتك ومستنداتك.")
+            : text("One account for creating deals, receiving deals, and tracking delivery.", "حساب واحد لإنشاء الصفقات واستقبالها ومتابعة التسليم.")}
         </p>
 
         <Card className="mt-6">
           <CardContent className="p-6">
             <Button variant="outline" className="w-full" onClick={handleGoogle} type="button">
-              Continue with Google
+              {text("Continue with Google", "المتابعة مع Google")}
             </Button>
 
             <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
               <span className="h-px flex-1 bg-border" />
-              or use your email
+              {text("or use your email", "أو استخدم بريدك الإلكتروني")}
               <span className="h-px flex-1 bg-border" />
             </div>
 
@@ -162,7 +164,7 @@ function AuthPage() {
               {mode === "signup" && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full name</Label>
+                    <Label htmlFor="fullName">{text("Full name", "الاسم الكامل")}</Label>
                     <Input
                       id="fullName"
                       value={fullName}
@@ -172,7 +174,7 @@ function AuthPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Mobile number</Label>
+                    <Label htmlFor="phone">{text("Mobile number", "رقم الجوال")}</Label>
                     <Input
                       id="phone"
                       value={phone}
@@ -185,7 +187,7 @@ function AuthPage() {
                 </>
               )}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{text("Email", "البريد الإلكتروني")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -196,7 +198,7 @@ function AuthPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{text("Password", "كلمة المرور")}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -217,9 +219,9 @@ function AuthPage() {
                     className="mt-0.5 size-4"
                   />
                   <span>
-                    I agree to the{" "}
-                    <a href="/terms" className="text-primary hover:underline">terms of service</a> and consent to Insight processing my personal data under the{" "}
-                    <a href="/privacy" className="text-primary hover:underline">privacy policy</a> (Saudi PDPL).
+                    {text("I agree to the", "أوافق على")} {" "}
+                    <a href="/terms" className="text-primary hover:underline">{text("terms of service", "شروط الخدمة")}</a> {text("and consent to Insight processing my personal data under the", "وأوافق على معالجة إنسايت لبياناتي الشخصية وفق")} {" "}
+                    <a href="/privacy" className="text-primary hover:underline">{text("privacy policy", "سياسة الخصوصية")}</a> (Saudi PDPL).
                   </span>
                 </label>
               )}
@@ -227,17 +229,17 @@ function AuthPage() {
               {notice && <p className="text-sm text-primary">{notice}</p>}
 
               <Button className="w-full" type="submit" disabled={busy}>
-                {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+                {busy ? text("Please wait…", "يرجى الانتظار…") : mode === "signin" ? text("Sign in", "تسجيل الدخول") : text("Create account", "إنشاء حساب")}
               </Button>
               {mode === "signin" && (
                 <button type="button" className="w-full text-center text-sm font-medium text-primary hover:underline" onClick={handleForgot} disabled={busy}>
-                  Forgot password?
+                  {text("Forgot password?", "نسيت كلمة المرور؟")}
                 </button>
               )}
             </form>
 
             <p className="mt-5 text-center text-sm text-muted-foreground">
-              {mode === "signin" ? "New to Insight?" : "Already have an account?"}{" "}
+              {mode === "signin" ? text("New to Insight?", "جديد في إنسايت؟") : text("Already have an account?", "لديك حساب بالفعل؟")}{" "}
               <button
                 type="button"
                 className="font-semibold text-primary hover:underline"
@@ -247,7 +249,7 @@ function AuthPage() {
                   setNotice(null);
                 }}
               >
-                {mode === "signin" ? "Create an account" : "Sign in"}
+                {mode === "signin" ? text("Create an account", "إنشاء حساب") : text("Sign in", "تسجيل الدخول")}
               </button>
             </p>
           </CardContent>

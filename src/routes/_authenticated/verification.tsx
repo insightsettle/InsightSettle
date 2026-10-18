@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useLocale } from "@/lib/locale";
 import { auctionAccess } from "@/lib/auction-client";
+import { useStaffAccess } from "@/hooks/use-staff";
 import { useSessionUser } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDate } from "@/lib/demo-data";
@@ -51,6 +52,7 @@ const tone: Record<string, string> = {
 function VerificationPage() {
   const queryClient = useQueryClient();
   const { user } = useSessionUser();
+  const { isStaff, loading: staffLoading } = useStaffAccess();
   const { text } = useLocale();
   const auctionPreference = useQuery({ queryKey: ['auction-access'], queryFn: auctionAccess });
   const preferenceMutation = useMutation({
@@ -66,7 +68,7 @@ function VerificationPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("full_name, phone, verification_status")
+        .select("full_name, phone, verification_status").eq("id", user?.id ?? "")
         .maybeSingle();
       return data;
     },
@@ -83,6 +85,7 @@ function VerificationPage() {
       setFile(null);
       setError(null);
       queryClient.invalidateQueries({ queryKey: ["my-kyc"] });
+      queryClient.invalidateQueries({ queryKey: ["account-steps"] });
     },
     onError: (e: unknown) =>
       setError(e instanceof Error ? e.message : "The document could not be uploaded."),
@@ -90,7 +93,7 @@ function VerificationPage() {
 
   const remove = useMutation({
     mutationFn: (doc: KycDocument) => deleteKycDocument(doc),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["my-kyc"] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["my-kyc"] }); queryClient.invalidateQueries({ queryKey: ["account-steps"] }); },
   });
 
   async function openDoc(doc: KycDocument) {
@@ -100,6 +103,7 @@ function VerificationPage() {
 
   const status = profile.data?.verification_status ?? "pending";
 
+  if (staffLoading || isStaff) return null;
   return (
     <SiteShell>
       <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">

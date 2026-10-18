@@ -1,4 +1,7 @@
 # Roadmap
+- [ ] 18 Oct customer restoration: compare six reference screens and restore all missing/collapsed/mobile-unreachable information while keeping new design; remove reference after audit.
+- [ ] 18 Oct staff separation: suppress customer prompts and phone tabs for staff; verify console pages.
+- [ ] 18 Oct verification: run Vitest, automatic TypeScript checks, and EN/AR desktop/390px preview goods + milestone flows using requested accounts and deals; report blockers honestly.
 - [x] C09-D26: corrected only acceptTerms/updateShipping load arguments; full suite once: 82 passed, 10 skipped, test-only RPC mock failed then isolated regression rerun passed (83 passing tests across runs). DL-44255 shipped/delivered/accepted via parties; direct legs succeeded with DL-44255-RELEASE-OWNER SAR 40800 and DL-44255-RELEASE-ORG SAR 7200. T22-a/b/c PASS; organiser-session split update refused and unverified fictional owner refused via lot UI. SAR escrow_held 0, ledger debit-credit 0; INV-1004 matches locked quote fee 845.63/VAT 0. All temporary passwords invalidated, final Arabic screenshot reviewed; no repeated funding, data patches or publishing.
 - [x] C09-D25: align auction and public calculator money input minimum/step; SAR 48000 and BHD 1000.500 regression passes. 82 tests passed, 10 skipped; preview build OK; no publishing.
 - [x] T22 continuation: existing lot 08ff680a-3b38-48f9-ba3c-5314f026f742 and DL-44255 completed after C09-D26; a/b/c all passed with no repeated funding or data patches.

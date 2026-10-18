@@ -6,14 +6,14 @@
 import { GENERIC_ROLES, the, to, type Roles } from "@/lib/roles";
 
 export type Bilingual = [en: string, ar: string];
-export type NextStepAction = "accept-terms" | "scroll-terms" | "scroll-pay" | "scroll-ship" | "deliver" | "release" | "scroll-dispute";
+export type NextStepAction = "accept-terms" | "scroll-terms" | "scroll-pay" | "scroll-ship" | "deliver" | "release" | "scroll-dispute" | "scroll-milestones";
 export type NextStep = {
   icon: "terms" | "pay" | "ship" | "inspect" | "wait" | "done" | "dispute";
   mine: boolean;
   title: Bilingual;
   body: Bilingual;
   note?: Bilingual;
-  primary?: { label: Bilingual; action: NextStepAction };
+  primary?: { label: Bilingual; action: NextStepAction } | undefined;
   secondary?: { label: Bilingual; action: NextStepAction };
 };
 
@@ -30,6 +30,9 @@ export type NextStepInput = {
   frozen: boolean;
   hasMilestones: boolean;
   nextMilestoneToFund: number | null;
+  submittedMilestone?: number | null | undefined;
+  workingMilestone?: number | null | undefined;
+  nextMilestoneAmount?: string | null;
   /** Inspection deadline already formatted for display, or null. */
   deadline: Bilingual | null;
   /** Party names for this deal type (buyer/seller, client/service provider, owner/contractor…). */
@@ -64,6 +67,13 @@ export function nextStepFor(i: NextStepInput): NextStep | null {
       return { icon: "pay", mine: true, title: ms ? [`Pay milestone ${ms} to get started`, `ادفع المرحلة ${ms} ليبدأ العمل`] : ["Pay for the deal", "ادفع مبلغ الصفقة"], body: [`The amount stays in the deal and is paid out ${toPayeeEn} only after delivery and the inspection period.`, `يبقى المبلغ في الصفقة، ولا يُحوَّل ${toPayeeAr} إلا بعد التسليم ومدة الفحص.`], primary: { label: ["See my amount and pay", "اعرض المبلغ وادفع"], action: "scroll-pay" } };
     }
     return { icon: "wait", mine: false, title: [`Waiting for ${payerEn} to pay`, `بانتظار دفع ${payerAr}`], body: ["We will notify you as soon as the payment is confirmed, so you can start.", "سنخبرك فور تأكيد الدفع لتبدأ التنفيذ."] };
+  }
+
+  if (i.status === "in_progress" && i.hasMilestones) {
+    if (i.submittedMilestone) return { icon: "inspect", mine: i.isBuyer, title: [`Review milestone ${i.submittedMilestone}`, `راجع المرحلة ${i.submittedMilestone}`], body: [`${cap1(payeeEn)} submitted the milestone. Review the evidence and payment schedule below.`, `سلّم ${payeeAr} المرحلة. راجع الأدلة وجدول الدفع أدناه.`], primary: i.isBuyer ? { label: ["Review the milestone", "راجع المرحلة"], action: "scroll-milestones" } : undefined };
+    if (i.workingMilestone) return { icon: "inspect", mine: i.isSeller, title: [`Milestone ${i.workingMilestone} is in progress`, `المرحلة ${i.workingMilestone} قيد التنفيذ`], body: [`${cap1(payeeEn)} can submit completion evidence in the milestone schedule.`, `يمكن ${payeeAr} تقديم إثبات الإنجاز في جدول المراحل.`], primary: i.isSeller ? { label: ["Open the milestone", "افتح المرحلة"], action: "scroll-milestones" } : undefined };
+    if (i.nextMilestoneToFund) return { icon: "pay", mine: i.isBuyer, title: [`Fund milestone ${i.nextMilestoneToFund}${i.nextMilestoneAmount ? ` · ${i.nextMilestoneAmount}` : ""}`, `موّل المرحلة ${i.nextMilestoneToFund}${i.nextMilestoneAmount ? ` · ${i.nextMilestoneAmount}` : ""}`], body: [`${cap1(payerEn)} funds the next milestone before work starts.`, `يموّل ${payerAr} المرحلة التالية قبل بدء العمل.`], primary: i.isBuyer ? { label: ["See my amount and pay", "اعرض المبلغ وادفع"], action: "scroll-pay" } : undefined };
+    return { icon: "wait", mine: false, title: ["Milestone schedule", "جدول المراحل"], body: ["Review the complete payment and retention record below.", "راجع سجل الدفع والمحتجزات الكامل أدناه."], secondary: { label: ["View milestones", "عرض المراحل"], action: "scroll-milestones" } };
   }
 
   if (i.status === "held") {
