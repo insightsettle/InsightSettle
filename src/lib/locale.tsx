@@ -102,6 +102,7 @@ const translations: Record<string, string> = {
   "Actions depend on your side of the deal and its current status. Every money movement is recorded below with its status.": "تتوفر الإجراءات بحسب دورك وحالة الصفقة. تُسجّل كل حركة مالية أدناه مع حالتها.",
   "After delivery the buyer has this long to accept, ask for a revision, or open a dispute. When it ends the funds release automatically.": "بعد التسليم يمكن للمشتري خلال هذه المدة أن يقبل أو يطلب تعديلاً أو يفتح نزاعاً. عند انتهائها يُحوَّل المبلغ للمورد تلقائياً.",
   "Other country": "دولة أخرى",
+  "Outside the Gulf": "خارج الخليج (أي دولة)",
   "Oman": "عُمان",
   "Kuwait": "الكويت",
   "Qatar": "قطر",

@@ -23,7 +23,7 @@ export const PROVISIONAL_SCHEDULE: FeeSchedule = {
 };
 
 /** VAT on the Insight fee by the paying party's country (provisional until legal review). */
-export const VAT_RATES: Record<string, number> = { SA: 0.15, BH: 0.1, AE: 0.05, OM: 0.05, QA: 0, KW: 0 };
+export const VAT_RATES: Record<string, number> = { SA: 0.15, BH: 0.1, AE: 0.05, OM: 0.05, QA: 0, KW: 0, OTHER: 0 };
 
 export function vatRateFor(country: string | null | undefined, table: Record<string, number> = VAT_RATES) {
   const code = normalizeCountry(country);
@@ -31,7 +31,7 @@ export function vatRateFor(country: string | null | undefined, table: Record<str
 }
 
 const COUNTRY_NAMES: Record<string, string> = {
-  "SAUDI ARABIA": "SA", BAHRAIN: "BH", "UNITED ARAB EMIRATES": "AE", UAE: "AE", OMAN: "OM", QATAR: "QA", KUWAIT: "KW",
+  "SAUDI ARABIA": "SA", BAHRAIN: "BH", "UNITED ARAB EMIRATES": "AE", UAE: "AE", OMAN: "OM", QATAR: "QA", KUWAIT: "KW", OTHER: "OTHER",
 };
 export function normalizeCountry(country: string | null | undefined) {
   if (!country) return null;

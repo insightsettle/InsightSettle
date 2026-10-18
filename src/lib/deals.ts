@@ -56,7 +56,7 @@ export const gccCountries = [
   { code: "QA", name: "Qatar" },
   { code: "KW", name: "Kuwait" },
   { code: "OM", name: "Oman" },
-  { code: "OTHER", name: "Other country" },
+  { code: "OTHER", name: "Outside the Gulf" },
 ] as const;
 
 export const feePayerLabels: Record<string, string> = {

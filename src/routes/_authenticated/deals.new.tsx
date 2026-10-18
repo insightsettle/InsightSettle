@@ -79,7 +79,7 @@ function NewDeal() {
   const pricingFn = useServerFn(publicPricing);
   const [debounced, setDebounced] = useState(numericAmount);
   useEffect(() => { const t = setTimeout(() => setDebounced(numericAmount), 400); return () => clearTimeout(t); }, [numericAmount]);
-  const codes = ["SA", "BH", "AE", "KW", "QA", "OM"] as const;
+  const codes = ["SA", "BH", "AE", "KW", "QA", "OM", "OTHER"] as const;
   const asCode = (c: string) => (codes as readonly string[]).includes(normalizeCountry(c) ?? "") ? (normalizeCountry(c) as (typeof codes)[number]) : "SA";
   const live = useQuery({
     queryKey: ["new-deal-pricing", debounced, currency, feePayer, supplierCountry, deliveryCountry],

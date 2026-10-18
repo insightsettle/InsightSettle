@@ -112,7 +112,7 @@ function Page() {
         </section>
         <section id="auctions" className="mt-12 scroll-mt-24 border-t border-border pt-8">
           <h2 className="text-2xl font-semibold">{text("Auctions", "المزادات")}</h2>
-          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("Live auctions: the winner gets a payment link with a 24-hour deadline. If they don't pay, the offer passes to the backup bidder automatically. After inspection, the provider pays the item owner and the organiser separately. Available in the demo; payments are simulated.", "المزادات المباشرة: يحصل الفائز على رابط دفع بمهلة 24 ساعة، وإن لم يدفع ينتقل العرض تلقائياً إلى المزايد الاحتياطي. بعد الفحص يصرف مزوّد الدفع لمالك القطعة وللمنظّم كلٌّ على حدة. متاحة في النسخة التجريبية، والدفع فيها محاكى.")}</p>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("Auctions run on Instagram or TikTok: Insight does not host the bidding. Once the organiser records the winner, the winner gets a payment link with a 24-hour deadline. If they don't pay, the offer passes to the backup bidder automatically. After inspection, the provider pays the item owner and the organiser separately. Available in the demo; payments are simulated.", "مزادات تُدار على إنستغرام أو تيك توك: المزايدة لا تجري داخل إنسايت. بعد أن يسجّل المنظّم الفائز، يحصل الفائز على رابط دفع بمهلة 24 ساعة، وإن لم يدفع ينتقل العرض تلقائياً إلى المزايد الاحتياطي. بعد الفحص يصرف مزوّد الدفع لمالك القطعة وللمنظّم كلٌّ على حدة. متاحة في النسخة التجريبية، والدفع فيها محاكى.")}</p>
         </section>
         <div className="mt-10 flex gap-3">
           <Button asChild>

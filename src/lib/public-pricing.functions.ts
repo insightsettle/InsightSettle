@@ -4,7 +4,7 @@ import { z } from "zod";
 import { dealFee, splitFee } from "@/lib/fees";
 
 export const publicPricing = createServerFn({ method: "GET" })
-  .inputValidator((input) => z.object({ amount: z.number().positive().max(1e9), currency: z.enum(["USD", "SAR", "AED", "BHD", "KWD", "QAR", "OMR"]), payer: z.enum(["buyer", "seller", "split"]), buyerCountry: z.enum(["SA", "BH", "AE", "KW", "QA", "OM"]), supplierCountry: z.enum(["SA", "BH", "AE", "KW", "QA", "OM"]) }).parse(input))
+  .inputValidator((input) => z.object({ amount: z.number().positive().max(1e9), currency: z.enum(["USD", "SAR", "AED", "BHD", "KWD", "QAR", "OMR"]), payer: z.enum(["buyer", "seller", "split"]), buyerCountry: z.enum(["SA", "BH", "AE", "KW", "QA", "OM", "OTHER"]), supplierCountry: z.enum(["SA", "BH", "AE", "KW", "QA", "OM", "OTHER"]) }).parse(input))
   .handler(async ({ data }) => {
     const url = process.env["SUPABASE_URL"];
     const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
