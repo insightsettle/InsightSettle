@@ -5,6 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * Official typeface (founder, 18 Oct 2026): Thmanyah Sans, Arabic and Latin, by thmanyah Publishing and
+ * Distribution, used with the owner's permission. The files are bundled by the build (hashed asset names),
+ * never offered for download, and are not modified. Readex Pro remains only as a fallback for characters
+ * the typeface does not include.
+ */
+@font-face { font-family: "Thmanyah Sans"; src: url("./assets/fonts/thmanyahsans-Light.woff2") format("woff2"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Thmanyah Sans"; src: url("./assets/fonts/thmanyahsans-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Thmanyah Sans"; src: url("./assets/fonts/thmanyahsans-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Thmanyah Sans"; src: url("./assets/fonts/thmanyahsans-Bold.woff2") format("woff2"); font-weight: 600 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Thmanyah Sans"; src: url("./assets/fonts/thmanyahsans-Black.woff2") format("woff2"); font-weight: 800 900; font-style: normal; font-display: swap; }
+
+/*
  * Design system definition.
  *
  * The @theme inline block maps CSS custom properties to Tailwind utility
@@ -29,7 +41,7 @@
   --color-danger-subtle: var(--danger-subtle);
   --color-success-subtle: var(--success-subtle);
 
-  --font-sans: "Readex Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Thmanyah Sans", "Readex Pro", ui-sans-serif, system-ui, sans-serif;
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
