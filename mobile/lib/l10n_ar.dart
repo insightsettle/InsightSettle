@@ -214,7 +214,7 @@ const Map<String, String> kArabic = {
 
   // Statuses
   'Pending funding': 'بانتظار التمويل',
-  'Funds held by the payment provider': 'الأموال محفوظة لدى مزوّد الدفع',
+  'Held by the payment provider': 'محفوظة لدى مزوّد الدفع',
   'Under review': 'قيد المراجعة',
   'Refunded': 'مستردة',
   'Disputed': 'متنازع عليها',

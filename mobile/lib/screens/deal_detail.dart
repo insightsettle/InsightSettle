@@ -119,14 +119,13 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
     final gap = const SizedBox(height: 14);
     return [
       // Header
-      Row(children: [
-        Expanded(child: Text(d.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))),
-        StatusBadge(d.status),
-      ]),
+      Text(d.title, textDirection: dirFor(d.title), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+      const SizedBox(height: 8),
+      Align(alignment: AlignmentDirectional.centerStart, child: StatusBadge(d.status)),
       const SizedBox(height: 6),
       Text('${dealTypeLabel(d.dealType)} · ${isBuyer ? tr('You are the buyer') : tr('You are the supplier')}',
           style: const TextStyle(color: InsightColors.muted)),
-      if (d.description.isNotEmpty) ...[const SizedBox(height: 8), Text(d.description)],
+      if (d.description.isNotEmpty) ...[const SizedBox(height: 8), Text(d.description, textDirection: dirFor(d.description))],
       gap,
       _Stepper(deal: d),
       gap,
@@ -463,7 +462,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(tr(e.title), style: const TextStyle(fontWeight: FontWeight.w500)),
                   if (e.note != null && e.note!.isNotEmpty && !e.note!.startsWith('[internal]'))
-                    Text(e.note!, style: const TextStyle(fontSize: 12.5, color: InsightColors.muted)),
+                    Text(e.note!, textDirection: dirFor(e.note!), style: const TextStyle(fontSize: 12.5, color: InsightColors.muted)),
                   Text(_date(e.createdAt), style: const TextStyle(fontSize: 11.5, color: InsightColors.muted)),
                 ]),
               ),

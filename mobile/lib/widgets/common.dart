@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 import '../l10n.dart';
 import '../theme.dart';
 
+/// Direction of user-entered text: right-to-left when its first letter is Arabic, otherwise left-to-right,
+/// so English titles and notes keep their punctuation in place inside the Arabic app.
+TextDirection dirFor(String text) {
+  for (final r in text.runes) {
+    if ((r >= 0x0600 && r <= 0x06FF) || (r >= 0x0750 && r <= 0x077F) || (r >= 0xFB50 && r <= 0xFEFF)) return TextDirection.rtl;
+    if ((r >= 0x41 && r <= 0x5A) || (r >= 0x61 && r <= 0x7A)) return TextDirection.ltr;
+  }
+  return AppLocale.isArabic ? TextDirection.rtl : TextDirection.ltr;
+}
+
 /// Official Insight logo (assets copied from the website's public/brand).
 class BrandLogo extends StatelessWidget {
   const BrandLogo({super.key, this.height = 36, this.light = false});
@@ -60,7 +70,7 @@ class InfoRow extends StatelessWidget {
           Flexible(
             child: Text(
               value,
-              textDirection: ltr ? TextDirection.ltr : null,
+              textDirection: ltr ? TextDirection.ltr : dirFor(value),
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: strong ? 16 : 14,

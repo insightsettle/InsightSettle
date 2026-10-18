@@ -12,7 +12,7 @@ void main() {
         child: Scaffold(body: Column(children: [StatusBadge('held'), InfoRow('المبلغ', 'BHD 1,000.000')])),
       ),
     ));
-    expect(find.text('الأموال محفوظة لدى مزوّد الدفع'), findsOneWidget);
+    expect(find.text('محفوظة لدى مزوّد الدفع'), findsOneWidget);
     expect(find.text('BHD 1,000.000'), findsOneWidget);
 
     AppLocale.notifier.value = const Locale('en');
