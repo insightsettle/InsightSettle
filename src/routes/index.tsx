@@ -96,7 +96,7 @@ function HomePage() {
         <div className="me-8 rounded-3xl border border-border bg-card p-5 shadow-[0_30px_60px_-40px_rgb(12_42_34/0.45)] sm:me-10 sm:p-7">
           <div className="flex items-start justify-between gap-3">
             <div><p className="text-xs text-muted-foreground">{text("Example deal", "مثال")} · {text("Jeddah – Shenzhen", "جدة – شنتشن")}</p><h2 className="mt-2 text-lg font-semibold">{text("Office chairs from a factory", "كراسي مكتبية من مصنع")}</h2></div>
-            <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{text("Shipped", "تم الشحن")}</span>
+            <span className="shrink-0 whitespace-nowrap rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{text("Shipped", "تم الشحن")}</span>
           </div>
           <p className="mt-6 text-3xl font-bold tabular-nums"><bdi dir="ltr">{formatMoney(12000, "USD")}</bdi></p>
           <div className="mt-6 grid grid-cols-4 gap-1.5" aria-hidden="true"><span className="h-2 rounded bg-brand-mint" /><span className="h-2 rounded bg-brand-mint" /><span className="gradient-brand h-2 rounded" /><span className="h-2 rounded bg-surface" /></div>
