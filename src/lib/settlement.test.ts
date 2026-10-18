@@ -94,7 +94,7 @@ describe("C09-D15 actual confirmation path", () => {
 });
 
 describe('T22 auction real confirmation path', () => {
-  async function fixture(amount = 48000, buyerPercent = 0) {
+  async function fixture(amount = 48000, buyerPercent = 0, payCurrency: string | null = 'SAR') {
     const schedule = [
       {amount_from:0,amount_to:1500,percent:3}, {amount_from:1500,amount_to:6000,percent:2.5},
       {amount_from:6000,amount_to:250000,percent:1}, {amount_from:250000,amount_to:null,percent:0.5},
@@ -103,13 +103,13 @@ describe('T22 auction real confirmation path', () => {
       deals:[{id:'deal',ref:'DL-T22',deal_type:'auction',auction_lot_id:'lot',amount,currency:'SAR',fee_payer:'split',buyer_id:'winner',seller_id:'owner',status:buyerPercent ? 'disputed' : 'held'}],
       profiles:[{id:'winner',country:'KW'},{id:'owner',country:'SA'}],
       fee_rules:schedule, vat_rates:[{country_code:'KW',rate:0},{country_code:'SA',rate:0.15}],
-      fx_rates:[{code:'USD',provider_rate:3.75,spread:0,active:true}],
+      fx_rates:[{code:'USD',provider_rate:3.75,spread:0,active:true},{code:'KWD',provider_rate:12.09375,spread:0.01,active:true}],
       auction_lots:[{id:'lot',split_locked_at:'2026-10-17'}],
       deal_payout_splits:[{id:'owner-split',deal_id:'deal',role:'owner',pct:85,beneficiary_id:'owner',release_tx_id:'owner-release'},
         {id:'org-split',deal_id:'deal',role:'organiser',pct:15,beneficiary_id:'organiser',release_tx_id:'org-release'}],
       deal_transactions:[{id:'fund',deal_id:'deal',kind:'funding',status:'processing',amount:0,currency:'SAR',fx_quote_id:'quote'}],
     };
-    const db=database(tables); const pricing=await priceDeal(db,tables['deals']?.[0]);
+    const db=database(tables); const pricing=await priceDeal(db,tables['deals']?.[0],payCurrency);
     tables['fx_quotes']=[{id:'quote',breakdown:pricing}];
     const fund=tables['deal_transactions']?.[0]; fund.amount=pricing.payIn.total;
     const notify={notifyDealParties:async()=>{}};
@@ -157,6 +157,18 @@ describe('T22 auction real confirmation path', () => {
     expect(tables['deals']?.[0].status).toBe('partially_refunded');
     const rows=tables['ledger_entries']??[];
     expect(ledgerBalance(rows)).toEqual({SAR:0});
+    expect(rows.filter(r=>r.account==='escrow_held').reduce((s,r)=>s+r.credit-r.debit,0)).toBe(0);
+  });
+  it('C09-D19: a Kuwait winner pays in KWD by default; fee invoiced in KWD at the provider rate; ledger balanced per currency',async()=>{
+    const {db,tables,pricing,notify}=await fixture(48000,0,null);
+    expect(pricing.payIn.payCurrency).toBe('KWD');
+    expect(pricing.breakdown.fee).toBe(845.63);
+    expect(tables['tax_invoices']?.[0].fee).toBe(pricing.payIn.insightFee);
+    expect(pricing.payIn.insightFee).toBeCloseTo(845.63/12.09375,3);
+    for (const transactionId of ['owner-release','org-release']) await settleTransactionCore(db,notify,{transactionId,outcome:'succeeded',actorId:null});
+    expect(tables['deals']?.[0].status).toBe('released');
+    const rows=tables['ledger_entries']??[];
+    expect(ledgerBalance(rows)).toEqual({KWD:0,SAR:0});
     expect(rows.filter(r=>r.account==='escrow_held').reduce((s,r)=>s+r.credit-r.debit,0)).toBe(0);
   });
   it('T22-f: SAR 36,500 hammer price uses existing USD tiers, fee 730.63',async()=>{

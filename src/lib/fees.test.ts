@@ -8,19 +8,21 @@ import {
   isValidGccIban,
   ledgerBalance,
   payInQuote,
+  crossRate,
   releaseLedger,
   splitFee,
 } from "./fees";
 
 describe("marginal USD fee bands", () => {
-  it("never drops at the band edges 1,500 / 15,000 / 250,000 USD", () => {
-    for (const edge of [1_500, 15_000, 250_000]) {
+  it("never drops at the band edges 1,500 / 6,000 / 250,000 USD (table P1, D-48)", () => {
+    for (const edge of [1_500, 6_000, 250_000]) {
       expect(feeUsd(edge + 0.01)).toBeGreaterThanOrEqual(feeUsd(edge));
       expect(feeUsd(edge)).toBeGreaterThanOrEqual(feeUsd(edge - 0.01));
     }
     expect(feeUsd(1_500)).toBeCloseTo(45, 6);
-    expect(feeUsd(15_000)).toBeCloseTo(45 + 337.5, 6);
-    expect(feeUsd(250_000)).toBeCloseTo(382.5 + 2_350, 6);
+    expect(feeUsd(6_000)).toBeCloseTo(45 + 112.5, 6);
+    expect(feeUsd(10_000)).toBeCloseTo(197.5, 6);
+    expect(feeUsd(250_000)).toBeCloseTo(157.5 + 2_440, 6);
   });
   it("applies the 15 USD minimum and 3,500 USD cap", () => {
     expect(feeUsd(100)).toBe(15);
@@ -83,5 +85,28 @@ describe("IBAN and funding rules", () => {
     expect(fundingBlockReason({ ...base, termsStatus: "pending" })).toMatch(/terms/);
     expect(fundingBlockReason({ ...base, latestVersionAccepted: false })).toMatch(/terms/);
     expect(fundingBlockReason({ ...base, supplierPayoutOk: false })).toMatch(/payout account/);
+  });
+});
+
+describe("pay-in currency cross rates (C09-D19)", () => {
+  const r = { SAR: { code: "SAR", rate: 1, spread: 0 }, BHD: { code: "BHD", rate: 9.9734, spread: 0.0105 }, KWD: { code: "KWD", rate: 12.09375, spread: 0.01 }, AED: { code: "AED", rate: 1.021102, spread: 0.008 } };
+  it("keeps the BHD→SAR rate used by T1", () => {
+    expect(crossRate(r.BHD, r.SAR)).toEqual({ providerRate: 9.9734, customerRate: 10.078121 });
+  });
+  it("same currency means no conversion and no spread", () => {
+    expect(crossRate(r.KWD, r.KWD)).toEqual({ providerRate: 1, customerRate: 1 });
+  });
+  it("crosses KWD→AED through SAR with the larger spread (T11)", () => {
+    const x = crossRate(r.KWD, r.AED);
+    expect(x.providerRate).toBeCloseTo(12.09375 / 1.021102, 6);
+    expect(x.customerRate).toBeCloseTo(x.providerRate * 1.01, 5);
+    const b = splitFee({ amount: 1_000, currency: "KWD", fee: 25, feePayer: "split", buyerCountry: "AE", supplierCountry: "KW" });
+    const q = payInQuote(b, "AED", x.providerRate, x.customerRate);
+    expect(q.payCurrency).toBe("AED");
+    expect(q.escrowConversion + q.insightFee + q.vatPayable + q.fxSpread).toBeCloseTo(q.total, 2);
+    expect(ledgerBalance([...fundingLedger(b, q), ...releaseLedger(b)])).toEqual({ AED: 0, KWD: 0 });
+  });
+  it("prices the C07 v0.3 vector BHD 1,000.000 → fee BHD 27.820", () => {
+    expect(dealFee(1_000, "BHD", 9.9734 / 3.75)).toBe(27.82);
   });
 });

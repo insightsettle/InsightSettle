@@ -1,4 +1,4 @@
-import { getDealPricing, requestFxQuote, type FxQuote } from "@/lib/fx-quotes.functions";
+import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
 import { getAuctionDealView } from "@/lib/auction-client.functions";
 import { AuctionDealScreen } from "@/components/auction/AuctionWinner";
 import {
@@ -196,9 +196,10 @@ function OrdinaryDealPage() {
   const reviewFn = useServerFn(requestRevision);
   const shipFn = useServerFn(updateShippingFn);
   const pricingFn = useServerFn(getDealPricing);
+  const [payCurrency, setPayCurrency] = useState<(typeof PAY_CURRENCIES)[number] | undefined>(undefined);
   const pricing = useQuery({
-    queryKey: ["deal-pricing", deal?.id, deal?.status, deal?.terms_version],
-    queryFn: () => pricingFn({ data: { dealId: deal?.id ?? "" } }),
+    queryKey: ["deal-pricing", deal?.id, deal?.status, deal?.terms_version, payCurrency],
+    queryFn: () => pricingFn({ data: { dealId: deal?.id ?? "", payCurrency } }),
     enabled: !!deal,
   });
   const release = useServerFn(requestFundsRelease);
@@ -497,16 +498,27 @@ function OrdinaryDealPage() {
                         <div className="flex flex-wrap items-center gap-3">
                           <span className="text-muted-foreground">
                             {quoteExpired
-                              ? "Your exchange rate has expired. Please request a new quote."
-                              : "Lock an exchange rate for 15 minutes before paying."}
+                              ? text("Your exchange rate has expired. Please request a new quote.", "انتهت صلاحية سعر الصرف. اطلب عرضاً جديداً.")
+                              : text("Lock an exchange rate for 15 minutes before paying.", "ثبّت سعر الصرف لمدة 15 دقيقة قبل الدفع.")}
                           </span>
+                          <label className="flex items-center gap-2" data-no-localize>
+                            <span className="text-muted-foreground">{text("Pay in", "الدفع بعملة")}</span>
+                            <select
+                              aria-label={text("Pay-in currency", "عملة الدفع")}
+                              className="h-9 rounded-md border border-input bg-card px-2 text-sm"
+                              value={payCurrency ?? pricing.data?.payIn.payCurrency ?? ""}
+                              onChange={(e) => { setQuote(null); setPayCurrency(e.target.value as (typeof PAY_CURRENCIES)[number]); }}
+                            >
+                              {PAY_CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          </label>
                           <Button
                             variant="outline"
                             size="sm"
                             disabled={!termsAgreed}
                             onClick={async () => {
                               try {
-                                setQuote(await getQuote({ data: { dealId: deal.id } }));
+                                setQuote(await getQuote({ data: { dealId: deal.id, payCurrency: payCurrency ?? (pricing.data?.payIn.payCurrency as (typeof PAY_CURRENCIES)[number] | undefined) } }));
                               } catch (e) {
                                 setPaymentNotice({
                                   ok: false,
@@ -518,7 +530,7 @@ function OrdinaryDealPage() {
                               }
                             }}
                           >
-                            Get exchange-rate quote
+                            {text("Get exchange-rate quote", "اطلب عرض سعر الصرف")}
                           </Button>
                         </div>
                       )}

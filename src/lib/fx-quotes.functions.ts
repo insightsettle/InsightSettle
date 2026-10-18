@@ -29,10 +29,14 @@ export type DealPricingView = {
 
 const QUOTE_MINUTES = 15;
 
+/** Currencies the buyer may pay in (C09-D19). Omitted = the buyer's country currency, else SAR. */
+export const PAY_CURRENCIES = ["SAR", "AED", "BHD", "KWD", "QAR", "OMR", "USD"] as const;
+const quoteInput = z.object({ dealId: z.string().uuid(), payCurrency: z.enum(PAY_CURRENCIES).optional() });
+
 /** Locks an exchange rate for 15 minutes. Every deal is funded from a quote (SAR deals at rate 1). */
 export const requestFxQuote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { dealId: string }) => z.object({ dealId: z.string().uuid() }).parse(input))
+  .inputValidator((input: { dealId: string; payCurrency?: string | undefined }) => quoteInput.parse(input))
   .handler(async ({ data, context }): Promise<FxQuote> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
@@ -41,14 +45,14 @@ export const requestFxQuote = createServerFn({ method: "POST" })
     if (!deal || deal.buyer_id !== context.userId) throw new Error("Only the buyer can request a quote.");
     if (deal.status !== "pending_funding") throw new Error("This deal is not waiting for funding.");
 
-    const { priceDeal, PAY_IN_CURRENCY } = await import("@/lib/pricing.server");
-    const p = await priceDeal(admin, deal);
+    const { priceDeal } = await import("@/lib/pricing.server");
+    const p = await priceDeal(admin, deal, data.payCurrency);
     const { data: q, error: qErr } = await admin
       .from("fx_quotes")
       .insert({
         deal_id: deal.id,
         source_currency: deal.currency,
-        target_currency: PAY_IN_CURRENCY,
+        target_currency: p.payIn.payCurrency,
         source_amount: Number(deal.amount),
         provider_rate: p.payIn.providerRate,
         customer_rate: p.payIn.customerRate,
@@ -84,7 +88,7 @@ export const requestFxQuote = createServerFn({ method: "POST" })
 /** Fee, VAT and ledger view for a party or staff — the same numbers everywhere. */
 export const getDealPricing = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { dealId: string }) => z.object({ dealId: z.string().uuid() }).parse(input))
+  .inputValidator((input: { dealId: string; payCurrency?: string | undefined }) => quoteInput.parse(input))
   .handler(async ({ data, context }): Promise<DealPricingView> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
@@ -106,6 +110,6 @@ export const getDealPricing = createServerFn({ method: "GET" })
       const { data: q } = await admin.from("fx_quotes").select("breakdown").eq("id", fund.fx_quote_id).maybeSingle();
       if (q?.breakdown?.breakdown) return { ...q.breakdown, ledger: ledgerPreview(q.breakdown), locked: true };
     }
-    const p = await priceDeal(admin, deal);
+    const p = await priceDeal(admin, deal, data.payCurrency);
     return { breakdown: p.breakdown, payIn: p.payIn, ledger: ledgerPreview(p), locked: false };
   });

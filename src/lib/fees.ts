@@ -14,8 +14,8 @@ export const PROVISIONAL_SCHEDULE: FeeSchedule = {
   currency: "USD",
   bands: [
     { from: 0, to: 1_500, percent: 3 },
-    { from: 1_500, to: 15_000, percent: 2.5 },
-    { from: 15_000, to: 250_000, percent: 1 },
+    { from: 1_500, to: 6_000, percent: 2.5 },
+    { from: 6_000, to: 250_000, percent: 1 },
     { from: 250_000, to: null, percent: 0.5 },
   ],
   minFee: 15,
@@ -122,6 +122,17 @@ export function payInQuote(b: FeeBreakdown, payCurrency: string, providerRate: n
   const vatPayable = roundMoney(b.buyerVat * providerRate, payCurrency);
   const fxSpread = roundMoney(total - escrowConversion - insightFee - vatPayable, payCurrency);
   return { payCurrency, providerRate, customerRate, escrowConversion, insightFee, vatPayable, fxSpread, total };
+}
+
+/**
+ * Cross rate from the deal currency into the pay-in currency (C09-D19). `rate` = SAR per 1 unit.
+ * providerRate = pay-in units per 1 deal unit; the customer rate adds the larger of the two spreads.
+ */
+export function crossRate(deal: { code: string; rate: number; spread: number }, pay: { code: string; rate: number; spread: number }) {
+  if (deal.code === pay.code) return { providerRate: 1, customerRate: 1 };
+  const providerRate = +(deal.rate / pay.rate).toFixed(6);
+  const spread = Math.max(deal.code === "SAR" ? 0 : deal.spread, pay.code === "SAR" ? 0 : pay.spread);
+  return { providerRate, customerRate: +(providerRate * (1 + spread)).toFixed(6) };
 }
 
 export type LedgerRow = { account: string; debit: number; credit: number; currency: string };
