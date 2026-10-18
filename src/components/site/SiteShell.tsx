@@ -58,7 +58,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="ms-auto flex items-center gap-2 xl:ms-0">
-          <LanguageToggle className="px-2 sm:px-3" />
+          <LanguageToggle />
           {loading ? null : user ? (
             <>
               <NotificationBell />

@@ -79,7 +79,7 @@ function HomePage() {
         </div>
         <div className="rounded-3xl border border-border bg-card p-6 shadow-[0_30px_60px_-40px_rgb(12_42_34/0.45)] sm:p-8">
           <div className="flex items-start justify-between gap-3">
-            <div><p className="text-xs text-muted-foreground">{text("Example deal", "مثال")} · <bdi>Riyadh ← Manama</bdi></p><h2 className="mt-2 text-lg font-semibold">{text("Packaging materials", "مواد تغليف")}</h2></div>
+            <div><p className="text-xs text-muted-foreground">{text("Example deal", "مثال")} · {text("Riyadh – Manama", "الرياض – المنامة")}</p><h2 className="mt-2 text-lg font-semibold">{text("Packaging materials", "مواد تغليف")}</h2></div>
             <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{text("Shipped", "تم الشحن")}</span>
           </div>
           <p className="mt-6 text-3xl font-bold tabular-nums"><bdi dir="ltr">{formatMoney(1000, "BHD")}</bdi></p>
