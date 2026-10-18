@@ -1,4 +1,6 @@
 import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
+import { PayoutPlan } from "@/components/deal/PayoutPlan";
+import { planDealPayouts } from "@/lib/payout-planner";
 import { getAuctionDealView } from "@/lib/auction-client.functions";
 import { AuctionDealScreen } from "@/components/auction/AuctionWinner";
 import {
@@ -323,6 +325,9 @@ function OrdinaryDealPage() {
               </CardContent>
             </Card>
 
+            {isSeller && fb && !["released", "refunded", "partially_refunded", "cancelled", "rejected", "completed"].includes(status) && (
+              <PayoutPlan lines={planDealPayouts({ currency: deal.currency, supplierNet: fb.supplierNet, amount: Number(deal.amount), sellerShare: fb.sellerShare, sellerVat: fb.sellerVat, retentionPercent: Number((deal as any).retention_percent ?? 0), milestones: (milestonesQ.data ?? []).map((m: any) => ({ seq: m.seq, title: m.title, amount: Number(m.amount) })) })} />
+            )}
             {shippingNeeded && (
               <Card>
                 <CardContent className="p-6">
