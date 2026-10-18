@@ -20,6 +20,7 @@ import { Route as ForBuyersRouteImport } from './routes/for-buyers'
 import { Route as ForSuppliersRouteImport } from './routes/for-suppliers'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as IndividualsRouteImport } from './routes/individuals'
 import { Route as InterestRouteImport } from './routes/interest'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -114,6 +115,11 @@ const HelpRoute = HelpRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndividualsRoute = IndividualsRouteImport.update({
+  id: '/individuals',
+  path: '/individuals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InterestRoute = InterestRouteImport.update({
@@ -337,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/individuals': typeof IndividualsRoute
   '/interest': typeof InterestRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -389,6 +396,7 @@ export interface FileRoutesByTo {
   '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/individuals': typeof IndividualsRoute
   '/interest': typeof InterestRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/individuals': typeof IndividualsRoute
   '/interest': typeof InterestRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -499,6 +508,7 @@ export interface FileRouteTypes {
     | '/for-suppliers'
     | '/help'
     | '/how-it-works'
+    | '/individuals'
     | '/interest'
     | '/pricing'
     | '/privacy'
@@ -551,6 +561,7 @@ export interface FileRouteTypes {
     | '/for-suppliers'
     | '/help'
     | '/how-it-works'
+    | '/individuals'
     | '/interest'
     | '/pricing'
     | '/privacy'
@@ -605,6 +616,7 @@ export interface FileRouteTypes {
     | '/for-suppliers'
     | '/help'
     | '/how-it-works'
+    | '/individuals'
     | '/interest'
     | '/pricing'
     | '/privacy'
@@ -660,6 +672,7 @@ export interface RootRouteChildren {
   ForSuppliersRoute: typeof ForSuppliersRoute
   HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  IndividualsRoute: typeof IndividualsRoute
   InterestRoute: typeof InterestRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -754,6 +767,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/individuals': {
+      id: '/individuals'
+      path: '/individuals'
+      fullPath: '/individuals'
+      preLoaderRoute: typeof IndividualsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/interest': {
@@ -1136,6 +1156,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForSuppliersRoute: ForSuppliersRoute,
   HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
+  IndividualsRoute: IndividualsRoute,
   InterestRoute: InterestRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,

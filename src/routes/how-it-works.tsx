@@ -1,128 +1,88 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { BadgeCheck, CircleCheckBig, FileSignature, Gavel, HardHat, Link2, PackageCheck, SearchCheck, Wallet } from "lucide-react";
+
+import { CtaBand, IconTile, PageHero, SectionHeader, type T2 } from "@/components/site/Marketing";
 import { SiteShell } from "@/components/site/SiteShell";
 import { StatusBadge } from "@/components/site/StatusBadge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import type { DealStatus } from "@/lib/demo-data";
 import { useLocale } from "@/lib/locale";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
     meta: [
-      { title: "How Insight works | Secure escrow steps" },
-      {
-        name: "description",
-        content:
-          "Follow an Insight deal from account verification and funding through delivery, release, refund, or dispute.",
-      },
+      { title: "How Insight works | From agreement to payout" },
+      { name: "description", content: "Follow an Insight deal from the agreement and payment through delivery, inspection and payout — or a dispute." },
       { property: "og:title", content: "How Insight works" },
-      { property: "og:description", content: "Seven clear steps from agreement to settlement." },
+      { property: "og:description", content: "Seven clear steps from agreement to payout." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Page,
 });
-const steps = [
-  {
-    t: "Create and verify your account",
-    d: "Confirm your email and phone. Identity checks apply when required.",
-  },
-  {
-    t: "Define the deal",
-    d: "Set the scope, value, currency, parties, delivery window, and release conditions.",
-  },
-  {
-    t: "Invite the other party",
-    d: "Send a secure, time-limited invitation for review and acceptance.",
-  },
-  {
-    t: "Fund the agreement",
-    d: "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.",
-  },
-  { t: "Deliver the work", d: "The seller confirms delivery with notes and supporting files." },
-  {
-    t: "Review the delivery",
-    d: "The buyer accepts, requests changes, or opens a dispute during the review window.",
-  },
-  {
-    t: "Release or refund",
-    d: "The payment provider (simulated in this demo) releases or refunds the funds; Insight keeps the receipt and the complete timeline.",
-  },
+
+const STEPS: [typeof BadgeCheck, T2, T2][] = [
+  [BadgeCheck, ["Create and verify your account", "أنشئ حسابك ووثّقه"], ["Confirm your email and phone. Identity checks apply when required.", "أكّد بريدك وجوالك، ويُطلب توثيق الهوية عند الحاجة."]],
+  [FileSignature, ["Define the deal", "حدّد تفاصيل الصفقة"], ["What is delivered, the amount, the currency, the delivery window and how it is accepted.", "ما سيُسلَّم، والمبلغ، والعملة، وموعد التسليم، وكيف يُقبل."]],
+  [Link2, ["Invite the other party", "ادعُ الطرف الآخر"], ["Send one secure link. They review the terms and accept, or ask for a change.", "أرسل رابطاً آمناً واحداً، فيراجع الشروط ويقبلها أو يطلب تعديلها."]],
+  [Wallet, ["The buyer pays into the deal", "يدفع المشتري في الصفقة"], ["In their own currency, with the rate and every fee shown first. In this demo the payment provider is simulated and no real money moves.", "بعملته، مع سعر الصرف وكل الرسوم أمامه أولاً. في هذه النسخة التجريبية مزوّد الدفع محاكى ولا تتحرك أموال حقيقية."]],
+  [PackageCheck, ["The supplier delivers", "يسلّم المورد"], ["Ships the goods or completes the work, with tracking, notes and files.", "يشحن البضاعة أو يُنجز العمل، مع رقم التتبع والملاحظات والملفات."]],
+  [SearchCheck, ["The buyer inspects", "يفحص المشتري"], ["Within the agreed inspection period: accept, ask for a revision, or open a dispute.", "خلال مدة الفحص المتفق عليها: يقبل، أو يطلب تعديلاً، أو يفتح نزاعاً."]],
+  [CircleCheckBig, ["Payout to the supplier", "التحويل للمورد"], ["On acceptance, or automatically when the inspection period ends without an objection. Insight keeps the receipt and the full timeline.", "عند القبول، أو تلقائياً بانتهاء مدة الفحص دون اعتراض. وتحفظ إنسايت الإيصال والسجل الكامل."]],
 ];
-const statuses: DealStatus[] = [
-  "pending_funding",
-  "held",
-  "delivered",
-  "under_review",
-  "released",
-  "refunded",
-  "disputed",
-];
-const desc: Partial<Record<DealStatus, string>> = {
-  pending_funding: "The agreement is ready but has not been funded.",
-  held: "The funds are held with the payment provider (simulated in this demo) and work can begin.",
-  delivered: "The seller marked the work as delivered.",
-  under_review: "The buyer is reviewing the submitted work.",
-  released: "The payment provider released the funds to the seller.",
-  refunded: "The payment provider returned the funds under the refund policy.",
-  disputed: "The deal is paused for mediation.",
+
+const STATUSES: DealStatus[] = ["pending_funding", "held", "delivered", "under_review", "released", "refunded", "disputed"];
+const DESC: Partial<Record<DealStatus, T2>> = {
+  pending_funding: ["The terms are ready; the buyer has not paid yet.", "الشروط جاهزة، ولم يدفع المشتري بعد."],
+  held: ["The buyer has paid into the deal and the work can begin.", "دفع المشتري في الصفقة، ويمكن بدء العمل."],
+  delivered: ["The supplier has marked the deal as delivered.", "أكّد المورد التسليم."],
+  under_review: ["The buyer is inspecting what was delivered.", "يفحص المشتري ما سُلِّم."],
+  released: ["The amount has been paid to the supplier.", "حُوِّل المبلغ للمورد."],
+  refunded: ["The amount has been returned to the buyer under the refund policy.", "أُعيد المبلغ للمشتري وفق سياسة الاسترداد."],
+  disputed: ["The payout is paused while the Insight team reviews both sides' evidence.", "التحويل متوقف بينما يراجع فريق إنسايت أدلة الطرفين."],
 };
+
 function Page() {
   const { text } = useLocale();
-  return (
-    <SiteShell>
-      <div className="mx-auto max-w-4xl px-4 py-16">
-        <p className="text-sm font-semibold text-primary">THE ESCROW JOURNEY</p>
-        <h1 className="mt-2 text-4xl font-extrabold">From agreement to settlement</h1>
-        <p className="mt-3 text-muted-foreground">
-          The platform supports SAR, BHD, AED, QAR, KWD, OMR and USD. In Bahrain and Saudi Arabia, funds are to be held by payment providers licensed by the Central Bank of Bahrain (CBB) and the Saudi Central Bank (SAMA), respectively. Insight runs the deal rules and keeps the record; Insight is not licensed, regulated or approved by either central bank.
-        </p>
-        <ol className="mt-10 space-y-4">
-          {steps.map((s, i) => (
-            <li key={s.t}>
-              <Card className="shadow-sm">
-                <CardContent className="flex gap-4 p-5">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-                    {i + 1}
-                  </span>
-                  <div>
-                    <h2 className="font-bold">{s.t}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </li>
-          ))}
-        </ol>
-        <h2 className="mt-16 text-2xl font-extrabold">Deal statuses</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {statuses.map((s) => (
-            <Card key={s}>
-              <CardContent className="p-5">
-                <StatusBadge status={s} />
-                <p className="mt-3 text-sm text-muted-foreground">{desc[s]}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <section id="contracting" className="mt-12 scroll-mt-24 border-t border-border pt-8">
-          <h2 className="text-2xl font-semibold">{text("Contracting", "المقاولات")}</h2>
-          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("2–20 milestones, advance up to 20%, retention and a defects period.", "من 2 إلى 20 مرحلة، دفعة مقدّمة حتى 20%، واحتفاظ وفترة ضمان عيوب.")}</p>
-        </section>
-        <section id="auctions" className="mt-12 scroll-mt-24 border-t border-border pt-8">
-          <h2 className="text-2xl font-semibold">{text("Auctions", "المزادات")}</h2>
-          <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("Auctions run on Instagram or TikTok: Insight does not host the bidding. Once the organiser records the winner, the winner gets a payment link with a 24-hour deadline. If they don't pay, the offer passes to the backup bidder automatically. After inspection, the provider pays the item owner and the organiser separately. Available in the demo; payments are simulated.", "مزادات تُدار على إنستغرام أو تيك توك: المزايدة لا تجري داخل إنسايت. بعد أن يسجّل المنظّم الفائز، يحصل الفائز على رابط دفع بمهلة 24 ساعة، وإن لم يدفع ينتقل العرض تلقائياً إلى المزايد الاحتياطي. بعد الفحص يصرف مزوّد الدفع لمالك القطعة وللمنظّم كلٌّ على حدة. متاحة في النسخة التجريبية، والدفع فيها محاكى.")}</p>
-        </section>
-        <div className="mt-10 flex gap-3">
-          <Button asChild>
-            <Link to="/services">Review fees</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link to="/dashboard">Explore dashboard</Link>
-          </Button>
-        </div>
-      </div>
-    </SiteShell>
-  );
+  return <SiteShell><div data-no-localize>
+    <PageHero
+      badge={["How it works", "كيف تعمل"]}
+      title={["From the first agreement", "من أول اتفاق"]}
+      highlight={["to the last payment.", "حتى آخر دفعة."]}
+      body={["Seven clear steps. At every moment each side knows what has happened, and what it needs to do next.", "سبع خطوات واضحة. في كل لحظة يعرف كل طرف ما حدث، وما المطلوب منه الآن."]}
+      primary={{ label: ["Start your first deal", "ابدأ صفقتك الأولى"], to: "/auth", signup: true }}
+      secondary={{ label: ["Fee calculator", "حاسبة الرسوم"], to: "/pricing" }}
+    />
+
+    <section className="mx-auto max-w-4xl px-5 py-16 lg:py-20">
+      <ol className="relative space-y-4">
+        <span aria-hidden="true" className="gradient-brand absolute top-8 bottom-8 start-[2.75rem] w-0.5 opacity-50 sm:start-[3rem]" />
+        {STEPS.map(([I, t, d], i) => (
+          <li key={t[0]} className="relative flex gap-5 rounded-2xl border border-border bg-card p-5 sm:p-6">
+            <IconTile icon={I} className="ring-4 ring-card" />
+            <div><p className="text-xs font-semibold text-primary">{text("Step", "الخطوة")} {i + 1}</p><h2 className="mt-1 text-lg font-semibold">{text(t[0], t[1])}</h2><p className="mt-1.5 leading-7 text-muted-foreground">{text(d[0], d[1])}</p></div>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-6 text-xs leading-6 text-muted-foreground">{text("The platform supports SAR, BHD, AED, QAR, KWD, OMR and USD. In Bahrain and Saudi Arabia, funds are to be held by payment providers licensed by the Central Bank of Bahrain (CBB) and the Saudi Central Bank (SAMA), respectively. Insight runs the deal rules and keeps the record; Insight is not licensed, regulated or approved by either central bank.", "تدعم المنصة الريال السعودي والدينار البحريني والدرهم الإماراتي والريال القطري والدينار الكويتي والريال العُماني والدولار الأمريكي. في البحرين والسعودية تُحفظ الأموال لدى مزوّدي دفع مرخّصين من مصرف البحرين المركزي والبنك المركزي السعودي على التوالي. تدير إنسايت قواعد الصفقة وتحفظ سجلها، وإنسايت غير مرخّصة أو خاضعة لرقابة أو معتمدة من أيٍّ من البنكين المركزيين.")}</p>
+    </section>
+
+    <section className="border-y border-border bg-secondary"><div className="mx-auto max-w-7xl px-5 py-16 lg:py-20">
+      <SectionHeader title={["What each status means", "ماذا تعني كل حالة"]} />
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{STATUSES.map((s) => <article key={s} className="rounded-2xl border border-border bg-card p-5"><StatusBadge status={s} /><p className="mt-3 text-sm leading-7 text-muted-foreground">{DESC[s] ? text(DESC[s]![0], DESC[s]![1]) : null}</p></article>)}</div>
+    </div></section>
+
+    <section className="mx-auto grid max-w-7xl gap-5 px-5 py-16 lg:grid-cols-2 lg:py-20">
+      <article id="contracting" className="scroll-mt-24 rounded-3xl border border-border bg-card p-8">
+        <div className="flex items-center gap-4"><IconTile icon={HardHat} size="lg" /><h2 className="text-2xl font-bold">{text("Contracting in stages", "المقاولات على مراحل")}</h2></div>
+        <ul className="mt-6 space-y-3 leading-8 text-muted-foreground">{([["2 to 20 milestones, each paid when you approve it.", "من 2 إلى 20 مرحلة، تُدفع كل مرحلة حين تعتمدها."], ["An advance of up to 20% to get the work started.", "دفعة مقدّمة حتى 20% لبدء العمل."], ["Pay the whole contract up front, or each milestone when it is due.", "ادفع العقد كاملاً مقدّماً، أو كل مرحلة عند موعدها."], ["Retention released after the defects period.", "محتجز ضمان يُصرف بعد فترة ضمان العيوب."]] as const).map(([en, ar]) => <li key={en} className="flex gap-3"><span className="mt-3 size-1.5 shrink-0 rounded-full bg-primary" />{text(en, ar)}</li>)}</ul>
+      </article>
+      <article id="auctions" className="scroll-mt-24 rounded-3xl border border-border bg-card p-8">
+        <div className="flex items-center gap-4"><IconTile icon={Gavel} size="lg" /><h2 className="text-2xl font-bold">{text("Social-media auctions", "مزادات وسائل التواصل")}</h2></div>
+        <ul className="mt-6 space-y-3 leading-8 text-muted-foreground">{([["You run the auction on Instagram or TikTok — the bidding does not take place on Insight.", "تدير المزاد على إنستغرام أو تيك توك، والمزايدة لا تجري داخل إنسايت."], ["Once you record the winner, they get a payment link with a 24-hour deadline.", "حين تسجّل الفائز، يصله رابط دفع بمهلة 24 ساعة."], ["If they do not pay, the offer passes to the backup bidder automatically.", "إن لم يدفع، ينتقل العرض تلقائياً إلى المزايد الاحتياطي."], ["After inspection, the owner and the organiser are paid separately.", "بعد الفحص يُحوَّل للمالك وللمنظّم كلٌّ على حدة."]] as const).map(([en, ar]) => <li key={en} className="flex gap-3"><span className="mt-3 size-1.5 shrink-0 rounded-full bg-primary" />{text(en, ar)}</li>)}</ul>
+      </article>
+    </section>
+
+    <CtaBand title={["Ready for your first deal?", "جاهز لصفقتك الأولى؟"]} body={["Creating a deal is free. Fees only when you pay.", "إنشاء الصفقة مجاني، والرسوم عند الدفع فقط."]} />
+  </div></SiteShell>;
 }

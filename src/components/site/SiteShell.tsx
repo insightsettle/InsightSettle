@@ -14,10 +14,9 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/locale";
 
 const nav = [
-  { to: "/", label: "Home", ar: "الرئيسية", hash: "" },
+  { to: "/individuals", label: "For individuals", ar: "للأفراد", hash: "" },
+  { to: "/business", label: "For business", ar: "للشركات", hash: "" },
   { to: "/how-it-works", label: "How it works", ar: "كيف تعمل؟", hash: "" },
-  { to: "/for-buyers", label: "For buyers", ar: "للمشترين", hash: "" },
-  { to: "/for-suppliers", label: "For suppliers", ar: "للموردين", hash: "" },
   { to: "/pricing", label: "Pricing", ar: "الرسوم", hash: "" },
   { to: "/help", label: "Help", ar: "المساعدة", hash: "" },
 ] as const;
@@ -49,7 +48,7 @@ export function SiteHeader() {
               key={item.label}
               to={item.to}
               hash={item.hash}
-              activeOptions={{ exact: item.to === "/" }}
+              activeOptions={{ exact: false }}
               className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground"
             >
               {text(item.label, item.ar)}
@@ -160,23 +159,27 @@ export function SiteHeader() {
 export function SiteFooter() {
   const { text } = useLocale();
   return <footer data-no-localize className="border-t border-primary-foreground/15 bg-brand-strong text-primary-foreground">
-    <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
-      <div><Link to="/" aria-label="Insight home" className="inline-flex"><BrandLogo tone="light" className="h-14 w-auto" /></Link><p className="mt-4 max-w-xs text-sm leading-7 text-primary-foreground/75">{text("Every deal clear, from the first agreement to the last payment.", "صفقتك واضحة، من أول اتفاق حتى آخر دفعة.")}</p></div>
-      <FooterCol title={text("Product", "المنتج")} links={[{to:"/how-it-works",label:text("How it works","كيف تعمل؟")},{to:"/for-buyers",label:text("For buyers","للمشترين")},{to:"/for-suppliers",label:text("For suppliers","للموردين")},{to:"/pricing",label:text("Pricing","الرسوم")}]} />
-      <FooterCol title={text("Company", "الشركة")} links={[{to:"/business",label:text("Business","الأعمال")},{to:"/security",label:text("Security","الأمان")},{to:"/help",label:text("Help","المساعدة")},{to:"/faq",label:text("FAQ","الأسئلة الشائعة")}]} />
-      <FooterCol title={text("Legal", "قانوني")} links={[{to:"/terms",label:text("Terms of service","شروط الخدمة")},{to:"/privacy",label:text("Privacy policy","سياسة الخصوصية")},{to:"/dispute-policy",label:text("Disputes & refunds","النزاعات والاسترداد")}]} />
-    </div><div className="border-t border-primary-foreground/15 px-5 py-6"><p className="mx-auto max-w-7xl text-xs leading-6 text-primary-foreground/70">{text("Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.", "نسخة تجريبية لخدمة الضمان: مزوّد الدفع محاكى ولا تُحوَّل أي أموال حقيقية. عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، وتدير إنسايت قواعد الصفقة وتحفظ سجلها.")}</p></div>
+    <div aria-hidden="true" className="gradient-brand h-1" />
+    <div className="mx-auto max-w-7xl px-5 py-12">
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
+        <div><Link to="/" aria-label="Insight home" className="inline-flex"><BrandLogo tone="light" className="h-14 w-auto" /></Link><p className="mt-4 max-w-xs text-sm leading-7 text-primary-foreground/75">{text("Every deal clear, from the first agreement to the last payment.", "صفقتك واضحة، من أول اتفاق حتى آخر دفعة.")}</p></div>
+        <FooterCol title={text("For individuals", "للأفراد")} links={[{to:"/individuals",label:text("Insight for individuals","إنسايت للأفراد")},{to:"/for-buyers",label:text("For buyers","للمشترين")},{to:"/for-suppliers",label:text("For sellers and suppliers","للبائعين والموردين")},{to:"/how-it-works",hash:"auctions",label:text("Social-media auctions","مزادات وسائل التواصل")}]} />
+        <FooterCol title={text("For business", "للشركات")} links={[{to:"/business",label:text("Insight for business","إنسايت للشركات")},{to:"/business",hash:"imports",label:text("Importing from abroad","الاستيراد من الخارج")},{to:"/business",hash:"contracting",label:text("Contracting and fit-out","المقاولات والتجهيز")},{to:"/business",hash:"services",label:text("Business services","خدمات الشركات")}]} />
+        <FooterCol title={text("Platform", "المنصة")} links={[{to:"/how-it-works",label:text("How it works","كيف تعمل؟")},{to:"/pricing",label:text("Fees and calculator","الرسوم والحاسبة")},{to:"/security",label:text("Security","الأمان")},{to:"/faq",label:text("FAQ","الأسئلة الشائعة")}]} />
+        <FooterCol title={text("Support and legal", "الدعم والأنظمة")} links={[{to:"/help",label:text("Help centre","مركز المساعدة")},{to:"/dispute-policy",label:text("Disputes & refunds","النزاعات والاسترداد")},{to:"/terms",label:text("Terms of service","شروط الخدمة")},{to:"/privacy",label:text("Privacy policy","سياسة الخصوصية")}]} />
+      </div>
+    </div><div className="border-t border-primary-foreground/15 px-5 py-6"><p className="mx-auto max-w-7xl text-xs leading-6 text-primary-foreground/70">© 2026 Insight · {text("Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.", "نسخة تجريبية لخدمة الضمان: مزوّد الدفع محاكى ولا تُحوَّل أي أموال حقيقية. عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، وتدير إنسايت قواعد الصفقة وتحفظ سجلها.")}</p></div>
   </footer>;
 }
 
-function FooterCol({ title, links }: { title: string; links: { to: string; label: string }[] }) {
+function FooterCol({ title, links }: { title: string; links: { to: string; label: string; hash?: string }[] }) {
   return (
     <div>
       <h4 className="text-sm font-semibold">{title}</h4>
       <ul className="mt-4 space-y-3 text-sm text-primary-foreground/75">
         {links.map((l) => (
-          <li key={l.to}>
-            <Link to={l.to} className="transition-colors hover:text-primary-foreground">
+          <li key={l.to + (l.hash ?? "")}>
+            <Link to={l.to} {...(l.hash ? { hash: l.hash } : {})} className="transition-colors hover:text-primary-foreground">
               {l.label}
             </Link>
           </li>
