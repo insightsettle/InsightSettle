@@ -24,10 +24,12 @@ export const Route = createFileRoute("/api/public/auto-release")({
           const auctions = await sweepAuctionDeadlines(admin);
           const { data: started, error } = await admin.rpc("run_auto_release");
           if (error) throw error;
+          const { correctAutoReleaseFigures } = await import("@/lib/auto-release-figures.server");
+          const netted = await correctAutoReleaseFigures(admin);
           const { runMilestoneJobs } = await import("@/lib/milestones.server");
           const milestones = await runMilestoneJobs(admin, notify);
           const confirmed = await sweepSimulatedTransactions(admin, notify);
-          return Response.json({ ok: true, started: started ?? 0, milestones, confirmed, auctions });
+          return Response.json({ ok: true, started: started ?? 0, netted, milestones, confirmed, auctions });
         } catch (e) {
           console.error("auto-release job failed", e);
           return Response.json({ ok: false }, { status: 500 });
