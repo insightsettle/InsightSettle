@@ -24,6 +24,11 @@ drop trigger if exists guard_auction_funding on public.deal_transactions;
 create trigger guard_auction_funding after insert or delete or update on public.deal_transactions
   for each row when (not public.demo_reset_active()) execute function public.guard_auction_funding();
 
+drop trigger if exists validate_auction_split_total on public.deal_payout_splits;
+create constraint trigger validate_auction_split_total after insert or update on public.deal_payout_splits
+  deferrable initially deferred for each row when (not public.demo_reset_active())
+  execute function public.validate_auction_split_total();
+
 drop trigger if exists guard_lot_bidder on public.lot_bidders;
 create trigger guard_lot_bidder before insert or delete or update on public.lot_bidders
   for each row when (not public.demo_reset_active()) execute function public.guard_lot_bidder();
@@ -71,11 +76,12 @@ begin
 
   -- Break the lot <-> deal links, then remove every deal-related row (children first).
   update public.auction_lots set deal_id = null, funded_deal_id = null, funding_tx_id = null;
-  delete from public.deal_payout_splits;
+  update public.deal_payout_splits set release_tx_id = null where release_tx_id is not null;
   delete from public.ledger_entries;
   delete from public.tax_invoices;
   delete from public.dispute_evidence;
   delete from public.deal_transactions;
+  delete from public.deal_payout_splits;
   delete from public.disputes;
   delete from public.fx_quotes;
   delete from public.lot_bidders;

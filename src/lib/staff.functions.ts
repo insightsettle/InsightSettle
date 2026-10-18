@@ -110,6 +110,6 @@ export const resetDemoData = createServerFn({ method: 'POST' })
     const { getPaymentProvider } = await import('@/lib/payment-provider.server');
     if (getPaymentProvider().connected) throw new Error('The demo reset is disabled when a live payment provider is connected.');
     const { data, error } = await (db as any).rpc('reset_demo_data', { _actor: context.userId });
-    if (error) throw error;
+    if (error) throw new Error(error.message ?? 'Reset failed.');
     return data as { removed: number; deals: number; auctions: number; lots: number; ms: number };
   });
