@@ -1,0 +1,54 @@
+name: insight_mobile
+description: Insight client app for buyers and suppliers (escrow deal management, GCC). Staff console stays on the web.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  supabase_flutter: ^2.5.0
+  http: ^1.2.0
+  shared_preferences: ^2.2.0
+  url_launcher: ^6.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ">=4.0.0 <7.0.0"
+  flutter_launcher_icons: ^0.14.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/
+  # Thmanyah Sans: official Insight typeface (thmanyah Font License, https://font.thmanyah.com/licenses-en).
+  # Embedded only inside the compiled app; files are not modified or offered for download.
+  fonts:
+    - family: ThmanyahSans
+      fonts:
+        - asset: assets/fonts/thmanyahsans-Light.otf
+          weight: 300
+        - asset: assets/fonts/thmanyahsans-Regular.otf
+          weight: 400
+        - asset: assets/fonts/thmanyahsans-Medium.otf
+          weight: 500
+        - asset: assets/fonts/thmanyahsans-Bold.otf
+          weight: 700
+        - asset: assets/fonts/thmanyahsans-Black.otf
+          weight: 900
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/brand/icon-512.png
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/brand/icon-512.png
+    background_color: "#FFFFFF"
+    theme_color: "#0F6B56"
