@@ -54,6 +54,7 @@ import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedInvoiceRefRouteImport } from './routes/_authenticated/invoice.$ref'
 import { Route as ApiPublicAutoReleaseRouteImport } from './routes/api/public/auto-release'
+import { Route as ApiV1ActionRouteImport } from './routes/api/v1/$action'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -287,6 +288,11 @@ const ApiPublicAutoReleaseRoute = ApiPublicAutoReleaseRouteImport.update({
   path: '/api/public/auto-release',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV1ActionRoute = ApiV1ActionRouteImport.update({
+  id: '/api/v1/$action',
+  path: '/api/v1/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConsoleDealsIndexRoute = ConsoleDealsIndexRouteImport.update({
   id: '/deals/',
   path: '/deals/',
@@ -359,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
+  '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -409,6 +416,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
+  '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -462,6 +470,7 @@ export interface FileRoutesById {
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
+  '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -515,6 +524,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/invoice/$ref'
     | '/api/public/auto-release'
+    | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/deals/'
     | '/lovable/email/auth/preview'
@@ -565,6 +575,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/invoice/$ref'
     | '/api/public/auto-release'
+    | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/deals'
     | '/lovable/email/auth/preview'
@@ -617,6 +628,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invite/$token'
     | '/_authenticated/invoice/$ref'
     | '/api/public/auto-release'
+    | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/deals/'
     | '/lovable/email/auth/preview'
@@ -647,6 +659,7 @@ export interface RootRouteChildren {
   ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
   ApiDocumentReviewRoute: typeof ApiDocumentReviewRoute
   ApiPublicAutoReleaseRoute: typeof ApiPublicAutoReleaseRoute
+  ApiV1ActionRoute: typeof ApiV1ActionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -969,6 +982,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAutoReleaseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/$action': {
+      id: '/api/v1/$action'
+      path: '/api/v1/$action'
+      fullPath: '/api/v1/$action'
+      preLoaderRoute: typeof ApiV1ActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/console/deals/': {
       id: '/console/deals/'
       path: '/deals'
@@ -1106,6 +1126,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,
   ApiDocumentReviewRoute: ApiDocumentReviewRoute,
   ApiPublicAutoReleaseRoute: ApiPublicAutoReleaseRoute,
+  ApiV1ActionRoute: ApiV1ActionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
