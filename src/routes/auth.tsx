@@ -100,6 +100,27 @@ function AuthPage() {
     }
   }
 
+  async function handleForgot() {
+    setError(null);
+    setNotice(null);
+    if (!email.trim()) {
+      setError("Enter your email above first, then choose \"Forgot password?\".");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: window.location.origin + "/auth/reset",
+      });
+      if (resetError) throw resetError;
+      setNotice("If this email has an account, a link to set a new password is on its way. Check your inbox.");
+    } catch {
+      setError("The reset link could not be sent right now. Please try again in a minute.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleGoogle() {
     setError(null);
     const result = await lovable.auth.signInWithOAuth("google", {
@@ -208,6 +229,11 @@ function AuthPage() {
               <Button className="w-full" type="submit" disabled={busy}>
                 {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
               </Button>
+              {mode === "signin" && (
+                <button type="button" className="w-full text-center text-sm font-medium text-primary hover:underline" onClick={handleForgot} disabled={busy}>
+                  Forgot password?
+                </button>
+              )}
             </form>
 
             <p className="mt-5 text-center text-sm text-muted-foreground">

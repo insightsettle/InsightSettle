@@ -37,6 +37,7 @@ import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-ana
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
 import { Route as AuthCheckEmailRouteImport } from './routes/auth.check-email'
 import { Route as AuthConfirmedRouteImport } from './routes/auth.confirmed'
+import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
 import { Route as ConsoleAuctionsRouteImport } from './routes/console.auctions'
 import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
@@ -201,6 +202,11 @@ const AuthConfirmedRoute = AuthConfirmedRouteImport.update({
   path: '/confirmed',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/reset',
+  path: '/reset',
+  getParentRoute: () => AuthRoute,
+} as any)
 const ConsoleIndexRoute = ConsoleIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -348,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
+  '/auth/reset': typeof AuthResetRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -399,6 +406,7 @@ export interface FileRoutesByTo {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
+  '/auth/reset': typeof AuthResetRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -453,6 +461,7 @@ export interface FileRoutesById {
   '/api/document-review': typeof ApiDocumentReviewRoute
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
+  '/auth/reset': typeof AuthResetRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -507,6 +516,7 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/auth/check-email'
     | '/auth/confirmed'
+    | '/auth/reset'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -558,6 +568,7 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/auth/check-email'
     | '/auth/confirmed'
+    | '/auth/reset'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -611,6 +622,7 @@ export interface FileRouteTypes {
     | '/api/document-review'
     | '/auth/check-email'
     | '/auth/confirmed'
+    | '/auth/reset'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -863,6 +875,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthConfirmedRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/console/': {
       id: '/console/'
       path: '/'
@@ -1059,11 +1078,13 @@ const AuthenticatedRouteRouteWithChildren =
 interface AuthRouteChildren {
   AuthCheckEmailRoute: typeof AuthCheckEmailRoute
   AuthConfirmedRoute: typeof AuthConfirmedRoute
+  AuthResetRoute: typeof AuthResetRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthCheckEmailRoute: AuthCheckEmailRoute,
   AuthConfirmedRoute: AuthConfirmedRoute,
+  AuthResetRoute: AuthResetRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
