@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import {
+  Img,
   Body,
   Button,
   Container,
@@ -37,6 +38,7 @@ export const EmailChangeEmail = ({
     <Preview>Confirm your email change for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Img src="https://insightsettle.com/brand/insight-logo.png" alt="Insight" width="140" height="67" style={{ marginBottom: "16px" }} />
         <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
           You requested to change your email address for {siteName} from{' '}

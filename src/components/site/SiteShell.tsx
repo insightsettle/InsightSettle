@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Menu, ShieldAlert, TrendingUp } from "lucide-react";
+import { Menu, ShieldAlert } from "lucide-react";
+import { BrandLogo } from "@/components/site/BrandLogo";
 import { useState } from "react";
 
 import { NotificationBell } from "@/components/site/NotificationBell";
@@ -40,8 +41,8 @@ export function SiteHeader() {
   return (
     <header data-no-localize className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
-        <Link to="/" aria-label="Insight home" className="flex shrink-0 items-center gap-2 text-xl font-semibold">
-          <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground"><TrendingUp className="size-5" /></span><span>Insight</span>
+        <Link to="/" aria-label="Insight home" className="flex shrink-0 items-center">
+          <BrandLogo className="h-10 w-auto" />
         </Link>
 
         <nav className="ms-auto hidden items-center gap-1 xl:flex">
@@ -162,7 +163,7 @@ export function SiteFooter() {
   const { text } = useLocale();
   return <footer data-no-localize className="border-t border-primary-foreground/15 bg-brand-strong text-primary-foreground">
     <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
-      <div><Link to="/" className="flex items-center gap-2 text-2xl font-semibold"><span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground"><TrendingUp className="size-5" /></span>Insight</Link><p className="mt-4 max-w-xs text-sm leading-7 text-primary-foreground/75">{text("Clear rules for individuals and businesses across the Gulf, and from the Gulf to the world.", "قواعد واضحة لصفقات الأفراد والشركات بين دول الخليج، ومن الخليج إلى العالم.")}</p></div>
+      <div><Link to="/" aria-label="Insight home" className="inline-flex"><BrandLogo tone="light" className="h-14 w-auto" /></Link><p className="mt-4 max-w-xs text-sm leading-7 text-primary-foreground/75">{text("Clear rules for individuals and businesses across the Gulf, and from the Gulf to the world.", "قواعد واضحة لصفقات الأفراد والشركات بين دول الخليج، ومن الخليج إلى العالم.")}</p></div>
       <FooterCol title={text("Product", "المنتج")} links={[{to:"/how-it-works",label:text("How it works","كيف تعمل؟")},{to:"/for-buyers",label:text("For buyers","للمشترين")},{to:"/for-suppliers",label:text("For suppliers","للموردين")},{to:"/pricing",label:text("Pricing","الرسوم")}]} />
       <FooterCol title={text("Company", "الشركة")} links={[{to:"/business",label:text("Business","الأعمال")},{to:"/security",label:text("Security","الأمان")},{to:"/help",label:text("Help","المساعدة")},{to:"/faq",label:text("FAQ","الأسئلة الشائعة")}]} />
       <FooterCol title={text("Legal", "قانوني")} links={[{to:"/terms",label:text("Terms of service","شروط الخدمة")},{to:"/privacy",label:text("Privacy policy","سياسة الخصوصية")},{to:"/dispute-policy",label:text("Disputes & refunds","النزاعات والاسترداد")}]} />

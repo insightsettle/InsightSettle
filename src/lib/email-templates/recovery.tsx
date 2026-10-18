@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import {
+  Img,
   Body,
   Button,
   Container,
@@ -27,6 +28,7 @@ export const RecoveryEmail = ({
     <Preview>Reset your password for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Img src="https://insightsettle.com/brand/insight-logo.png" alt="Insight" width="140" height="67" style={{ marginBottom: "16px" }} />
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
           We received a request to reset your password for {siteName}. Click

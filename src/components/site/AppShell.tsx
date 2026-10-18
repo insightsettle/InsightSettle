@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Menu, Search, Settings, LogOut, TrendingUp } from "lucide-react";
+import { Menu, Search, Settings, LogOut } from "lucide-react";
+import { BrandLogo } from "@/components/site/BrandLogo";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +29,8 @@ export function AppShell({ children, navigation, title, staff = false }: { child
   }
   const sidebar = (
     <div className="flex min-h-full flex-col p-5" data-no-localize>
-      <Link to={staff ? "/console" : "/dashboard"} className="mb-6 flex items-center gap-2.5 text-2xl font-semibold" aria-label="Insight">
-        <span className="grid size-10 place-items-center rounded-lg bg-primary text-primary-foreground"><TrendingUp className="size-6" /></span>
-        <span data-no-localize>Insight</span>
+      <Link to={staff ? "/console" : "/dashboard"} className="mb-6 flex items-center" aria-label="Insight">
+        <BrandLogo className="h-11 w-auto" />
       </Link>
       {staff && <span className="mb-5 w-fit rounded-md bg-brand-strong px-2.5 py-1 text-xs font-medium text-primary-foreground">{text("Staff console")}</span>}
       <div onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setOpen(false); }}>{navigation}</div>

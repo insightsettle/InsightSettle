@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import {
+  Img,
   Body,
   Button,
   Container,
@@ -30,6 +31,7 @@ export const InviteEmail = ({
     <Preview>You've been invited to join {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Img src="https://insightsettle.com/brand/insight-logo.png" alt="Insight" width="140" height="67" style={{ marginBottom: "16px" }} />
         <Heading style={h1}>You've been invited</Heading>
         <Text style={text}>
           You've been invited to join{' '}
