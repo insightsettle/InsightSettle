@@ -82,7 +82,9 @@ export const getStaffOverview = createServerFn({ method: "GET" })
     }
     const closed = new Set(deals.filter(d => ["released", "completed", "refunded", "partially_refunded", "cancelled", "rejected"].includes(d.status)).map(d => d.id));
     const closedHeld = Object.entries(heldByDeal).filter(([key, v]) => closed.has(key.split(":")[0]) && roundMoney(v, key.split(":")[1] ?? "USD") !== 0).length;
-    const invoiceExceptions = invoices.filter(invoice => {
+    // R4 compares billed with collected once a deal is closed: the supplier fee share is billed at funding
+    // but collected at release, so open deals would show a timing difference, not an exception.
+    const invoiceExceptions = invoices.filter(invoice => closed.has(invoice.deal_id)).filter(invoice => {
       const lines = Array.isArray(invoice.lines) ? invoice.lines : [{ currency: invoice.currency, fee: invoice.fee, vat: invoice.vat }];
       const currencies = new Set([...lines.map((l: any) => l.currency), ...ledger.filter(l => l.deal_id === invoice.deal_id && ["insight_fee_revenue", "vat_payable"].includes(l.account)).map(l => l.currency)]);
       return [...currencies].some(currency => {
@@ -90,7 +92,7 @@ export const getStaffOverview = createServerFn({ method: "GET" })
         const collected = ledger.filter(l => l.deal_id === invoice.deal_id && l.currency === currency && ["insight_fee_revenue", "vat_payable"].includes(l.account)).reduce((s, l) => s + Number(l.credit) - Number(l.debit), 0);
         return roundMoney(billed - collected, String(currency)) !== 0;
       });
-    }).length + new Set(ledger.filter(l => ["insight_fee_revenue", "vat_payable"].includes(l.account) && !invoices.some(i => i.deal_id === l.deal_id)).map(l => l.deal_id)).size;
+    }).length + new Set(ledger.filter(l => closed.has(l.deal_id) && ["insight_fee_revenue", "vat_payable"].includes(l.account) && !invoices.some(i => i.deal_id === l.deal_id)).map(l => l.deal_id)).size;
     return { deals, disputes, profiles, businesses, milestones, evidence, balances,
       heldUsd: missingRates ? null : roundMoney(heldUsd, "USD"),
       fundedCount: new Set(transactions.filter(t => t.kind === "funding" && t.status === "succeeded").map(t => t.deal_id)).size,
