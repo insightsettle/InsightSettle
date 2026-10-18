@@ -1,4 +1,6 @@
 import { BadgeCheck } from "lucide-react";
+import { IconTile } from "@/components/site/Marketing";
+import { PackageCheck, Wallet } from "lucide-react";
 import { cap, feePayerLabel, rolesFor } from "@/lib/roles";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -193,6 +195,18 @@ function NewDeal() {
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <form className="min-w-0 space-y-5" onSubmit={handleSubmit}>
           <div hidden={step !== 0} className="space-y-5">
+          <fieldset data-no-localize>
+            <legend className="text-sm font-semibold">{text("Your role in the deal", "دورك في الصفقة")}</legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
+              {([["buyer", Wallet, ["I am paying", "أنا من يدفع"], ["You pay into the deal; nothing moves until you receive and check.", "تدفع في الصفقة، ولا يتحرك المبلغ قبل أن تستلم وتتأكد."], R.payer], ["seller", PackageCheck, ["I am being paid", "أنا من يستلم المبلغ"], ["You deliver what you agreed, knowing the money is already in the deal.", "تُنجز ما اتفقتما عليه وأنت تعلم أن مستحقك محفوظ في الصفقة."], R.payee]] as const).map(([value, Icon, title, hint, name]) => (
+                <button type="button" key={value} role="radio" aria-checked={role === value} aria-label={text(title[0], title[1])} onClick={() => setRole(value)}
+                  className={`flex items-start gap-4 rounded-2xl border bg-card p-5 text-start transition ${role === value ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                  <IconTile icon={Icon} tone={role === value ? "brand" : "soft"} />
+                  <span className="min-w-0"><b className="block text-base">{text(title[0], title[1])}{dealType && <span className="ms-1 text-sm font-normal text-muted-foreground">({text(name.en, name.ar)})</span>}</b><span className="mt-1 block text-sm leading-6 text-muted-foreground">{text(hint[0], hint[1])}</span></span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
           <fieldset>
             <legend className="text-sm font-semibold">{text("Deal type")}</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
@@ -282,18 +296,7 @@ function NewDeal() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="role">{text("Your side of the deal")}</Label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value as "buyer" | "seller")}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-              >
-                <option value="buyer">{text(`I am paying (${R.payer.en})`, `أنا من يدفع (${R.payer.ar})`)}</option>
-                <option value="seller">{text(`I am delivering (${R.payee.en})`, `أنا من يُسلّم (${R.payee.ar})`)}</option>
-              </select>
-            </div>
+
             <div className="space-y-2">
               <Label htmlFor="dueAt">{text("Delivery date")}</Label>
               <Input

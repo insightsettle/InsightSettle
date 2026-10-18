@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BadgeCheck, FileUp, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { AccountSummary } from "@/components/site/AccountProgress";
 import { BusinessDetailsCard, PayoutAccountCard, PersonalDetailsCard } from "@/components/site/KycForms";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
@@ -101,8 +102,9 @@ function VerificationPage() {
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="text-3xl font-extrabold">Identity verification</h1>
+      <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
+        <AccountSummary name={(user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email?.split("@")[0] ?? ""} email={user?.email ?? ""} />
+        <h1 id="identity" className="mt-10 scroll-mt-24 text-3xl font-extrabold">Identity verification</h1>
         <p className="mt-2 text-muted-foreground">
           Verification protects both sides of every deal. Upload a clear photo or PDF of your
           documents; only you and the Insight review team can open them.
@@ -127,9 +129,9 @@ function VerificationPage() {
           </CardContent>
         </Card>
 
-        <PersonalDetailsCard />
+        <div id="details" className="scroll-mt-24"><PersonalDetailsCard /></div>
         <BusinessDetailsCard />
-        <PayoutAccountCard />
+        <div id="payout" className="scroll-mt-24"><PayoutAccountCard /></div>
         <Card className="mt-4" data-no-localize><CardContent className="flex items-start justify-between gap-4 p-6"><div><Label htmlFor="organises-auctions">{text('I organise auctions', 'أنا أنظّم مزادات')}</Label><p className="mt-2 text-xs leading-6 text-muted-foreground">{text('Auction organisers must be verified business accounts.', 'يجب أن يكون منظّم المزاد حساب أعمال موثّقًا.')}</p>{preferenceMutation.error && <p role="alert" className="mt-2 text-xs text-destructive">{text('Unable to update this preference.', 'تعذّر تحديث هذا الخيار.')}</p>}</div><Switch id="organises-auctions" checked={auctionPreference.data?.enabled ?? false} disabled={preferenceMutation.isPending || (!auctionPreference.data?.eligible && !auctionPreference.data?.enabled)} onCheckedChange={value => preferenceMutation.mutate(value)} /></CardContent></Card>
 
         <Card className="mt-4">

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Handshake, Scale, Receipt, UserRoundCheck, Plus, Gavel } from "lucide-react";
+import { Home, Handshake, Scale, Receipt, UserRoundCheck, Plus, Gavel, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { Button } from "@/components/ui/button";
@@ -37,5 +37,22 @@ export function ClientShell({ children }: { children: ReactNode }) {
       {auctionsAccess?.visible && <Link to="/auctions" className={shellNavClass} data-status={pathname.startsWith('/auctions') ? 'active' : 'inactive'}><Gavel className="size-4" />{text("Auctions", "المزادات")}</Link>}
     </nav>
   </>;
-  return <AppShell navigation={nav} title={title}>{children}</AppShell>;
+  // Phone tab bar: hidden on a single deal page, which carries its own sticky action instead.
+  const onDealPage = pathname.startsWith("/deals/") && pathname !== "/deals/new";
+  const tab = (to: string, label: [string, string], Icon: typeof Home, active: boolean, badge?: number, hashTo?: string) => (
+    <Link to={to} {...(hashTo ? { hash: hashTo } : {})} aria-current={active ? "page" : undefined} className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[11px] font-medium transition-colors ${active ? "bg-accent text-primary" : "text-muted-foreground"}`}>
+      <Icon className="size-5" strokeWidth={active ? 2.2 : 1.8} />{text(label[0], label[1])}
+      {!!badge && <span className="absolute top-1 end-3 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] leading-4 text-primary-foreground tabular-nums">{badge}</span>}
+    </Link>
+  );
+  const mobileNav = onDealPage ? undefined : (
+    <nav data-no-localize aria-label={text("Main", "الرئيسية")} className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 items-center gap-1 rounded-3xl border border-border bg-card/95 p-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] shadow-[0_20px_40px_-20px_rgb(12_42_34/0.45)] backdrop-blur lg:hidden">
+      {tab("/dashboard", ["Home", "الرئيسية"], Home, pathname === "/dashboard" && hash !== "saved-deals", actionCount)}
+      {tab("/dashboard", ["Deals", "الصفقات"], Handshake, onDeals, undefined, "saved-deals")}
+      <Link to="/deals/new" aria-label={text("New deal", "صفقة جديدة")} className="gradient-brand mx-auto -mt-7 grid size-14 place-items-center rounded-full text-white shadow-[0_14px_28px_-12px_rgb(19_128_101/0.9)] ring-4 ring-background"><Plus className="size-6" strokeWidth={2.4} /></Link>
+      {tab("/documents", ["Invoices", "الفواتير"], Receipt, pathname === "/documents" || pathname.startsWith("/invoice/"))}
+      {tab("/verification", ["Account", "حسابي"], UserRound, pathname === "/verification")}
+    </nav>
+  );
+  return <AppShell navigation={nav} title={title} mobileNav={mobileNav}>{children}</AppShell>;
 }

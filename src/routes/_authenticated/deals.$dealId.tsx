@@ -1,4 +1,5 @@
 import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
+import { CalendarClock as CalendarIcon, Check as CheckIcon, Coins as CoinsIcon, Copy as CopyIcon, Eye as EyeIcon } from "lucide-react";
 import { PayoutPlan } from "@/components/deal/PayoutPlan";
 import { planDealPayouts } from "@/lib/payout-planner";
 import { getAuctionDealView } from "@/lib/auction-client.functions";
@@ -304,11 +305,12 @@ function OrdinaryDealPage() {
       <div className="min-w-0">
         <nav className="mb-5 flex items-center gap-2 text-xs text-muted-foreground" data-no-localize><Link to="/dashboard" hash="saved-deals">{text("Deals", "الصفقات")}</Link><span>‹</span><bdi>{deal.ref}</bdi></nav>
         <header className="flex flex-wrap items-start justify-between gap-4" data-no-localize>
-          <div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h2 className="text-2xl font-semibold">{deal.title}</h2><StatusBadge status={status} /><span className="rounded-full bg-gold-subtle px-3 py-1 text-xs font-medium text-gold-foreground">{text(({goods:"Goods",contracting:"Contracting & fit-out",services:"Services",freelance:"Freelance & digital work"} as Record<string,string>)[(deal as any).deal_type ?? "goods"] ?? "Goods")}</span></div><p className="mt-2 text-xs leading-6 text-muted-foreground">{text("with", "مع")} {partyProfiles.data?.find((p) => p.id === counterpartyId)?.full_name ?? deal.counterparty_email ?? text("Other party", "الطرف الآخر")} ({text(partyProfiles.data?.find((p) => p.id === counterpartyId)?.country ?? (isBuyer ? deal.supplier_country : deal.delivery_country) ?? "—")}) · {text("created", "أُنشئت")} {new Date(deal.created_at).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB")} · <bdi>{deal.ref}</bdi></p><p className="mt-2 text-sm text-muted-foreground">{deal.description}</p></div>
+          <div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h2 className="text-2xl font-semibold">{deal.title}</h2><RefChip value={deal.ref} /><StatusBadge status={status} /><span className="rounded-full bg-gold-subtle px-3 py-1 text-xs font-medium text-gold-foreground">{text(({goods:"Goods",contracting:"Contracting & fit-out",services:"Services",freelance:"Freelance & digital work"} as Record<string,string>)[(deal as any).deal_type ?? "goods"] ?? "Goods")}</span></div><p className="mt-2 text-xs leading-6 text-muted-foreground">{text("with", "مع")} {partyProfiles.data?.find((p) => p.id === counterpartyId)?.full_name ?? deal.counterparty_email ?? text("Other party", "الطرف الآخر")} ({text(partyProfiles.data?.find((p) => p.id === counterpartyId)?.country ?? (isBuyer ? deal.supplier_country : deal.delivery_country) ?? "—")}) · {text("created", "أُنشئت")} {new Date(deal.created_at).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB")} · <bdi>{deal.ref}</bdi></p><p className="mt-2 text-sm text-muted-foreground">{deal.description}</p></div>
           <div className="text-end"><p className="text-xs text-muted-foreground">{text("Deal value", "قيمة الصفقة")}</p><p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr">{money(amount)}</bdi></p></div>
         </header>
         <div className="mt-6"><EscrowStepper status={deal.status} termsStatus={deal.terms_status} /></div>
         <div className="mt-6"><NextStepCard step={nextStep} onAction={onNextStep} busy={action.isPending || payment.isPending} /></div>
+        <div data-no-localize className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">{([[EyeIcon, text("Inspection", "مدة الفحص"), text(`${deal.inspection_days} day(s)`, `${deal.inspection_days} أيام`)], [CalendarIcon, text("Delivery by", "التسليم قبل"), deal.due_at ? formatDate(deal.due_at) : text("Not set", "غير محدد")], [CoinsIcon, text("Currency", "العملة"), deal.currency]] as const).map(([I, label, value]) => <div key={label} className="flex items-center gap-2.5 rounded-2xl border border-border bg-card p-3 sm:p-4"><span className="hidden size-9 shrink-0 place-items-center rounded-xl bg-accent text-primary sm:grid"><I className="size-4" /></span><div className="min-w-0"><p className="truncate text-[11px] text-muted-foreground sm:text-xs">{label}</p><p className="truncate text-sm font-semibold sm:text-base"><bdi>{value}</bdi></p></div></div>)}</div>
         {(action.error || paymentNotice) && <div className="mt-3" data-no-localize>{action.error && <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{(action.error as Error).message}</p>}{paymentNotice && <p role="status" className={`rounded-xl border p-4 text-sm ${paymentNotice.ok ? "border-primary/40 bg-accent" : "border-destructive/40 bg-destructive/5"}`}><b>{paymentNotice.ok ? text("Payment recorded", "تم تسجيل الدفع") : text("Payment could not be completed", "تعذّر إكمال الدفع")}</b> · {paymentNotice.message}</p>}</div>}
         {(milestonesQ.data?.length ?? 0) > 0 && <div className="mt-6"><ContractDashboard deal={deal} milestones={milestonesQ.data ?? []} isBuyer={isBuyer} isSeller={isSeller} termVersions={termsQ.data ?? []} onDone={refresh} /></div>}
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -946,6 +948,12 @@ function OrdinaryDealPage() {
             </Card>
           </aside>
         </div>
+        {nextStep?.mine && nextStep.primary && <>
+          <div aria-hidden="true" className="h-24 lg:hidden" />
+          <div data-no-localize className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-12px_30px_-20px_rgb(12_42_34/0.4)] backdrop-blur lg:hidden">
+            <Button className="h-14 w-full rounded-2xl text-base" disabled={action.isPending || payment.isPending} onClick={() => onNextStep(nextStep.primary!.action)}>{text(nextStep.primary.label[0], nextStep.primary.label[1])}</Button>
+          </div>
+        </>}
       </div>
     </SiteShell>
   );
@@ -962,3 +970,12 @@ function Info({ label, value }: { label: string; value: string }) {
 }
 
 function cap1(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/** The deal reference with a one-tap copy, for sharing with the other party. */
+function RefChip({ value }: { value: string }) {
+  const { text } = useLocale();
+  const [copied, setCopied] = useState(false);
+  return <button type="button" onClick={() => { void navigator.clipboard?.writeText(value).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600); }); }} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary" aria-label={text(`Copy deal reference ${value}`, `انسخ رقم الصفقة ${value}`)}>
+    <bdi dir="ltr" className="tabular-nums">{value}</bdi>{copied ? <CheckIcon className="size-3.5 text-primary" /> : <CopyIcon className="size-3.5" />}
+  </button>;
+}

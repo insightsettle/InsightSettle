@@ -14,7 +14,7 @@ import { useLocale } from "@/lib/locale";
 
 export const shellNavClass = "flex h-10 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary data-[status=active]:bg-accent data-[status=active]:text-primary data-[status=active]:font-medium";
 
-export function AppShell({ children, navigation, title, staff = false }: { children: ReactNode; navigation: ReactNode; title: string; staff?: boolean }) {
+export function AppShell({ children, navigation, title, staff = false, mobileNav }: { children: ReactNode; navigation: ReactNode; title: string; staff?: boolean; mobileNav?: ReactNode }) {
   const { text, direction } = useLocale();
   const { user } = useSessionUser();
   const [open, setOpen] = useState(false);
@@ -64,7 +64,8 @@ export function AppShell({ children, navigation, title, staff = false }: { child
             <div className="hidden max-w-36 sm:block"><p className="truncate text-xs font-medium" data-no-localize>{name}</p><p className="text-xs text-muted-foreground">{text(staff ? "Staff console" : "Customer view")}</p></div>
           </div>
         </header>
-        <main className="app-content min-w-0 p-4 lg:p-8">{children}</main>
+        <main className={`app-content min-w-0 p-4 lg:p-8 ${mobileNav ? "pb-32 lg:pb-8" : ""}`}>{children}</main>
+        {mobileNav}
       </div>
     </div>
   );
