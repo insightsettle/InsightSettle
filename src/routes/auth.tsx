@@ -224,7 +224,7 @@ function AuthPage() {
                   <span>
                     {text("I agree to the", "أوافق على")} {" "}
                     <a href="/terms" className="text-primary hover:underline">{text("terms of service", "شروط الخدمة")}</a> {text("and consent to Insight processing my personal data under the", "وأوافق على معالجة إنسايت لبياناتي الشخصية وفق")} {" "}
-                    <a href="/privacy" className="text-primary hover:underline">{text("privacy policy", "سياسة الخصوصية")}</a> (Saudi PDPL).
+                    <a href="/privacy" className="text-primary hover:underline">{text("privacy policy", "سياسة الخصوصية")}</a> ({text("Saudi PDPL", "نظام حماية البيانات الشخصية السعودي")}).
                   </span>
                 </label>
               )}

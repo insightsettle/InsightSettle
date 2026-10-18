@@ -1004,7 +1004,7 @@ const translations: Record<string, string> = {
   "Everything you marked medium or high risk, newest score first.":
     "كل شيء وضعت علامة عليه مخاطر متوسطة أو عالية، أحدث درجة أولاً.",
   "No deals are flagged right now.": "لم يتم الإبلاغ عن أي صفقات في الوقت الحالي.",
-  "Platform console | Insight": "وحدة تحكم المنصة | نظرة ثاقبة",
+  "Platform console | Insight": "وحدة تحكم المنصة | إنسايت",
   "Internal Insight console: KPIs, revenue analytics, currency rates, fee rules, and dispute resolution.":
     "وحدة تحكم INSIGHT الداخلية: مؤشرات الأداء الرئيسية وتحليلات الإيرادات وأسعار العملات وقواعد الرسوم وحل النزاعات.",
   "Insight platform console": "وحدة تحكم منصة إنسايت",
@@ -1046,7 +1046,7 @@ const translations: Record<string, string> = {
     "تستعرض إنسايت الحالة ضمن نافذة المراجعة المنشورة في مركز المنازعات (3 أيام افتراضيًا) وتقترح نتيجة: الإفراج أو رد الأموال بالكامل أو تقسيم التسوية الجزئية بين الطرفين.",
   "4. Decision and payout": "4. القرار والدفع",
   "The licensed payment provider handles the release or refund under the recorded decision. Insight keeps the amount, reason and reference in the deal record, visible to both parties.": "يتولى مزوّد الدفع المرخّص الإفراج أو الاسترداد وفق القرار المسجّل. تحفظ Insight المبلغ والسبب والمرجع في سجل الصفقة، ويطّلع عليه الطرفان.",
-  "Help centre | Insight": "مركز المساعدة | نظرة ثاقبة",
+  "Help centre | Insight": "مركز المساعدة | إنسايت",
   "Answers about funding, inspection periods, releasing funds, refunds, disputes and verification on Insight.":
     "إجابات حول التمويل وفترات التفتيش والإفراج عن الأموال والمبالغ المستردة والنزاعات والتحقق من إنسايت.",
   "Insight help centre": "مركز مساعدة INSIGHT",
