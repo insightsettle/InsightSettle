@@ -20,6 +20,7 @@ import { Route as ForBuyersRouteImport } from './routes/for-buyers'
 import { Route as ForSuppliersRouteImport } from './routes/for-suppliers'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as InterestRouteImport } from './routes/interest'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RolesRouteImport } from './routes/roles'
@@ -41,6 +42,7 @@ import { Route as ConsoleAuctionsRouteImport } from './routes/console.auctions'
 import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
+import { Route as ConsoleInterestRouteImport } from './routes/console.interest'
 import { Route as ConsoleKycRouteImport } from './routes/console.kyc'
 import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
 import { Route as ConsoleReportsRouteImport } from './routes/console.reports'
@@ -110,6 +112,11 @@ const HelpRoute = HelpRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InterestRoute = InterestRouteImport.update({
+  id: '/interest',
+  path: '/interest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -218,6 +225,11 @@ const ConsoleFeesRoute = ConsoleFeesRouteImport.update({
   path: '/fees',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleInterestRoute = ConsoleInterestRouteImport.update({
+  id: '/interest',
+  path: '/interest',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleKycRoute = ConsoleKycRouteImport.update({
   id: '/kyc',
   path: '/kyc',
@@ -313,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/interest': typeof InterestRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
@@ -333,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/reports': typeof ConsoleReportsRoute
@@ -361,6 +375,7 @@ export interface FileRoutesByTo {
   '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/interest': typeof InterestRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
@@ -381,6 +396,7 @@ export interface FileRoutesByTo {
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/reports': typeof ConsoleReportsRoute
@@ -412,6 +428,7 @@ export interface FileRoutesById {
   '/for-suppliers': typeof ForSuppliersRoute
   '/help': typeof HelpRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/interest': typeof InterestRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/roles': typeof RolesRoute
@@ -432,6 +449,7 @@ export interface FileRoutesById {
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/reports': typeof ConsoleReportsRoute
@@ -463,6 +481,7 @@ export interface FileRouteTypes {
     | '/for-suppliers'
     | '/help'
     | '/how-it-works'
+    | '/interest'
     | '/pricing'
     | '/privacy'
     | '/roles'
@@ -483,6 +502,7 @@ export interface FileRouteTypes {
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/interest'
     | '/console/kyc'
     | '/console/rates'
     | '/console/reports'
@@ -511,6 +531,7 @@ export interface FileRouteTypes {
     | '/for-suppliers'
     | '/help'
     | '/how-it-works'
+    | '/interest'
     | '/pricing'
     | '/privacy'
     | '/roles'
@@ -531,6 +552,7 @@ export interface FileRouteTypes {
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/interest'
     | '/console/kyc'
     | '/console/rates'
     | '/console/reports'
@@ -561,6 +583,7 @@ export interface FileRouteTypes {
     | '/for-suppliers'
     | '/help'
     | '/how-it-works'
+    | '/interest'
     | '/pricing'
     | '/privacy'
     | '/roles'
@@ -581,6 +604,7 @@ export interface FileRouteTypes {
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/interest'
     | '/console/kyc'
     | '/console/rates'
     | '/console/reports'
@@ -612,6 +636,7 @@ export interface RootRouteChildren {
   ForSuppliersRoute: typeof ForSuppliersRoute
   HelpRoute: typeof HelpRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  InterestRoute: typeof InterestRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RolesRoute: typeof RolesRoute
@@ -704,6 +729,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interest': {
+      id: '/interest'
+      path: '/interest'
+      fullPath: '/interest'
+      preLoaderRoute: typeof InterestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -851,6 +883,13 @@ declare module '@tanstack/react-router' {
       path: '/fees'
       fullPath: '/console/fees'
       preLoaderRoute: typeof ConsoleFeesRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/interest': {
+      id: '/console/interest'
+      path: '/interest'
+      fullPath: '/console/interest'
+      preLoaderRoute: typeof ConsoleInterestRouteImport
       parentRoute: typeof ConsoleRoute
     }
     '/console/kyc': {
@@ -1014,6 +1053,7 @@ interface ConsoleRouteChildren {
   ConsoleAuditRoute: typeof ConsoleAuditRoute
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
   ConsoleFeesRoute: typeof ConsoleFeesRoute
+  ConsoleInterestRoute: typeof ConsoleInterestRoute
   ConsoleKycRoute: typeof ConsoleKycRoute
   ConsoleRatesRoute: typeof ConsoleRatesRoute
   ConsoleReportsRoute: typeof ConsoleReportsRoute
@@ -1029,6 +1069,7 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleAuditRoute: ConsoleAuditRoute,
   ConsoleDisputesRoute: ConsoleDisputesRoute,
   ConsoleFeesRoute: ConsoleFeesRoute,
+  ConsoleInterestRoute: ConsoleInterestRoute,
   ConsoleKycRoute: ConsoleKycRoute,
   ConsoleRatesRoute: ConsoleRatesRoute,
   ConsoleReportsRoute: ConsoleReportsRoute,
@@ -1054,6 +1095,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForSuppliersRoute: ForSuppliersRoute,
   HelpRoute: HelpRoute,
   HowItWorksRoute: HowItWorksRoute,
+  InterestRoute: InterestRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RolesRoute: RolesRoute,
