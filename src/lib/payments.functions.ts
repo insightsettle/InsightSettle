@@ -76,18 +76,22 @@ async function serverDeps() {
 /** Buyer starts funding the escrow. The money movement is always recorded. */
 export const startDealFunding = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { dealId: string; fee?: number; quoteId?: string }) =>
+  .inputValidator((input: { dealId: string; fee?: number; quoteId?: string; simulateDecline?: boolean }) =>
     z
       .object({
         dealId: z.string().uuid(),
         fee: z.number().min(0).max(1_000_000).optional(),
         quoteId: z.string().uuid().optional(),
+        simulateDecline: z.boolean().optional(),
       })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<PaymentResult> => {
     const deal = await loadDealForParty(context, data.dealId);
     const { admin, provider, notify } = await serverDeps();
+    // T2: the demo provider can decline a payment on request; never available with a live provider.
+    if (data.simulateDecline && (provider.connected || deal.deal_type === "auction"))
+      return { ok: false, status: "failed", provider: provider.id, providerLabel: provider.label, message: "A simulated decline is only available in the demo." };
 
     if (deal.buyer_id !== context.userId)
       return {
@@ -250,6 +254,23 @@ export const startDealFunding = createServerFn({ method: "POST" })
         kind: "payment",
         recipients: staff,
       });
+    } else if (tx?.id && data.simulateDecline) {
+      const { settleTransactionCore } = await import("@/lib/settlement.server");
+      await settleTransactionCore(admin, notify, {
+        transactionId: tx.id,
+        outcome: "failed",
+        providerRef: `SIM-DECLINE-${String(tx.id).replace(/-/g, "").slice(0, 8).toUpperCase()}`,
+        reason: "The payment provider declined the payment (simulated decline). No money moved; request a new quote to try again.",
+        actorId: null,
+      });
+      return {
+        ok: false,
+        status: "failed",
+        provider: provider.id,
+        providerLabel: provider.label,
+        transactionId: tx.id,
+        message: "Payment declined by the payment provider (simulated). No money moved. Request a new quote to try again.",
+      };
     } else if (tx?.id) {
       const { simulateProviderConfirm } = await import("@/lib/settlement.server");
       await simulateProviderConfirm(admin, notify, [tx.id]);

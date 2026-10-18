@@ -555,7 +555,19 @@ function OrdinaryDealPage() {
                         !quote || quoteExpired
                       }
                     >
-                      <Wallet /> {payment.isPending ? "Starting payment…" : "Fund the deal"}
+                      <Wallet /> {payment.isPending ? text("Starting payment…", "جارٍ بدء الدفع…") : text("Fund the deal", "موّل الصفقة")}
+                    </Button>
+                  )}
+                  {isBuyer && status === "pending_funding" && quote && !quoteExpired && (
+                    <Button
+                      variant="ghost"
+                      className="text-muted-foreground"
+                      disabled={!bothJoined || !termsAgreed || payment.isPending}
+                      onClick={() =>
+                        payment.mutate(() => fund({ data: { dealId: deal.id, quoteId: quote.id, simulateDecline: true } }))
+                      }
+                    >
+                      {text("Simulate a declined payment (demo)", "محاكاة رفض الدفع (تجريبي)")}
                     </Button>
                   )}
                   {isSeller && status === "held" && (
