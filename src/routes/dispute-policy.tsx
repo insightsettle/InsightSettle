@@ -1,3 +1,4 @@
+import { useLocale } from "@/lib/locale";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { SiteShell } from "@/components/site/SiteShell";
@@ -42,50 +43,42 @@ const steps = [
 ];
 
 function DisputePolicyPage() {
+  const { text } = useLocale();
   return (
     <SiteShell>
-      <div className="mx-auto max-w-3xl px-4 py-14">
-        <h1 className="text-4xl font-extrabold">Disputes & refunds</h1>
-        <p className="mt-3 text-muted-foreground">
-          Held funds are never released while a dispute is open. This is the exact path a case
-          follows.
-        </p>
+      <div data-no-localize className="mx-auto max-w-3xl px-4 py-14">
+        <h1 className="text-4xl font-extrabold">{text("Disputes & refunds")}</h1>
+        <p className="mt-3 text-muted-foreground">{text("Held funds are never released while a dispute is open. This is the exact path a case follows.")}</p>
 
         <div className="mt-8 space-y-7">
           {steps.map((s) => (
-            <section key={s.h}>
-              <h2 className="text-lg font-bold">{s.h}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.p}</p>
+            <section key={text(s.h)}>
+              <h2 className="text-lg font-bold">{text(s.h)}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text(s.p)}</p>
             </section>
           ))}
         </div>
 
         <Card className="mt-10">
           <CardContent className="p-6">
-            <h2 className="font-bold">Refund types</h2>
+            <h2 className="font-bold">{text("Refund types")}</h2>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
-                <b className="text-foreground">Full refund</b> — the buyer receives the funded amount
-                back when delivery did not happen or was materially different from the terms.
-              </li>
+                <b className="text-foreground">{text("Full refund")}</b>{text("— the buyer receives the funded amount back when delivery did not happen or was materially different from the terms.")}</li>
               <li>
-                <b className="text-foreground">Partial refund</b> — the parties agree, or Insight
-                decides, a split of the held amount; the rest is released to the seller.
-              </li>
+                <b className="text-foreground">{text("Partial refund")}</b>{text("— the parties agree, or Insight decides, a split of the held amount; the rest is released to the seller.")}</li>
               <li>
-                <b className="text-foreground">Cancellation before delivery</b> — if both sides
-                cancel before delivery, the funded amount is returned.
-              </li>
+                <b className="text-foreground">{text("Cancellation before delivery")}</b>{text("— if both sides cancel before delivery, the funded amount is returned.")}</li>
             </ul>
           </CardContent>
         </Card>
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Button asChild>
-            <Link to="/help">Visit the help centre</Link>
+            <Link to="/help">{text("Visit the help centre")}</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/terms">Read the terms</Link>
+            <Link to="/terms">{text("Read the terms")}</Link>
           </Button>
         </div>
       </div>

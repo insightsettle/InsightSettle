@@ -36,3 +36,7 @@
 
 - Customer layouts wait for existing staff-access resolution and redirect staff to the console before mounting customer children, preventing onboarding flashes and customer phone tabs.
 - Restored financial breakdowns and milestone schedules remain uncollapsed; phone milestone rows reflow within the same panel so controls use unchanged server actions and pricing.
+
+- Authentication pages use AuthShell, separate from public/customer chrome, with the shared locale provider so recovery screens stay branded and bilingual for signed-out and recovery sessions.
+
+- Auth follow-up pages use un-nested route IDs while preserving /auth/* URLs; the sign-in page is content, not a layout, so its redirect must not swallow recovery and confirmation pages.

@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router";
+import { useLocale } from "@/lib/locale";
+import { formatMoney } from "@/lib/money";
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileUp, LoaderCircle, Scale, ShieldCheck, Sparkles, X } from "lucide-react";
@@ -34,7 +37,8 @@ export const Route = createFileRoute("/_authenticated/disputes")({
 });
 
 function DisputesPage() {
-  const { deals } = useMyDeals();
+  const { text } = useLocale();
+  const { deals, error: dealsError, retry } = useMyDeals();
   const [picked, setDealId] = useState("");
   const dealId = picked || deals.find((deal) => deal.status === "disputed")?.id || deals[0]?.id || "";
   const [issue, setIssue] = useState("");
@@ -90,7 +94,7 @@ function DisputesPage() {
       }
     } catch (caught) {
       if (!(caught instanceof DOMException && caught.name === "AbortError"))
-        setError(caught instanceof Error ? caught.message : "Analysis failed.");
+        setError(text("AI analysis is unavailable. To open a dispute or submit evidence, use the deal page.", "تحليل الذكاء الاصطناعي غير متاح. لفتح نزاع أو تقديم أدلة، استخدم صفحة الصفقة."));
     } finally {
       setLoading(false);
       controller.current = null;
@@ -99,15 +103,13 @@ function DisputesPage() {
 
   return (
     <SiteShell>
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div data-no-localize className="mx-auto max-w-6xl px-4 py-12">
+        {dealsError && <div role="alert" className="mb-4 text-sm text-destructive">{text("Deals could not be loaded.", "تعذّر تحميل الصفقات.")}<Button variant="outline" onClick={retry}>{text("Try again", "حاول مرة أخرى")}</Button></div>}
         <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
           <div>
-            <p className="text-sm font-semibold text-primary">DISPUTE CENTER</p>
-            <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">Build a clearer case</h1>
-            <p className="mt-3 max-w-xl text-muted-foreground">
-              Describe what happened and attach supporting files. Insight AI organizes the facts and
-              suggests neutral next steps for review.
-            </p>
+            <p className="text-sm font-semibold text-primary">{text("DISPUTE CENTER")}</p>
+            <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{text("Build a clearer case")}</h1>
+            <p className="mt-3 max-w-xl text-muted-foreground">{text("Describe what happened and attach supporting files. Insight AI organizes the facts and suggests neutral next steps for review.")}</p>
             <div className="mt-8 space-y-4">
               {[
                 {
@@ -126,13 +128,13 @@ function DisputesPage() {
                   text: "Receive evidence gaps, verification points, and a practical settlement path.",
                 },
               ].map((item) => (
-                <div key={item.title} className="flex gap-3">
+                <div key={text(item.title)} className="flex gap-3">
                   <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
                     <item.icon className="size-4" />
                   </span>
                   <div>
-                    <h2 className="font-semibold">{item.title}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.text}</p>
+                    <h2 className="font-semibold">{text(item.title)}</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">{text(item.text)}</p>
                   </div>
                 </div>
               ))}
@@ -141,14 +143,14 @@ function DisputesPage() {
           <Card className="shadow-sm">
             <CardContent className="space-y-5 p-6">
               <div>
-                <Label htmlFor="deal">Deal</Label>
+                <Label htmlFor="deal">{text("Deal")}</Label>
                 <select
                   id="deal"
                   value={dealId}
                   onChange={(e) => setDealId(e.target.value)}
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  {deals.length === 0 && <option value="">No deals yet.</option>}
+                  {deals.length === 0 && <option value="">{text("No deals yet.")}</option>}
                   {deals.map((deal) => (
                     <option key={deal.id} value={deal.id}>
                       {deal.ref} — {deal.title}
@@ -157,38 +159,36 @@ function DisputesPage() {
                 </select>
               </div>
               <div>
-                <Label htmlFor="issue">What happened?</Label>
+                <Label htmlFor="issue">{text("What happened?")}</Label>
                 <Textarea
                   id="issue"
                   rows={7}
                   value={issue}
                   onChange={(e) => setIssue(e.target.value)}
-                  placeholder="Explain the agreement, what was delivered, what differs from the agreed terms, and any attempts to resolve it."
+                  placeholder={text("Explain the agreement, what was delivered, what differs from the agreed terms, and any attempts to resolve it.")}
                   className="mt-2"
                 />
                 <p className="mt-1 text-right text-xs text-muted-foreground">{issue.length}/6000</p>
               </div>
               <div>
-                <Label htmlFor="outcome">Preferred outcome</Label>
+                <Label htmlFor="outcome">{text("Preferred outcome")}</Label>
                 <Input
                   id="outcome"
                   value={desiredOutcome}
                   onChange={(e) => setDesiredOutcome(e.target.value)}
-                  placeholder="For example: partial refund or replacement"
+                  placeholder={text("For example: partial refund or replacement")}
                   className="mt-2"
                 />
               </div>
               <div>
-                <Label htmlFor="evidence">Supporting evidence</Label>
+                <Label htmlFor="evidence">{text("Supporting evidence")}</Label>
                 <label
                   htmlFor="evidence"
                   className="mt-2 flex cursor-pointer flex-col items-center border border-dashed border-input bg-muted/40 px-4 py-6 text-center"
                 >
                   <FileUp className="size-6 text-primary" />
-                  <span className="mt-2 text-sm font-semibold">Choose documents or images</span>
-                  <span className="mt-1 text-xs text-muted-foreground">
-                    Up to 8 files, 10 MB each
-                  </span>
+                  <span className="mt-2 text-sm font-semibold">{text("Choose documents or images")}</span>
+                  <span className="mt-1 text-xs text-muted-foreground">{text("Up to 8 files, 10 MB each")}</span>
                 </label>
                 <input
                   id="evidence"
@@ -206,13 +206,13 @@ function DisputesPage() {
                         className="flex items-center justify-between rounded-md bg-muted px-3 py-2 text-xs"
                       >
                         <span className="truncate">{f.name}</span>
-                        <button
+                        <Button size="icon" variant="ghost"
                           type="button"
-                          aria-label={`Remove ${f.name}`}
+                          aria-label={text(`Remove ${f.name}`, `إزالة ${f.name}`)}
                           onClick={() => setFiles((all) => all.filter((file) => file !== f))}
                         >
                           <X className="size-4" />
-                        </button>
+                        </Button>
                       </li>
                     ))}
                   </ul>
@@ -226,24 +226,19 @@ function DisputesPage() {
                   {error}
                 </p>
               )}
-              <div className="flex gap-3">
-                <Button className="flex-1" disabled={loading} onClick={analyze}>
+              <div className="flex flex-wrap gap-3">
+                {deals.find((d) => d.id === dealId) && <Button asChild variant="outline"><Link to="/deals/$dealId" params={{ dealId: deals.find((d) => d.id === dealId)?.ref ?? "" }}>{text("Open deal & dispute actions", "فتح الصفقة وإجراءات النزاع")}</Link></Button>}
+                <Button className="flex-1" disabled={loading || !dealId} onClick={analyze}>
                   {loading ? (
                     <>
-                      <LoaderCircle className="animate-spin" />
-                      Analyzing case…
-                    </>
+                      <LoaderCircle className="animate-spin" />{text("Analyzing case…")}</>
                   ) : (
                     <>
-                      <Sparkles />
-                      Analyze dispute
-                    </>
+                      <Sparkles />{text("Analyze dispute")}</>
                   )}
                 </Button>
                 {loading && (
-                  <Button variant="outline" onClick={() => controller.current?.abort()}>
-                    Stop
-                  </Button>
+                  <Button variant="outline" onClick={() => controller.current?.abort()}>{text("Stop")}</Button>
                 )}
               </div>
             </CardContent>
@@ -254,14 +249,12 @@ function DisputesPage() {
             <CardContent className="p-6">
               <div className="mb-5 flex items-center gap-2">
                 <Sparkles className="size-5 text-primary" />
-                <h2 className="text-xl font-bold">AI case analysis</h2>
+                <h2 className="text-xl font-bold">{text("AI case analysis")}</h2>
               </div>
               <div className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-li:text-muted-foreground">
                 <ReactMarkdown>{analysis}</ReactMarkdown>
               </div>
-              <p className="mt-6 border-t pt-4 text-xs text-muted-foreground">
-                AI-generated guidance for review. It is not a binding decision or legal advice.
-              </p>
+              <p className="mt-6 border-t pt-4 text-xs text-muted-foreground">{text("AI-generated guidance for review. It is not a binding decision or legal advice.")}</p>
             </CardContent>
           </Card>
         )}

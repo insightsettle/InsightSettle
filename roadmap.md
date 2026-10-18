@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Platform follow-up audit: branded bilingual auth, reset/sign-in/sign-out verification; public/customer/staff page and action audit, phone layouts, translations and runtime errors; preserve money logic/mobile and report unverified flows.
 - [x] 18 Oct customer restoration: six-screen audit completed; visible deal breakdown, inspection timer, milestone schedule, mobile summary, FX widget, terms and controls restored; reference removed.
 - [x] 18 Oct staff separation: customer prompts/tabs suppressed; admin client pages redirect to console; requested console pages verified in English/Arabic at desktop/390px.
 - [x] 18 Oct verification: 123/123 Vitest tests passed including PostgreSQL races, automatic TypeScript/build OK, named goods and four contracting milestones completed through UI. EN/AR desktop/390px pages and wizard validation passed without page overflow or runtime errors. BHD 500 retention remains held until 16 Jan 2027 by existing terms; future retention/automatic deadline release not time-travel tested; per-milestone funding display/unit coverage only (named contract is upfront). No publication or money-logic/mobile changes.

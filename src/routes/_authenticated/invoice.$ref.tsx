@@ -1,3 +1,5 @@
+import { useLocale } from "@/lib/locale";
+import { formatMoney } from "@/lib/money";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import QRCode from "qrcode";
@@ -39,6 +41,7 @@ function zatcaTlv(values: string[]) {
 }
 
 function InvoiceBlock({ i, deal, label }: { i: TaxInvoiceRow; deal: { ref: string; title: string }; label: string | null }) {
+  const { text, locale } = useLocale();
   const [qr, setQr] = useState<string | null>(null);
   useEffect(() => {
     const payload = zatcaTlv([SELLER, VAT_NUMBER, new Date(i.issued_at).toISOString(), Number(i.total).toFixed(2), Number(i.vat).toFixed(2)]);
@@ -46,25 +49,25 @@ function InvoiceBlock({ i, deal, label }: { i: TaxInvoiceRow; deal: { ref: strin
   }, [i]);
   return (
     <section className="break-inside-avoid border-b border-border pb-8 pt-8 first:pt-0 last:border-b-0">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold">Simplified tax invoice</h1>
-          <p className="text-sm">فاتورة ضريبية مبسطة</p>
+          <h1 className="text-2xl font-extrabold">{text("Simplified tax invoice", "فاتورة ضريبية مبسطة")}</h1>
+          
           <p className="mt-3 text-sm">
-            {SELLER} · VAT no. {VAT_NUMBER}
+            {SELLER} · {text("VAT no.", "الرقم الضريبي")} {VAT_NUMBER}
           </p>
         </div>
         {qr && <img src={qr} alt="ZATCA QR code" className="size-36" />}
       </div>
       <table className="mt-8 w-full text-sm">
         <tbody className="divide-y divide-border">
-          <tr><td className="py-2 text-muted-foreground">Invoice number</td><td className="py-2 text-right font-semibold">{i.invoice_number}</td></tr>
-          <tr><td className="py-2 text-muted-foreground">Issued</td><td className="py-2 text-right">{new Date(i.issued_at).toLocaleString("en-GB")}</td></tr>
-          <tr><td className="py-2 text-muted-foreground">Deal</td><td className="py-2 text-right">{deal.ref} — {deal.title}</td></tr>
-          {label && <tr><td className="py-2 text-muted-foreground">Funding</td><td className="py-2 text-right">{label}</td></tr>}
-          <tr><td className="py-2 text-muted-foreground">Escrow service fee</td><td className="py-2 text-right">{i.currency} {Number(i.fee).toFixed(2)}</td></tr>
-          <tr><td className="py-2 text-muted-foreground">VAT ({(Number(i.vat_rate) * 100).toFixed(0)}%)</td><td className="py-2 text-right">{i.currency} {Number(i.vat).toFixed(2)}</td></tr>
-          <tr><td className="py-2 font-bold">Total</td><td className="py-2 text-right font-bold">{i.currency} {Number(i.total).toFixed(2)}</td></tr>
+          <tr><td className="py-2 text-muted-foreground">{text("Invoice number", "رقم الفاتورة")}</td><td className="py-2 text-right font-semibold">{i.invoice_number}</td></tr>
+          <tr><td className="py-2 text-muted-foreground">{text("Issued", "تاريخ الإصدار")}</td><td className="py-2 text-right">{new Date(i.issued_at).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB")}</td></tr>
+          <tr><td className="py-2 text-muted-foreground">{text("Deal", "الصفقة")}</td><td className="py-2 text-right">{deal.ref} — {deal.title}</td></tr>
+          {label && <tr><td className="py-2 text-muted-foreground">{text("Funding", "الدفع")}</td><td className="py-2 text-right">{label}</td></tr>}
+          <tr><td className="py-2 text-muted-foreground">{text("Escrow service fee", "رسوم خدمة الضمان")}</td><td className="py-2 text-right">{formatMoney(Number(i.fee), i.currency)}</td></tr>
+          <tr><td className="py-2 text-muted-foreground">{text("VAT", "الضريبة")} ({(Number(i.vat_rate) * 100).toFixed(0)}%)</td><td className="py-2 text-right">{formatMoney(Number(i.vat), i.currency)}</td></tr>
+          <tr><td className="py-2 font-bold">{text("Total", "الإجمالي")}</td><td className="py-2 text-right font-bold">{formatMoney(Number(i.total), i.currency)}</td></tr>
         </tbody>
       </table>
     </section>
@@ -72,30 +75,33 @@ function InvoiceBlock({ i, deal, label }: { i: TaxInvoiceRow; deal: { ref: strin
 }
 
 function InvoicePage() {
+  const { text, direction } = useLocale();
   const { ref } = Route.useParams();
   const deal = useQuery({ queryKey: ["deal", ref], queryFn: () => getDealByRef(ref) });
   const inv = useQuery({
     queryKey: ["invoices", deal.data?.id],
-    queryFn: () => getTaxInvoices(deal.data!.id),
+    queryFn: () => { if (!deal.data) throw new Error("Deal unavailable"); return getTaxInvoices(deal.data.id); },
     enabled: !!deal.data,
   });
   const milestones = useMilestones(deal.data?.id);
   const list = inv.data ?? [];
 
-  if (deal.isLoading || inv.isLoading) return <p className="p-10 text-center">Loading…</p>;
-  if (!list.length || !deal.data) return <p className="p-10 text-center">No invoice has been issued for this deal yet.</p>;
+  if (deal.isError || inv.isError) return <div data-no-localize role="alert" className="p-4">{text("Invoice could not be loaded.", "تعذّر تحميل الفاتورة.")}<Button variant="outline" onClick={() => { void deal.refetch(); void inv.refetch(); }}>{text("Try again", "حاول مرة أخرى")}</Button></div>;
+  if (deal.isLoading || inv.isLoading) return <p className="p-10 text-center">{text("Loading…", "جارٍ التحميل…")}</p>;
+  if (!list.length || !deal.data) return <p className="p-10 text-center">{text("No invoice has been issued for this deal yet.", "لم تصدر فاتورة لهذه الصفقة بعد.")}</p>;
 
+  const invoiceDeal = deal.data;
   const labelFor = (i: TaxInvoiceRow) => {
     if (!i.milestone_id) return null;
     const m = (milestones.data ?? []).find((x: any) => x.id === i.milestone_id);
-    return m ? `Milestone ${m.seq} — ${m.title}` : "Milestone";
+    return m ? text(`Milestone ${m.seq} — ${m.title}`, `المرحلة ${m.seq} — ${m.title}`) : text("Milestone", "المرحلة");
   };
 
   return (
-    <div className="mx-auto max-w-2xl bg-background p-8 text-foreground" dir="ltr">
-      {list.map((i) => <InvoiceBlock key={i.invoice_number} i={i} deal={deal.data!} label={labelFor(i)} />)}
+    <div data-no-localize className="mx-auto max-w-2xl bg-background p-4 text-foreground sm:p-8" dir={direction}>
+      {list.map((i) => <InvoiceBlock key={i.invoice_number} i={i} deal={invoiceDeal} label={labelFor(i)} />)}
       <p className="mt-6 text-xs text-muted-foreground">
-        {list.length > 1 ? "These invoices cover" : "This invoice covers"} the Insight service fee only. The deal amount itself is held and settled by the payment provider (simulated in this demo).
+        {text("These invoices cover the Insight service fee only. The deal amount is held and settled by the payment provider (simulated in this demo).", "تغطي هذه الفواتير رسوم خدمة إنسايت فقط. يحتفظ مزوّد الدفع بمبلغ الصفقة ويسوّيه (محاكى في هذه النسخة التجريبية).")}
       </p>
       <Button className="mt-6 print:hidden" onClick={() => window.print()}>
         Print or save as PDF
