@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { rolesFor, the, to, type Roles } from "@/lib/roles";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
@@ -112,11 +113,11 @@ function Dashboard() {
         <section aria-labelledby="next-steps" className="space-y-4">
           <h3 id="next-steps" className="text-lg font-bold">{text("Your next steps", "خطوتك التالية")}</h3>
           {n === 0 ? (
-            <Card><CardContent className="flex flex-wrap items-center gap-4 p-6"><CheckCircle2 className="size-8 shrink-0 text-primary" /><div className="min-w-0 flex-1"><p className="font-semibold">{text("You are all caught up", "كل شيء على ما يرام")}</p><p className="mt-1 text-sm text-muted-foreground">{text("We will notify you as soon as a deal needs you.", "سنخبرك فور احتياج أي صفقة لإجراء منك.")}</p></div><Button asChild variant="outline"><Link to="/deals/new"><Users />{text("Invite a supplier or buyer", "ادعُ مورداً أو مشترياً")}</Link></Button></CardContent></Card>
+            <Card><CardContent className="flex flex-wrap items-center gap-4 p-6"><CheckCircle2 className="size-8 shrink-0 text-primary" /><div className="min-w-0 flex-1"><p className="font-semibold">{text("You are all caught up", "كل شيء على ما يرام")}</p><p className="mt-1 text-sm text-muted-foreground">{text("We will notify you as soon as a deal needs you.", "سنخبرك فور احتياج أي صفقة لإجراء منك.")}</p></div><Button asChild variant="outline"><Link to="/deals/new"><Users />{text("Start a new deal", "ابدأ صفقة جديدة")}</Link></Button></CardContent></Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {actionDeals.map(({ deal, action: next }) => {
-                const c = actionCopy[next ?? ""] ?? actionCopy["View deal"]!;
+                const ac = actionCopyFor(rolesFor((deal as any).deal_type)); const c = ac[next ?? ""] ?? ac["View deal"]!;
                 const due = deal.auto_release_at && next === "Release the funds" ? text(` Inspection ends ${new Date(deal.auto_release_at).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`, ` تنتهي مدة الفحص ${new Date(deal.auto_release_at).toLocaleDateString("ar-SA", { day: "numeric", month: "long" })}.`) : "";
                 return (
                   <article key={deal.id} className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
@@ -136,7 +137,7 @@ function Dashboard() {
           <Card className="min-w-0"><CardContent className="p-0">
             <div className="flex items-center justify-between px-6 py-5"><h3 className="text-lg font-bold">{text("My deals", "صفقاتي")}</h3></div>
             <div className="overflow-x-auto"><table className="w-full min-w-[560px] text-start text-sm"><thead className="bg-muted text-xs text-muted-foreground"><tr>{[text("Deal", "الصفقة"), text("Amount", "المبلغ"), text("Status", "الحالة"), text("Progress", "المرحلة")].map((l) => <th className="px-5 py-3 text-start font-medium" key={l}>{l}</th>)}</tr></thead>
-              <tbody>{active.map((d) => { const st = escrowStep(d.status, d.terms_status); return <tr className="border-t" key={d.id}><td className="p-4"><Link className="font-semibold hover:text-primary" to="/deals/$dealId" params={{ dealId: d.ref }}>{d.title}</Link><p className="mt-1 text-xs text-muted-foreground"><bdi>{d.ref}</bdi> · {d.buyer_id === uid ? text("You are the buyer", "أنت المشتري") : text("You are the supplier", "أنت المورد")}</p></td><td className="p-4 font-semibold tabular-nums"><bdi dir="ltr">{formatMoney(Number(d.amount), d.currency)}</bdi></td><td className="p-4"><StatusBadge status={d.status as never} /></td><td className="w-32 p-4"><div className="flex gap-1" aria-label={text(`Step ${st + 1} of 5`, `الخطوة ${st + 1} من 5`)}>{[0, 1, 2, 3, 4].map((k) => <span key={k} className={`h-1.5 flex-1 rounded ${k < st ? "bg-brand-mint" : k === st ? "gradient-brand" : "bg-surface"}`} />)}</div></td></tr>; })}
+              <tbody>{active.map((d) => { const st = escrowStep(d.status, d.terms_status); return <tr className="border-t" key={d.id}><td className="p-4"><Link className="font-semibold hover:text-primary" to="/deals/$dealId" params={{ dealId: d.ref }}>{d.title}</Link><p className="mt-1 text-xs text-muted-foreground"><bdi>{d.ref}</bdi> · {(d.buyer_id === uid ? text(`You are the ${rolesFor((d as any).deal_type).payer.en}`, `أنت ${rolesFor((d as any).deal_type).payer.ar}`) : text(`You are the ${rolesFor((d as any).deal_type).payee.en}`, `أنت ${rolesFor((d as any).deal_type).payee.ar}`))}</p></td><td className="p-4 font-semibold tabular-nums"><bdi dir="ltr">{formatMoney(Number(d.amount), d.currency)}</bdi></td><td className="p-4"><StatusBadge status={d.status as never} /></td><td className="w-32 p-4"><div className="flex gap-1" aria-label={text(`Step ${st + 1} of 5`, `الخطوة ${st + 1} من 5`)}>{[0, 1, 2, 3, 4].map((k) => <span key={k} className={`h-1.5 flex-1 rounded ${k < st ? "bg-brand-mint" : k === st ? "gradient-brand" : "bg-surface"}`} />)}</div></td></tr>; })}
                 {!active.length && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{text("No active deals yet. Create your first one in a few minutes.", "لا توجد صفقات جارية بعد. أنشئ صفقتك الأولى في دقائق.")}</td></tr>}</tbody></table></div>
           </CardContent></Card>
           <Card><CardContent className="p-6"><h3 className="text-lg font-bold">{text("Latest updates", "آخر التحديثات")}</h3><ol className="mt-5 space-y-5 border-s ps-5">{myActivity.map((item) => <li className="relative" key={item.id}><span className="absolute -start-[25px] top-1.5 size-2 rounded-full bg-brand-mint" /><p className="text-sm font-medium">{text(item.title)}</p>{item.body && <p className="mt-1 text-xs leading-5 text-muted-foreground">{text(item.body)}</p>}<p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB", { dateStyle: "medium", timeStyle: "short" })}</p></li>)}{!myActivity.length && <li className="text-sm text-muted-foreground">{text("No updates yet.", "لا توجد تحديثات بعد.")}</li>}</ol></CardContent></Card>
@@ -150,15 +151,19 @@ function Dashboard() {
 }
 
 /** Plain wording for each dashboard action (keys are clientAction's results). [en, ar, button en, button ar] */
-const actionCopy: Record<string, [string, string, string, string]> = {
-  "Accept the terms": ["The other party sent the terms. Review them and accept to move to payment.", "أرسل الطرف الآخر الشروط. راجعها ووافق عليها للانتقال إلى الدفع.", "Review the terms", "راجع الشروط"],
-  "Approve and release": ["The supplier delivered a milestone. Review it and approve to pay it out.", "سلّم المورد مرحلة. راجعها واعتمدها ليُحوَّل مبلغها.", "Review the milestone", "راجع المرحلة"],
-  "Fund the deal": ["You both agreed the terms. Pay the amount so the supplier can start.", "اتفقتما على الشروط. ادفع المبلغ ليبدأ المورد التنفيذ.", "Pay now", "ادفع الآن"],
-  "Update shipping": ["The buyer has paid. Ship the order and add the tracking number.", "دفع المشتري المبلغ. اشحن الطلب وأضف رقم التتبع.", "Add shipping details", "أضف بيانات الشحن"],
-  "Confirm delivery": ["Confirm once you have delivered, so the buyer's inspection period starts.", "أكّد عندما تُسلِّم لتبدأ مدة الفحص لدى المشتري.", "Confirm delivery", "أكّد التسليم"],
-  "Release the funds": ["Your delivery has arrived. Inspect it, then confirm receipt to pay the supplier.", "وصل التسليم. افحصه ثم أكّد الاستلام ليُحوَّل المبلغ للمورد.", "Confirm receipt", "أكّد الاستلام"],
-  "View deal": ["Open the deal to see what is needed.", "افتح الصفقة لترى المطلوب.", "Open the deal", "افتح الصفقة"],
-};
+function actionCopyFor(R: Roles): Record<string, [string, string, string, string]> {
+  const [payerEn, payerAr] = the(R.payer); const [payeeEn, payeeAr] = the(R.payee); const [toEn, toAr] = to(R.payee);
+  return {
+    "Accept the terms": ["The other party sent the terms. Review them and accept to move to payment.", "أرسل الطرف الآخر الشروط. راجعها ووافق عليها للانتقال إلى الدفع.", "Review the terms", "راجع الشروط"],
+    "Approve and release": [`${cap1(payeeEn)} delivered a milestone. Review it and approve to pay it out.`, `سلّم ${payeeAr} مرحلة. راجعها واعتمدها ليُحوَّل مبلغها.`, "Review the milestone", "راجع المرحلة"],
+    "Fund the deal": [`You both agreed the terms. Pay the amount so ${payeeEn} can start.`, `اتفقتما على الشروط. ادفع المبلغ ليبدأ ${payeeAr} التنفيذ.`, "Pay now", "ادفع الآن"],
+    "Update shipping": [`${cap1(payerEn)} has paid. Ship the order and add the tracking number.`, `دفع ${payerAr} المبلغ. اشحن الطلب وأضف رقم التتبع.`, "Add shipping details", "أضف بيانات الشحن"],
+    "Confirm delivery": [`Confirm once you have delivered, so ${payerEn}'s inspection period starts.`, `أكّد عندما تُسلِّم لتبدأ مدة الفحص لدى ${payerAr}.`, "Confirm delivery", "أكّد التسليم"],
+    "Release the funds": [`Your delivery has arrived. Inspect it, then confirm receipt to release the payment ${toEn}.`, `وصل التسليم. افحصه ثم أكّد الاستلام ليُحوَّل المبلغ ${toAr}.`, "Confirm receipt", "أكّد الاستلام"],
+    "View deal": ["Open the deal to see what is needed.", "افتح الصفقة لترى المطلوب.", "Open the deal", "افتح الصفقة"],
+  };
+}
+function cap1(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 const typeLabels: Record<string, string> = { goods: "Goods", services: "Services", contracting: "Contracting & fit-out", freelance: "Freelance & digital work" };
 

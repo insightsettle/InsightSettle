@@ -1,4 +1,5 @@
 import { BadgeCheck } from "lucide-react";
+import { cap, feePayerLabel, rolesFor } from "@/lib/roles";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -44,6 +45,8 @@ const blankRow = (): EditableMilestone => ({ title: "", amount: "", dueDate: "",
 function NewDeal() {
   const { text } = useLocale();
   const [dealType, setDealType] = useState<DealType | null>(null);
+  const R = rolesFor(dealType);
+  const RC = { payer: cap(R.payer), payee: cap(R.payee) };
   const [useMilestones, setUseMilestones] = useState(false);
   const [rows, setRows] = useState<EditableMilestone[]>([blankRow(), blankRow()]);
   const [retention, setRetention] = useState("5");
@@ -266,7 +269,7 @@ function NewDeal() {
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="supplierCountry">{text("Supplier country")}</Label>
+              <Label htmlFor="supplierCountry">{text(`${RC.payee[0]} country`, `دولة ${R.payee.ar}`)}</Label>
               <select id="supplierCountry" value={supplierCountry} onChange={(e) => setSupplierCountry(e.target.value)} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
                 {gccCountries.map((c) => (<option key={c.code} value={c.code}>{c.name}</option>))}
               </select>
@@ -287,8 +290,8 @@ function NewDeal() {
                 onChange={(e) => setRole(e.target.value as "buyer" | "seller")}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="buyer">{text("I am paying (buyer)")}</option>
-                <option value="seller">{text("I am delivering (seller)")}</option>
+                <option value="buyer">{text(`I am paying (${R.payer.en})`, `أنا من يدفع (${R.payer.ar})`)}</option>
+                <option value="seller">{text(`I am delivering (${R.payee.en})`, `أنا من يُسلّم (${R.payee.ar})`)}</option>
               </select>
             </div>
             <div className="space-y-2">
@@ -312,13 +315,13 @@ function NewDeal() {
                 onChange={(e) => setFeePayer(e.target.value as FeePayer)}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                <option value="buyer">{text("Buyer pays the fee")}</option>
-                <option value="seller">{text("Seller pays the fee")}</option>
-                <option value="split">{text("Split 50/50")}</option>
+                <option value="buyer">{text(feePayerLabel("buyer", R)[0], feePayerLabel("buyer", R)[1])}</option>
+                <option value="seller">{text(feePayerLabel("seller", R)[0], feePayerLabel("seller", R)[1])}</option>
+                <option value="split">{text("Split half and half", "مناصفة بين الطرفين")}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="inspection">{text("Buyer inspection period (days)")}</Label>
+              <Label htmlFor="inspection">{text(`Inspection period for the ${R.payer.en} (days)`, `مدة الفحص لدى ${R.payer.ar} (أيام)`)}</Label>
               <Input
                 id="inspection"
                 type="number"
@@ -351,19 +354,19 @@ function NewDeal() {
           {dealType === "goods" && shippingRequired && (<div className="space-y-2">
             <Label htmlFor="shipResp">{text("Shipping responsibility")}</Label>
             <select id="shipResp" value={shippingResponsibility} onChange={(e) => setShippingResponsibility(e.target.value as "seller" | "buyer" | "none")} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm">
-              <option value="seller">{text("Seller arranges and pays shipping")}</option>
-              <option value="buyer">{text("Buyer arranges shipping")}</option>
+              <option value="seller">{text(`The ${R.payee.en} arranges and pays shipping`, `يرتّب ${R.payee.ar} الشحن ويدفعه`)}</option>
+              <option value="buyer">{text(`The ${R.payer.en} arranges shipping`, `يرتّب ${R.payer.ar} الشحن`)}</option>
               <option value="none">{text("No shipping (service or digital)")}</option>
             </select>
           </div>)}
           <div className="space-y-2">
             <Label htmlFor="acceptance">{text("Acceptance criteria")}</Label>
-            <Textarea id="acceptance" rows={2} value={acceptanceCriteria} onChange={(e) => setAcceptanceCriteria(e.target.value)} placeholder="What must be true for the buyer to accept the delivery." />
+            <Textarea id="acceptance" rows={2} value={acceptanceCriteria} onChange={(e) => setAcceptanceCriteria(e.target.value)} placeholder={text(`What must be true for the ${R.payer.en} to accept the delivery.`, `ما الذي يجب أن يتحقق ليقبل ${R.payer.ar} التسليم.`)} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="refundCond">{text("Refund conditions")}</Label>
-              <Textarea id="refundCond" rows={2} value={refundConditions} onChange={(e) => setRefundConditions(e.target.value)} placeholder="When the buyer gets the money back." />
+              <Textarea id="refundCond" rows={2} value={refundConditions} onChange={(e) => setRefundConditions(e.target.value)} placeholder={text(`When the ${R.payer.en} gets the money back.`, `متى يستعيد ${R.payer.ar} المبلغ.`)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="cancelCond">{text("Cancellation conditions")}</Label>
@@ -428,7 +431,7 @@ function NewDeal() {
                   <option value="upfront">{text("Fund all upfront")}</option>
                   <option value="per_milestone">{text("Fund each milestone when it starts")}</option>
                 </select>
-                <p className="text-xs text-muted-foreground">{fundingMode === "per_milestone" ? text("The buyer funds milestone 1 to start, then each next milestone before work on it begins. Each funding is charged its share of the fee at that day's rate.") : text("The buyer funds the whole contract once; each milestone is released from it.")}</p>
+                <p className="text-xs text-muted-foreground">{fundingMode === "per_milestone" ? text(`The ${R.payer.en} pays milestone 1 to start, then each next milestone before work on it begins. Each payment carries its share of the fee at that day's rate.`, `يدفع ${R.payer.ar} المرحلة الأولى للبدء، ثم كل مرحلة قبل بدء العمل عليها. تُحتسب لكل دفعة حصتها من الرسوم بسعر يومها.`) : text(`The ${R.payer.en} pays the whole contract once; each milestone is paid out from it.`, `يدفع ${R.payer.ar} العقد كاملاً مرة واحدة، وتُحوَّل كل مرحلة منه.`)}</p>
               </div>
               {planError && <p className="text-sm text-destructive">{planError}</p>}
             </div>
@@ -445,7 +448,7 @@ function NewDeal() {
               : <Button key="submit" type="submit" size="lg" className="h-11 px-6" disabled={busy || !dealType || !!planError}>{busy ? text("Saving…", "جارٍ الحفظ…") : text("Create deal and get invite link", "أنشئ الصفقة واحصل على رابط الدعوة")}</Button>}
           </div>
         </form>
-        <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{([["Total fee", "إجمالي الرسوم", lb ? formatMoney(lb.fee, currency) : null], ["Buyer fee share + VAT", "حصة المشتري + الضريبة", lb ? `${formatMoney(lb.buyerShare, currency)} + ${lb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.buyerVat, currency)}` : null], ["Supplier fee share + VAT", "حصة المورد + الضريبة", lb ? `${formatMoney(lb.sellerShare, currency)} + ${lb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.sellerVat, currency)}` : null], ["Supplier receives", "يستلم المورد", lb ? formatMoney(lb.supplierNet, currency) : null], ["Buyer pays", "يدفع المشتري", lb ? formatMoney(lb.buyerTotal, currency) : null]] as const).map(([en,ar,v]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd className="tabular-nums"><bdi>{v ?? "—"}</bdi></dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Indicative, from the published fee table. The locked quote appears on the deal after both parties join.", "تقديرية من جدول الرسوم المنشور. يظهر العرض المقفل في الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
+        <aside className="xl:sticky xl:top-6" data-no-localize><Card><CardContent className="p-6"><h3 className="font-semibold">{text("Live summary", "الملخص المباشر")}</h3><p className="mt-5 text-xs text-muted-foreground">{text("Deal amount", "مبلغ الصفقة")}</p><p className="mt-2 text-2xl font-semibold tabular-nums"><bdi>{formatMoney(numericAmount, currency)}</bdi></p><dl className="mt-5 space-y-4 border-t pt-4 text-sm">{([["Total fee", "إجمالي الرسوم", lb ? formatMoney(lb.fee, currency) : null], [`${RC.payer[0]} fee share + VAT`, `حصة ${R.payer.ar} + الضريبة`, lb ? `${formatMoney(lb.buyerShare, currency)} + ${lb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.buyerVat, currency)}` : null], [`${RC.payee[0]} fee share + VAT`, `حصة ${R.payee.ar} + الضريبة`, lb ? `${formatMoney(lb.sellerShare, currency)} + ${lb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : formatMoney(lb.sellerVat, currency)}` : null], [`${RC.payee[0]} receives`, `يستلم ${R.payee.ar}`, lb ? formatMoney(lb.supplierNet, currency) : null], [`${RC.payer[0]} pays`, `يدفع ${R.payer.ar}`, lb ? formatMoney(lb.buyerTotal, currency) : null]] as const).map(([en,ar,v]) => <div key={en} className="flex justify-between gap-3"><dt className="text-muted-foreground">{text(en,ar)}</dt><dd className="tabular-nums"><bdi>{v ?? "—"}</bdi></dd></div>)}</dl><p className="mt-4 text-xs leading-6 text-muted-foreground">{text("Indicative, from the published fee table. The locked quote appears on the deal after both parties join.", "تقديرية من جدول الرسوم المنشور. يظهر العرض المقفل في الصفقة بعد انضمام الطرفين.")}</p><CustodyNote className="mt-5 border-t pt-4" /></CardContent></Card></aside>
         </div>
       </div>
     </SiteShell>

@@ -66,7 +66,8 @@ import {
   postDealMessage,
   submitRating,
 } from "@/lib/deal-actions";
-import { feePayerLabels, getDealByRef, shippingStatusLabels } from "@/lib/deals";
+import { getDealByRef, shippingStatusLabels } from "@/lib/deals";
+import { cap, feePayerLabel, poss, rolesFor, the, to } from "@/lib/roles";
 import { formatDate, statusLabels, type DealStatus } from "@/lib/demo-data";
 import {
   requestFundsRelease,
@@ -279,7 +280,11 @@ function OrdinaryDealPage() {
   const nextToFund = perMilestone ? (milestonesQ.data ?? []).find((m: any) => m.status === "pending") ?? null : null;
   const canFund = isBuyer && (perMilestone ? ["pending_funding", "in_progress"].includes(status) && !!nextToFund : status === "pending_funding");
   const deadlineFmt = (l: string) => inspectionEnds ? inspectionEnds.toLocaleString(l, { timeZone: "Asia/Riyadh", weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" }) : "";
+  const R = rolesFor((deal as any).deal_type);
+  const [payerT, payeeT, toPayee, payerPoss, payeePoss] = [the(R.payer), the(R.payee), to(R.payee), poss(R.payer), poss(R.payee)];
+  const fpl = feePayerLabel(deal.fee_payer, R);
   const nextStep = nextStepFor({
+    roles: R,
     status, termsAgreed, isBuyer, isSeller, bothJoined, canDecideTerms, shippingNeeded,
     shipped: !!deal.shipped_at || ["shipped", "in_transit", "out_for_delivery", "delivered"].includes(deal.shipping_status ?? ""),
     autoRelease: !!deal.auto_release_enabled, frozen: !!(deal as any).frozen, hasMilestones: (milestonesQ.data?.length ?? 0) > 0,
@@ -314,14 +319,14 @@ function OrdinaryDealPage() {
                 {fb && (
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-xl bg-background p-4">
-                      <p className="text-sm text-muted-foreground">{isBuyer ? (status === "pending_funding" || perMilestone ? text("You pay", "تدفع") : text("You paid", "دفعتَ")) : text("The buyer pays", "يدفع المشتري")}</p>
+                      <p className="text-sm text-muted-foreground">{isBuyer ? (status === "pending_funding" || perMilestone ? text("You pay", "تدفع") : text("You paid", "دفعتَ")) : text(`${cap1(payerT[0])} pays`, `يدفع ${payerT[1]}`)}</p>
                       <p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr">{pin && !perMilestone ? money(pin.total, pin.payCurrency) : money(fb.buyerTotal)}</bdi></p>
-                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{pin && !perMilestone && pin.payCurrency !== deal.currency ? <>{text("Includes the fee share and VAT, at", "يشمل حصة الرسوم والضريبة، بسعر")} <bdi dir="ltr">1 {deal.currency} = {pin.customerRate} {pin.payCurrency}</bdi></> : text("Includes the buyer's fee share and VAT", "يشمل حصة المشتري من الرسوم والضريبة")}</p>
+                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{pin && !perMilestone && pin.payCurrency !== deal.currency ? <>{text("Includes the fee share and VAT, at", "يشمل حصة الرسوم والضريبة، بسعر")} <bdi dir="ltr">1 {deal.currency} = {pin.customerRate} {pin.payCurrency}</bdi></> : text(`Includes ${payerPoss[0]} fee share and VAT`, `يشمل حصة ${payerPoss[1]} من الرسوم والضريبة`)}</p>
                     </div>
                     <div className="rounded-xl bg-background p-4">
-                      <p className="text-sm text-muted-foreground">{isSeller ? text("You receive", "تستلم") : text("The supplier receives", "يستلم المورد")}</p>
+                      <p className="text-sm text-muted-foreground">{isSeller ? text("You receive", "تستلم") : text(`${cap1(payeeT[0])} receives`, `يستلم ${payeeT[1]}`)}</p>
                       <p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr">{money(fb.supplierNet)}</bdi></p>
-                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{text("After the supplier's fee share and VAT, once the buyer confirms", "بعد حصة المورد من الرسوم وضريبتها، عند تأكيد المشتري")}</p>
+                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{text(`After ${payeePoss[0]} fee share and VAT, once ${payerT[0]} confirms`, `بعد حصة ${payeePoss[1]} من الرسوم وضريبتها، عند تأكيد ${payerT[1]}`)}</p>
                     </div>
                   </div>
                 )}
@@ -331,9 +336,9 @@ function OrdinaryDealPage() {
                     <summary className="cursor-pointer list-none text-sm font-semibold text-primary">{text("Fee and VAT details", "تفاصيل الرسوم والضريبة")}</summary>
                     <dl className="mt-3 space-y-3 text-sm">
                       <Info label={text("Insight fee", "رسوم إنسايت")} value={money(fb.fee)} />
-                      <Info label={text("Who pays the fee", "من يدفع الرسوم")} value={text(feePayerLabels[deal.fee_payer] ?? "Buyer pays the fee")} />
-                      <Info label={text("Buyer's share", "حصة المشتري")} value={`${money(fb.buyerShare)} + ${fb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "ضريبة")} ${Math.round(fb.buyerVatRate * 100)}% ${money(fb.buyerVat)}`}`} />
-                      <Info label={text("Supplier's share", "حصة المورد")} value={`${money(fb.sellerShare)} + ${fb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "ضريبة")} ${Math.round(fb.sellerVatRate * 100)}% ${money(fb.sellerVat)}`}`} />
+                      <Info label={text("Who pays the fee", "من يدفع الرسوم")} value={text(fpl[0], fpl[1])} />
+                      <Info label={text(`${cap(R.payer)[0]}'s share`, `حصة ${R.payer.ar}`)} value={`${money(fb.buyerShare)} + ${fb.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "ضريبة")} ${Math.round(fb.buyerVatRate * 100)}% ${money(fb.buyerVat)}`}`} />
+                      <Info label={text(`${cap(R.payee)[0]}'s share`, `حصة ${R.payee.ar}`)} value={`${money(fb.sellerShare)} + ${fb.sellerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "ضريبة")} ${Math.round(fb.sellerVatRate * 100)}% ${money(fb.sellerVat)}`}`} />
                       {pin && pin.payCurrency !== deal.currency && <Info label={text("Exchange rate", "سعر الصرف")} value={`1 ${deal.currency} = ${pin.customerRate} ${pin.payCurrency}`} />}
                     </dl>
                     <p className="mt-3 text-xs leading-6 text-muted-foreground">{text("The exchange rate and its spread belong to the payment provider.", "سعر الصرف وفارقه يعودان لمزوّد الدفع.")}</p>
@@ -344,7 +349,7 @@ function OrdinaryDealPage() {
                   <dl className="mt-3 space-y-3 text-sm">
                     {deal.acceptance_criteria && <Info label={text("Accepted when", "متى يُقبل التسليم")} value={deal.acceptance_criteria} />}
                     <Info label={text("Inspection period", "مدة الفحص")} value={text(`${deal.inspection_days} day(s) after delivery`, `${deal.inspection_days} يوم بعد التسليم`)} />
-                    <Info label={text("Automatic payout", "التحويل التلقائي")} value={deal.auto_release_enabled ? text("On, at the end of the inspection period", "مفعّل عند نهاية مدة الفحص") : text("Off — the buyer confirms", "غير مفعّل، يؤكد المشتري")} />
+                    <Info label={text("Automatic payout", "التحويل التلقائي")} value={deal.auto_release_enabled ? text("On, at the end of the inspection period", "مفعّل عند نهاية مدة الفحص") : text(`Off — ${payerT[0]} confirms`, `غير مفعّل، يؤكد ${payerT[1]}`)} />
                     {Number(deal.quantity ?? 1) !== 1 && <Info label={text("Quantity", "الكمية")} value={String(deal.quantity)} />}
                     {deal.refund_conditions && <Info label={text("Refund conditions", "شروط الاسترداد")} value={deal.refund_conditions} />}
                     <Info label={text("Delivery by", "التسليم قبل")} value={deal.due_at ? formatDate(deal.due_at) : text("No date set", "بدون موعد")} />
@@ -462,11 +467,9 @@ function OrdinaryDealPage() {
                     <FileSignature className="size-5 text-warning" />
                     <h2 className="font-bold">{text("Deal terms need agreement")}</h2>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    No money can be funded until both sides accept the terms: value{" "}
-                    {money(amount)}, {feePayerLabels[deal.fee_payer] ?? "buyer pays the fee"},
-                    buyer inspection period of {deal.inspection_days} day(s)
-                    {deal.due_at ? `, delivery by ${formatDate(deal.due_at)}` : ""}.
+                  <p className="mt-2 text-sm text-muted-foreground" data-no-localize>
+                    {text(`Nothing is paid until both sides accept the terms: value ${money(amount)}, ${fpl[0].toLowerCase()}, an inspection period of ${deal.inspection_days} day(s) for ${payerT[0]}${deal.due_at ? `, delivery by ${formatDate(deal.due_at)}` : ""}.`,
+                      `لا يُدفع أي مبلغ قبل أن يوافق الطرفان على الشروط: القيمة ${money(amount)}، ${fpl[1]}، ومدة فحص ${deal.inspection_days} يوم لدى ${payerT[1]}${deal.due_at ? `، والتسليم قبل ${formatDate(deal.due_at)}` : ""}.`)}
                   </p>
                   {deal.terms_note && (
                     <p className="mt-2 rounded-md bg-background p-3 text-sm">
@@ -657,8 +660,8 @@ function OrdinaryDealPage() {
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {inspectionExpired
-                          ? "The funds can now be released to the seller. If something is wrong, open a dispute before releasing."
-                          : `Ends ${formatDate(deal.auto_release_at ?? "")}. If the buyer takes no action, the funds are released to the seller.`}
+                          ? text(`The amount can now be paid out ${toPayee[0]}. If something is wrong, open a dispute first.`, `يمكن الآن تحويل المبلغ ${toPayee[1]}. إن كانت هناك مشكلة، افتح نزاعاً أولاً.`)
+                          : text(`Ends ${formatDate(deal.auto_release_at ?? "")}. If ${payerT[0]} takes no action, the amount is paid out ${toPayee[0]}.`, `تنتهي ${formatDate(deal.auto_release_at ?? "")}. إن لم يتخذ ${payerT[1]} أي إجراء، يُحوَّل المبلغ ${toPayee[1]}.`)}
                       </p>
                     </div>
                   </div>
@@ -856,23 +859,17 @@ function OrdinaryDealPage() {
                   <Users className="size-5 text-primary" />
                   <h2 className="font-bold">{text("Parties")}</h2>
                 </div>
+                <div data-no-localize>
                 <Info
-                  label="Buyer"
-                  value={
-                    deal.buyer_id ? (isBuyer ? "You" : "Other party (joined)") : "Awaiting buyer"
-                  }
+                  label={text(cap(R.payer)[0], cap(R.payer)[1])}
+                  value={deal.buyer_id ? (isBuyer ? text("You", "أنت") : text("The other party (joined)", "الطرف الآخر (انضم)")) : text("Not joined yet", "لم ينضم بعد")}
                 />
                 <Info
-                  label="Seller"
-                  value={
-                    deal.seller_id
-                      ? isSeller
-                        ? "You"
-                        : "Other party (joined)"
-                      : "Awaiting seller"
-                  }
+                  label={text(cap(R.payee)[0], cap(R.payee)[1])}
+                  value={deal.seller_id ? (isSeller ? text("You", "أنت") : text("The other party (joined)", "الطرف الآخر (انضم)")) : text("Not joined yet", "لم ينضم بعد")}
                 />
-                {partyProfiles.data?.map((p) => <div data-no-localize key={p.id} className="mt-4 border-t pt-4"><p className="text-xs text-muted-foreground">{text(p.id === deal.buyer_id ? "Buyer" : "Supplier", p.id === deal.buyer_id ? "المشتري" : "المورد")}</p><p className="mt-1 text-sm font-medium">{p.full_name ?? "—"}</p><p className="mt-1 text-xs text-muted-foreground">{text(p.country ?? "—")}</p>{p.verification_status === "verified" && <p className="mt-2 flex items-center gap-1 text-xs text-primary"><BadgeCheck className="size-3" />{text("Verified", "موثق")}</p>}</div>)}
+                </div>
+                {partyProfiles.data?.map((p) => <div data-no-localize key={p.id} className="mt-4 border-t pt-4"><p className="text-xs text-muted-foreground">{text(p.id === deal.buyer_id ? cap(R.payer)[0] : cap(R.payee)[0], p.id === deal.buyer_id ? R.payer.ar : R.payee.ar)}</p><p className="mt-1 text-sm font-medium">{p.full_name ?? "—"}</p><p className="mt-1 text-xs text-muted-foreground">{text(p.country ?? "—")}</p>{p.verification_status === "verified" && <p className="mt-2 flex items-center gap-1 text-xs text-primary"><BadgeCheck className="size-3" />{text("Verified", "موثق")}</p>}</div>)}
                 {isCreator && <Info label="You invited" value={deal.counterparty_email ?? "—"} />}
               </CardContent>
             </Card>
@@ -963,3 +960,5 @@ function Info({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function cap1(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }

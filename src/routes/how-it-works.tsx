@@ -25,20 +25,20 @@ const STEPS: [typeof BadgeCheck, T2, T2][] = [
   [BadgeCheck, ["Create and verify your account", "أنشئ حسابك ووثّقه"], ["Confirm your email and phone. Identity checks apply when required.", "أكّد بريدك وجوالك، ويُطلب توثيق الهوية عند الحاجة."]],
   [FileSignature, ["Define the deal", "حدّد تفاصيل الصفقة"], ["What is delivered, the amount, the currency, the delivery window and how it is accepted.", "ما سيُسلَّم، والمبلغ، والعملة، وموعد التسليم، وكيف يُقبل."]],
   [Link2, ["Invite the other party", "ادعُ الطرف الآخر"], ["Send one secure link. They review the terms and accept, or ask for a change.", "أرسل رابطاً آمناً واحداً، فيراجع الشروط ويقبلها أو يطلب تعديلها."]],
-  [Wallet, ["The buyer pays into the deal", "يدفع المشتري في الصفقة"], ["In their own currency, with the rate and every fee shown first. In this demo the payment provider is simulated and no real money moves.", "بعملته، مع سعر الصرف وكل الرسوم أمامه أولاً. في هذه النسخة التجريبية مزوّد الدفع محاكى ولا تتحرك أموال حقيقية."]],
-  [PackageCheck, ["The supplier delivers", "يسلّم المورد"], ["Ships the goods or completes the work, with tracking, notes and files.", "يشحن البضاعة أو يُنجز العمل، مع رقم التتبع والملاحظات والملفات."]],
-  [SearchCheck, ["The buyer inspects", "يفحص المشتري"], ["Within the agreed inspection period: accept, ask for a revision, or open a dispute.", "خلال مدة الفحص المتفق عليها: يقبل، أو يطلب تعديلاً، أو يفتح نزاعاً."]],
-  [CircleCheckBig, ["Payout to the supplier", "التحويل للمورد"], ["On acceptance, or automatically when the inspection period ends without an objection. Insight keeps the receipt and the full timeline.", "عند القبول، أو تلقائياً بانتهاء مدة الفحص دون اعتراض. وتحفظ إنسايت الإيصال والسجل الكامل."]],
+  [Wallet, ["The payer pays into the deal", "يدفع الدافع في الصفقة"], ["In their own currency, with the rate and every fee shown first. In this demo the payment provider is simulated and no real money moves.", "بعملته، مع سعر الصرف وكل الرسوم أمامه أولاً. في هذه النسخة التجريبية مزوّد الدفع محاكى ولا تتحرك أموال حقيقية."]],
+  [PackageCheck, ["The payee delivers", "يُنجز المستفيد ما اتفقتما عليه"], ["Ships the goods or completes the work, with tracking, notes and files.", "يشحن البضاعة أو يُنجز العمل، مع رقم التتبع والملاحظات والملفات."]],
+  [SearchCheck, ["The payer checks", "يتأكد الدافع"], ["Within the agreed inspection period: accept, ask for a revision, or open a dispute.", "خلال مدة الفحص المتفق عليها: يقبل، أو يطلب تعديلاً، أو يفتح نزاعاً."]],
+  [CircleCheckBig, ["Payout to the payee", "التحويل للمستفيد"], ["On acceptance, or automatically when the inspection period ends without an objection. Insight keeps the receipt and the full timeline.", "عند القبول، أو تلقائياً بانتهاء مدة الفحص دون اعتراض. وتحفظ إنسايت الإيصال والسجل الكامل."]],
 ];
 
 const STATUSES: DealStatus[] = ["pending_funding", "held", "delivered", "under_review", "released", "refunded", "disputed"];
 const DESC: Partial<Record<DealStatus, T2>> = {
-  pending_funding: ["The terms are ready; the buyer has not paid yet.", "الشروط جاهزة، ولم يدفع المشتري بعد."],
-  held: ["The buyer has paid into the deal and the work can begin.", "دفع المشتري في الصفقة، ويمكن بدء العمل."],
-  delivered: ["The supplier has marked the deal as delivered.", "أكّد المورد التسليم."],
-  under_review: ["The buyer is inspecting what was delivered.", "يفحص المشتري ما سُلِّم."],
-  released: ["The amount has been paid to the supplier.", "حُوِّل المبلغ للمورد."],
-  refunded: ["The amount has been returned to the buyer under the refund policy.", "أُعيد المبلغ للمشتري وفق سياسة الاسترداد."],
+  pending_funding: ["The terms are ready; the payer has not paid yet.", "الشروط جاهزة، ولم يدفع الدافع بعد."],
+  held: ["The payer has paid into the deal and the work can begin.", "دفع الدافع في الصفقة، ويمكن بدء العمل."],
+  delivered: ["The payee has marked the deal as delivered.", "أكّد المستفيد التسليم."],
+  under_review: ["The payer is checking what was delivered.", "يتأكد الدافع مما سُلِّم."],
+  released: ["The amount has been paid to the payee.", "حُوِّل المبلغ للمستفيد."],
+  refunded: ["The amount has been returned to the payer under the refund policy.", "أُعيد المبلغ للدافع وفق سياسة الاسترداد."],
   disputed: ["The payout is paused while the Insight team reviews both sides' evidence.", "التحويل متوقف بينما يراجع فريق إنسايت أدلة الطرفين."],
 };
 
@@ -55,6 +55,7 @@ function Page() {
     />
 
     <section className="mx-auto max-w-4xl px-5 py-16 lg:py-20">
+      <div className="mb-8 rounded-2xl border border-border bg-secondary p-5 text-sm leading-7"><p className="font-semibold">{text("Who is who", "من هو من")}</p><p className="mt-1 text-muted-foreground">{text("On this page, the payer is the side that pays and the payee is the side the money is for. Inside your deal you see the everyday names: buyer and seller, client and service provider, owner and contractor.", "في هذه الصفحة نسمّي من يدفع «الدافع»، ومن يستحق المبلغ «المستفيد». وداخل صفقتك ترى الاسم المعتاد لها: المشتري والبائع، العميل ومقدّم الخدمة، المالك والمقاول.")}</p></div>
       <ol className="relative space-y-4">
         <span aria-hidden="true" className="gradient-brand absolute top-8 bottom-8 start-[2.75rem] w-0.5 opacity-50 sm:start-[3rem]" />
         {STEPS.map(([I, t, d], i) => (

@@ -31,10 +31,10 @@ const reasonLabels: Record<string, string> = {
   other: "Other",
 };
 
-const outcomeLabels: Record<string, string> = {
-  full_release: "Full release to the seller",
-  full_refund: "Full refund to the buyer",
-  partial_settlement: "Partial settlement",
+const outcomeLabels: Record<string, [string, string]> = {
+  full_release: ["Full payout to the payee", "تحويل كامل المبلغ للمستفيد"],
+  full_refund: ["Full refund to the payer", "استرداد كامل المبلغ للدافع"],
+  partial_settlement: ["Partial settlement", "تسوية جزئية"],
 };
 
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
@@ -124,8 +124,8 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
     return (
       <div className="mt-4 rounded-md border p-4 text-sm">
         <p className="font-semibold">
-          Dispute decision: {outcomeLabels[d.outcome]}
-          {d.outcome === "partial_settlement" && ` (buyer ${d.buyer_percent}%)`}
+          {text("Dispute decision: ", "قرار النزاع: ")}{outcomeLabels[d.outcome] ? text(outcomeLabels[d.outcome]![0], outcomeLabels[d.outcome]![1]) : d.outcome}
+          {d.outcome === "partial_settlement" && text(` (payer ${d.buyer_percent}%)`, ` (الدافع ${d.buyer_percent}%)`)}
         </p>
         <p className="mt-1 text-muted-foreground">{d.resolution_note}</p>
       </div>

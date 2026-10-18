@@ -55,17 +55,17 @@ export function PageHero({ badge, title, highlight, body, points, aside, primary
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
       <div aria-hidden="true" className="absolute -top-40 -end-40 size-[28rem] rounded-full bg-brand-teal/10 blur-3xl" />
       <div className={cn("relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-14 lg:py-20", aside && "lg:grid-cols-[1.1fr_0.9fr] lg:gap-16")}>
-        <div>
+        <div className="text-center lg:text-start">
           <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-primary">{text(badge[0], badge[1])}</span>
           <h1 className="mt-5 text-4xl leading-[1.3] font-bold sm:text-5xl">{text(title[0], title[1])}<br /><span className="text-primary">{text(highlight[0], highlight[1])}</span></h1>
-          <p className="mt-5 max-w-xl text-lg leading-9 text-foreground/80">{text(body[0], body[1])}</p>
+          <p className="mx-auto mt-5 max-w-xl text-lg leading-9 text-foreground/80 lg:mx-0">{text(body[0], body[1])}</p>
           {(primary || secondary) && (
-            <div className="mt-8 flex flex-wrap gap-3">
-              {primary && <Button asChild size="lg" className="h-12 px-6 text-base"><Link to={primary.to} {...(primary.signup ? { search: { mode: "signup" as const } } : {})}>{text(primary.label[0], primary.label[1])}<ArrowUpRight className="size-4" /></Link></Button>}
-              {secondary && <Button asChild size="lg" variant="outline" className="h-12 bg-card px-6 text-base"><Link to={secondary.to} {...(secondary.hash ? { hash: secondary.hash } : {})}>{text(secondary.label[0], secondary.label[1])}</Link></Button>}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+              {primary && <Button asChild size="lg" className="h-14 rounded-full px-7 text-base shadow-[0_14px_30px_-16px_rgb(19_128_101/0.9)] sm:h-12"><Link to={primary.to} {...(primary.signup ? { search: { mode: "signup" as const } } : {})}>{text(primary.label[0], primary.label[1])}<ArrowUpRight className="size-4" /></Link></Button>}
+              {secondary && <Button asChild size="lg" variant="outline" className="h-14 rounded-full bg-card px-7 text-base sm:h-12"><Link to={secondary.to} {...(secondary.hash ? { hash: secondary.hash } : {})}>{text(secondary.label[0], secondary.label[1])}</Link></Button>}
             </div>
           )}
-          {points && <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground">{points.map(([en, ar]) => <li key={en} className="flex items-center gap-2"><Check className="size-4 text-primary" />{text(en, ar)}</li>)}</ul>}
+          {points && <ul className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground lg:justify-start">{points.map(([en, ar]) => <li key={en} className="flex items-center gap-2"><Check className="size-4 text-primary" />{text(en, ar)}</li>)}</ul>}
         </div>
         {aside}
       </div>
@@ -93,9 +93,9 @@ export function FeatureGrid({ items, cols = 3, dark }: { items: Feature[]; cols?
 
 export const DEAL_STEPS: [T2, T2][] = [
   [["Agree the terms", "اتفقا على الشروط"], ["Create the deal, invite the other party and accept the terms together — on one page.", "أنشئ الصفقة وادعُ الطرف الآخر، واقبلا الشروط معاً في صفحة واحدة."]],
-  [["The buyer pays", "يدفع المشتري"], ["In their own currency, with a tax invoice issued on the spot.", "بعملته، مع فاتورة ضريبية تصدر فوراً."]],
-  [["The supplier delivers", "يسلّم المورد"], ["Ships the goods or completes the work; both sides follow every step.", "يشحن البضاعة أو يُنجز العمل، ويتابع الطرفان كل خطوة."]],
-  [["Inspect and pay out", "فحص ثم تحويل"], ["The buyer confirms, and the amount is paid out to the supplier. A problem? Open a dispute in one tap.", "يؤكد المشتري فيُحوَّل المبلغ للمورد. هناك مشكلة؟ افتح نزاعاً بضغطة."]],
+  [["You pay into the deal", "تدفع في الصفقة"], ["In your own currency, with a tax invoice issued on the spot.", "بعملتك، مع فاتورة ضريبية تصدر فوراً."]],
+  [["The other side delivers", "الطرف الآخر يُنجز"], ["Ships the goods or completes the work; you both follow every step.", "يشحن البضاعة أو يُنجز العمل، وتتابعان معاً كل خطوة."]],
+  [["Check, then pay out", "تتأكد ثم يُحوَّل"], ["You confirm, and the amount is paid out to the other side. A problem? Open a dispute in one tap.", "تؤكد الاستلام فيُحوَّل المبلغ للطرف الآخر. هناك مشكلة؟ افتح نزاعاً بضغطة."]],
 ];
 
 /** Numbered steps joined by a line on wide screens. */
@@ -116,8 +116,8 @@ export function StepsFlow({ steps = DEAL_STEPS }: { steps?: [T2, T2][] }) {
 }
 
 export const COMPARE_ROWS: [T2, T2, T2, T2][] = [
-  [["If the supplier never delivers", "إن لم يُسلّم المورد"], ["Your money may be gone", "قد يضيع مبلغك"], ["The bank pays only against shipping documents", "البنك يدفع مقابل مستندات الشحن فقط"], ["The amount stays in the deal and you can open a dispute", "يبقى المبلغ في الصفقة ويمكنك فتح نزاع"]],
-  [["When the supplier is paid", "متى يُدفع للمورد"], ["Before work starts", "قبل أن يبدأ"], ["On documents, before you inspect the goods", "عند تقديم المستندات، قبل أن تفحص البضاعة"], ["After you receive and inspect", "بعد أن تستلم وتفحص"]],
+  [["If the other side never delivers", "إن لم يُسلّم الطرف الآخر"], ["Your money may be gone", "قد يضيع مبلغك"], ["The bank pays only against shipping documents", "البنك يدفع مقابل مستندات الشحن فقط"], ["The amount stays in the deal and you can open a dispute", "يبقى المبلغ في الصفقة ويمكنك فتح نزاع"]],
+  [["When the other side is paid", "متى يستلم الطرف الآخر المبلغ"], ["Before work starts", "قبل أن يبدأ"], ["On documents, before you inspect the goods", "عند تقديم المستندات، قبل أن تفحص البضاعة"], ["After you receive and inspect", "بعد أن تستلم وتفحص"]],
   [["What it takes", "ما تحتاجه"], ["A bank transfer", "تحويل بنكي فقط"], ["A bank facility, forms and documents", "تسهيلات بنكية ونماذج ومستندات"], ["A free account and one page of terms", "حساب مجاني وصفحة واحدة للاتفاق"]],
   [["Small and mid-size deals", "الصفقات الصغيرة والمتوسطة"], ["Easy, but unprotected", "سهل، لكن بلا حماية"], ["Minimum bank charges make them costly", "الحد الأدنى لرسوم البنك يجعلها مكلفة"], ["Fees from USD 15", "رسوم تبدأ من 15 دولاراً"]],
   [["Work paid in stages", "أعمال تُدفع على مراحل"], ["Hard to control", "صعب التحكم"], ["Rarely a fit", "نادراً ما يناسب"], ["2 to 20 milestones", "من 2 إلى 20 مرحلة"]],

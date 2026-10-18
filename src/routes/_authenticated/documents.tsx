@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { cap, rolesFor } from "@/lib/roles";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileSearch, FileUp, LoaderCircle, ScrollText, ShieldAlert, X } from "lucide-react";
 import { useRef, useState } from "react";
@@ -98,8 +99,8 @@ function DocumentsPage() {
             description: deal.description,
             amount: deal.amount,
             currency: deal.currency,
-            buyer: "Buyer",
-            seller: "Supplier",
+            buyer: cap(rolesFor((deal as any).deal_type).payer)[0],
+            seller: cap(rolesFor((deal as any).deal_type).payee)[0],
             dueAt: deal.due_at ?? "Not set",
             status: deal.status,
             stages: [],

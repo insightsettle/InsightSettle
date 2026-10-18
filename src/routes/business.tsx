@@ -102,7 +102,7 @@ function BusinessPage() {
     </section>
 
     <section className="border-y border-border bg-secondary"><div className="mx-auto max-w-7xl px-5 py-16 lg:py-20">
-      <SectionHeader title={["Four steps, every one on record", "أربع خطوات، وكل خطوة موثّقة"]} intro={["Your team and the supplier always know what happens next.", "يعرف فريقك والمورد دائماً ما المطلوب الآن."]} />
+      <SectionHeader title={["Four steps, every one on record", "أربع خطوات، وكل خطوة موثّقة"]} intro={["Your team and the other side always know what happens next.", "يعرف فريقك والطرف الآخر دائماً ما المطلوب الآن."]} />
       <StepsFlow />
     </div></section>
 

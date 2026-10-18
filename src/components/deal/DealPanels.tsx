@@ -120,15 +120,15 @@ export function ContractDashboard(props: {
   const [mode, setMode] = useState<"submit" | "revision" | "dispute">("submit");
   const [note, setNote] = useState("");
 
-  const next = (() => {
-    if (deal.status === "pending_funding") return deal.terms_status === "agreed" ? (isBuyer ? "Fund the contract to start work." : "Waiting for the buyer to fund the contract.") : "Both parties must accept the latest terms version.";
+  const next = ((): [string, string] | null => {
+    if (deal.status === "pending_funding") return deal.terms_status === "agreed" ? (isBuyer ? ["Pay the contract to start the work.", "ادفع العقد ليبدأ العمل."] : ["Waiting for the owner to pay the contract.", "بانتظار دفع المالك للعقد."]) : ["Both parties must accept the latest version of the terms.", "يجب أن يوافق الطرفان على آخر نسخة من الشروط."];
     const sub = milestones.find((m) => m.status === "submitted");
-    if (sub) return isBuyer ? `Review milestone ${sub.seq}: approve, ask for a revision, or open a dispute.` : `Waiting for the buyer to review milestone ${sub.seq}.`;
+    if (sub) return isBuyer ? [`Review milestone ${sub.seq}: approve it, ask for a revision, or open a dispute.`, `راجع المرحلة ${sub.seq}: اعتمدها، أو اطلب تعديلاً، أو افتح نزاعاً.`] : [`Waiting for the owner to review milestone ${sub.seq}.`, `بانتظار مراجعة المالك للمرحلة ${sub.seq}.`];
     const work = milestones.find((m) => ["funded", "revision_requested"].includes(m.status));
-    if (work) return isSeller ? `Submit milestone ${work.seq} with evidence when the work is done.` : `The contractor is working on milestone ${work.seq}.`;
+    if (work) return isSeller ? [`Submit milestone ${work.seq} with evidence when the work is done.`, `سلّم المرحلة ${work.seq} مع ما يثبت إنجازها عند انتهاء العمل.`] : [`The contractor is working on milestone ${work.seq}.`, `المقاول يعمل على المرحلة ${work.seq}.`];
     const unfunded = deal.funding_mode === "per_milestone" ? milestones.find((m) => m.status === "pending") : null;
-    if (unfunded) return isBuyer ? `Fund milestone ${unfunded.seq} so the contractor can start it.` : `Waiting for the buyer to fund milestone ${unfunded.seq}.`;
-    if (deal.status === "in_progress" && deal.retention_release_at) return `Retention is held until ${formatDate(deal.retention_release_at)} (defects liability period).`;
+    if (unfunded) return isBuyer ? [`Pay milestone ${unfunded.seq} so the contractor can start it.`, `ادفع المرحلة ${unfunded.seq} ليبدأها المقاول.`] : [`Waiting for the owner to pay milestone ${unfunded.seq}.`, `بانتظار دفع المالك للمرحلة ${unfunded.seq}.`];
+    if (deal.status === "in_progress" && deal.retention_release_at) return [`Retention is held until ${formatDate(deal.retention_release_at)} (defects period).`, `المحتجز محفوظ حتى ${formatDate(deal.retention_release_at)} (فترة ضمان العيوب).`];
     return null;
   })();
 
@@ -138,7 +138,7 @@ export function ContractDashboard(props: {
     <section className="space-y-5">
       <div className="space-y-5">
         <div className="flex items-center gap-2"><HardHat className="size-5 text-primary" /><h2 className="font-bold">{text("Contract dashboard", "لوحة العقد")}</h2></div>
-        {next && <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm"><b>Next action: </b><span>{next}</span></div>}
+        {next && <div data-no-localize className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm"><b>{text("Next step: ", "الخطوة التالية: ")}</b><span>{text(next[0], next[1])}</span></div>}
         <div>
           <div className="flex justify-between text-xs text-muted-foreground"><span>Contract value released</span><span dir="ltr">{pct}%</span></div>
           <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
