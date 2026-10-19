@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { transpileModule, ModuleKind } from "typescript";
+import { transpileModule, ModuleKind, ScriptTarget } from "typescript";
 import { EmailAPIError } from "@lovable.dev/email-js";
 import { CONTACT_RECIPIENT, contactRequestSchema } from "./contact-request";
 
 const send = vi.fn();
 // Execute the real helper outside Vite's server instrumentation, as party-action tests do.
 const source = readFileSync(new URL("./contact-request.server.ts", import.meta.url), "utf8").replace(/^import .*;\r?\n/gm, "");
-const compiled = transpileModule(source, { compilerOptions: { module: ModuleKind.CommonJS } }).outputText;
+const compiled = transpileModule(source, { compilerOptions: { module: ModuleKind.CommonJS, target: ScriptTarget.ES2022 } }).outputText;
 const handlers: Record<string, unknown> = {};
 new Function("exports", "EmailAPIError", "CONTACT_RECIPIENT", "contactRequestSchema", "sendTemplateEmail", compiled)(handlers, EmailAPIError, CONTACT_RECIPIENT, contactRequestSchema, send);
 const deliverContactRequest = handlers.deliverContactRequest as (input: unknown) => Promise<{ status: string }>;
