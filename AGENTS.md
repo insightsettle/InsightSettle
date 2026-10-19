@@ -12,6 +12,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Homepage contact requests use a dedicated validated public server function and a fixed-recipient managed email template; no contact queue or email tables are created, preventing arbitrary-recipient sending.
 - Positive currency inputs share moneyInputStep for minimum and step so native validation uses an aligned minor-unit base.
 - Auction shipping and delivery reuse goods party actions with server-authorized organiser shipping access; buyer acceptance reuses the existing split-release branch, and shared completion controls serve both auction surfaces.
 - Staff business and demo payout verification reuse the existing staff guard and append explicit actor/time audit records; live payout verification cannot substitute a simulated provider check.
