@@ -8,6 +8,7 @@ import { CompareTable, CtaBand, FaqList, IconTile, StepsFlow } from "@/component
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
+import { ContactPopup } from "@/components/site/ContactPopup";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(publicPricingOptions),
@@ -72,7 +73,7 @@ function HomePage() {
     ["Is it for businesses or individuals?", "هل الخدمة للشركات أم للأفراد؟", "Both. A company buying stock from a factory, or a person hiring a designer, use the same steps: agree, pay, deliver, inspect.", "للاثنين. الشركة التي تشتري بضاعة من مصنع، والشخص الذي يتعاقد مع مصمم، يمرّان بالخطوات نفسها: اتفاق، دفع، تسليم، فحص."],
   ];
 
-  return <SiteShell><div data-no-localize>
+  return <SiteShell><ContactPopup /><div data-no-localize>
     {/* Hero */}
     <section className="relative overflow-hidden border-b border-border bg-secondary">
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
