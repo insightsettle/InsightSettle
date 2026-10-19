@@ -33,7 +33,7 @@ describe("contact requests", () => {
   it("never claims success for suppressed or failed requests", async () => {
     send.mockResolvedValue({ sent: false, reason: "recipient_suppressed" });
     await expect(deliverContactRequest(input)).resolves.toEqual({ status: "unavailable" });
-    send.mockRejectedValue(new Error("unavailable"));
+    send.mockImplementation(() => { throw new Error("unavailable"); });
     await expect(deliverContactRequest(input)).resolves.toEqual({ status: "unavailable" });
   });
 });
