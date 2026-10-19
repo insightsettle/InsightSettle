@@ -1,9 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { contactRequestSchema } from "./contact-request";
+import { readFileSync } from "node:fs";
+import { transpileModule, ModuleKind } from "typescript";
+import { EmailAPIError } from "@lovable.dev/email-js";
+import { CONTACT_RECIPIENT, contactRequestSchema } from "./contact-request";
 
-const send = vi.hoisted(() => vi.fn());
-vi.mock("./email-templates/send-email", () => ({ sendTemplateEmail: send }));
-import { deliverContactRequest } from "./contact-request.server";
+const send = vi.fn();
+// Execute the real helper outside Vite's server instrumentation, as party-action tests do.
+const source = readFileSync(new URL("./contact-request.server.ts", import.meta.url), "utf8").replace(/^import .*;\r?\n/gm, "");
+const compiled = transpileModule(source, { compilerOptions: { module: ModuleKind.CommonJS } }).outputText;
+const handlers: Record<string, unknown> = {};
+new Function("exports", "EmailAPIError", "CONTACT_RECIPIENT", "contactRequestSchema", "sendTemplateEmail", compiled)(handlers, EmailAPIError, CONTACT_RECIPIENT, contactRequestSchema, send);
+const deliverContactRequest = handlers.deliverContactRequest as (input: unknown) => Promise<{ status: string }>;
 
 const input = { email: "visitor@example.com", consent: true, website: "", requestId: "2ce624fe-6654-4bc2-9a2e-ecf7a22c114f" };
 beforeEach(() => send.mockReset());
