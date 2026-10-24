@@ -59,6 +59,7 @@ import { Route as ApiPublicAutoReleaseRouteImport } from './routes/api/public/au
 import { Route as ApiV1ActionRouteImport } from './routes/api/v1/$action'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
+import { Route as ConsoleUsersUserIdRouteImport } from './routes/console.users_.$userId'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -315,6 +316,11 @@ const ConsoleDealsDealIdRoute = ConsoleDealsDealIdRouteImport.update({
   path: '/deals/$dealId',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleUsersUserIdRoute = ConsoleUsersUserIdRouteImport.update({
+  id: '/users_/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -381,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -434,6 +441,7 @@ export interface FileRoutesByTo {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/users_/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -546,6 +555,7 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/users/$userId'
     | '/console/deals/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -599,6 +609,7 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/users/$userId'
     | '/console/deals'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -654,6 +665,7 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/users_/$userId'
     | '/console/deals/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1045,6 +1057,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleDealsDealIdRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/users_/$userId': {
+      id: '/console/users_/$userId'
+      path: '/users/$userId'
+      fullPath: '/console/users/$userId'
+      preLoaderRoute: typeof ConsoleUsersUserIdRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -1111,6 +1130,7 @@ interface ConsoleRouteChildren {
   ConsoleUsersRoute: typeof ConsoleUsersRoute
   ConsoleIndexRoute: typeof ConsoleIndexRoute
   ConsoleDealsDealIdRoute: typeof ConsoleDealsDealIdRoute
+  ConsoleUsersUserIdRoute: typeof ConsoleUsersUserIdRoute
   ConsoleDealsIndexRoute: typeof ConsoleDealsIndexRoute
 }
 
@@ -1127,6 +1147,7 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleUsersRoute: ConsoleUsersRoute,
   ConsoleIndexRoute: ConsoleIndexRoute,
   ConsoleDealsDealIdRoute: ConsoleDealsDealIdRoute,
+  ConsoleUsersUserIdRoute: ConsoleUsersUserIdRoute,
   ConsoleDealsIndexRoute: ConsoleDealsIndexRoute,
 }
 
