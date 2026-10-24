@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { SiteNotice } from "@/components/site/SiteNotice";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Search, Settings, LogOut } from "lucide-react";
 import { ConsoleSearch } from "@/components/site/ConsoleSearch";
@@ -57,6 +58,7 @@ export function AppShell({ children, navigation, title, staff = false, mobileNav
       </Sheet>
       <div className="app-column min-w-0 lg:ms-[264px]">
         <div data-no-localize className="flex items-center justify-center gap-2 bg-brand-strong px-4 py-2 text-center text-xs text-white"><span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-brand-mint" />{text("Demo: the payment provider is simulated and no real money moves.", "نسخة تجريبية: مزوّد الدفع محاكى ولا تتحرك أموال حقيقية.")}</div>
+        <SiteNotice />
         <header data-no-localize className="app-topbar flex h-[68px] items-center gap-3 border-b border-border bg-card px-4 lg:px-8">
           <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setOpen(true)} aria-label={text("Open navigation")}><Menu /></Button>
           <p className="min-w-0 truncate text-lg font-bold">{text(title)}</p>

@@ -47,9 +47,11 @@ import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
 import { Route as ConsoleInterestRouteImport } from './routes/console.interest'
 import { Route as ConsoleKycRouteImport } from './routes/console.kyc'
+import { Route as ConsolePlatformRouteImport } from './routes/console.platform'
 import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
 import { Route as ConsoleReportsRouteImport } from './routes/console.reports'
 import { Route as ConsoleRiskRouteImport } from './routes/console.risk'
+import { Route as ConsoleSupportRouteImport } from './routes/console.support'
 import { Route as ConsoleUsersRouteImport } from './routes/console.users'
 import { Route as AuthenticatedAuctionsIdRouteImport } from './routes/_authenticated/auctions_.$id'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
@@ -255,6 +257,11 @@ const ConsoleKycRoute = ConsoleKycRouteImport.update({
   path: '/kyc',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsolePlatformRoute = ConsolePlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleRatesRoute = ConsoleRatesRouteImport.update({
   id: '/rates',
   path: '/rates',
@@ -268,6 +275,11 @@ const ConsoleReportsRoute = ConsoleReportsRouteImport.update({
 const ConsoleRiskRoute = ConsoleRiskRouteImport.update({
   id: '/risk',
   path: '/risk',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleSupportRoute = ConsoleSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => ConsoleRoute,
 } as any)
 const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
@@ -381,9 +393,11 @@ export interface FileRoutesByFullPath {
   '/console/fees': typeof ConsoleFeesRoute
   '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
+  '/console/platform': typeof ConsolePlatformRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
+  '/console/support': typeof ConsoleSupportRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
@@ -436,9 +450,11 @@ export interface FileRoutesByTo {
   '/console/fees': typeof ConsoleFeesRoute
   '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
+  '/console/platform': typeof ConsolePlatformRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
+  '/console/support': typeof ConsoleSupportRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console': typeof ConsoleIndexRoute
   '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
@@ -494,9 +510,11 @@ export interface FileRoutesById {
   '/console/fees': typeof ConsoleFeesRoute
   '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
+  '/console/platform': typeof ConsolePlatformRoute
   '/console/rates': typeof ConsoleRatesRoute
   '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
+  '/console/support': typeof ConsoleSupportRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/_authenticated/auctions_/$id': typeof AuthenticatedAuctionsIdRoute
@@ -552,9 +570,11 @@ export interface FileRouteTypes {
     | '/console/fees'
     | '/console/interest'
     | '/console/kyc'
+    | '/console/platform'
     | '/console/rates'
     | '/console/reports'
     | '/console/risk'
+    | '/console/support'
     | '/console/users'
     | '/console/'
     | '/auctions/$id'
@@ -607,9 +627,11 @@ export interface FileRouteTypes {
     | '/console/fees'
     | '/console/interest'
     | '/console/kyc'
+    | '/console/platform'
     | '/console/rates'
     | '/console/reports'
     | '/console/risk'
+    | '/console/support'
     | '/console/users'
     | '/console'
     | '/auctions/$id'
@@ -664,9 +686,11 @@ export interface FileRouteTypes {
     | '/console/fees'
     | '/console/interest'
     | '/console/kyc'
+    | '/console/platform'
     | '/console/rates'
     | '/console/reports'
     | '/console/risk'
+    | '/console/support'
     | '/console/users'
     | '/console/'
     | '/_authenticated/auctions_/$id'
@@ -985,6 +1009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleKycRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/platform': {
+      id: '/console/platform'
+      path: '/platform'
+      fullPath: '/console/platform'
+      preLoaderRoute: typeof ConsolePlatformRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/console/rates': {
       id: '/console/rates'
       path: '/rates'
@@ -1004,6 +1035,13 @@ declare module '@tanstack/react-router' {
       path: '/risk'
       fullPath: '/console/risk'
       preLoaderRoute: typeof ConsoleRiskRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/console/support': {
+      id: '/console/support'
+      path: '/support'
+      fullPath: '/console/support'
+      preLoaderRoute: typeof ConsoleSupportRouteImport
       parentRoute: typeof ConsoleRoute
     }
     '/console/users': {
@@ -1144,9 +1182,11 @@ interface ConsoleRouteChildren {
   ConsoleFeesRoute: typeof ConsoleFeesRoute
   ConsoleInterestRoute: typeof ConsoleInterestRoute
   ConsoleKycRoute: typeof ConsoleKycRoute
+  ConsolePlatformRoute: typeof ConsolePlatformRoute
   ConsoleRatesRoute: typeof ConsoleRatesRoute
   ConsoleReportsRoute: typeof ConsoleReportsRoute
   ConsoleRiskRoute: typeof ConsoleRiskRoute
+  ConsoleSupportRoute: typeof ConsoleSupportRoute
   ConsoleUsersRoute: typeof ConsoleUsersRoute
   ConsoleIndexRoute: typeof ConsoleIndexRoute
   ConsoleDealsDealIdRoute: typeof ConsoleDealsDealIdRoute
@@ -1162,9 +1202,11 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleFeesRoute: ConsoleFeesRoute,
   ConsoleInterestRoute: ConsoleInterestRoute,
   ConsoleKycRoute: ConsoleKycRoute,
+  ConsolePlatformRoute: ConsolePlatformRoute,
   ConsoleRatesRoute: ConsoleRatesRoute,
   ConsoleReportsRoute: ConsoleReportsRoute,
   ConsoleRiskRoute: ConsoleRiskRoute,
+  ConsoleSupportRoute: ConsoleSupportRoute,
   ConsoleUsersRoute: ConsoleUsersRoute,
   ConsoleIndexRoute: ConsoleIndexRoute,
   ConsoleDealsDealIdRoute: ConsoleDealsDealIdRoute,

@@ -4,6 +4,11 @@ import { sendTemplateEmail } from "./email-templates/send-email";
 
 export async function deliverContactRequest(input: unknown) {
   const data = contactRequestSchema.parse(input);
+  // Keep a copy for the staff support inbox; a storage failure never blocks the email.
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await (supabaseAdmin as any).from("support_requests").upsert({ request_id: data.requestId, email: data.email, source: "contact_popup" }, { onConflict: "request_id", ignoreDuplicates: true });
+  } catch { /* inbox copy is best-effort */ }
   try {
     const result = await sendTemplateEmail("contact-request", CONTACT_RECIPIENT, {
       templateData: { email: data.email },

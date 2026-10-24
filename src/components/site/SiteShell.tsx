@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { SiteNotice } from "@/components/site/SiteNotice";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { Menu, ShieldAlert } from "lucide-react";
 import { BrandLogo } from "@/components/site/BrandLogo";
@@ -201,6 +202,7 @@ export function SiteShell({
   if (["/dashboard", "/disputes", "/documents", "/verification"].includes(pathname) || ["/deals/", "/invoice/", "/invite/"].some((prefix) => pathname.startsWith(prefix))) return <>{children}</>;
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <SiteNotice />
       <SiteHeader />
       <main className={cn("flex-1", className)}>{children}</main>
       <SiteFooter />
