@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] 24 Oct: visitor-initiated contact popup; verify first load, scroll, waiting and manual open/close in EN/AR.
+- [ ] 24 Oct: preview E2E dispute DL-24817 with two-staff 70/30 approval, per-milestone contracting funding, auction decline/backup completion; inspect balances/invoices; reset through console afterwards. Preserve money logic and mobile files.
 - [x] Mobile 18 Oct wording parity: contextual roles, generic copy, receipt/release label, supported OTHER outside-Gulf country option and widget coverage added; business logic/API calls unchanged. Static translation and legacy-label checks pass. No web edits or publication.
 - [ ] Mobile Flutter test/analyze execution: Flutter unavailable locally; existing GitHub Actions runs these checks on push; CI result not yet verified.
 - [x] Delivered Arabic X cover at 1500×500 using official logo, original Thmanyah Sans and platform colours; visually checked unclipped text. Bio (129 characters), separate UTM profile/pinned links and demo-aware pinned post (217 weighted characters) supplied for manual upload; no account posting.
