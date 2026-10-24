@@ -88,8 +88,9 @@ export const createTypedDeal = createServerFn({ method: "POST" })
   .inputValidator((i: z.input<typeof createSchema>) => createSchema.parse(i))
   .handler(async ({ data, context }) => {
     const { admin } = await deps();
-    const { data: me } = await admin.from("profiles").select("account_state").eq("id", context.userId).maybeSingle();
-    if (me && me.account_state !== "active") throw new Error(`Your account is ${me.account_state}, so this action is not available. Contact Insight support.`);
+    const { data: me, error: accountError } = await admin.from("profiles").select("account_state").eq("id", context.userId).maybeSingle();
+    if (accountError) throw accountError;
+    if (!me || me.account_state !== "active") throw new Error("Your account cannot create deals while suspended or restricted. Contact Insight support.");
     const type = data.dealType as DealType;
     const ms = type === "goods" ? [] : data.milestones;
     if (data.fundingMode === "per_milestone" && ms.length === 0) throw new Error("Funding each milestone separately needs a milestone plan.");
