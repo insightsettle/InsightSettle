@@ -328,7 +328,7 @@ export function MilestoneEditor({ rows, onChange, currency, total, allowAdvance 
           )}
         </div>
       ))}
-      <div data-milestone-allocation className="sticky bottom-[calc(5rem+env(safe-area-inset-bottom))] z-10 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border bg-card p-3 text-sm sm:static sm:flex sm:justify-between">
+      <div data-milestone-allocation className="sticky bottom-[calc(6rem+env(safe-area-inset-bottom))] z-10 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border bg-card p-3 text-sm sm:static sm:flex sm:justify-between">
         <span role="status" className={`min-w-0 break-words tabular-nums ${diff === 0 ? "text-primary" : "text-destructive"}`}>
           {text('Unallocated:', 'غير موزّع:')} <bdi>{formatMoney(diff, currency)}</bdi>
         </span>
