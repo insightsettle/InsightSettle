@@ -40,6 +40,7 @@ import { Route as AuthCheckEmailRouteImport } from './routes/auth_.check-email'
 import { Route as AuthConfirmedRouteImport } from './routes/auth_.confirmed'
 import { Route as AuthResetRouteImport } from './routes/auth_.reset'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
+import { Route as ConsoleAuctionSettingsRouteImport } from './routes/console.auction-settings'
 import { Route as ConsoleAuctionsRouteImport } from './routes/console.auctions'
 import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
@@ -219,6 +220,11 @@ const ConsoleIndexRoute = ConsoleIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleAuctionSettingsRoute = ConsoleAuctionSettingsRouteImport.update({
+  id: '/auction-settings',
+  path: '/auction-settings',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleAuctionsRoute = ConsoleAuctionsRouteImport.update({
   id: '/auctions',
   path: '/auctions',
@@ -368,6 +374,7 @@ export interface FileRoutesByFullPath {
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
   '/auth/reset': typeof AuthResetRoute
+  '/console/auction-settings': typeof ConsoleAuctionSettingsRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -422,6 +429,7 @@ export interface FileRoutesByTo {
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
   '/auth/reset': typeof AuthResetRoute
+  '/console/auction-settings': typeof ConsoleAuctionSettingsRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -479,6 +487,7 @@ export interface FileRoutesById {
   '/auth_/check-email': typeof AuthCheckEmailRoute
   '/auth_/confirmed': typeof AuthConfirmedRoute
   '/auth_/reset': typeof AuthResetRoute
+  '/console/auction-settings': typeof ConsoleAuctionSettingsRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -536,6 +545,7 @@ export interface FileRouteTypes {
     | '/auth/check-email'
     | '/auth/confirmed'
     | '/auth/reset'
+    | '/console/auction-settings'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -590,6 +600,7 @@ export interface FileRouteTypes {
     | '/auth/check-email'
     | '/auth/confirmed'
     | '/auth/reset'
+    | '/console/auction-settings'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -646,6 +657,7 @@ export interface FileRouteTypes {
     | '/auth_/check-email'
     | '/auth_/confirmed'
     | '/auth_/reset'
+    | '/console/auction-settings'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -924,6 +936,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleIndexRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/auction-settings': {
+      id: '/console/auction-settings'
+      path: '/auction-settings'
+      fullPath: '/console/auction-settings'
+      preLoaderRoute: typeof ConsoleAuctionSettingsRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/console/auctions': {
       id: '/console/auctions'
       path: '/auctions'
@@ -1118,6 +1137,7 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ConsoleRouteChildren {
+  ConsoleAuctionSettingsRoute: typeof ConsoleAuctionSettingsRoute
   ConsoleAuctionsRoute: typeof ConsoleAuctionsRoute
   ConsoleAuditRoute: typeof ConsoleAuditRoute
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
@@ -1135,6 +1155,7 @@ interface ConsoleRouteChildren {
 }
 
 const ConsoleRouteChildren: ConsoleRouteChildren = {
+  ConsoleAuctionSettingsRoute: ConsoleAuctionSettingsRoute,
   ConsoleAuctionsRoute: ConsoleAuctionsRoute,
   ConsoleAuditRoute: ConsoleAuditRoute,
   ConsoleDisputesRoute: ConsoleDisputesRoute,
