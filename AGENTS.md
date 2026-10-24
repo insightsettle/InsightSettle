@@ -12,6 +12,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Invoice PDF tools are project dependencies dynamically imported only by the download handler, preserving fixed A4 rendering without runtime CDN scripts.
 - Staff operational interventions use service-only audited RPCs after the shared staff guard; legacy controls call the same RPCs so audit and dispute restrictions cannot be bypassed.
 - Auction fee settings feed only new auction quotes through a pure auction adapter; accepted splits change only before funding with new term versions, preserving prior snapshots and consumed quotes.
 - Account state is serialized with deal creation and funding through profile-row locks; funding checks account state, freeze and deadline before consuming a quote, while suspended sign-in and confirmation of previously reserved provider payments remain available.

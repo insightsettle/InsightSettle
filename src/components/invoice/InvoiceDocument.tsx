@@ -128,32 +128,15 @@ export const InvoiceDocument = forwardRef<HTMLDivElement, { inv: FeeInvoice; dea
   },
 );
 
-const CDN = {
-  htmlToImage: "https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js",
-  jspdf: "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
-};
-
-function loadScript(src: string) {
-  return new Promise<void>((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const s = document.createElement("script");
-    s.src = src; s.async = true; s.crossOrigin = "anonymous";
-    s.onload = () => resolve(); s.onerror = () => reject(new Error("PDF tools could not be loaded."));
-    document.head.appendChild(s);
-  });
-}
-
 /** Renders each fixed A4 invoice node to an image and saves one PDF page per invoice. */
 export async function downloadInvoicesPdf(nodes: HTMLElement[], fileName: string) {
-  await Promise.all([loadScript(CDN.htmlToImage), loadScript(CDN.jspdf)]);
-  const w = window as any;
-  const toPng = w.htmlToImage?.toPng as (n: HTMLElement, o: object) => Promise<string>;
-  const JsPDF = w.jspdf?.jsPDF;
-  if (!toPng || !JsPDF) throw new Error("PDF tools could not be loaded.");
+  const { toPng } = await import('html-to-image');
+  const { jsPDF } = await import('jspdf');
   if (document.fonts?.ready) await document.fonts.ready;
-  const pdf = new JsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+  const pdf = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
   for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]!;
+    const node = nodes[i];
+    if (!node) continue;
     await toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: "#ffffff" }); // first pass warms fonts/images (Safari)
     const png = await toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: "#ffffff" });
     if (i > 0) pdf.addPage();

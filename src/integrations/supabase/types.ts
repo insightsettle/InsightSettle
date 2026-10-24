@@ -1421,6 +1421,39 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          auctions_enabled: boolean
+          id: boolean
+          new_deals_enabled: boolean
+          notice_active: boolean
+          notice_ar: string
+          notice_en: string
+          notice_tone: string
+          updated_at: string
+        }
+        Insert: {
+          auctions_enabled?: boolean
+          id?: boolean
+          new_deals_enabled?: boolean
+          notice_active?: boolean
+          notice_ar?: string
+          notice_en?: string
+          notice_tone?: string
+          updated_at?: string
+        }
+        Update: {
+          auctions_enabled?: boolean
+          id?: boolean
+          new_deals_enabled?: boolean
+          notice_active?: boolean
+          notice_ar?: string
+          notice_en?: string
+          notice_tone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_state: string
@@ -1518,6 +1551,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_requests: {
+        Row: {
+          assignee_id: string | null
+          created_at: string
+          email: string
+          id: string
+          request_id: string | null
+          source: string
+          staff_note: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          request_id?: string | null
+          source?: string
+          staff_note?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          request_id?: string | null
+          source?: string
+          staff_note?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tax_invoices: {
         Row: {
@@ -1725,12 +1794,27 @@ export type Database = {
         Args: { _actor: string; _reason: string; _settings: Json }
         Returns: undefined
       }
+      staff_save_platform_settings: {
+        Args: { _actor: string; _reason: string; _settings: Json }
+        Returns: undefined
+      }
       staff_search_email: {
         Args: { _actor: string; _query: string }
         Returns: {
           email: string
           id: string
         }[]
+      }
+      staff_update_support_request: {
+        Args: {
+          _actor: string
+          _assignee: string
+          _id: string
+          _note: string
+          _reason: string
+          _status: string
+        }
+        Returns: undefined
       }
       sweep_auction_deadlines: { Args: never; Returns: Json }
     }
