@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { auctionFee, auctionSettingsSchema, type AuctionFeeSettings } from './auction-fees';
-import { dealFee, PROVISIONAL_SCHEDULE, splitFee } from './fees';
+import { dealFee, BANDED_SCHEDULE_V03 as PROVISIONAL_SCHEDULE, splitFee } from './fees';
 const base: AuctionFeeSettings = { mode:'standard',percent:1,min_usd:2,max_usd:10,fixed_usd:3,default_commission:15,max_commission:30 };
 it('standard auction and non-auction USD 10,000 fees remain 197.50',()=>{
  expect(auctionFee(10000,'USD',1,PROVISIONAL_SCHEDULE,base)).toBe(197.50);

@@ -11,28 +11,29 @@ import {
   crossRate,
   releaseLedger,
   splitFee,
+  BANDED_SCHEDULE_V03 as V03,
 } from "./fees";
 
 describe("marginal USD fee bands", () => {
   it("never drops at the band edges 1,500 / 6,000 / 250,000 USD (table P1, D-48)", () => {
     for (const edge of [1_500, 6_000, 250_000]) {
-      expect(feeUsd(edge + 0.01)).toBeGreaterThanOrEqual(feeUsd(edge));
-      expect(feeUsd(edge)).toBeGreaterThanOrEqual(feeUsd(edge - 0.01));
+      expect(feeUsd(edge + 0.01, V03)).toBeGreaterThanOrEqual(feeUsd(edge, V03));
+      expect(feeUsd(edge, V03)).toBeGreaterThanOrEqual(feeUsd(edge - 0.01, V03));
     }
-    expect(feeUsd(1_500)).toBeCloseTo(45, 6);
-    expect(feeUsd(6_000)).toBeCloseTo(45 + 112.5, 6);
-    expect(feeUsd(10_000)).toBeCloseTo(197.5, 6);
-    expect(feeUsd(250_000)).toBeCloseTo(157.5 + 2_440, 6);
+    expect(feeUsd(1_500, V03)).toBeCloseTo(45, 6);
+    expect(feeUsd(6_000, V03)).toBeCloseTo(45 + 112.5, 6);
+    expect(feeUsd(10_000, V03)).toBeCloseTo(197.5, 6);
+    expect(feeUsd(250_000, V03)).toBeCloseTo(157.5 + 2_440, 6);
   });
   it("applies the 15 USD minimum and 3,500 USD cap", () => {
-    expect(feeUsd(100)).toBe(15);
-    expect(feeUsd(500)).toBe(15);
-    expect(feeUsd(10_000_000)).toBe(3_500);
+    expect(feeUsd(100, V03)).toBe(15);
+    expect(feeUsd(500, V03)).toBe(15);
+    expect(feeUsd(10_000_000, V03)).toBe(3_500);
   });
   it("is monotonic across a wide range", () => {
     let prev = 0;
     for (let a = 0; a <= 600_000; a += 250) {
-      const f = feeUsd(a);
+      const f = feeUsd(a, V03);
       expect(f).toBeGreaterThanOrEqual(prev);
       prev = f;
     }
@@ -42,9 +43,9 @@ describe("marginal USD fee bands", () => {
 describe("fee in the deal currency", () => {
   it("rounds 3-decimal currencies to 3 decimals", () => {
     const usdPerBhd = 9.9734 / 3.75;
-    const fee = dealFee(1_000, "BHD", usdPerBhd);
+    const fee = dealFee(1_000, "BHD", usdPerBhd, V03);
     expect(Math.round(fee * 1000)).toBe(fee * 1000);
-    expect(fee).toBeCloseTo(feeUsd(1_000 * usdPerBhd) / usdPerBhd, 3);
+    expect(fee).toBeCloseTo(feeUsd(1_000 * usdPerBhd, V03) / usdPerBhd, 3);
   });
   it("splits 50/50: buyer pays share + own VAT, supplier gets amount − share − own VAT", () => {
     const b = splitFee({ amount: 1_000, currency: "BHD", fee: 26.297, feePayer: "split", buyerCountry: "SA", supplierCountry: "BH" });
@@ -107,6 +108,16 @@ describe("pay-in currency cross rates (C09-D19)", () => {
     expect(ledgerBalance([...fundingLedger(b, q), ...releaseLedger(b)])).toEqual({ AED: 0, KWD: 0 });
   });
   it("prices the C07 v0.3 vector BHD 1,000.000 → fee BHD 27.820", () => {
-    expect(dealFee(1_000, "BHD", 9.9734 / 3.75)).toBe(27.82);
+    expect(dealFee(1_000, "BHD", 9.9734 / 3.75, V03)).toBe(27.82);
+  });
+});
+
+describe("flat 2.5% schedule (D-64)", () => {
+  it("charges 2.5% with the USD 15 minimum and USD 3,500 cap", async () => {
+    const { feeUsd: f, PROVISIONAL_SCHEDULE: P } = await import("./fees");
+    expect(f(100, P)).toBe(15);
+    expect(f(1_000, P)).toBeCloseTo(25, 6);
+    expect(f(10_000, P)).toBeCloseTo(250, 6);
+    expect(f(200_000, P)).toBe(3_500);
   });
 });

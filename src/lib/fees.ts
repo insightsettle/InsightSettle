@@ -9,8 +9,16 @@ export type FeeBand = { from: number; to: number | null; percent: number };
 export type FeeSchedule = { currency: "USD"; bands: FeeBand[]; minFee: number; maxFee: number | null };
 export type FeePayer = "buyer" | "seller" | "split";
 
-/** Provisional levels until the pricing workstream sets them. Percent as a number, e.g. 3 = 3%. */
+/** One flat Insight rate for every deal (founder decision D-64, 24 Oct 2026), live in fee_rules. Percent as a number, e.g. 2.5 = 2.5%. */
 export const PROVISIONAL_SCHEDULE: FeeSchedule = {
+  currency: "USD",
+  bands: [{ from: 0, to: null, percent: 2.5 }],
+  minFee: 15,
+  maxFee: 3_500,
+};
+
+/** The earlier marginal bands (C07 v0.3, D-48), kept only for history and regression tests. */
+export const BANDED_SCHEDULE_V03: FeeSchedule = {
   currency: "USD",
   bands: [
     { from: 0, to: 1_500, percent: 3 },
