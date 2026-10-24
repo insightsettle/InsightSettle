@@ -100,6 +100,7 @@ describe('T22 auction real confirmation path', () => {
       {amount_from:6000,amount_to:250000,percent:1}, {amount_from:250000,amount_to:null,percent:0.5},
     ].map(r => ({...r,currency:'USD',min_fee:15,max_fee:3500}));
     const tables: Record<string,any[]> = {
+      auction_fee_settings:[{id:true,mode:'standard',percent:0,min_usd:0,max_usd:null,fixed_usd:0,default_commission:15,max_commission:100}],
       deals:[{id:'deal',ref:'DL-T22',deal_type:'auction',auction_lot_id:'lot',amount,currency:'SAR',fee_payer:'split',buyer_id:'winner',seller_id:'owner',status:buyerPercent ? 'disputed' : 'held'}],
       profiles:[{id:'winner',country:'KW'},{id:'owner',country:'SA'}],
       fee_rules:schedule, vat_rates:[{country_code:'KW',rate:0},{country_code:'SA',rate:0.15}],
