@@ -30,7 +30,6 @@ export function PublicPricing() {
   const [error, setError] = useState(false);
   const [dirty, setDirty] = useState(false);
   const b = result.available && !dirty ? result.breakdown : null;
-  const auction = initial.available ? initial.auction : null;
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError(false);
     try { setResult(await calculate({ data: { amount: Number(amount), currency, payer, buyerCountry, supplierCountry } })); setDirty(false); }
@@ -43,7 +42,6 @@ export function PublicPricing() {
   }
   return <div data-no-localize className="grid items-start gap-8 lg:grid-cols-[1fr_440px]">
     <div>
-      {auction && auction.mode!=='standard' && <section className="mb-6 border-y py-4"><h3 className="font-semibold">{text('Active auction fee — per lot','رسم المزاد الحالي — لكل قطعة')}</h3><p className="mt-2 text-sm">{auction.mode==='fixed'?<bdi>{formatMoney(auction.fixed_usd,'USD')}</bdi>:<><bdi>{auction.percent}%</bdi> · {text('Minimum','الحد الأدنى')} <bdi>{formatMoney(auction.min_usd,'USD')}</bdi>{auction.max_usd!=null&&<> · {text('Maximum','الحد الأقصى')} <bdi>{formatMoney(auction.max_usd,'USD')}</bdi></>}</>}</p><p className="mt-2 text-xs text-muted-foreground">{text('The winner pays this fee plus applicable VAT. USD limits are converted at the quote rate. For other deals, use the calculator.','يدفع الفائز هذا الرسم وضريبته المطبّقة. تُحوّل حدود الدولار بسعر عرض الدفع. للصفقات الأخرى استخدم الحاسبة.')}</p></section>}
       <h3 className="text-xl font-semibold">{text("Your fee, before you pay", "رسومك قبل أن تدفع")}</h3>
       <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("Enter the deal amount in the calculator to see the exact fee, each party's share and VAT by country. Fees are provisional and may change before launch.", "أدخل مبلغ الصفقة في الحاسبة لترى الرسوم بالضبط وحصة كل طرف والضريبة حسب الدولة. الرسوم مؤقتة وقد تتغير قبل الإطلاق.")}</p>
       <p className="mt-5 text-sm leading-7 text-muted-foreground">{text("In Bahrain and Saudi Arabia, funds at launch will be held by payment providers licensed by CBB and SAMA respectively. Insight runs the deal rules and keeps the record.", "عند الإطلاق تُحفظ الأموال في البحرين والسعودية لدى مزوّدي دفع مرخّصين من مصرف البحرين المركزي والبنك المركزي السعودي على التوالي. تدير إنسايت قواعد الصفقة وتحفظ سجلها.")}</p>
