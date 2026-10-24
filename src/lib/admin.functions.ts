@@ -218,7 +218,7 @@ export const getDealForStaff = createServerFn({ method: "GET" })
     const { data: row, error } = await admin
       .from("deals")
       .select("*")
-      .eq("ref", data.ref)
+      .eq(z.string().uuid().safeParse(data.ref).success ? "id" : "ref", data.ref)
       .maybeSingle();
     if (error) throw error;
     if (!row) return null;
