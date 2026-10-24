@@ -478,6 +478,7 @@ const translations: Record<string, string> = {
   "Auctions": "المزادات",
   "Account & verification": "الحساب والتحقق",
   "Payments & invoices": "المدفوعات والفواتير",
+  "Documents & invoices": "المستندات والفواتير",
   "Deal type": "نوع الصفقة",
   "Goods": "بضائع",
   "Contracting & fit-out": "مقاولات وتشطيبات",

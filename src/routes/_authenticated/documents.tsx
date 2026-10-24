@@ -138,11 +138,11 @@ function DocumentsPage() {
     <SiteShell>
       <div data-no-localize className="mx-auto max-w-6xl px-4 py-12">
         <p className="text-sm font-semibold text-primary">{text("DEAL MANAGER TOOLS")}</p>
-        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{text("Document review")}</h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">{text("Upload contracts, scopes of work, or invoices. Insight AI extracts the obligations and risks, then compares them with the escrow record so mismatches surface before funding.")}</p>
+        <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{text("Deal documents", "مستندات الصفقة")}</h1>
+        <p className="mt-3 max-w-2xl text-muted-foreground">{text("Upload the deal's documents: contracts, scopes of work, or the seller's invoices. Insight AI extracts the obligations and risks, then compares them with the deal record so mismatches surface before payment.", "ارفع مستندات الصفقة: العقود أو نطاقات العمل أو فواتير البائع. يستخرج ذكاء إنسايت الاصطناعي الالتزامات والمخاطر، ثم يقارنها بسجل الصفقة لإظهار أوجه الاختلاف قبل الدفع.")}</p>
 
         {dealsError && <div role="alert" className="mt-4 text-sm text-destructive">{text("Deals could not be loaded.", "تعذّر تحميل الصفقات.")}<Button variant="outline" onClick={retry}>{text("Try again", "حاول مرة أخرى")}</Button></div>}
-        <section className="mt-6"><h2 className="text-lg font-semibold">{text("Invoices", "الفواتير")}</h2><div className="mt-3 flex flex-wrap gap-3">{deals.map((d) => <Button key={d.id} asChild variant="outline"><Link to="/invoice/$ref" params={{ ref: d.ref }}>{d.ref} — {text("Open printable invoice", "فتح الفاتورة للطباعة")}</Link></Button>)}</div></section>
+        <section className="mt-6 rounded-xl border border-border bg-card p-5"><h2 className="text-lg font-semibold">{text("Insight fee invoices", "فواتير رسوم إنسايت")}</h2><p className="mt-1 text-sm text-muted-foreground">{text("Tax invoices from Insight for the service fee you paid, at your country's VAT rate. These are not deal documents.", "فواتير ضريبية من إنسايت عن رسوم الخدمة التي دفعتها، بنسبة ضريبة دولتك. وهي منفصلة عن مستندات الصفقة.")}</p><div className="mt-3 flex flex-wrap gap-3">{deals.map((d) => <Button key={d.id} asChild variant="outline"><Link to="/invoice/$ref" params={{ ref: d.ref }}>{d.ref} — {text("Fee invoice", "فاتورة الرسوم")}</Link></Button>)}</div></section>
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">
           <Card>
             <CardContent className="space-y-5 p-6">
@@ -182,7 +182,7 @@ function DocumentsPage() {
                   className="mt-2 flex cursor-pointer flex-col items-center rounded-md border border-dashed border-input bg-muted/40 px-4 py-6 text-center"
                 >
                   <FileUp className="size-6 text-primary" />
-                  <span className="mt-2 text-sm font-semibold">{text("Choose contracts or invoices")}</span>
+                  <span className="mt-2 text-sm font-semibold">{text("Choose deal documents (contracts, scopes, seller invoices)", "اختر مستندات الصفقة (عقود، نطاقات عمل، فواتير البائع)")}</span>
                   <span className="mt-1 text-xs text-muted-foreground">{text("PDF, images, or text — up to")}{MAX_FILES}{text("files, 8 MB each")}</span>
                 </label>
                 <input

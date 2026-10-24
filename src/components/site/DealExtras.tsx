@@ -332,7 +332,7 @@ export function InvoiceCard({ deal }: { deal: DealRow }) {
       <CardContent className="p-6">
         <div className="flex items-center gap-2">
           <Receipt className="size-5 text-primary" />
-          <h2 className="font-bold">{inv.data.length > 1 ? text("Tax invoices", "الفواتير الضريبية") : text("Tax invoice", "الفاتورة الضريبية")}</h2>
+          <h2 className="font-bold">{inv.data.length > 1 ? text("Insight fee invoices", "فواتير رسوم إنسايت") : text("Insight fee invoice", "فاتورة رسوم إنسايت")}</h2>
         </div>
         {inv.data.map((i) => (
           <p key={i.invoice_number} className="mt-2 text-sm" dir="ltr">
