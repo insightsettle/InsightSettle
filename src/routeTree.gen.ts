@@ -27,6 +27,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RolesRouteImport } from './routes/roles'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SurveyRouteImport } from './routes/survey'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAuctionsRouteImport } from './routes/_authenticated/auctions'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -53,6 +54,7 @@ import { Route as ConsoleRatesRouteImport } from './routes/console.rates'
 import { Route as ConsoleReportsRouteImport } from './routes/console.reports'
 import { Route as ConsoleRiskRouteImport } from './routes/console.risk'
 import { Route as ConsoleSupportRouteImport } from './routes/console.support'
+import { Route as ConsoleSurveyRouteImport } from './routes/console.survey'
 import { Route as ConsoleUsersRouteImport } from './routes/console.users'
 import { Route as AuthenticatedAuctionsIdRouteImport } from './routes/_authenticated/auctions_.$id'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
@@ -155,6 +157,11 @@ const SecurityRoute = SecurityRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveyRoute = SurveyRouteImport.update({
+  id: '/survey',
+  path: '/survey',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -288,6 +295,11 @@ const ConsoleSupportRoute = ConsoleSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleSurveyRoute = ConsoleSurveyRouteImport.update({
+  id: '/survey',
+  path: '/survey',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -380,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/roles': typeof RolesRoute
   '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
+  '/survey': typeof SurveyRoute
   '/terms': typeof TermsRoute
   '/auctions': typeof AuthenticatedAuctionsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -405,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/support': typeof ConsoleSupportRoute
+  '/console/survey': typeof ConsoleSurveyRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
@@ -438,6 +452,7 @@ export interface FileRoutesByTo {
   '/roles': typeof RolesRoute
   '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
+  '/survey': typeof SurveyRoute
   '/terms': typeof TermsRoute
   '/auctions': typeof AuthenticatedAuctionsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -463,6 +478,7 @@ export interface FileRoutesByTo {
   '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/support': typeof ConsoleSupportRoute
+  '/console/survey': typeof ConsoleSurveyRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console': typeof ConsoleIndexRoute
   '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
@@ -499,6 +515,7 @@ export interface FileRoutesById {
   '/roles': typeof RolesRoute
   '/security': typeof SecurityRoute
   '/services': typeof ServicesRoute
+  '/survey': typeof SurveyRoute
   '/terms': typeof TermsRoute
   '/_authenticated/auctions': typeof AuthenticatedAuctionsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -524,6 +541,7 @@ export interface FileRoutesById {
   '/console/reports': typeof ConsoleReportsRoute
   '/console/risk': typeof ConsoleRiskRoute
   '/console/support': typeof ConsoleSupportRoute
+  '/console/survey': typeof ConsoleSurveyRoute
   '/console/users': typeof ConsoleUsersRoute
   '/console/': typeof ConsoleIndexRoute
   '/_authenticated/auctions_/$id': typeof AuthenticatedAuctionsIdRoute
@@ -560,6 +578,7 @@ export interface FileRouteTypes {
     | '/roles'
     | '/security'
     | '/services'
+    | '/survey'
     | '/terms'
     | '/auctions'
     | '/dashboard'
@@ -585,6 +604,7 @@ export interface FileRouteTypes {
     | '/console/reports'
     | '/console/risk'
     | '/console/support'
+    | '/console/survey'
     | '/console/users'
     | '/console/'
     | '/auctions/$id'
@@ -618,6 +638,7 @@ export interface FileRouteTypes {
     | '/roles'
     | '/security'
     | '/services'
+    | '/survey'
     | '/terms'
     | '/auctions'
     | '/dashboard'
@@ -643,6 +664,7 @@ export interface FileRouteTypes {
     | '/console/reports'
     | '/console/risk'
     | '/console/support'
+    | '/console/survey'
     | '/console/users'
     | '/console'
     | '/auctions/$id'
@@ -678,6 +700,7 @@ export interface FileRouteTypes {
     | '/roles'
     | '/security'
     | '/services'
+    | '/survey'
     | '/terms'
     | '/_authenticated/auctions'
     | '/_authenticated/dashboard'
@@ -703,6 +726,7 @@ export interface FileRouteTypes {
     | '/console/reports'
     | '/console/risk'
     | '/console/support'
+    | '/console/survey'
     | '/console/users'
     | '/console/'
     | '/_authenticated/auctions_/$id'
@@ -739,6 +763,7 @@ export interface RootRouteChildren {
   RolesRoute: typeof RolesRoute
   SecurityRoute: typeof SecurityRoute
   ServicesRoute: typeof ServicesRoute
+  SurveyRoute: typeof SurveyRoute
   TermsRoute: typeof TermsRoute
   ApiDealRiskRoute: typeof ApiDealRiskRoute
   ApiDisputeAnalysisRoute: typeof ApiDisputeAnalysisRoute
@@ -879,6 +904,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/survey': {
+      id: '/survey'
+      path: '/survey'
+      fullPath: '/survey'
+      preLoaderRoute: typeof SurveyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -1063,6 +1095,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleSupportRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/survey': {
+      id: '/console/survey'
+      path: '/survey'
+      fullPath: '/console/survey'
+      preLoaderRoute: typeof ConsoleSurveyRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/console/users': {
       id: '/console/users'
       path: '/users'
@@ -1208,6 +1247,7 @@ interface ConsoleRouteChildren {
   ConsoleReportsRoute: typeof ConsoleReportsRoute
   ConsoleRiskRoute: typeof ConsoleRiskRoute
   ConsoleSupportRoute: typeof ConsoleSupportRoute
+  ConsoleSurveyRoute: typeof ConsoleSurveyRoute
   ConsoleUsersRoute: typeof ConsoleUsersRoute
   ConsoleIndexRoute: typeof ConsoleIndexRoute
   ConsoleDealsDealIdRoute: typeof ConsoleDealsDealIdRoute
@@ -1228,6 +1268,7 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleReportsRoute: ConsoleReportsRoute,
   ConsoleRiskRoute: ConsoleRiskRoute,
   ConsoleSupportRoute: ConsoleSupportRoute,
+  ConsoleSurveyRoute: ConsoleSurveyRoute,
   ConsoleUsersRoute: ConsoleUsersRoute,
   ConsoleIndexRoute: ConsoleIndexRoute,
   ConsoleDealsDealIdRoute: ConsoleDealsDealIdRoute,
@@ -1257,6 +1298,7 @@ const rootRouteChildren: RootRouteChildren = {
   RolesRoute: RolesRoute,
   SecurityRoute: SecurityRoute,
   ServicesRoute: ServicesRoute,
+  SurveyRoute: SurveyRoute,
   TermsRoute: TermsRoute,
   ApiDealRiskRoute: ApiDealRiskRoute,
   ApiDisputeAnalysisRoute: ApiDisputeAnalysisRoute,

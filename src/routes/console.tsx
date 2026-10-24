@@ -69,7 +69,7 @@ function AdminLayout() {
     );
   }
 
-  // MFA wall temporarily disabled at the owner's request; restore by wrapping in <MfaGate>.
+  // Staff sign in with email and password; access is limited by staff level and every action is audited (founder decision, 24 Oct: no two-step verification).
   return (
     <ConsoleShell
       title="Operations, revenue and controls"

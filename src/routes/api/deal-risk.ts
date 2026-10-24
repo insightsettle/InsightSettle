@@ -47,15 +47,9 @@ export const Route = createFileRoute("/api/deal-risk")({
           const { data: userData, error: userError } = await authed.auth.getUser(token);
           if (userError || !userData.user)
             return Response.json({ error: "Sign in required." }, { status: 401 });
-          const { isStaffUser, STAFF_MFA_REQUIRED } = await import("@/lib/staff-auth.server");
+          const { isStaffUser } = await import("@/lib/staff-auth.server");
           const isStaff = await isStaffUser({ supabase: authed, userId: userData.user.id });
-          let aal: string | undefined;
-          try {
-            aal = JSON.parse(atob(token.split(".")[1]!.replace(/-/g, "+").replace(/_/g, "/"))).aal;
-          } catch {
-            aal = undefined;
-          }
-          if (!isStaff || (STAFF_MFA_REQUIRED && aal !== "aal2"))
+          if (!isStaff)
             return Response.json({ error: "Insight staff only." }, { status: 403 });
 
           const parsed = inputSchema.safeParse(await request.json());

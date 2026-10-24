@@ -12,6 +12,7 @@ const groups = [
   ] },
   { label: "Customers", items: [
     { to: "/console/support", label: "Support inbox", exact: false, icon: Inbox },
+    { to: "/console/survey", label: "Market survey", exact: false, icon: ClipboardList },
     { to: "/console/users", label: "Members", exact: false, icon: Users },
     { to: "/console/kyc", label: "Identity documents", exact: false, icon: FileCheck },
     { to: "/console/risk", label: "Risk review", exact: false, icon: ScanSearch },
