@@ -1,4 +1,5 @@
 import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
+import { DEFAULT_METHOD, METHOD_LABEL, PAYMENT_METHODS, type PaymentMethod } from "@/lib/payment-methods";
 import { CalendarClock as CalendarIcon, Check as CheckIcon, Coins as CoinsIcon, Copy as CopyIcon, Eye as EyeIcon } from "lucide-react";
 import { PayoutPlan } from "@/components/deal/PayoutPlan";
 import { planDealPayouts } from "@/lib/payout-planner";
@@ -205,9 +206,10 @@ function OrdinaryDealPage() {
   const shipFn = useServerFn(updateShippingFn);
   const pricingFn = useServerFn(getDealPricing);
   const [payCurrency, setPayCurrency] = useState<(typeof PAY_CURRENCIES)[number] | undefined>(undefined);
+  const [payMethod, setPayMethod] = useState<PaymentMethod>(DEFAULT_METHOD);
   const pricing = useQuery({
-    queryKey: ["deal-pricing", deal?.id, deal?.status, deal?.terms_version, payCurrency],
-    queryFn: () => pricingFn({ data: { dealId: deal?.id ?? "", payCurrency } }),
+    queryKey: ["deal-pricing", deal?.id, deal?.status, deal?.terms_version, payCurrency, payMethod],
+    queryFn: () => pricingFn({ data: { dealId: deal?.id ?? "", payCurrency, method: payMethod } }),
     enabled: !!deal,
   });
   const release = useServerFn(requestFundsRelease);
@@ -572,6 +574,7 @@ function OrdinaryDealPage() {
                           <Info label={text(quote.milestone ? "Milestone amount (provider conversion + provider spread)" : "Deal amount (provider conversion + provider spread)", quote.milestone ? "مبلغ المرحلة (تحويل المزوّد + فارق المزوّد)" : "مبلغ الصفقة (تحويل المزوّد + فارق المزوّد)")} value={money(quoteAmountLine(quote), quote.target_currency)} />
                           <Info label={text("Your fee share", "حصتك من الرسوم")} value={money(quote.fee, quote.target_currency)} />
                           <Info label={quote.breakdown.buyerVatRate === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${Math.round(quote.breakdown.buyerVatRate * 100)}%`} value={money(quote.vat, quote.target_currency)} />
+                          <Info label={text("Payment method", "طريقة الدفع")} value={text(METHOD_LABEL[quote.method][0], METHOD_LABEL[quote.method][1])} />
                           <div className="border-t pt-3"><Info label={text("Total", "الإجمالي")} value={money(quote.total, quote.target_currency)} /></div>
                           <p className="text-xs leading-6 text-muted-foreground">{text("Rate", "السعر")}: <bdi>1 {deal.currency} = {quote.customer_rate} {quote.target_currency}</bdi> ({text("provider rate", "سعر المزوّد")} <bdi>{quote.payIn.providerRate}</bdi>; {text("the difference is kept by the provider", "الفارق يحتفظ به المزوّد")}). {text("Fees and VAT converted at the provider rate; the provider spread is included in the deal amount line.", "تُحوّل الرسوم والضريبة بسعر المزوّد؛ ويُدرج فارق المزوّد في بند مبلغ الصفقة.")}</p>
                           <p className="text-xs text-muted-foreground">{text("Rate locked until", "السعر ثابت حتى")} {new Date(quote.expires_at).toLocaleTimeString(locale === "ar" ? "ar-SA" : "en-GB")}</p>
@@ -585,6 +588,21 @@ function OrdinaryDealPage() {
                                 ? text(`Next: fund milestone ${nextToFund.seq} (${money(Number(nextToFund.amount))}). Lock an exchange rate for 15 minutes before paying.`, `التالي: تمويل المرحلة ${nextToFund.seq} (${money(Number(nextToFund.amount))}). ثبّت سعر الصرف لمدة 15 دقيقة قبل الدفع.`)
                                 : text("Lock an exchange rate for 15 minutes before paying.", "ثبّت سعر الصرف لمدة 15 دقيقة قبل الدفع.")}
                           </span>
+                          <label className="flex items-center gap-2" data-no-localize>
+                            <span className="text-muted-foreground">{text("Pay by", "طريقة الدفع")}</span>
+                            <select
+                              aria-label={text("Payment method", "طريقة الدفع")}
+                              className="h-9 rounded-md border border-input bg-card px-2 text-sm"
+                              value={payMethod}
+                              onChange={(e) => { setQuote(null); setPayMethod(e.target.value as PaymentMethod); }}
+                            >
+                              {PAYMENT_METHODS.map((m) => {
+                                const c = pricing.data?.methods?.find((x) => x.method === m);
+                                return <option key={m} value={m} disabled={c ? !c.allowed : false}>{text(METHOD_LABEL[m][0], METHOD_LABEL[m][1])}{c && !c.allowed ? text(" (not available)", " (غير متاحة)") : ""}</option>;
+                              })}
+                            </select>
+                          </label>
+                          {(() => { const c = pricing.data?.methods?.find((x) => x.method === payMethod); return c && !c.allowed && c.reason ? <span role="status" className="w-full text-xs text-warning">{text(c.reason[0], c.reason[1])}</span> : null; })()}
                           <label className="flex items-center gap-2" data-no-localize>
                             <span className="text-muted-foreground">{text("Pay in", "الدفع بعملة")}</span>
                             <select
@@ -602,7 +620,7 @@ function OrdinaryDealPage() {
                             disabled={!termsAgreed}
                             onClick={async () => {
                               try {
-                                setQuote(await getQuote({ data: { dealId: deal.id, payCurrency: payCurrency ?? (pricing.data?.payIn.payCurrency as (typeof PAY_CURRENCIES)[number] | undefined) } }));
+                                setQuote(await getQuote({ data: { dealId: deal.id, method: payMethod, payCurrency: payCurrency ?? (pricing.data?.payIn.payCurrency as (typeof PAY_CURRENCIES)[number] | undefined) } }));
                               } catch (e) {
                                 setPaymentNotice({
                                   ok: false,

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { FeeBreakdown, LedgerRow, PayInQuote } from "@/lib/fees";
+import { PAYMENT_METHODS, type MethodCheck, type PaymentMethod } from "@/lib/payment-methods";
 
 export type FxQuote = {
   id: string;
@@ -19,6 +20,8 @@ export type FxQuote = {
   payIn: PayInQuote;
   /** Per-milestone funding: the milestone this quote funds (breakdown above is that milestone's share). */
   milestone?: { id: string; seq: number; title: string; amount: number };
+  /** The payment method this quote is for; funding must use it (D-66). */
+  method: PaymentMethod;
 };
 
 type QuoteMilestone = { id: string; seq: number; title: string; amount: number; breakdown: FeeBreakdown };
@@ -29,18 +32,21 @@ export type DealPricingView = {
   ledger: LedgerRow[];
   /** From the buyer's used quote once the deal is funded; otherwise a live preview. */
   locked: boolean;
+  method: PaymentMethod;
+  methods: MethodCheck[];
 };
 
 const QUOTE_MINUTES = 15;
 
 /** Currencies the buyer may pay in (C09-D19). Omitted = the buyer's country currency, else SAR. */
 export const PAY_CURRENCIES = ["SAR", "AED", "BHD", "KWD", "QAR", "OMR", "USD"] as const;
-const quoteInput = z.object({ dealId: z.string().uuid(), payCurrency: z.enum(PAY_CURRENCIES).optional() });
+const quoteInput = z.object({ dealId: z.string().uuid(), payCurrency: z.enum(PAY_CURRENCIES).optional(), method: z.enum(PAYMENT_METHODS).optional() });
+type QuoteInput = { dealId: string; payCurrency?: string | undefined; method?: string | undefined };
 
 /** Locks an exchange rate for 15 minutes. Every deal is funded from a quote (SAR deals at rate 1). */
 export const requestFxQuote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { dealId: string; payCurrency?: string | undefined }) => quoteInput.parse(input))
+  .inputValidator((input: QuoteInput) => quoteInput.parse(input))
   .handler(async ({ data, context }): Promise<FxQuote> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
@@ -51,7 +57,9 @@ export const requestFxQuote = createServerFn({ method: "POST" })
     if (!perMilestone && deal.status !== "pending_funding") throw new Error("This deal is not waiting for funding.");
 
     const { priceDeal } = await import("@/lib/pricing.server");
-    const p = await priceDeal(admin, deal, data.payCurrency);
+    const p = await priceDeal(admin, deal, data.payCurrency, data.method);
+    const check = p.methods.find((m) => m.method === p.method);
+    if (!check?.allowed) throw new Error(check?.reason?.[0] ?? "This payment method is not available for this deal.");
     let milestone: QuoteMilestone | null = null;
     if (perMilestone) {
       // The next milestone is charged its pro-rata share of the whole-deal fee, locked by the first funding,
@@ -108,13 +116,14 @@ export const requestFxQuote = createServerFn({ method: "POST" })
       breakdown: shown,
       payIn: p.payIn,
       ...(milestone ? { milestone: { id: milestone.id, seq: milestone.seq, title: milestone.title, amount: milestone.amount } } : {}),
+      method: p.method,
     };
   });
 
 /** Fee, VAT and ledger view for a party or staff — the same numbers everywhere. */
 export const getDealPricing = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { dealId: string; payCurrency?: string | undefined }) => quoteInput.parse(input))
+  .inputValidator((input: QuoteInput) => quoteInput.parse(input))
   .handler(async ({ data, context }): Promise<DealPricingView> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
@@ -136,8 +145,8 @@ export const getDealPricing = createServerFn({ method: "GET" })
       .maybeSingle();
     if (fund?.fx_quote_id) {
       const { data: q } = await admin.from("fx_quotes").select("breakdown").eq("id", fund.fx_quote_id).maybeSingle();
-      if (q?.breakdown?.breakdown) return { ...q.breakdown, ledger: ledgerPreview(q.breakdown), locked: true };
+      if (q?.breakdown?.breakdown) return { methods: [], method: "mada", ...q.breakdown, ledger: ledgerPreview(q.breakdown), locked: true };
     }
-    const p = await priceDeal(admin, deal, data.payCurrency);
-    return { breakdown: p.breakdown, payIn: p.payIn, ledger: ledgerPreview(p), locked: false };
+    const p = await priceDeal(admin, deal, data.payCurrency, data.method);
+    return { breakdown: p.breakdown, payIn: p.payIn, ledger: ledgerPreview(p), locked: false, method: p.method, methods: p.methods };
   });

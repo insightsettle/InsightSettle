@@ -115,7 +115,7 @@ async function fundNextMilestone(
   const attempt = String((failedAttempts ?? 0) + 1).padStart(3, "0");
   const { data: tx, error } = await admin.from("deal_transactions").insert({
     deal_id: deal.id, kind: "funding", milestone_id: m.id, amount: Number(q.total), fee: Number(q.fee), currency: q.target_currency,
-    status: "processing", provider: provider.id, note: provider.notice, created_by: userId,
+    status: "processing", provider: provider.id, note: `${provider.notice} · Payment method: ${q.breakdown?.method ?? "mada"}`, created_by: userId,
     idempotency_key: `${deal.ref}-M${m.seq}-PAYMENT-${attempt}`, fx_quote_id: q.id,
   }).select().maybeSingle();
   if (error) {
@@ -297,7 +297,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
         currency: quote.target_currency,
         status,
         provider: provider.id,
-        note: provider.notice,
+        note: `${provider.notice} · Payment method: ${quote?.breakdown?.method ?? "mada"}`,
         created_by: context.userId,
         idempotency_key: `${deal.ref}-PAYMENT-${attempt}`,
         fx_quote_id: quote?.id ?? null,
@@ -320,7 +320,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
       deal_id: deal.id,
       actor_id: context.userId,
       title: "Buyer started funding the escrow",
-      note: provider.notice,
+      note: `${provider.notice} · Payment method: ${quote?.breakdown?.method ?? "mada"}`,
     });
     await notify.notifyDealParties(admin, deal.id, {
       title: `Funding started for ${deal.ref}`,

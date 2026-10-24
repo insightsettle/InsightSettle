@@ -1,4 +1,5 @@
 import { auctionFee, auctionSettingsSchema } from "@/lib/auction-fees";
+import { checkMethod, DEFAULT_METHOD, PAYMENT_METHODS, scheduleForMethod, type MethodCheck, type PaymentMethod } from "@/lib/payment-methods";
 import {
   COUNTRY_CURRENCY,
   PROVISIONAL_SCHEDULE,
@@ -61,7 +62,7 @@ export async function loadPricingInputs(admin: any, dealCurrency: string, payCur
     { code: payCurrency, rate: Number(pay.provider_rate), spread: Number(pay.spread) },
   );
   const usdPerUnit = Number(deal.provider_rate) / Number(usd.provider_rate);
-  return { schedule, vatTable, providerRate, customerRate, usdPerUnit, payCurrency };
+  return { schedule, vatTable, providerRate, customerRate, usdPerUnit, sarPerUnit: Number(deal.provider_rate), payCurrency };
 }
 
 async function partyCountries(admin: any, deal: any) {
@@ -74,23 +75,37 @@ async function partyCountries(admin: any, deal: any) {
   };
 }
 
-export type DealPricing = { breakdown: FeeBreakdown; payIn: PayInQuote; usdPerUnit: number; buyerCountry: string; supplierCountry: string };
+export type DealPricing = {
+  breakdown: FeeBreakdown; payIn: PayInQuote; usdPerUnit: number; buyerCountry: string; supplierCountry: string;
+  /** The payment method this price is for (D-66), and which methods can be offered for this deal. */
+  method: PaymentMethod; methods: MethodCheck[];
+};
 
-/** The one place a deal is priced. */
-export async function priceDeal(admin: any, deal: any, payCurrency?: string | null): Promise<DealPricing> {
+/** The one place a deal is priced. The fee depends on the payment method: the cap applies to bank transfer only (D-66). */
+export async function priceDeal(admin: any, deal: any, payCurrency?: string | null, method: PaymentMethod = DEFAULT_METHOD): Promise<DealPricing> {
   const countries = await partyCountries(admin, deal);
   const inputs = await loadPricingInputs(admin, deal.currency, payCurrency || defaultPayCurrency(countries.buyerCountry));
   const auctionSettings = deal.deal_type === 'auction' ? await admin.from('auction_fee_settings').select('*').eq('id',true).single() : null;
   if (auctionSettings?.error) throw auctionSettings.error;
-  const fee = deal.deal_type === 'auction' ? auctionFee(Number(deal.amount),deal.currency,inputs.usdPerUnit,inputs.schedule,auctionSettingsSchema.parse(auctionSettings?.data)) : dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, inputs.schedule, {
+  const auction = deal.deal_type === 'auction' ? auctionSettingsSchema.parse(auctionSettings?.data) : null;
+  const override = {
     percent: deal.fee_override_percent == null ? null : Number(deal.fee_override_percent),
     flat: deal.fee_override_flat == null ? null : Number(deal.fee_override_flat),
-  });
+  };
+  const feeFor = (m: PaymentMethod) => {
+    const schedule = scheduleForMethod(inputs.schedule, m);
+    return auction
+      ? auctionFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, schedule, m === 'bank_transfer' ? auction : { ...auction, max_usd: null })
+      : dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, schedule, override);
+  };
+  const amountSar = Number(deal.amount) * inputs.sarPerUnit;
+  const methods = PAYMENT_METHODS.map((m) => checkMethod(m, amountSar, feeFor(m) * inputs.sarPerUnit));
+  const fee = feeFor(method);
   const breakdown = splitFee({
     amount: Number(deal.amount), currency: deal.currency, fee, feePayer: deal.deal_type === 'auction' ? 'buyer' : deal.fee_payer, ...countries, vatTable: inputs.vatTable,
   });
   const payIn = payInQuote(breakdown, inputs.payCurrency, inputs.providerRate, inputs.customerRate);
-  return { breakdown, payIn, usdPerUnit: inputs.usdPerUnit, ...countries };
+  return { breakdown, payIn, usdPerUnit: inputs.usdPerUnit, ...countries, method, methods };
 }
 
 export function ledgerPreview(p: DealPricing) {
