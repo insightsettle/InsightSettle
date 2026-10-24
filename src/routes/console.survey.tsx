@@ -39,7 +39,7 @@ function SurveyResults() {
           <div className="mt-5 grid gap-3 sm:grid-cols-4">
             {[[text("Responses (n)", "عدد الإجابات (n)"), String(q.data.n)], [text("Want the pilot", "يريدون التجربة"), String(q.data.pilot)],
               [text("First", "الأولى"), fmtDate(q.data.first)], [text("Latest", "الأحدث"), fmtDate(q.data.last)]].map(([k, v]) => (
-              <div key={k} className="rounded-xl border bg-card p-4"><p className="text-xs text-muted-foreground">{k}</p><p className="mt-1 text-xl font-bold">{v}</p></div>
+              <div key={k} className="rounded-xl border bg-card p-4"><p className="text-xs text-muted-foreground">{k}</p><p className="mt-1 text-xl font-bold" dir="ltr">{v}</p></div>
             ))}
           </div>
           {q.data.bySource.length > 0 && <p className="mt-3 text-xs text-muted-foreground">{text("By source: ", "حسب المصدر: ")}{q.data.bySource.map(([s, c]) => `${s} ${c}`).join(" · ")}</p>}
@@ -68,7 +68,7 @@ function SurveyResults() {
           <section className="mt-6 rounded-xl border bg-card p-5">
             <h3 className="font-semibold">{text("Comments", "التعليقات")}</h3>
             {q.data.comments.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{text("No comments yet.", "لا توجد تعليقات بعد.")}</p> : (
-              <ul className="mt-3 space-y-3">{q.data.comments.map((c, i) => <li key={i} className="border-b pb-3 text-sm last:border-0"><p dir="auto" className="leading-7">{c.text}</p><p className="mt-1 text-xs text-muted-foreground">{c.respondent} · {c.country} · {fmtDate(c.at)}</p></li>)}</ul>
+              <ul className="mt-3 space-y-3">{q.data.comments.map((c, i) => <li key={i} className="border-b pb-3 text-sm last:border-0"><p dir="auto" className="leading-7">{c.text}</p><p className="mt-1 text-xs text-muted-foreground">{c.respondent} · {c.country} · <span dir="ltr">{fmtDate(c.at)}</span></p></li>)}</ul>
             )}
           </section>
         </>

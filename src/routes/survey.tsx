@@ -18,7 +18,7 @@ import { submitSurvey } from "@/lib/survey.functions";
 
 export const Route = createFileRoute("/survey")({
   validateSearch: (s: Record<string, unknown>) => z.object({ src: z.string().max(40).optional() }).parse(s),
-  head: () => infoHead("Two-minute survey", "Help us understand how buyers, suppliers and contractors in the Gulf protect their payments today. Anonymous, 8 questions."),
+  head: () => infoHead("Two-minute survey", "Help us understand how buyers, suppliers and contractors in the Gulf protect their payments today. Anonymous, 9 questions."),
   component: SurveyPage,
 });
 
@@ -63,7 +63,7 @@ function SurveyPage() {
       <section className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
         <p className="text-sm font-semibold text-primary">{text("Insight survey", "استبيان إنسايت")}</p>
         <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">{text("How do you protect your payments?", "كيف تحمي مدفوعاتك؟")}</h1>
-        <p className="mt-3 leading-8 text-muted-foreground">{text("Eight short questions, about two minutes. Anonymous: we do not ask for your name. Results are used only as totals.", "ثمانية أسئلة قصيرة، دقيقتان تقريباً. بدون اسم، ونستخدم النتائج كمجاميع فقط.")}</p>
+        <p className="mt-3 leading-8 text-muted-foreground">{text("Nine short questions, about two minutes. Anonymous: we do not ask for your name. Results are used only as totals.", "تسعة أسئلة قصيرة، دقيقتان تقريباً. بدون اسم، ونستخدم النتائج كمجاميع فقط.")}</p>
         <form className="mt-8 space-y-5" onSubmit={(e) => { e.preventDefault(); setTried(true); if (missing.length === 0) m.mutate(); }}>
           {SURVEY_QUESTIONS.map((q, i) => {
             const v = a[q.id]; const bad = tried && missing.includes(q.id);

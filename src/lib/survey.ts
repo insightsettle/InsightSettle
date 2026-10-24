@@ -34,8 +34,8 @@ export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
     ["none", "None of these", "لا شيء مما سبق"],
   ] },
   { id: "deal_size", en: "What is a typical amount for one of these deals?", ar: "ما المبلغ المعتاد لصفقة واحدة من هذا النوع؟", options: [
-    ["lt1k", "Under SAR 1,000", "أقل من 1,000 ريال"], ["1k_5k", "SAR 1,000–5,000", "1,000–5,000 ريال"],
-    ["5k_25k", "SAR 5,000–25,000", "5,000–25,000 ريال"], ["25k_100k", "SAR 25,000–100,000", "25,000–100,000 ريال"],
+    ["lt1k", "Under SAR 1,000", "أقل من 1,000 ريال"], ["1k_5k", "SAR 1,000 to 5,000", "من 1,000 إلى 5,000 ريال"],
+    ["5k_25k", "SAR 5,000 to 25,000", "من 5,000 إلى 25,000 ريال"], ["25k_100k", "SAR 25,000 to 100,000", "من 25,000 إلى 100,000 ريال"],
     ["gt100k", "More than SAR 100,000", "أكثر من 100,000 ريال"],
   ] },
   { id: "current_method", en: "How do you usually protect yourself today?", ar: "كيف تحمي نفسك عادةً اليوم؟", options: [
@@ -50,7 +50,7 @@ export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
     ["yes", "Yes", "نعم"], ["maybe", "Maybe, depends on the fee", "ربما، حسب الرسوم"], ["no", "No", "لا"],
   ] },
   { id: "fee_ok", en: "What fee would be fair for that protection, as a share of the deal?", ar: "كم رسوماً تراها مناسبة لهذه الحماية، كنسبة من قيمة الصفقة؟", options: [
-    ["lt1", "Under 1%", "أقل من 1%"], ["1_2", "1%–2%", "1%–2%"], ["2_3", "2%–3%", "2%–3%"], ["gt3", "More than 3%", "أكثر من 3%"], ["none", "I would not pay a fee", "لن أدفع رسوماً"],
+    ["lt1", "Under 1%", "أقل من 1%"], ["1_2", "1% to 2%", "من 1% إلى 2%"], ["2_3", "2% to 3%", "من 2% إلى 3%"], ["gt3", "More than 3%", "أكثر من 3%"], ["none", "I would not pay a fee", "لن أدفع رسوماً"],
   ] },
   { id: "heard_of", en: "Have you used any of these? (choose all that apply)", ar: "هل استخدمت أياً مما يلي؟ (اختر كل ما ينطبق)", multi: true, options: [
     ["waffy", "Waffy", "وفّي"], ["other_escrow", "Another escrow service", "خدمة ضمان دفع أخرى"],
