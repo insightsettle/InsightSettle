@@ -86,11 +86,11 @@ String? nextStep(Deal d, List<Milestone> ms, String? userId) {
   if (actions.contains(DealAction.acceptTerms)) return 'Review and accept the terms';
   if (d.status == 'pending_funding' && d.termsStatus != 'agreed') return 'Waiting for the other party to accept the terms';
   if (actions.contains(DealAction.fund)) return d.perMilestone ? 'Fund the next milestone' : 'Fund the deal';
-  if (d.status == 'pending_funding') return 'Waiting for the buyer to fund';
+  if (d.status == 'pending_funding') return 'Waiting for the {payer} to fund';
   if (actions.contains(DealAction.confirmDelivery)) return 'Ship and confirm delivery';
-  if (d.status == 'held') return 'Waiting for the supplier to deliver';
-  if (actions.contains(DealAction.release)) return 'Inspect and release the funds';
-  if (d.status == 'delivered' || d.status == 'under_review') return isBuyer ? 'Inspect and release the funds' : 'Buyer is inspecting';
+  if (d.status == 'held') return 'Waiting for the {payee} to deliver';
+  if (actions.contains(DealAction.release)) return 'Inspect and confirm receipt';
+  if (d.status == 'delivered' || d.status == 'under_review') return isBuyer ? 'Inspect and confirm receipt' : '{Payer} is inspecting';
   if (d.status == 'in_progress') {
     for (final m in ms) {
       if (milestoneActions(d, m, userId).any((a) => a != MilestoneAction.openDispute)) {

@@ -123,7 +123,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
       const SizedBox(height: 8),
       Align(alignment: AlignmentDirectional.centerStart, child: StatusBadge(d.status)),
       const SizedBox(height: 6),
-      Text('${dealTypeLabel(d.dealType)} · ${isBuyer ? tr('You are the buyer') : tr('You are the supplier')}',
+      Text('${dealTypeLabel(d.dealType)} · ${partyText(isBuyer ? 'You are the {payer}' : 'You are the {payee}', d.dealType)}',
           style: const TextStyle(color: InsightColors.muted)),
       if (d.description.isNotEmpty) ...[const SizedBox(height: 8), UserText(d.description)],
       gap,
@@ -133,12 +133,12 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
         _banner(tr('This deal is on hold by Insight. Contact Insight support.'), InsightColors.dangerSubtle, InsightColors.danger),
       if (d.status == 'delivered' && d.autoReleaseAt != null)
         _banner(
-          '${tr('Inspection ends')} ${_date(d.autoReleaseAt!)}. ${d.autoReleaseEnabled ? tr('If the buyer takes no action, the funds are released to the supplier.') : tr('Auto-release is off: the buyer must accept manually.')}',
+          '${tr('Inspection ends')} ${_date(d.autoReleaseAt!)}. ${partyText(d.autoReleaseEnabled ? 'If the {payer} takes no action, the funds are released {payeeTo}.' : 'Auto-release is off: the {payer} must accept manually.', d.dealType)}',
           InsightColors.warningSubtle,
           InsightColors.warning,
         ),
       if (nextStep(d, b.milestones, uid) != null) ...[
-        _banner('${tr('Next step')}: ${tr(nextStep(d, b.milestones, uid)!)}', InsightColors.primarySubtle, InsightColors.primary),
+        _banner('${tr('Next step')}: ${partyText(nextStep(d, b.milestones, uid)!, d.dealType)}', InsightColors.primarySubtle, InsightColors.primary),
       ],
       // Amount summary
       SectionCard(title: tr('Amount summary'), icon: Icons.account_balance_wallet_outlined, children: [
@@ -147,7 +147,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
         InfoRow(tr('Deal amount'), formatMoney(d.amount, d.currency), strong: true),
         if (p != null) ...[
           InfoRow(tr('Platform fee'), formatMoney(p.fee, p.currency)),
-          InfoRow(tr('Your fee share'), formatMoney(isBuyer ? p.buyerShare : p.sellerShare, p.currency)),
+          InfoRow(partyText(isBuyer ? '{Payer} fee share' : '{Payee} fee share', d.dealType), formatMoney(isBuyer ? p.buyerShare : p.sellerShare, p.currency)),
           InfoRow(
             (isBuyer ? p.buyerVatRate : p.sellerVatRate) == 0
                 ? tr('No VAT')
@@ -155,7 +155,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
             formatMoney(isBuyer ? p.buyerVat : p.sellerVat, p.currency),
           ),
           if (!d.perMilestone)
-            InfoRow(isBuyer ? tr('Buyer pays') : tr('Supplier receives'),
+            InfoRow(partyText(isBuyer ? '{Payer} pays' : '{Payee} receives', d.dealType),
                 isBuyer ? formatMoney(p.buyerTotal, p.currency) : formatMoney(p.supplierNet, p.currency), strong: true),
           if (d.perMilestone)
             Padding(
@@ -164,7 +164,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
                   style: const TextStyle(fontSize: 12.5, color: InsightColors.muted)),
             ),
         ],
-        InfoRow(tr('Fee paid by'), tr(switch (d.feePayer) { 'seller' => 'Supplier pays the fee', 'split' => 'Split 50/50', _ => 'Buyer pays the fee' }), ltr: false),
+        InfoRow(tr('Fee paid by'), feePayerLabel(d.feePayer, d.dealType), ltr: false),
         InfoRow(tr('Inspection period'), trf('{n} day(s)', {'n': d.inspectionDays}), ltr: false),
         if (d.acceptanceCriteria != null && d.acceptanceCriteria!.isNotEmpty) InfoRow(tr('Acceptance criteria'), d.acceptanceCriteria!, ltr: false),
       ]),
@@ -205,7 +205,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
         if (m != null) InfoRow(tr('Milestone'), '${m['seq']} · ${m['title']} · ${formatMoney((m['amount'] as num?) ?? 0, d.currency)}', ltr: false),
         InfoRow(tr(m != null ? 'Milestone amount (provider conversion + provider spread)' : 'Deal amount (provider conversion + provider spread)'),
             formatMoney(q.escrowConversion + q.fxSpread, q.targetCurrency)),
-        InfoRow(tr('Your fee share'), formatMoney(q.fee, q.targetCurrency)),
+        InfoRow(partyText('{Payer} fee share', d.dealType), formatMoney(q.fee, q.targetCurrency)),
         InfoRow(q.buyerVatRate == 0 ? tr('No VAT') : '${tr('VAT')} ${(q.buyerVatRate * 100).round()}%', formatMoney(q.vat, q.targetCurrency)),
         const Divider(),
         InfoRow(tr('Total'), formatMoney(q.total, q.targetCurrency), strong: true),
@@ -275,7 +275,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
           onPressed: _busy
               ? null
               : () async {
-                  if (await confirm(context, tr('Confirm delivery?'), tr('The buyer\'s inspection period starts now.'))) {
+                  if (await confirm(context, tr('Confirm delivery?'), partyText('The {payer}\'s inspection period starts now.', d.dealType))) {
                     await _run('confirm-delivery', {'dealId': d.id});
                   }
                 },
@@ -296,11 +296,11 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
           onPressed: _busy
               ? null
               : () async {
-                  if (await confirm(context, tr('Release the funds?'), tr('The payment provider pays the supplier. This cannot be undone.'))) {
+                  if (await confirm(context, tr('Release the funds?'), partyText('The payment provider pays the {payee}. This cannot be undone.', d.dealType))) {
                     await _run('release', {'dealId': d.id});
                   }
                 },
-          child: Text(tr('Release the funds')),
+          child: Text(tr('Confirm receipt and release the payment')),
         );
       case DealAction.openDispute:
         return TextButton.icon(
@@ -374,7 +374,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
           onPressed: _busy
               ? null
               : () async {
-                  if (await confirm(context, trf('Approve milestone {n}?', {'n': m.seq}), tr('The milestone amount less retention is released to the supplier.'))) {
+                  if (await confirm(context, trf('Approve milestone {n}?', {'n': m.seq}), partyText('The milestone amount less retention is released {payeeTo}.', d.dealType))) {
                     await _run('approve-milestone', {'dealId': d.id, 'milestoneId': m.id});
                   }
                 },
