@@ -50,7 +50,7 @@ function SurveyPage() {
 
   if (m.isSuccess) return (
     <SiteShell>
-      <section className="mx-auto max-w-2xl px-4 py-20 text-center">
+      <section key="done" data-no-localize className="mx-auto max-w-2xl px-4 py-20 text-center">
         <CheckCircle2 className="mx-auto size-12 text-primary" aria-hidden />
         <h1 className="mt-5 text-3xl font-bold">{text("Thank you", "شكراً لك")}</h1>
         <p className="mt-3 leading-8 text-muted-foreground">{text("Your answers were saved. They help us build a fairer way to pay people you have not dealt with before.", "حُفظت إجاباتك. تساعدنا على بناء طريقة أعدل للدفع لأطراف لم تتعامل معها من قبل.")}</p>
@@ -60,7 +60,7 @@ function SurveyPage() {
 
   return (
     <SiteShell>
-      <section className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+      <section key="form" data-no-localize className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
         <p className="text-sm font-semibold text-primary">{text("Insight survey", "استبيان إنسايت")}</p>
         <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">{text("How do you protect your payments?", "كيف تحمي مدفوعاتك؟")}</h1>
         <p className="mt-3 leading-8 text-muted-foreground">{text("Nine short questions, about two minutes. Anonymous: we do not ask for your name. Results are used only as totals.", "تسعة أسئلة قصيرة، دقيقتان تقريباً. بدون اسم، ونستخدم النتائج كمجاميع فقط.")}</p>
