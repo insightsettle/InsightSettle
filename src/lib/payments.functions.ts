@@ -54,7 +54,7 @@ async function releaseFigures(admin: any, deal: any) {
 async function loadDealForParty(context: { supabase: any; userId: string }, dealId: string) {
   const { data, error } = await context.supabase
     .from("deals")
-    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat, fee_payer, terms_version, deal_type, auction_lot_id, funding_mode")
+    .select("id, ref, amount, currency, status, buyer_id, seller_id, fee_override_percent, fee_override_flat, fee_payer, terms_version, deal_type, auction_lot_id, funding_mode, frozen, payment_deadline_at")
     .eq("id", dealId)
     .maybeSingle();
   if (error) throw error;
@@ -165,6 +165,10 @@ export const startDealFunding = createServerFn({ method: "POST" })
     const { data: profile, error: profileError } = await admin.from('profiles').select('account_state').eq('id', context.userId).maybeSingle();
     if (profileError || !profile || profile.account_state !== 'active')
       return { ok: false, status: 'failed', provider: provider.id, providerLabel: provider.label, message: 'Your account cannot fund deals while suspended or restricted. Contact Insight support.' };
+    if (deal.frozen)
+      return { ok: false, status: 'failed', provider: provider.id, providerLabel: provider.label, message: 'This deal is frozen by Insight. Contact support.' };
+    if (deal.status === 'pending_funding' && deal.payment_deadline_at && Date.parse(deal.payment_deadline_at) <= Date.now())
+      return { ok: false, status: 'failed', provider: provider.id, providerLabel: provider.label, message: 'The payment deadline has ended. Contact Insight support.' };
     // T2: the demo provider can decline a payment on request; never available with a live provider.
     if (data.simulateDecline && (provider.connected || deal.deal_type === "auction"))
       return { ok: false, status: "failed", provider: provider.id, providerLabel: provider.label, message: "A simulated decline is only available in the demo." };
