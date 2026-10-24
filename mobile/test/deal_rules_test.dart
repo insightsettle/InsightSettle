@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:insight_mobile/deal_rules.dart';
 import 'package:insight_mobile/models.dart';
+import 'package:insight_mobile/l10n.dart';
 
 const buyer = 'buyer-1';
 const seller = 'seller-1';
@@ -76,6 +77,19 @@ void main() {
     expect(nextStep(deal({'status': 'released'}), const [], buyer), isNull);
     expect(needsMyAction(deal({'terms_status': 'agreed'}), const [], buyer), isTrue);
     expect(needsMyAction(deal({'terms_status': 'agreed'}), const [], seller), isFalse);
+  });
+
+  test('next steps retain contextual templates without changing actions', () {
+    for (final type in ['goods', 'services', 'freelance', 'contracting', 'auction']) {
+      final pending = deal({'deal_type': type, 'terms_status': 'agreed'});
+      expect(nextStep(pending, const [], seller), 'Waiting for the {payer} to fund');
+      final held = deal({'deal_type': type, 'status': 'held', 'terms_status': 'agreed'});
+      expect(nextStep(held, const [], buyer), 'Waiting for the {payee} to deliver');
+      final delivered = deal({'deal_type': type, 'status': 'delivered', 'terms_status': 'agreed'});
+      expect(nextStep(delivered, const [], buyer), 'Inspect and confirm receipt');
+      expect(nextStep(delivered, const [], seller), '{Payer} is inspecting');
+      expect(partyText(nextStep(delivered, const [], seller) ?? '', type), isNot(contains('{')));
+    }
   });
 
   test('reads the invitation token from a link or a bare code', () {
