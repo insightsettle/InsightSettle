@@ -94,8 +94,7 @@ export const consoleSearch=createServerFn({method:'GET'}).middleware([requireSup
  checked(db.from('deal_transactions').select('deal_id,provider_ref').ilike('provider_ref',`%${q}%`).limit(10)),
  ]);
  const users:StaffSearchResult[]=(profiles??[]).map((p:any)=>({kind:'user',id:p.id,label:p.full_name||p.phone||p.id,detail:p.phone??''}));
- // Email directory is bounded and authorized; auth API does not support a substring filter.
- if(q.includes('@')){for(let page=1;page<=10;page++){const r=await db.auth.admin.listUsers({page,perPage:100});if(r.error)throw r.error;for(const u of r.data.users){if(u.email?.toLowerCase().includes(q.toLowerCase()))users.push({kind:'user',id:u.id,label:u.email,detail:''});}if(r.data.users.length<100)break;}}
+ if(q.includes('@')){const matches=await checked(db.rpc('staff_search_email',{_actor:context.userId,_query:q}));for(const u of matches??[])users.push({kind:'user',id:u.id,label:u.email,detail:''});}
  const related=[...(invoices??[]).map((r:any)=>({id:r.deal_id,label:r.invoice_number})),...(transactions??[]).map((r:any)=>({id:r.deal_id,label:r.provider_ref}))];
  return [...users,...(deals??[]).map((d:any)=>({kind:'deal' as const,id:d.id,label:d.ref,detail:d.title})),...related.map((d:any)=>({kind:'deal' as const,id:d.id,label:d.label,detail:''}))].filter((r,i,a)=>a.findIndex(v=>v.kind===r.kind&&v.id===r.id)===i).slice(0,20);
 });
