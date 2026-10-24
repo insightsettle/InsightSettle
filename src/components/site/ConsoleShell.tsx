@@ -39,8 +39,8 @@ export function ConsoleShell({ children, title, subtitle }: { children: React.Re
   </nav>;
   return <AppShell staff navigation={navigation} title="Staff console">
     <div>
-      <h1 className="text-2xl font-semibold">{text(title)}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{text(subtitle)}</p>
+      <h1 data-no-localize className="text-2xl font-semibold">{text(title, title === 'Operations, revenue and controls' ? 'العمليات والإيرادات والتحكم' : undefined)}</h1>
+      <p data-no-localize className="mt-2 text-sm text-muted-foreground">{text(subtitle, subtitle === 'Staff view of every member, deal, fee, currency rate, and dispute.' ? 'عرض إداري شامل لكل عضو وصفقة ورسم وسعر عملة ونزاع.' : undefined)}</p>
     </div>
     {children}
   </AppShell>;

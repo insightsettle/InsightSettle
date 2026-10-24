@@ -30,6 +30,7 @@ export function PublicPricing() {
   const [error, setError] = useState(false);
   const [dirty, setDirty] = useState(false);
   const b = result.available && !dirty ? result.breakdown : null;
+  const auction = initial.available ? initial.auction : null;
   const schedule = initial.available ? initial.schedule : null;
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError(false);
@@ -43,6 +44,7 @@ export function PublicPricing() {
   }
   return <div data-no-localize className="grid items-start gap-8 lg:grid-cols-[1fr_440px]">
     <div>
+      {auction && auction.mode!=='standard' && <section className="mb-6 border-y py-4"><h3 className="font-semibold">{text('Active auction fee — per lot','رسم المزاد الحالي — لكل قطعة')}</h3><p className="mt-2 text-sm">{auction.mode==='fixed'?<bdi>{formatMoney(auction.fixed_usd,'USD')}</bdi>:<><bdi>{auction.percent}%</bdi> · {text('Minimum','الحد الأدنى')} <bdi>{formatMoney(auction.min_usd,'USD')}</bdi>{auction.max_usd!=null&&<> · {text('Maximum','الحد الأقصى')} <bdi>{formatMoney(auction.max_usd,'USD')}</bdi></>}</>}</p><p className="mt-2 text-xs text-muted-foreground">{text('The winner pays this fee plus applicable VAT. USD limits are converted at the quote rate. Other deals use the bands below.','يدفع الفائز هذا الرسم وضريبته المطبّقة. تُحوّل حدود الدولار بسعر عرض الدفع. تستخدم الصفقات الأخرى الشرائح أدناه.')}</p></section>}
       <h3 className="text-xl font-semibold">{text("Marginal USD fee bands", "شرائح الرسوم بالدولار")}</h3>
       <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("Each rate applies only to the amount within its band. VAT depends on each party's country.", "تُطبّق كل نسبة على المبلغ داخل شريحتها فقط. تعتمد ضريبة القيمة المضافة على بلد كل طرف.")}</p>
       <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card"><table className="w-full text-start text-sm"><thead className="bg-muted text-muted-foreground"><tr><th className="p-4 text-start">{text("Deal value (USD)", "قيمة الصفقة (USD)")}</th><th className="p-4 text-start">{text("Rate", "النسبة")}</th></tr></thead><tbody>{schedule ? schedule.bands.map((band) => <tr key={band.from} className="border-t border-border"><td className="p-4">{band.from === 0 ? text("Up to", "حتى") : band.to === null ? text("Above", "أكثر من") : ""} <bdi className="tabular-nums">{band.from === 0 ? band.to?.toLocaleString("en-GB") : band.to === null ? band.from.toLocaleString("en-GB") : `${band.from.toLocaleString("en-GB")} – ${band.to.toLocaleString("en-GB")}`}</bdi></td><td className="p-4"><bdi>{band.percent}%</bdi></td></tr>) : <tr><td colSpan={2} className="p-6 text-muted-foreground">{text("Live fee bands are currently unavailable for public viewing.", "شرائح الرسوم الحالية غير متاحة للعرض العام حالياً.")}</td></tr>}</tbody></table></div>

@@ -1,0 +1,1 @@
+DO $$ DECLARE def text; BEGIN SELECT pg_get_functiondef('public.staff_operational_update(uuid,uuid,text,text,text)'::regprocedure) INTO def; IF position('tstatus' in def)=0 THEN RAISE EXCEPTION 'Expected deadline column typo missing'; END IF; EXECUTE replace(def,'tstatus','status'); END $$;

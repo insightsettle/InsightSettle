@@ -384,8 +384,8 @@ export const staffAction = createServerFn({ method: "POST" })
 
     if (data.action === "account_state") {
       if (!data.userId || !data.state) throw new Error("Choose a member and a state.");
-      await db.from("profiles").update({ account_state: data.state }).eq("id", data.userId);
-      await log("profiles", data.userId, { account_state: data.state, note: data.note });
+      const { error } = await db.rpc("staff_account_state", { _actor: context.userId, _user: data.userId, _state: data.state, _reason: data.note });
+      if (error) throw error;
       await notify.notifyUsers(db, {
         title: data.state === "active" ? "Your account is active again" : `Your account is ${data.state}`,
         body: data.note,
@@ -410,7 +410,8 @@ export const staffAction = createServerFn({ method: "POST" })
 
     if (data.action === "freeze" || data.action === "unfreeze") {
       const frozen = data.action === "freeze";
-      await db.from("deals").update({ frozen, frozen_reason: frozen ? data.note : null }).eq("id", deal.id);
+      const { error } = await db.rpc("staff_operational_update", { _actor: context.userId, _deal: deal.id, _action: data.action, _value: "", _reason: data.note });
+      if (error) throw error;
       await db.from("deal_events").insert({
         deal_id: deal.id,
         actor_id: context.userId,

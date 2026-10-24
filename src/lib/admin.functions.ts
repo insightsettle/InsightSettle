@@ -218,7 +218,7 @@ export const getDealForStaff = createServerFn({ method: "GET" })
     const { data: row, error } = await admin
       .from("deals")
       .select("*")
-      .eq("ref", data.ref)
+      .eq(z.string().uuid().safeParse(data.ref).success ? "id" : "ref", data.ref)
       .maybeSingle();
     if (error) throw error;
     if (!row) return null;
@@ -264,6 +264,8 @@ export const setDealStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const admin = await assertStaff(context);
+    if (["released", "refunded", "partially_refunded", "cancelled"].includes(data.status))
+      throw new Error("Use the existing release, refund or cancellation review action; the status control cannot move money.");
     const { error } = await admin
       .from("deals")
       .update({

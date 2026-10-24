@@ -134,6 +134,34 @@
       "when": 1792845194594,
       "tag": "0018_staff_control_centre",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792845252781,
+      "tag": "0019_staff_payment_deadline_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792845791219,
+      "tag": "0020_staff_account_and_dispute_safety",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792845812004,
+      "tag": "0021_suspended_deal_creation_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792845931439,
+      "tag": "0022_staff_email_directory_search",
+      "breakpoints": true
     }
   ]
 }
