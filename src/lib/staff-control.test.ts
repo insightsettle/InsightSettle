@@ -47,9 +47,9 @@ const r=await db.query<{value:{dealId:string}}>(`SELECT record_auction_winner('$
 });
 it('edits 85/15 to 80/20 before payment with new terms and exact BHD legs',async()=>{
 await db.exec(`SELECT staff_edit_auction_split('${actor}','${lot}',20,'Demo customer request')`);
-expect((await db.query(`SELECT role,pct,amount FROM deal_payout_splits ORDER BY role`)).rows).toEqual([{role:'organiser',pct:'20.000',amount:'200.100'},{role:'owner',pct:'80.000',amount:'800.400'}]);
+expect((await db.query(`SELECT role,pct,amount FROM deal_payout_splits ORDER BY role`)).rows).toEqual([{role:'organiser',pct:'20',amount:'200.100'},{role:'owner',pct:'80',amount:'800.400'}]);
 const terms=await db.query(`SELECT version,snapshot->>'organiser_pct' pct,accepted_at FROM deal_term_versions ORDER BY version`);
-expect(terms.rows).toEqual([{version:1,pct:'15.000',accepted_at:null},{version:2,pct:'20',accepted_at:null}]);
+expect(terms.rows).toEqual([{version:1,pct:'15',accepted_at:null},{version:2,pct:'20',accepted_at:null}]);
 expect((await db.query(`SELECT terms_version,amount FROM deals`)).rows[0]).toEqual({terms_version:2,amount:'1000.500'});
 expect((await db.query(`SELECT new_value->>'staff_name' name FROM audit_logs`)).rows[0]).toEqual({name:'Demo admin'});
 });
@@ -75,7 +75,7 @@ expect((await db.query(`SELECT email_confirmed_at IS NOT NULL active FROM auth.u
 });
 it('a required audit reason cannot be null',async()=>{
 await expect(db.exec(`SELECT staff_edit_auction_split('${actor}','${lot}',20,NULL)`)).rejects.toThrow(/reason/);
-expect((await db.query(`SELECT organiser_pct FROM auction_lots`)).rows[0]).toEqual({organiser_pct:'15.000'});
+expect((await db.query(`SELECT organiser_pct FROM auction_lots`)).rows[0]).toEqual({organiser_pct:'15'});
 });
 it('unfreeze rejects unresolved dispute without touching held funds',async()=>{
 await db.exec(`INSERT INTO disputes(id,deal_id,status) VALUES(gen_random_uuid(),'${deal}','open')`);
