@@ -1,4 +1,10 @@
 # Roadmap
+- [x] 24 Oct 12:20 batch 1 initial console reset: 6 deals removed, two demo deals/one auction/one lot restored through UI.
+- [ ] Staff batch 1 A: admin auction fee modes/settings, commission limits, audited pre-payment split edits with locked/used quote and funded-deal preservation, public auction pricing, isolated financial/regression tests.
+- [ ] Staff batch 1 B: Customer 360, audited reason-required account interventions and internal notes; suspension permits sign-in but blocks creation/funding; no impersonation.
+- [ ] Staff batch 1 C: audited reason-required deal deadline/freeze/invitation/notification/internal-note interventions; money actions retain four-eyes.
+- [ ] Staff batch 1 D: authorized console search for customer identifiers, deal/invoice/provider references; bilingual phone verification.
+- [ ] Staff batch 1 validation: admin/client/second-reviewer end-to-end tests, unit/build checks and final console demo reset; no publication, mobile unchanged.
 - [x] 24 Oct 12:07 milestone form: labeled bilingual fields, 375px containment, equal allocation (SAR 5,000 → 1,666.66/1,666.66/1,666.68), opt-in retention and advance copy. AR/EN No/Yes creations verified via UI: DL-46830/DL-71742 retention 0%, defects 0 days; DL-63814/DL-22371 retention 5%, defects 90 days. No input/page overflow, amount bar clears phone tabs by 13.5px; 123 tests passed, 10 DB-race tests skipped, automatic build OK. Financial/server/mobile unchanged, empty amounts and removed unit-price hint preserved; no publication.
 - [x] 24 Oct: visitor-initiated contact popup verified closed after 31 seconds and scroll; manual open/close verified EN desktop and AR mobile, design unchanged.
 - [x] 24 Oct: DL-24817 two-staff 70/30 decision completed; BHD 700 refund + 295.410 net payout + 4.173 fee + 0.417 VAT = 1,000; escrow zero and each currency ledger balanced. Temporary reviewer role removed.

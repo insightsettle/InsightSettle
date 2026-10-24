@@ -1,167 +1,42 @@
-# خطة مقترحة: قالب صفقة "مزاد" في Insight (تصميم فقط، بلا تنفيذ)
+# Staff control centre — batch 1
 
-**الفكرة الأساسية:** كل قطعة مباعة (Lot) = صفقة ضمان عادية من نوع جديد `auction` في جدول الصفقات الحالي. المزاد نفسه مجرد "حاوية" تجمع القطع تحت منظّم واحد. هكذا نستخدم المحرك الحالي كما هو: الشروط، التمويل عبر مزوّد الدفع المحاكى، الشحن، مهلة الفحص، الإفراج التلقائي، النزاعات، الدفتر المحاسبي. ولا نبني نظاماً منفصلاً.
+## Completed first
+The demo dataset was reset through the console and refreshed: the four milestone test contracts are gone; the two starting deals, auction and open lot are restored.
 
-```text
-مزاد (حاوية)  ──►  قطعة 1 ──► صفقة auction (مشتري = الفائز، مورد = صاحب القطعة)
-               ──►  قطعة 2 ──► صفقة auction
-               └─►  قائمة المزايدين الاحتياطيين لكل قطعة (الثاني، الثالث)
-```
+## A. Auction settings and pre-payment controls
+- Add admin-only `/console/auction-settings` with standard bands (default), percentage fees with minimum/maximum per lot, and fixed USD fees converted at the existing rates.
+- **Assumption:** percentage-mode minimum and maximum are entered in USD, matching the existing fee schedule. No new supportive rate is invented; standard bands remain active until the founder chooses values.
+- Configure default and maximum organiser commission; enforce the maximum in organiser forms and on the server. Existing paid allocations remain untouched.
+- Add staff-only, reason-required lot split editing before payment. Owner and organiser percentages must total 100.
+- Changes to fee settings affect newly created quotes only. Existing quote amounts, used quotes, invoices and funded deals remain immutable.
+- Show a separate active auction-fee section on public pricing when it differs from standard bands; ordinary calculators retain their empty defaults and ordinary pricing.
 
-Insight لا تدير المزايدة. دورها يبدأ عند "بيع": يسجّل المنظّم الفائز والسعر، فتُنشأ الصفقة ويُرسل للفائز رابط دفع له مهلة.
+## B. Customer 360
+- Add `/console/users/$userId` with profile, KYC status, payout verification, paginated deals/payments/invoices/disputes/notifications and last sign-in.
+- Add reason-required, audited reset-email, verification-email, email/phone correction, suspension/reactivation and staff-only note actions.
+- Suspension does not ban sign-in; enforce creation/funding restrictions server-side, including auction funding.
+- Include a read-only customer summary; never impersonate or sign in as the customer.
+- Email actions distinguish accepted sending requests from confirmed delivery; fictional addresses may reject delivery. Never bypass suppression or confirmation requirements.
 
----
+## C. Deal interventions
+- Extend the existing staff deal page with reason-required payment/delivery/inspection deadline extensions, freeze/unfreeze, invitation resend, pre-join counterparty-email correction, staff-only notes and last-notification resend.
+- Expose existing deadline fields without changing release rules. Payment extensions cannot revive an expired bidder offer or bypass bidder order.
+- Keep release/refund/cancellation-with-refund on a server-enforced two-reviewer decision path. Reuse existing dispute approval where applicable; do not expose a direct status or settlement bypass.
 
-## 1. داشبورد العميل لكل طرف
+## D. Global search
+- Replace the inert console-header search with a bounded, staff-authorized search for email, phone, name, DL reference, invoice number and provider reference.
+- Results navigate to the corresponding customer or staff deal page. Make search accessible on phones as well as desktop.
 
-### أ. المنظّم (التاجر)
+## Technical safeguards
+- Reuse existing staff authorization, generated clients, audit log and notification/email infrastructure. Privileged operations verify permissions before loading the privileged client.
+- Add migrations for auction settings, protected internal notes and narrow atomic interventions; include grants, RLS and actor/reason/before/after audit records.
+- Split editing locks auction → lot → deal, refuses funded or in-flight payments, updates pending payout splits and versioned terms together, and keeps historical quotes unchanged. Quotes for superseded terms cannot fund; a winner must obtain a fresh quote. Do not remove existing transaction/funding locks.
+- Isolate the fee-mode calculation to the auction pricing path, then reuse existing fee-share VAT, FX, invoice and ledger functions. Preserve normal deal fees with concrete regression tests.
+- No Flutter changes, licensing claims, batch-2 inbox/settings/permission redesign or publication.
 
-```text
-+------------------------------------------------------------------+
-| مزاداتي                                         [+ مزاد جديد]    |
-|------------------------------------------------------------------|
-| بث "ساعات فاخرة - الخميس" · إنستقرام · 14 أكتوبر                 |
-| 12 قطعة | بانتظار الدفع 3 | مدفوع 5 | مشحون 2 | نزاع 1 | مُسوّى 1  |
-|------------------------------------------------------------------|
-| القطعة            الفائز      السعر      الحالة        الإجراء     |
-| Rolex Sub (Demo)  @user1     BHD 4,200  بانتظار الدفع 05:42  [تذكير]|
-| Hermès Kelly      @user2     SAR 38,000 مدفوع          [أدخل التتبع]|
-| Cartier Love      @user3     SAR 9,500  نزاع (أصالة)   [عرض]       |
-|------------------------------------------------------------------|
-| [+ إضافة قطعة]  [تسجيل فائز]                                       |
-+------------------------------------------------------------------+
-```
-
-- **إنشاء مزاد:** العنوان، المنصة (إنستقرام/تيك توك)، رابط البث، التاريخ، العملة، مهلة الدفع (مثلاً 24 ساعة)، مهلة الفحص (48–72 ساعة)، عمولة المنظّم بالنسبة.
-- **إضافة قطعة:** الاسم، الصور، الوصف، الحالة، صاحب القطعة (أنا / بائع آخر بدعوة بالبريد)، وثائق الأصالة إن وُجدت.
-- **تسجيل الفائز:** معرّف الفائز على المنصة وبريده، السعر النهائي، ثم مزايد ثانٍ وثالث مع أسعارهم (اختياري).
-- **تبويب "المتأخرون":** فائزون تجاوزوا المهلة، مع زر "انقل للمزايد التالي" وسجل التنقلات.
-- **تبويب "التسويات":** لكل قطعة: السعر، رسوم Insight، عمولتي، صافي صاحب القطعة، الحالة. مع تصدير CSV.
-
-### ب. الفائز (المشتري)
-
-```text
-+--------------------------------------------+
-| مبروك! فزت بـ Hermès Kelly (Demo)           |
-| المنظّم: @lux_auctions                      |
-| السعر: SAR 38,000  + رسوم + ضريبة = ...     |
-|  ⏱ متبقٍ على مهلة الدفع: 05:42:10          |
-| [ادفع الآن]                                 |
-| يحتفظ بالأموال مزوّد دفع مرخّص...           |
-+--------------------------------------------+
-بعد الدفع: خط زمني (مدفوع ← مشحون + رقم التتبع ← مستلم)
-مهلة الفحص: 71:20 متبقية  [أؤكد الاستلام والمطابقة] [فتح نزاع]
-```
-
-- الدخول عبر رابط الدعوة الحالي (يجب أن يملك حساباً، وهي خطوة واحدة).
-- لو انتهت المهلة تظهر: "انتهت مهلة الدفع وانتقلت القطعة لمزايد آخر".
-- النزاع يقدّم أسباباً جاهزة: غير أصلية، لا تطابق الوصف، تالفة، لم تصل.
-
-### ج. صاحب القطعة (إن لم يكن هو المنظّم)
-
-```text
-+--------------------------------------------+
-| قطعتي: Cartier Love (Demo) · مزاد @lux      |
-| الحالة: مشحون · الفحص ينتهي خلال 48 ساعة     |
-| السعر 9,500 − رسوم Insight − عمولة المنظّم  |
-| = مستحقك المتوقع: SAR 8,6xx                  |
-| حساب الصرف: ✓ موثّق (SAR)                    |
-+--------------------------------------------+
-```
-
-يرى صاحب القطعة القراءة فقط والمستحقات. أما الشحن فيحدده من يملك القطعة فعلياً، وهذا قرار مطلوب منك (انظر المخاطر).
-
----
-
-## 2. إعادة تنظيم قائمة العميل
-
-| الحالي | المقترح |
-|---|---|
-| لوحة التحكم | **الرئيسية** (ملخص موحّد: ما يحتاج إجراءً مني الآن) |
-| الصفقات | **الصفقات** (كل صفقاتي، ومنها قطع المزاد التي فزت بها أو أملكها، مع فلتر بالنوع) |
-| — | **المزادات** (تظهر فقط لمن فعّل "أنا منظّم مزادات") |
-| النزاعات | النزاعات (كما هي) |
-| المستندات | **الحساب ← المستندات** |
-| التوثيق | **الحساب ← التوثيق وحساب الصرف** |
-
-**السبب:**
-- المستخدم العادي لا يرى أي شيء جديد سوى فلتر النوع، فلا يزيد التعقيد.
-- الفائز في المزاد مشترٍ عادي، وقطعته صفقة في "الصفقات". لا يحتاج قسماً خاصاً.
-- قسم "المزادات" أداة للمنظّم فقط، ويُفعّل من الملف الشخصي بعد توثيق حساب تجاري.
-- دمج المستندات والتوثيق تحت "الحساب" يقلل القائمة من 5 عناصر إلى 4 (5 عند المنظّم).
-- الرئيسية تتحول إلى قائمة "مطلوب منك": ادفع قبل انتهاء المهلة، أدخل التتبع، أكّد الاستلام.
-
----
-
-## 3. لوحة الإدارة (Console)
-
-| الحالي | المقترح |
-|---|---|
-| Overview | Overview + بطاقات المزادات (قطع بانتظار الدفع، المتأخرون، نزاعات الأصالة) |
-| All deals | All deals + فلتر النوع `auction` وعمود "المزاد" |
-| — | **Auctions** (جديد): المنظّمون، المزادات، القطع |
-| Members | Members + شارة "منظّم" وحالة توثيقه التجاري |
-| Identity documents | كما هو (يشمل السجل التجاري للمنظّم) |
-| Risk review | + قواعد مزادات (فائز تأخر مرات، منظّم نسبة نزاعاته عالية) |
-| Currency rates | كما هو |
-| Fee rules | + قسم "رسوم المزاد": نسبة مع حد أدنى وحد أقصى، وسقف لعمولة المنظّم |
-| Disputes | + نوع "أصالة" وطابور خاص به ومهلة أدلة أقصر |
-| Reports | + تقرير التسويات الموزّعة (Insight / المنظّم / صاحب القطعة) |
-| Staff history | كما هو |
-
-صفحة **Auctions** الجديدة فيها 3 تبويبات:
-1. **المنظّمون:** الاسم، التوثيق، عدد المزادات، نسبة النزاع، تجميد.
-2. **المزادات والقطع:** مراقبة حية لحالة كل قطعة.
-3. **طابور غير الدافعين:** قطع تجاوزت المهلة، المزايد التالي، وزر "نقل" للموظف عند الحاجة. النقل الافتراضي آلي.
-
-هكذا يبقى عنصر واحد جديد في القائمة الجانبية، وكل الباقي امتداد لصفحات موجودة.
-
----
-
-## 4. أثر البيانات
-
-**يُعاد استخدامه كما هو:** الصفقات (كل قطعة = صفقة)، إصدارات الشروط، معاملات الدفع وعروض الصرف، الدفتر المحاسبي، الفواتير الضريبية، النزاعات وأدلتها، الإشعارات، حسابات الصرف، التدقيق، الإفراج التلقائي.
-
-**جديد:**
-- قيمة جديدة `auction` في نوع الصفقة.
-- `auctions`: المنظّم، العنوان، المنصة، رابط البث، العملة، مهلة الدفع، مهلة الفحص، نسبة عمولة المنظّم، الحالة.
-- `auction_lots`: المزاد، الاسم، الوصف، الصور، صاحب القطعة، الحالة، وربط بالصفقة الحالية.
-- `lot_bidders`: القطعة، الترتيب (1، 2، 3)، المعرّف على المنصة، البريد، السعر، الحالة (معروض/دفع/انتهت مهلته/تجاوزناه)، وقت انتهاء المهلة.
-- `deal_payout_splits`: الصفقة، المستفيد (صاحب القطعة/المنظّم)، الحصة بالنسبة أو المبلغ، المبلغ المحسوب، وربط بمعاملة الإفراج.
-- حقول جديدة في الصفقة: `payment_deadline_at` و`auction_lot_id`.
-- رسوم المزاد: صفوف جديدة في قواعد الرسوم بنوع `auction` (نسبة، حد أدنى، حد أقصى).
-
-**المراحل (milestones):** لا أنصح بها هنا. القطعة دفعة واحدة، والتوزيع يتم عند الإفراج بين مستفيدَين، وهذا "تقسيم" وليس "مراحل".
-
----
-
-## 5. المخاطر والتعارضات
-
-1. **الإفراج لمستفيد واحد:** التسوية والدفتر الحاليان يفترضان أن المورد هو المستفيد الوحيد. التوزيع على اثنين يحتاج معاملتي إفراج (أو أكثر) وقيوداً متوازنة لكل منهما. هذا أكبر تغيير، ويمسّ الكود الذي يحمي توافق العرض والفاتورة والدفتر.
-2. **التسعير:** محرك الرسوم الموحد مبني على شرائح USD هامشية. رسوم المزاد (نسبة + سقف) تحتاج مساراً داخل المحرك نفسه، لا حاسبة ثانية. وعمولة المنظّم ليست رسوم Insight: يجب ألا تدخل في ضريبة Insight، ويجب تحديد ضريبتها.
-3. **قبول الشروط:** الآن لا يتم التمويل قبل قبول الطرفين لآخر نسخة من الشروط. في المزاد، الفائز يقبل عند الدفع. نحتاج أن يكون "الدفع = قبول الشروط" صريحاً، دون إضعاف القاعدة لباقي الأنواع.
-4. **مهلة الدفع والمزايد التالي:** يلزم فحص دوري (يمكن ربطه بالمهمة المجدولة الموجودة كل 10 دقائق). خطر السباق: يدفع الفائز الأول في نفس لحظة النقل للثاني، فيتم تمويل القطعة مرتين. الحل: قفل على مستوى القطعة ورفض التمويل بعد انتهاء المهلة.
-5. **حساب الصرف:** القاعدة الحالية تتطلب حساب صرف موثّقاً للمورد بعملة الصفقة. في المزاد يلزم ذلك لصاحب القطعة وللمنظّم كليهما، وإلا تتعطل الصفقة بعد بيعها.
-6. **الإفراج التلقائي:** مهلة 48–72 ساعة أقصر من الحالية (أيام). يجب ألا يبدأ العدّاد إلا بعد "مستلم" حسب شركة الشحن، لا بعد "مشحون"، وإلا قد يتم الإفراج قبل وصول القطعة.
-7. **نزاعات الأصالة:** تحتاج غالباً رأي خبير ومهلة أطول من 72 ساعة، وقد تتطلب إعادة القطعة قبل الاسترداد. وهذا يتطلب تعديل مسار الاسترداد ليربطه بتتبع شحنة الإرجاع.
-8. **الامتثال:** جمع أموال لصالح طرف ثالث (المنظّم) قد يُعتبر "تجميع مدفوعات" يحتاج ترخيصاً لدى البنك المركزي السعودي ومصرف البحرين المركزي. يلزم رأي قانوني قبل الإطلاق. وتبقى صياغة "مزوّد دفع مرخّص يحتفظ بالأموال" سارية.
-9. **دقة المبالغ:** حقل مبلغ الصفقة ما زال بمنزلتين عشريتين، والمزادات بالدينار البحريني والكويتي والعماني تحتاج 3. يُفضّل حلّه أولاً.
-10. **المحتوى العام:** الإعلان عن ميزة المزاد قبل اكتمالها يخالف قاعدة "لا ادعاءات بلا دليل".
-
----
-
-## قرارات مطلوبة منك قبل التنفيذ
-
-- من يشحن عندما يكون صاحب القطعة شخصاً آخر: المنظّم أم صاحب القطعة؟
-- مَن يدفع رسوم Insight: الفائز أم تُخصم من السعر؟
-- هل يحق للمنظّم تجاوز المزايد الثاني والبيع لغيره؟
-- مهلة الدفع الافتراضية (12 أم 24 ساعة)، وعدد المزايدين الاحتياطيين (2 أم 3).
-
-## ترتيب تنفيذ مقترح (بعد الموافقة)
-
-1. توسيع دقة المبلغ إلى 3 منازل عشرية.
-2. الجداول ونوع `auction` وقواعد الحماية.
-3. التوزيع متعدد المستفيدين في التسوية والدفتر، مع اختبارات التوازن.
-4. شاشات المنظّم والفائز وصاحب القطعة.
-5. Console: صفحة Auctions والامتدادات.
-6. صفقة تجريبية كاملة، ببيانات وهمية، من البيع إلى التوزيع.
+## Validation and cleanup
+- Unit tests: each fee mode, USD bounds/caps, currency rounding, unchanged VAT, ordinary fee regression, commission restrictions, suspension and intervention authorization/reasons.
+- Database tests: pre-payment edits, funded/used-quote immutability, stale-term refusal, concurrent edit/funding protections and staff-only notes.
+- Preview checks with admin, client and a second reviewer: customer actions, search, deal interventions and auction quote-to-payment behavior; Arabic/English at 375px and desktop.
+- Verify tests and automatic build, restore settings/account changes made by tests, remove temporary reviewer privileges if needed, then reset demo data through the console.
+- Final report: feature — result — notes, with delivery or fixture limitations stated explicitly.
