@@ -15,7 +15,7 @@ it('percentage enforces USD minimum and cap',()=>{
 });
 it('fixed USD fee converts and rounds SAR to two decimals',()=>expect(auctionFee(48000,'SAR',1/3.75,PROVISIONAL_SCHEDULE,{...base,mode:'fixed',fixed_usd:1.01})).toBe(3.79));
 it('fixed USD fee rounds BHD to three decimals',()=>expect(auctionFee(1000,'BHD',1/0.376,PROVISIONAL_SCHEDULE,{...base,mode:'fixed',fixed_usd:1.01})).toBe(0.380));
-it('percentage rounds KWD to three decimals',()=>expect(auctionFee(1000.5,'KWD',3.25,PROVISIONAL_SCHEDULE,{...base,mode:'percentage',max_usd:null,percent:0.123})).toBe(2));
+it('percentage rounds KWD to three decimals',()=>expect(auctionFee(1000.5,'KWD',3.25,PROVISIONAL_SCHEDULE,{...base,mode:'percentage',max_usd:null,percent:0.123})).toBe(1.231));
 it('VAT is applied only to winner fee, unchanged',()=>{
  const fee=auctionFee(48000,'SAR',1/3.75,PROVISIONAL_SCHEDULE,{...base,mode:'fixed',fixed_usd:4});
  const b=splitFee({amount:48000,currency:'SAR',fee,feePayer:'buyer',buyerCountry:'SA',supplierCountry:'SA'});
