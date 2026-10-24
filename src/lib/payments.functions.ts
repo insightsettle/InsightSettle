@@ -161,6 +161,10 @@ export const startDealFunding = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<PaymentResult> => {
     const deal = await loadDealForParty(context, data.dealId);
     const { admin, provider, notify } = await serverDeps();
+    // Account support restrictions must reject before consuming a funding quote.
+    const { data: profile, error: profileError } = await admin.from('profiles').select('account_state').eq('id', context.userId).maybeSingle();
+    if (profileError || !profile || profile.account_state !== 'active')
+      return { ok: false, status: 'failed', provider: provider.id, providerLabel: provider.label, message: 'Your account cannot fund deals while suspended or restricted. Contact Insight support.' };
     // T2: the demo provider can decline a payment on request; never available with a live provider.
     if (data.simulateDecline && (provider.connected || deal.deal_type === "auction"))
       return { ok: false, status: "failed", provider: provider.id, providerLabel: provider.label, message: "A simulated decline is only available in the demo." };

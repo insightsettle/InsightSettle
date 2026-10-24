@@ -53,7 +53,7 @@ export const customerIntervention=createServerFn({method:'POST'}).middleware([re
   return {ok:true,message:'Email updated'};
  }
  if(data.action==='phone'){
-  const phone=z.string().regex(/^\+?[0-9 ()-]{7,30}$/).parse(data.value);const p=await checked(db.from('profiles').select('phone').eq('id',data.userId).single());
+  const phone=data.value ? z.string().regex(/^\+?[0-9 ()-]{7,30}$/).parse(data.value) : null;const p=await checked(db.from('profiles').select('phone').eq('id',data.userId).single());
   await audit(db,context.userId,'PHONE_CHANGE_REQUEST','profiles',data.userId,{phone:p.phone},{phone},data.reason);
   await checked(db.from('profiles').update({phone}).eq('id',data.userId));await audit(db,context.userId,'PHONE_CHANGED','profiles',data.userId,{phone:p.phone},{phone},data.reason);return {ok:true,message:'Phone updated'};
  }
