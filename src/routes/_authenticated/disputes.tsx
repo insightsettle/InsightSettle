@@ -22,12 +22,12 @@ export const Route = createFileRoute("/_authenticated/disputes")({
       {
         name: "description",
         content:
-          "Describe an escrow dispute, attach evidence, and receive neutral AI-assisted next steps.",
+          "Describe an escrow dispute, attach evidence, and see the next steps.",
       },
       { property: "og:title", content: "Insight AI Dispute Center" },
       {
         property: "og:description",
-        content: "Structured dispute intake and neutral AI-assisted resolution guidance.",
+        content: "Structured dispute intake and a documented review by the Insight team.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

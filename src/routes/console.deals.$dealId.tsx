@@ -44,7 +44,8 @@ export const Route = createFileRoute("/console/deals/$dealId")({
   component: StaffDealPage,
 });
 
-const statusOptions = Object.keys(statusLabels) as DealStatus[];
+// IC-2: the status control never moves money. Only review / dispute flags, plus cancellation (routed to the reviewed cancel action).
+const statusOptions = (["under_review", "disputed", "cancelled"] as DealStatus[]).filter((s) => s in statusLabels);
 
 function StaffDealPage() {
   const { dealId } = Route.useParams();
@@ -204,7 +205,7 @@ function StaffDealPage() {
             <CardContent className="p-6">
               <h3 className="font-bold">{text("Change deal status", "تغيير حالة الصفقة")}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                The reason is written into the deal log and is visible to both parties.
+                {text("Flags a deal for review or dispute. Money only moves through the provider or a recorded dispute decision. The reason is written into the deal log and is visible to both parties.", "يضع الصفقة قيد المراجعة أو النزاع. لا تتحرك الأموال إلا عبر مزوّد الدفع أو قرار نزاع مسجّل. يُكتب السبب في سجل الصفقة ويراه الطرفان.")}
               </p>
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {statusOptions.map((s) => (

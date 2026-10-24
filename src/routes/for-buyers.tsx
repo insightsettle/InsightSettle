@@ -8,7 +8,7 @@ export const Route = createFileRoute("/for-buyers")({
     <InfoPage
       eyebrow="For buyers"
       title="Pay only for what actually arrives"
-      intro="Your payment is secured with a licensed provider and released to the supplier only when you accept the delivery or the inspection period ends without a dispute."
+      intro="At launch, your payment will be held by a licensed payment provider, never by Insight, and paid to the supplier only when you accept the delivery or the inspection period ends without a dispute. In this demo the provider is simulated."
       sections={[
         { h: "Agree the terms first", p: "Product, quantity, price, delivery date, inspection period, refund and cancellation conditions — every change is saved as a new version." },
         { h: "Locked exchange rate", p: "Buying from Bahrain, the UAE or abroad? Get a rate quote locked for 15 minutes and pay in riyals with the total shown up front." },

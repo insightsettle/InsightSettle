@@ -129,7 +129,7 @@ async function fundNextMilestone(
     const staff = await notify.staffUserIds(admin);
     await notify.notifyUsers(admin, { dealId: deal.id, title: `Milestone funding started — ${deal.ref}`, body: `The buyer started funding milestone ${m.seq}. The payment provider will confirm it.`, kind: "payment", recipients: staff });
     return { ok: true, status: "processing", provider: provider.id, providerLabel: provider.label, transactionId: tx?.id,
-      message: "Payment submitted to the licensed payment provider, which holds the funds. Insight records the confirmation." };
+      message: "Payment submitted to the payment provider (simulated in this demo). Insight records the provider's confirmation." };
   }
   const { settleTransactionCore, simulateProviderConfirm } = await import("@/lib/settlement.server");
   if (data.simulateDecline && tx?.id) {
@@ -365,7 +365,7 @@ export const startDealFunding = createServerFn({ method: "POST" })
       providerLabel: provider.label,
       transactionId: tx?.id,
       message: provider.connected
-        ? "Payment submitted to the licensed payment provider, which holds the funds. Insight records the confirmation."
+        ? "Payment submitted to the payment provider (simulated in this demo). Insight records the provider's confirmation."
         : "Payment confirmed by the payment provider (simulated). In this demo no real money moves.",
     };
   });

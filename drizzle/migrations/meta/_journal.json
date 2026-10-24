@@ -169,6 +169,13 @@
       "when": 1792850000000,
       "tag": "0023_platform_settings_support_inbox",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792860000000,
+      "tag": "0024_no_admin_deal_bypass",
+      "breakpoints": true
     }
   ]
 }

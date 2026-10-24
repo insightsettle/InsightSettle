@@ -110,7 +110,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
 
       <section className="relative px-6 pt-6 sm:hidden print:hidden">
         <div className="rounded-xl border border-border p-4 text-sm">
-          <Bi ar={<strong>{`رسوم خدمة إنسايت لإدارة الصفقة وحفظ مبلغها — ${view.deal.ref}`}</strong>} en={`Insight service fee for managing and holding the deal — ${view.deal.ref}`} />
+          <Bi ar={<strong>{`رسوم خدمة إنسايت لإدارة الصفقة — ${view.deal.ref}`}</strong>} en={`Insight deal management service fee — ${view.deal.ref}`} />
           <div className="mt-3">
             <Row ar="الكمية" en="Qty" value="1" />
             <Row ar="المبلغ الخاضع" en="Taxable amount" value={formatMoney(inv.fee, inv.currency)} />
@@ -135,7 +135,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
             </thead>
             <tbody>
               <tr className="border-t border-border align-top">
-                <td className="p-3"><Bi ar={`رسوم خدمة إنسايت لإدارة الصفقة وحفظ مبلغها — ${view.deal.ref}`} en={`Insight service fee for managing and holding the deal — ${view.deal.ref}`} /></td>
+                <td className="p-3"><Bi ar={`رسوم خدمة إنسايت لإدارة الصفقة — ${view.deal.ref}`} en={`Insight deal management service fee — ${view.deal.ref}`} /></td>
                 <td className="p-3 text-center tabular-nums">1</td>
                 <td className="p-3 text-end tabular-nums"><bdi dir="ltr">{formatMoney(inv.fee, inv.currency)}</bdi></td>
                 <td className="p-3 text-end tabular-nums"><bdi dir="ltr">{rate}</bdi></td>

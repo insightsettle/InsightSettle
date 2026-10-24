@@ -270,8 +270,9 @@ export const setDealStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const admin = await assertStaff(context, "finance");
-    if (["released", "refunded", "partially_refunded", "cancelled"].includes(data.status))
-      throw new Error("Use the existing release, refund or cancellation review action; the status control cannot move money.");
+    // IC-2 / K-8: a staff status change may only flag a deal; every money status comes from the provider or a dispute decision.
+    if (!["under_review", "disputed"].includes(data.status))
+      throw new Error("The status control cannot move money. Use the dispute decision, cancellation review or provider confirmation.");
     const { error } = await admin
       .from("deals")
       .update({

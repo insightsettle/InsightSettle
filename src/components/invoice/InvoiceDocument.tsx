@@ -94,7 +94,7 @@ export const InvoiceDocument = forwardRef<HTMLDivElement, { inv: FeeInvoice; dea
             </thead>
             <tbody>
               <tr>
-                <td style={{ ...cell, width: "38%" }}><Pair ar={`رسوم خدمة إنسايت لإدارة الصفقة وحفظ مبلغها — ${dealRef}`} en={`Insight service fee for managing and holding the deal — ${dealRef}`} size={11.5} /></td>
+                <td style={{ ...cell, width: "38%" }}><Pair ar={`رسوم خدمة إنسايت لإدارة الصفقة — ${dealRef}`} en={`Insight deal management service fee — ${dealRef}`} size={11.5} /></td>
                 <td style={{ ...cell, textAlign: "center" }}>1</td>
                 <td style={{ ...cell, textAlign: "left" }}><bdi dir="ltr">{money(inv.fee)}</bdi></td>
                 <td style={{ ...cell, textAlign: "left" }}><bdi dir="ltr">{rate}</bdi></td>

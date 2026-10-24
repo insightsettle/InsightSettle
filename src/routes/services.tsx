@@ -44,7 +44,7 @@ const services = [
     icon: Scale,
     t: "Dispute mediation",
     d: "Structured evidence review and a recorded decision under platform policy.",
-    points: ["AI-assisted triage", "Response period", "Documented outcome"],
+    points: ["Structured evidence intake", "Response period", "Documented outcome"],
   },
   {
     icon: ArrowRightLeft,
