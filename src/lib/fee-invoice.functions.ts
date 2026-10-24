@@ -54,3 +54,32 @@ export const getFeeInvoices = createServerFn({ method: "GET" }).middleware([requ
       viewer,
     };
   });
+
+export type MyFeeInvoice = { ref: string; title: string; number: string; issuedAt: string; currency: string; total: number; vatRate: number; kind: FeeInvoice["kind"] };
+
+/** Every Insight fee invoice addressed to the signed-in customer, newest first. */
+export const listMyFeeInvoices = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<MyFeeInvoice[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+    const uid = context.userId;
+    const { data: deals, error } = await admin.from("deals").select("id,ref,title,buyer_id,seller_id").or(`buyer_id.eq.${uid},seller_id.eq.${uid}`).limit(500);
+    if (error) throw error;
+    if (!deals?.length) return [];
+    const ids = deals.map((d: any) => d.id);
+    const [rows, profiles, businesses] = await Promise.all([
+      admin.from("tax_invoices").select("deal_id,invoice_number,fee,vat_rate,vat,total,currency,issued_at,milestone_id,lines").in("deal_id", ids),
+      admin.from("profiles").select("id,account_type").eq("id", uid),
+      admin.from("business_profiles").select("user_id,legal_name,tax_number").eq("user_id", uid),
+    ]);
+    for (const r of [rows, profiles, businesses]) if (r.error) throw r.error;
+    const b = (businesses.data ?? [])[0];
+    const me: BillTo = { name: "", country: null, taxNumber: b?.tax_number || null, registrationNumber: null, isBusiness: !!b?.legal_name };
+    const out: MyFeeInvoice[] = [];
+    for (const d of deals) {
+      const side = d.buyer_id === uid ? "buyer" : "supplier";
+      const mine = splitFeeInvoices((rows.data ?? []).filter((r: any) => r.deal_id === d.id) as StoredInvoice[], { buyer: me, supplier: me }).filter((i) => i.party === side);
+      for (const i of mine) out.push({ ref: d.ref, title: d.title, number: i.number, issuedAt: i.issuedAt, currency: i.currency, total: i.total, vatRate: i.vatRate, kind: i.kind });
+    }
+    return out.sort((a, z) => z.issuedAt.localeCompare(a.issuedAt));
+  });

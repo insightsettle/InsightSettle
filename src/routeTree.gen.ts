@@ -32,6 +32,7 @@ import { Route as AuthenticatedAuctionsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
+import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
@@ -179,6 +180,11 @@ const AuthenticatedDisputesRoute = AuthenticatedDisputesRouteImport.update({
 const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedVerificationRoute =
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -436,6 +443,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -496,6 +504,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
+  '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -556,6 +565,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disputes'
     | '/documents'
+    | '/invoices'
     | '/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
@@ -613,6 +623,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/disputes'
     | '/documents'
+    | '/invoices'
     | '/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
@@ -672,6 +683,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/disputes'
     | '/_authenticated/documents'
+    | '/_authenticated/invoices'
     | '/_authenticated/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
@@ -902,6 +914,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invoices': {
+      id: '/_authenticated/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof AuthenticatedInvoicesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/verification': {
@@ -1150,6 +1169,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
+  AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
   AuthenticatedAuctionsIdRoute: typeof AuthenticatedAuctionsIdRoute
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
@@ -1163,6 +1183,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
+  AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
   AuthenticatedAuctionsIdRoute: AuthenticatedAuctionsIdRoute,
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,

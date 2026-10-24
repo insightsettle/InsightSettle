@@ -87,12 +87,12 @@ export function AccountSummary({ name, email }: { name: string; email: string })
       </div>
       <ul className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card">
         {steps.map((s) => (
-          <li key={s.key}><a href={`#${s.anchor}`} className="flex items-center gap-4 p-4 transition-colors hover:bg-secondary">
+          <li key={s.key}><Link to="/verification" hash={s.anchor} hashScrollIntoView={false} className="flex items-center gap-4 p-4 transition-colors hover:bg-secondary">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-primary"><s.icon className="size-5" /></span>
             <span className="min-w-0 flex-1"><span className="block font-medium">{text(s.title[0], s.title[1])}</span><span className="block text-xs leading-5 text-muted-foreground">{text(s.hint[0], s.hint[1])}</span></span>
             <StateDot state={s.state} />
             <Chevron className="size-4 shrink-0 text-muted-foreground" />
-          </a></li>
+          </Link></li>
         ))}
       </ul>
     </div>

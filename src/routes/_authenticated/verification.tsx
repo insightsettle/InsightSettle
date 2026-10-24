@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { BadgeCheck, FileUp, ShieldCheck, Trash2 } from "lucide-react";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
+import { ArrowLeft, ArrowRight, BadgeCheck, FileUp, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { AccountSummary } from "@/components/site/AccountProgress";
@@ -53,7 +53,9 @@ function VerificationPage() {
   const queryClient = useQueryClient();
   const { user } = useSessionUser();
   const { isStaff, loading: staffLoading } = useStaffAccess();
-  const { text } = useLocale();
+  const { text, direction } = useLocale();
+  const hash = useRouterState({ select: (st) => st.location.hash });
+  const section = hash === "details" || hash === "identity" || hash === "payout" ? hash : null;
   const auctionPreference = useQuery({ queryKey: ['auction-access'], queryFn: auctionAccess });
   const preferenceMutation = useMutation({
     mutationFn: async (enabled: boolean) => { if (!user) return; const { error } = await supabase.from('profiles').update({ organises_auctions: enabled }).eq('id', user.id); if (error) throw error; },
@@ -107,8 +109,19 @@ function VerificationPage() {
   return (
     <SiteShell>
       <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
-        <AccountSummary name={(user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email?.split("@")[0] ?? ""} email={user?.email ?? ""} />
-        <h1 id="identity" className="mt-10 scroll-mt-24 text-3xl font-extrabold" data-no-localize>{text("Identity verification", "توثيق الهوية")}</h1>
+        {!section && <>
+          <AccountSummary name={(user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email?.split("@")[0] ?? ""} email={user?.email ?? ""} />
+        <Card className="mt-4" data-no-localize><CardContent className="flex items-start justify-between gap-4 p-6"><div><Label htmlFor="organises-auctions">{text('I organise auctions', 'أنا أنظّم مزادات')}</Label><p className="mt-2 text-xs leading-6 text-muted-foreground">{text('Auction organisers must be verified business accounts.', 'يجب أن يكون منظّم المزاد حساب أعمال موثّقًا.')}</p>{preferenceMutation.error && <p role="alert" className="mt-2 text-xs text-destructive">{text('Unable to update this preference.', 'تعذّر تحديث هذا الخيار.')}</p>}</div><Switch id="organises-auctions" checked={auctionPreference.data?.enabled ?? false} disabled={preferenceMutation.isPending || (!auctionPreference.data?.eligible && !auctionPreference.data?.enabled)} onCheckedChange={value => preferenceMutation.mutate(value)} /></CardContent></Card>
+        </>}
+        {section && (
+          <Link to="/verification" className="inline-flex items-center gap-2 text-sm font-medium text-primary" data-no-localize>
+            {direction === "rtl" ? <ArrowRight className="size-4" /> : <ArrowLeft className="size-4" />}{text("Back to my account", "العودة إلى حسابي")}
+          </Link>
+        )}
+        {section === "details" && <div data-no-localize className="mt-4"><h1 className="text-3xl font-extrabold">{text("Personal details and address", "البيانات الشخصية والعنوان")}</h1><PersonalDetailsCard /><BusinessDetailsCard /></div>}
+        {section === "payout" && <div data-no-localize className="mt-4"><h1 className="text-3xl font-extrabold">{text("Payout account", "الحساب البنكي")}</h1><PayoutAccountCard /></div>}
+        {section === "identity" && <>
+        <h1 id="identity" className="mt-4 text-3xl font-extrabold" data-no-localize>{text("Identity verification", "توثيق الهوية")}</h1>
         <p className="mt-2 text-muted-foreground" data-no-localize>
           {text("Verification protects both sides of every deal. Upload a clear photo or PDF of your documents; only you and the Insight review team can open them.", "التوثيق يحمي طرفي كل صفقة. ارفع صورة واضحة أو ملف PDF لمستنداتك، ولا يطّلع عليها إلا أنت وفريق المراجعة في إنسايت.")}
         </p>
@@ -118,7 +131,7 @@ function VerificationPage() {
             <div className="flex items-center gap-3">
               <ShieldCheck className="size-5 text-primary" />
               <div>
-                <p className="font-semibold">Account status</p>
+                <p className="font-semibold">{text("Account status", "حالة الحساب")}</p>
                 <p className="text-sm text-muted-foreground" dir="ltr">
                   {user?.email}
                 </p>
@@ -132,17 +145,12 @@ function VerificationPage() {
           </CardContent>
         </Card>
 
-        <div id="details" className="scroll-mt-24"><PersonalDetailsCard /></div>
-        <BusinessDetailsCard />
-        <div id="payout" className="scroll-mt-24"><PayoutAccountCard /></div>
-        <Card className="mt-4" data-no-localize><CardContent className="flex items-start justify-between gap-4 p-6"><div><Label htmlFor="organises-auctions">{text('I organise auctions', 'أنا أنظّم مزادات')}</Label><p className="mt-2 text-xs leading-6 text-muted-foreground">{text('Auction organisers must be verified business accounts.', 'يجب أن يكون منظّم المزاد حساب أعمال موثّقًا.')}</p>{preferenceMutation.error && <p role="alert" className="mt-2 text-xs text-destructive">{text('Unable to update this preference.', 'تعذّر تحديث هذا الخيار.')}</p>}</div><Switch id="organises-auctions" checked={auctionPreference.data?.enabled ?? false} disabled={preferenceMutation.isPending || (!auctionPreference.data?.eligible && !auctionPreference.data?.enabled)} onCheckedChange={value => preferenceMutation.mutate(value)} /></CardContent></Card>
-
         <Card className="mt-4">
           <CardContent className="p-6">
-            <h2 className="font-bold">Upload a document</h2>
+            <h2 className="font-bold">{text("Upload a document", "رفع مستند")}</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="docType">Document type</Label>
+                <Label htmlFor="docType">{text("Document type", "نوع المستند")}</Label>
                 <select
                   id="docType"
                   value={docType}
@@ -157,7 +165,7 @@ function VerificationPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="file">File (image or PDF, max 10 MB)</Label>
+                <Label htmlFor="file">{text("File (image or PDF, max 10 MB)", "الملف (صورة أو PDF، بحد أقصى 10 ميغابايت)")}</Label>
                 <Input
                   id="file"
                   type="file"
@@ -168,14 +176,14 @@ function VerificationPage() {
             </div>
             {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
             <Button className="mt-4" disabled={!file || upload.isPending} onClick={() => upload.mutate()}>
-              <FileUp /> {upload.isPending ? "Uploading…" : "Submit document"}
+              <FileUp /> {upload.isPending ? text("Uploading…", "جارٍ الرفع…") : text("Submit document", "إرسال المستند")}
             </Button>
           </CardContent>
         </Card>
 
         <Card className="mt-4">
           <CardContent className="p-6">
-            <h2 className="font-bold">Your documents</h2>
+            <h2 className="font-bold">{text("Your documents", "مستنداتك")}</h2>
             <div className="mt-4 space-y-3">
               {(docs.data ?? []).map((d) => (
                 <div
@@ -200,7 +208,7 @@ function VerificationPage() {
                       {d.status}
                     </span>
                     <Button size="sm" variant="outline" onClick={() => void openDoc(d)}>
-                      View
+                      {text("View", "عرض")}
                     </Button>
                     {d.status === "pending" && (
                       <Button size="sm" variant="ghost" onClick={() => remove.mutate(d)}>
@@ -212,16 +220,16 @@ function VerificationPage() {
               ))}
               {(docs.data ?? []).length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  You have not uploaded any documents yet.
+                  {text("You have not uploaded any documents yet.", "لم ترفع أي مستند بعد.")}
                 </p>
               )}
             </div>
             <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-              <BadgeCheck className="size-4 text-primary" /> Reviews are usually completed within one
-              business day.
+              <BadgeCheck className="size-4 text-primary" /> {text("Reviews are usually completed within one business day.", "تكتمل المراجعة عادة خلال يوم عمل واحد.")}
             </p>
           </CardContent>
         </Card>
+        </>}
       </div>
     </SiteShell>
   );

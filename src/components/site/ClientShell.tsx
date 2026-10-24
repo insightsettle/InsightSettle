@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Handshake, Scale, Receipt, UserRoundCheck, Plus, Gavel, UserRound } from "lucide-react";
+import { Home, Handshake, Scale, Receipt, FileText, UserRoundCheck, Plus, Gavel, UserRound } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
   // Same action buckets shown by the existing customer dashboard, counted once per deal.
   const actionCount = deals.filter((d) => clientAction(d, user?.id, actionMilestones)).length;
   const onDeals = pathname.startsWith("/deals/") || hash === "saved-deals";
-  const title = pathname === "/deals/new" ? "New deal" : pathname.startsWith("/deals/") || onDeals ? "Deals" : pathname === "/disputes" ? "Disputes" : pathname === "/documents" || pathname.startsWith("/invoice/") ? "Documents & invoices" : pathname === "/verification" ? "Account & verification" : "Home";
+  const title = pathname === "/deals/new" ? "New deal" : pathname.startsWith("/deals/") || onDeals ? "Deals" : pathname === "/disputes" ? "Disputes" : pathname === "/documents" ? "Deal documents" : pathname === "/invoices" || pathname.startsWith("/invoice/") ? "Tax invoices" : pathname === "/verification" ? "Account & verification" : "Home";
   const nav = <>
     <Button asChild className="mb-5 h-10 w-full rounded-lg"><Link to="/deals/new"><Plus />{text("New deal")}</Link></Button>
     <nav className="space-y-1" aria-label={text("Navigation")}>
@@ -39,7 +39,8 @@ export function ClientShell({ children }: { children: ReactNode }) {
       {/* There is no /deals listing route: preserve the existing saved-deals destination. */}
       <Link to="/dashboard" hash="saved-deals" className={shellNavClass} data-status={onDeals ? "active" : "inactive"} activeOptions={{ exact: true, includeHash: true }} activeProps={{ "data-status": onDeals ? "active" : "inactive" }}><Handshake className="size-4" />{text("Deals")}</Link>
       <Link to="/disputes" className={shellNavClass}><Scale className="size-4" />{text("Disputes")}</Link>
-      <Link to="/documents" className={shellNavClass}><Receipt className="size-4" />{text("Documents & invoices")}</Link>
+      <Link to="/documents" className={shellNavClass}><FileText className="size-4" />{text("Deal documents", "مستندات الصفقة")}</Link>
+      <Link to="/invoices" className={shellNavClass} data-status={pathname === "/invoices" || pathname.startsWith("/invoice/") ? "active" : "inactive"}><Receipt className="size-4" />{text("Tax invoices", "الفواتير الضريبية")}</Link>
       <Link to="/verification" className={shellNavClass}><UserRoundCheck className="size-4" />{text("Account & verification")}</Link>
       {auctionsAccess?.visible && <Link to="/auctions" className={shellNavClass} data-status={pathname.startsWith('/auctions') ? 'active' : 'inactive'}><Gavel className="size-4" />{text("Auctions", "المزادات")}</Link>}
     </nav>
@@ -57,7 +58,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
       {tab("/dashboard", ["Home", "الرئيسية"], Home, pathname === "/dashboard" && hash !== "saved-deals", actionCount)}
       {tab("/dashboard", ["Deals", "الصفقات"], Handshake, onDeals, undefined, "saved-deals")}
       <Link to="/deals/new" aria-label={text("New deal", "صفقة جديدة")} className="gradient-brand mx-auto -mt-7 grid size-14 place-items-center rounded-full text-white shadow-[0_14px_28px_-12px_rgb(19_128_101/0.9)] ring-4 ring-background"><Plus className="size-6" strokeWidth={2.4} /></Link>
-      {tab("/documents", ["Documents", "المستندات"], Receipt, pathname === "/documents" || pathname.startsWith("/invoice/"))}
+      {tab("/documents", ["Documents", "المستندات"], FileText, pathname === "/documents")}
       {tab("/verification", ["Account", "حسابي"], UserRound, pathname === "/verification")}
     </nav>
   );
