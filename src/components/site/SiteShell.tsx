@@ -40,7 +40,7 @@ export function SiteHeader() {
   }
   return (
     <header data-no-localize className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
+      <div className="mx-auto flex h-16 max-w-7xl flex-row-reverse items-center gap-3 px-4 xl:flex-row">
         <Link to="/" aria-label="Insight home" className="flex shrink-0 items-center">
           <BrandLogo className="h-10 w-auto" />
         </Link>
@@ -59,7 +59,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ms-auto flex items-center gap-2 xl:ms-0">
+        <div className="me-auto flex items-center gap-2 xl:me-0">
           <LanguageToggle />
           {loading ? null : user ? (
             <>
