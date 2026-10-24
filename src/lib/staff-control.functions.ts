@@ -60,7 +60,7 @@ export const customerIntervention=createServerFn({method:'POST'}).middleware([re
  if(!u.email)throw new Error('No email on account');
  if(data.action==='verify_email'&&u.email_confirmed_at)throw new Error('Email is already verified');
  await audit(db,context.userId,data.action==='reset'?'PASSWORD_RESET_REQUEST':'VERIFICATION_RESEND_REQUEST','profiles',data.userId,null,{email:u.email},data.reason);
- const result=data.action==='reset'?await db.auth.resetPasswordForEmail(u.email,{redirectTo:'https://insightsettle.com/auth/reset-password'}):await db.auth.resend({type:'signup',email:u.email,options:{emailRedirectTo:'https://insightsettle.com/auth/confirm'}});
+ const result=data.action==='reset'?await db.auth.resetPasswordForEmail(u.email,{redirectTo:'https://insightsettle.com/auth/reset'}):await db.auth.resend({type:'signup',email:u.email,options:{emailRedirectTo:'https://insightsettle.com/auth/confirmed'}});
  if(result.error)throw result.error;
  return {ok:true,message:'Email request accepted; delivery is not confirmed'};
 });
