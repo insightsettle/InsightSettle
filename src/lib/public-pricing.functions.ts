@@ -28,5 +28,5 @@ export const publicPricing = createServerFn({ method: "GET" })
     const fee = dealFee(data.amount, data.currency, inputs.usdPerUnit, inputs.schedule);
     const breakdown = splitFee({ amount: data.amount, currency: data.currency, fee, feePayer: data.payer, buyerCountry: data.buyerCountry, supplierCountry: data.supplierCountry, vatTable: inputs.vatTable });
     const {data: auction,error: auctionError}=await client.from('auction_fee_settings').select('*').eq('id',true).single();
-    return { available: true as const, schedule: inputs.schedule, breakdown, auction: auctionError ? null : auctionSettingsSchema.parse(auction) };
+    return { available: true as const, breakdown, auction: auctionError ? null : auctionSettingsSchema.parse(auction) };
   });
