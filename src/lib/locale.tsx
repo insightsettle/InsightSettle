@@ -1185,15 +1185,14 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("ar");
 
   useEffect(() => {
-    let saved: string | null = null;
-    try { saved = window.localStorage.getItem(STORAGE_KEY); } catch { /* storage blocked (e.g. Safari privacy settings) */ }
+    const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === "ar" || saved === "en") setLocaleState(saved);
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
-    try { window.localStorage.setItem(STORAGE_KEY, locale); } catch { /* storage blocked: keep the choice for this visit only */ }
+    window.localStorage.setItem(STORAGE_KEY, locale);
     let translating = false;
     const apply = () => {
       if (translating) return;

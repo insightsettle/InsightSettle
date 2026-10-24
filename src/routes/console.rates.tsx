@@ -69,7 +69,7 @@ function RatesPage() {
   const [now, setNow] = useState(Date.now());
   const [fetching, setFetching] = useState(false);
   useEffect(() => {
-    try { setNextAt(Number(localStorage.getItem(LS) || 0)); } catch { /* storage blocked */ }
+    setNextAt(Number(localStorage.getItem(LS) || 0));
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -92,7 +92,7 @@ function RatesPage() {
         }),
       );
       const at = Date.now() + COOLDOWN;
-      try { localStorage.setItem(LS, String(at)); } catch { /* storage blocked */ }
+      localStorage.setItem(LS, String(at));
       setNextAt(at);
       toast.success(`${n} live rates loaded — press Save changes to publish`);
     } catch (e) {
