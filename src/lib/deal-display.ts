@@ -7,6 +7,14 @@ export function quoteAmountLine(quote: Pick<FxQuote, "total" | "fee" | "vat" | "
   return roundMoney(quote.total - quote.fee - quote.vat, quote.target_currency);
 }
 
+/** Correct legacy event wording for display only; the stored financial record stays untouched. */
+export function paymentEventNote(note: string, transactions: { kind: string; provider_ref: string | null }[]): readonly [string, string] | null {
+  if (!note.startsWith("Milestone refund · ")) return null;
+  const reference = note.slice("Milestone refund · ".length);
+  if (!transactions.some((tx) => tx.kind === "funding" && tx.provider_ref === reference)) return null;
+  return [`Milestone funding · ${reference}`, `تمويل المرحلة · ${reference}`];
+}
+
 /** Mirrors the existing party controls; never authorizes or changes a deal. */
 export function clientAction(deal: DealRow, uid: string | undefined, milestones: { deal_id: string; status: string }[] = []): string | null {
   if (!uid || deal.frozen || ["released", "completed", "refunded", "partially_refunded", "cancelled", "rejected", "disputed"].includes(deal.status)) return null;
