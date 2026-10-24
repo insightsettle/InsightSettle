@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_fee_settings: {
+        Row: {
+          default_commission: number
+          fixed_usd: number
+          id: boolean
+          max_commission: number
+          max_usd: number | null
+          min_usd: number
+          mode: string
+          percent: number
+          updated_at: string
+        }
+        Insert: {
+          default_commission?: number
+          fixed_usd?: number
+          id?: boolean
+          max_commission?: number
+          max_usd?: number | null
+          min_usd?: number
+          mode?: string
+          percent?: number
+          updated_at?: string
+        }
+        Update: {
+          default_commission?: number
+          fixed_usd?: number
+          id?: boolean
+          max_commission?: number
+          max_usd?: number | null
+          min_usd?: number
+          mode?: string
+          percent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       auction_lots: {
         Row: {
           auction_id: string
@@ -1650,6 +1686,45 @@ export type Database = {
       }
       reset_demo_data: { Args: { _actor: string }; Returns: Json }
       run_auto_release: { Args: never; Returns: number }
+      staff_account_state: {
+        Args: { _actor: string; _reason: string; _state: string; _user: string }
+        Returns: undefined
+      }
+      staff_control_audit: {
+        Args: {
+          _action: string
+          _actor: string
+          _entity: string
+          _id: string
+          _new: Json
+          _old: Json
+          _reason: string
+        }
+        Returns: undefined
+      }
+      staff_edit_auction_split: {
+        Args: {
+          _actor: string
+          _lot: string
+          _organiser: number
+          _reason: string
+        }
+        Returns: undefined
+      }
+      staff_operational_update: {
+        Args: {
+          _action: string
+          _actor: string
+          _deal: string
+          _reason: string
+          _value: string
+        }
+        Returns: undefined
+      }
+      staff_save_auction_settings: {
+        Args: { _actor: string; _reason: string; _settings: Json }
+        Returns: undefined
+      }
       sweep_auction_deadlines: { Args: never; Returns: Json }
     }
     Enums: {
