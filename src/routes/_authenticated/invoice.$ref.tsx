@@ -39,7 +39,7 @@ function Bi({ ar, en, className = "" }: { ar: React.ReactNode; en: React.ReactNo
 
 function Row({ ar, en, value, strong = false }: { ar: string; en: string; value: React.ReactNode; strong?: boolean }) {
   return (
-    <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-2.5 last:border-b-0 ${strong ? "font-bold" : ""}`}>
+    <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border py-2.5 last:border-b-0 print:py-1 ${strong ? "font-bold" : ""}`}>
       <Bi ar={ar} en={en} />
       <bdi dir="ltr" className="tabular-nums">{value}</bdi>
     </div>
@@ -60,11 +60,11 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
   const payerRole = inv.party === "buyer" ? { ar: "الطرف الدافع", en: "Paying party" } : { ar: "الطرف المستلم", en: "Receiving party" };
 
   return (
-    <article className="relative break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card shadow-sm print:rounded-none print:border-0 print:shadow-none">
+    <article className="invoice-sheet relative break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card shadow-sm print:break-after-page print:rounded-none print:border-0 print:text-[11px] print:shadow-none">
       <div className="pointer-events-none absolute inset-0 grid place-items-center print:flex" aria-hidden="true">
         <span className="rotate-[-24deg] select-none text-5xl font-extrabold text-muted-foreground/10 sm:text-7xl">DEMO · نموذج تجريبي</span>
       </div>
-      <header className="flex flex-wrap items-center justify-between gap-4 bg-[#0C2A22] px-6 py-5 text-white">
+      <header className="flex flex-wrap items-center justify-between gap-4 bg-[#0C2A22] px-6 py-5 text-white print:px-4 print:py-3">
         <img src="/brand/insight-logo-white.svg" alt="Insight" className="h-9 w-auto" />
         <div className="text-end">
           <p className="text-xl font-extrabold" dir="rtl">{title.ar}</p>
@@ -73,7 +73,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
       </header>
       <div className="h-1 bg-[#55BD8A]" />
 
-      <div className="relative grid gap-6 p-6 sm:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="relative grid gap-6 p-6 sm:grid-cols-[minmax(0,1fr)_auto] print:grid-cols-[minmax(0,1fr)_auto] print:gap-4 print:p-4">
         <div className="grid min-w-0 gap-1 text-sm">
           <Row ar="رقم الفاتورة" en="Invoice number" value={inv.number} strong />
           <Row ar="تاريخ ووقت الإصدار" en="Issue date and time" value={issued.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} />
@@ -81,13 +81,13 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
           {milestone && <Row ar={`المرحلة ${milestone.seq}`} en={`Milestone ${milestone.seq}`} value={milestone.title} />}
         </div>
         <div className="grid place-items-center gap-2">
-          {qr ? <img src={qr} alt="QR" className="size-36 rounded-lg border border-border bg-white p-1" /> : <div className="size-36 rounded-lg border border-dashed border-border" />}
+          {qr ? <img src={qr} alt="QR" className="size-36 rounded-lg border border-border bg-white p-1 print:size-24" /> : <div className="size-36 rounded-lg border border-dashed border-border print:size-24" />}
           <Bi ar="رمز الفاتورة" en="Invoice QR" className="text-center text-xs" />
         </div>
       </div>
 
-      <div className="relative grid gap-4 px-6 sm:grid-cols-2">
-        <section className="min-w-0 rounded-xl bg-[#E9F7F0] p-4 text-sm">
+      <div className="relative grid gap-4 px-6 sm:grid-cols-2 print:grid-cols-2 print:gap-3 print:px-4">
+        <section className="min-w-0 rounded-xl bg-[#E9F7F0] p-4 text-sm print:p-3 print:text-[11px]">
           <Bi ar={<strong>المورّد</strong>} en="Seller" />
           <div className="mt-3 grid gap-1.5">
             <p><strong dir="rtl">{SELLER.ar}</strong> · <span dir="ltr">{SELLER.en}</span></p>
@@ -96,7 +96,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
             <p dir="ltr" className="text-start text-xs">{SELLER.site}</p>
           </div>
         </section>
-        <section className="min-w-0 rounded-xl border border-border p-4 text-sm">
+        <section className="min-w-0 rounded-xl border border-border p-4 text-sm print:p-3 print:text-[11px]">
           <Bi ar={<strong>العميل ({payerRole.ar})</strong>} en={`Customer (${payerRole.en})`} />
           <div className="mt-3 grid gap-1.5">
             <p className="break-words font-semibold">{inv.billTo.name}</p>
@@ -107,7 +107,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
         </section>
       </div>
 
-      <section className="relative px-6 pt-6 sm:hidden">
+      <section className="relative px-6 pt-6 sm:hidden print:hidden">
         <div className="rounded-xl border border-border p-4 text-sm">
           <Bi ar={<strong>{`رسوم خدمة إنسايت لإدارة الصفقة وحفظ مبلغها — ${view.deal.ref}`}</strong>} en={`Insight service fee for managing and holding the deal — ${view.deal.ref}`} />
           <div className="mt-3">
@@ -119,9 +119,9 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
           </div>
         </div>
       </section>
-      <section className="relative hidden px-6 pt-6 sm:block">
+      <section className="relative hidden px-6 pt-6 sm:block print:block print:px-4 print:pt-3">
         <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[520px] text-sm">
+          <table className="w-full min-w-[520px] text-sm print:min-w-0 print:text-[11px]">
             <thead className="bg-muted/60 text-xs">
               <tr>
                 <th className="p-3 text-start"><Bi ar="الوصف" en="Description" /></th>
@@ -146,7 +146,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
         </div>
       </section>
 
-      <section className="relative grid gap-4 p-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)]">
+      <section className="relative grid gap-4 p-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)] print:grid-cols-[minmax(0,1fr)_260px] print:gap-3 print:p-4">
         <div className="grid content-start gap-2 text-xs leading-6 text-muted-foreground">
           <Bi ar={`الضريبة محسوبة بنسبة دولة العميل الذي دفع الرسوم (${countryAr}: ${rate}).`} en={`VAT is charged at the rate of the fee payer's country (${countryEn}: ${rate}).`} />
           <Bi ar="هذه الفاتورة عن رسوم خدمة إنسايت فقط. مبلغ الصفقة ليس بيعاً من إنسايت؛ يُصدر البائع فاتورته على البضاعة أو الخدمة." en="This invoice covers the Insight service fee only. The deal amount is not a supply by Insight; the seller issues their own invoice for the goods or service." />
@@ -158,7 +158,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
         </div>
       </section>
 
-      <footer className="relative border-t border-border bg-muted/40 px-6 py-4 text-center text-xs leading-6 text-muted-foreground">
+      <footer className="relative border-t border-border bg-muted/40 px-6 py-4 text-center text-xs leading-6 text-muted-foreground print:px-4 print:py-2 print:text-[9px] print:leading-4">
         <p dir="rtl">نموذج فاتورة في نسخة تجريبية: مزوّد الدفع محاكى ولا تتحرك أموال حقيقية، وإنسايت غير مسجّلة ضريبياً بعد. ليست فاتورة ضريبية معتمدة.</p>
         <p dir="ltr">Demo invoice template: the payment provider is simulated, no real money moves, and Insight is not VAT-registered yet. Not a valid tax invoice.</p>
       </footer>
@@ -182,7 +182,7 @@ function InvoicePage() {
   );
   const view = q.data;
   return (
-    <div data-no-localize className="mx-auto max-w-4xl space-y-8 bg-background p-4 text-foreground sm:p-8">
+    <div data-no-localize className="mx-auto max-w-4xl space-y-8 bg-background p-4 text-foreground sm:p-8 print:max-w-none print:space-y-0 print:p-0">
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Bi ar={<strong className="text-lg">فواتير رسوم إنسايت</strong>} en="Insight fee invoices" />
         <Button onClick={() => window.print()}>{text("Print or save as PDF", "طباعة أو حفظ PDF")}</Button>

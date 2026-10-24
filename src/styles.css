@@ -244,4 +244,12 @@ html[dir="rtl"] [class*="tracking-"] { letter-spacing: 0; }
 .app-content table thead { background: var(--muted); color: var(--muted-foreground); font-size: 12px; }
 .app-content table td { padding: 14px; border-top: 1px solid var(--border); }
 .app-content table th { text-align: start; }
-@media print { .app-shell aside, .app-topbar { display: none; } .app-column { margin-inline-start: 0; } }
+@media print {
+  .app-shell aside, .app-topbar { display: none; }
+  .app-column { margin-inline-start: 0; }
+  /* Print only the page content: no demo strip, notices, phone tab bar or shell padding. */
+  .app-column > div:first-child, .app-column > [role="status"], .app-column > nav { display: none !important; }
+  .app-content { padding: 0 !important; }
+  @page { size: A4; margin: 10mm; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff !important; }
+}
