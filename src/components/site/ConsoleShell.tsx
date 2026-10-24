@@ -18,6 +18,7 @@ const groups = [
   ] },
   { label: "Finance", items: [
     { to: "/console/rates", label: "Currency rates", exact: false, icon: Coins },
+    { to: "/console/auction-settings", label: "Auction settings", exact: false, icon: Gavel },
     { to: "/console/fees", label: "Fee rules", exact: false, icon: Percent },
     { to: "/console/reports", label: "Reports", exact: false, icon: FileBarChart },
   ] },
@@ -32,7 +33,7 @@ export function ConsoleShell({ children, title, subtitle }: { children: React.Re
     {groups.map((group) => <div key={group.label}>
       <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">{text(group.label)}</p>
       <div className="space-y-1">{group.items.map((tab) => <Link key={tab.to} to={tab.to} activeOptions={{ exact: tab.exact }} className={shellNavClass}>
-        <tab.icon className="size-4" />{text(tab.label, tab.label === 'Auctions' ? 'المزادات' : tab.label === 'Interest register' ? 'سجل الاهتمام' : undefined)}
+        <tab.icon className="size-4" />{text(tab.label, tab.label === 'Auction settings' ? 'إعدادات المزادات' : tab.label === 'Auctions' ? 'المزادات' : tab.label === 'Interest register' ? 'سجل الاهتمام' : undefined)}
       </Link>)}</div>
     </div>)}
   </nav>;

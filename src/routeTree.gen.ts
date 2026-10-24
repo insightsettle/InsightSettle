@@ -40,6 +40,7 @@ import { Route as AuthCheckEmailRouteImport } from './routes/auth_.check-email'
 import { Route as AuthConfirmedRouteImport } from './routes/auth_.confirmed'
 import { Route as AuthResetRouteImport } from './routes/auth_.reset'
 import { Route as ConsoleIndexRouteImport } from './routes/console.index'
+import { Route as ConsoleAuctionSettingsRouteImport } from './routes/console.auction-settings'
 import { Route as ConsoleAuctionsRouteImport } from './routes/console.auctions'
 import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
@@ -59,6 +60,7 @@ import { Route as ApiPublicAutoReleaseRouteImport } from './routes/api/public/au
 import { Route as ApiV1ActionRouteImport } from './routes/api/v1/$action'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
+import { Route as ConsoleUsersUserIdRouteImport } from './routes/console.users_.$userId'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -218,6 +220,11 @@ const ConsoleIndexRoute = ConsoleIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleAuctionSettingsRoute = ConsoleAuctionSettingsRouteImport.update({
+  id: '/auction-settings',
+  path: '/auction-settings',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleAuctionsRoute = ConsoleAuctionsRouteImport.update({
   id: '/auctions',
   path: '/auctions',
@@ -315,6 +322,11 @@ const ConsoleDealsDealIdRoute = ConsoleDealsDealIdRouteImport.update({
   path: '/deals/$dealId',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleUsersUserIdRoute = ConsoleUsersUserIdRouteImport.update({
+  id: '/users_/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -362,6 +374,7 @@ export interface FileRoutesByFullPath {
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
   '/auth/reset': typeof AuthResetRoute
+  '/console/auction-settings': typeof ConsoleAuctionSettingsRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -381,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -415,6 +429,7 @@ export interface FileRoutesByTo {
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/confirmed': typeof AuthConfirmedRoute
   '/auth/reset': typeof AuthResetRoute
+  '/console/auction-settings': typeof ConsoleAuctionSettingsRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -434,6 +449,7 @@ export interface FileRoutesByTo {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -471,6 +487,7 @@ export interface FileRoutesById {
   '/auth_/check-email': typeof AuthCheckEmailRoute
   '/auth_/confirmed': typeof AuthConfirmedRoute
   '/auth_/reset': typeof AuthResetRoute
+  '/console/auction-settings': typeof ConsoleAuctionSettingsRoute
   '/console/auctions': typeof ConsoleAuctionsRoute
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
@@ -490,6 +507,7 @@ export interface FileRoutesById {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/users_/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -527,6 +545,7 @@ export interface FileRouteTypes {
     | '/auth/check-email'
     | '/auth/confirmed'
     | '/auth/reset'
+    | '/console/auction-settings'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -546,6 +565,7 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/users/$userId'
     | '/console/deals/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -580,6 +600,7 @@ export interface FileRouteTypes {
     | '/auth/check-email'
     | '/auth/confirmed'
     | '/auth/reset'
+    | '/console/auction-settings'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -599,6 +620,7 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/users/$userId'
     | '/console/deals'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -635,6 +657,7 @@ export interface FileRouteTypes {
     | '/auth_/check-email'
     | '/auth_/confirmed'
     | '/auth_/reset'
+    | '/console/auction-settings'
     | '/console/auctions'
     | '/console/audit'
     | '/console/disputes'
@@ -654,6 +677,7 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/users_/$userId'
     | '/console/deals/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -912,6 +936,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleIndexRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/auction-settings': {
+      id: '/console/auction-settings'
+      path: '/auction-settings'
+      fullPath: '/console/auction-settings'
+      preLoaderRoute: typeof ConsoleAuctionSettingsRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/console/auctions': {
       id: '/console/auctions'
       path: '/auctions'
@@ -1045,6 +1076,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleDealsDealIdRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/users_/$userId': {
+      id: '/console/users_/$userId'
+      path: '/users/$userId'
+      fullPath: '/console/users/$userId'
+      preLoaderRoute: typeof ConsoleUsersUserIdRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -1099,6 +1137,7 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ConsoleRouteChildren {
+  ConsoleAuctionSettingsRoute: typeof ConsoleAuctionSettingsRoute
   ConsoleAuctionsRoute: typeof ConsoleAuctionsRoute
   ConsoleAuditRoute: typeof ConsoleAuditRoute
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
@@ -1111,10 +1150,12 @@ interface ConsoleRouteChildren {
   ConsoleUsersRoute: typeof ConsoleUsersRoute
   ConsoleIndexRoute: typeof ConsoleIndexRoute
   ConsoleDealsDealIdRoute: typeof ConsoleDealsDealIdRoute
+  ConsoleUsersUserIdRoute: typeof ConsoleUsersUserIdRoute
   ConsoleDealsIndexRoute: typeof ConsoleDealsIndexRoute
 }
 
 const ConsoleRouteChildren: ConsoleRouteChildren = {
+  ConsoleAuctionSettingsRoute: ConsoleAuctionSettingsRoute,
   ConsoleAuctionsRoute: ConsoleAuctionsRoute,
   ConsoleAuditRoute: ConsoleAuditRoute,
   ConsoleDisputesRoute: ConsoleDisputesRoute,
@@ -1127,6 +1168,7 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleUsersRoute: ConsoleUsersRoute,
   ConsoleIndexRoute: ConsoleIndexRoute,
   ConsoleDealsDealIdRoute: ConsoleDealsDealIdRoute,
+  ConsoleUsersUserIdRoute: ConsoleUsersUserIdRoute,
   ConsoleDealsIndexRoute: ConsoleDealsIndexRoute,
 }
 

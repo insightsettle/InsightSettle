@@ -1,3 +1,4 @@
+import { StaffIntervention } from "@/components/site/StaffIntervention";
 import { StaffDealActions } from "@/components/site/StaffOps";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
@@ -194,6 +195,7 @@ function StaffDealPage() {
       </div>}
       <div className="mt-5">
         <StaffDealActions dealId={deal.id} frozen={!!deal.frozen} />
+        <StaffIntervention kind="deal" id={deal.id} />
       </div>
 
       <div className="mt-7 grid gap-5 lg:grid-cols-[1.3fr_.9fr]">

@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { template as auctionOffer } from './auction-offer'
+import { template as dealInvitation } from './deal-invitation'
 import { template as contactRequest } from './contact-request'
 
 export interface TemplateEntry {
@@ -21,6 +22,7 @@ export interface TemplateEntry {
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'contact-request': contactRequest,
+  'deal-invitation': dealInvitation,
   'auction-offer': auctionOffer,
   // Add templates here as they are created, e.g.:
   // 'welcome': welcomeTemplate,

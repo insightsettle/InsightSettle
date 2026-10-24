@@ -1,3 +1,4 @@
+import { auctionFee, auctionSettingsSchema } from "@/lib/auction-fees";
 import {
   COUNTRY_CURRENCY,
   PROVISIONAL_SCHEDULE,
@@ -79,7 +80,9 @@ export type DealPricing = { breakdown: FeeBreakdown; payIn: PayInQuote; usdPerUn
 export async function priceDeal(admin: any, deal: any, payCurrency?: string | null): Promise<DealPricing> {
   const countries = await partyCountries(admin, deal);
   const inputs = await loadPricingInputs(admin, deal.currency, payCurrency || defaultPayCurrency(countries.buyerCountry));
-  const fee = dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, inputs.schedule, deal.deal_type === 'auction' ? {} : {
+  const auctionSettings = deal.deal_type === 'auction' ? await admin.from('auction_fee_settings').select('*').eq('id',true).single() : null;
+  if (auctionSettings?.error) throw auctionSettings.error;
+  const fee = deal.deal_type === 'auction' ? auctionFee(Number(deal.amount),deal.currency,inputs.usdPerUnit,inputs.schedule,auctionSettingsSchema.parse(auctionSettings?.data)) : dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, inputs.schedule, {
     percent: deal.fee_override_percent == null ? null : Number(deal.fee_override_percent),
     flat: deal.fee_override_flat == null ? null : Number(deal.fee_override_flat),
   });
