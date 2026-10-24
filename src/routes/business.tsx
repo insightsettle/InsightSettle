@@ -38,13 +38,6 @@ const TOOLS: Feature[] = [
   { icon: Scale, title: ["A fair dispute path", "مسار نزاع عادل"], body: ["Payout stops, both sides submit evidence, and a written decision is approved by two Insight staff members.", "يتوقف التحويل، ويقدّم الطرفان أدلتهما، ويصدر قرار مكتوب يعتمده موظفان في إنسايت."] },
 ];
 
-const NEXT: [typeof Users, T2][] = [
-  [Users, ["Team members and approval rights", "أعضاء الفريق وصلاحيات الاعتماد"]],
-  [Wallet, ["Spending limits", "حدود الإنفاق"]],
-  [Building2, ["Supplier management", "إدارة الموردين"]],
-  [FileText, ["Accounting and ERP connections", "الربط مع أنظمة المحاسبة"]],
-];
-
 const FAQ: [T2, T2][] = [
   [["Can I use Insight with a supplier outside the Gulf?", "هل أستخدم إنسايت مع مورد خارج الخليج؟"], ["Yes. Choose \"Outside the Gulf\" as the supplier's country and set the deal in US dollars. At launch, the countries a payout can reach depend on the licensed payment provider.", "نعم. اختر «خارج الخليج» دولةً للمورد وحدّد الصفقة بالدولار. عند الإطلاق تعتمد الدول التي يصلها التحويل على مزوّد الدفع المرخّص."]],
   [["How is VAT handled?", "كيف تُحتسب الضريبة؟"], ["VAT applies to the Insight fee only, at the rate of each party's own country, and appears on that party's tax invoice. The deal amount itself is not taxed by Insight.", "تُحتسب الضريبة على رسوم إنسايت فقط، بنسبة دولة كل طرف، وتظهر في فاتورته الضريبية. مبلغ الصفقة نفسه لا تفرض عليه إنسايت ضريبة."]],
@@ -109,13 +102,6 @@ function BusinessPage() {
       <SectionHeader title={["Four steps, every one on record", "أربع خطوات، وكل خطوة موثّقة"]} intro={["Your team and the other side always know what happens next.", "يعرف فريقك والطرف الآخر دائماً ما المطلوب الآن."]} />
       <StepsFlow />
     </div></section>
-
-    <section className="mx-auto max-w-7xl px-5 py-16 lg:py-20">
-      <div className="rounded-3xl border border-dashed border-primary/30 bg-card p-8">
-        <SectionHeader eyebrow={["Coming next", "قريباً"]} title={["For larger teams", "للفرق الأكبر"]} />
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{NEXT.map(([I, t]) => <li key={t[0]} className="flex items-center gap-3"><IconTile icon={I} tone="soft" size="sm" /><span className="font-medium">{text(t[0], t[1])}</span></li>)}</ul>
-      </div>
-    </section>
 
     <section className="mx-auto max-w-4xl px-5 pb-16 lg:pb-20">
       <SectionHeader title={["Questions from companies", "أسئلة تطرحها الشركات"]} />
