@@ -59,7 +59,7 @@ const translations: Record<string, string> = {
   "Insight terms of service": "شروط خدمة إنسايت",
   "Rights and obligations of buyers and sellers.": "حقوق المشترين والموردين والتزاماتهم.",
   "1. About these terms": "1. حول هذه الشروط",
-  "These terms govern your use of the Insight escrow service. By creating an account or joining a deal you agree to them. If you use Insight on behalf of a company, you confirm you are authorised to bind it.": "تحكم هذه الشروط استخدامك لخدمة الضمان من إنسايت. وبإنشاء حساب أو الانضمام إلى صفقة فإنك توافق عليها. وإذا استخدمت إنسايت نيابةً عن شركة، فإنك تؤكد أنك مخوّل بإلزامها بهذه الشروط.",
+  "These terms govern your use of the Insight escrow service. By creating an account or joining a deal you agree to them. If you use Insight on behalf of a company, you confirm you are authorised to bind it.": "تحكم هذه الشروط استخدامك لخدمة الضمان من إنسايت. وبإنشاء حساب أو الانضمام إلى صفقة فإنك توافق عليها. وإذا استخدمت إنسايت نيابةً عن منشأة، فإنك تؤكد أنك مخوّل بإلزامها بهذه الشروط.",
   "2. Accounts and verification": "2. الحسابات والتحقق",
   "You must provide accurate information and keep your login credentials private. Insight may request identity or business documents before allowing you to fund, release or receive funds, and may limit an account until verification is complete.": "يجب تقديم معلومات دقيقة والحفاظ على سرية بيانات تسجيل الدخول. وقد تطلب إنسايت وثائق هوية أو مستندات نشاط تجاري قبل السماح لك بتمويل الأموال أو الإفراج عنها أو استلامها، وقد تقيّد الحساب حتى اكتمال التحقق.",
   "3. How a deal works": "3. آلية الصفقة",
@@ -756,7 +756,7 @@ const translations: Record<string, string> = {
   "Protect buyers on high-value orders and custom-made goods.":
     "احمِ المشترين في الطلبات عالية القيمة والمنتجات المصنوعة حسب الطلب.",
   "Business services": "خدمات الأعمال",
-  "Close B2B contracts with agreed delivery terms and a documented trail.": "أتمم عقود الشركات بشروط تسليم متفق عليها وسجل موثّق.",
+  "Close B2B contracts with agreed delivery terms and a documented trail.": "أتمم عقود الأعمال بشروط تسليم متفق عليها وسجل موثّق.",
   "Transparent fees, no surprises": "رسوم شفافة بلا مفاجآت",
   "One clear fee per deal — you see the exact amount before funding.":
     "رسم واضح لكل صفقة، وتعرف المبلغ الدقيق قبل التمويل.",

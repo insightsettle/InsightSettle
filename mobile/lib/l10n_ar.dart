@@ -212,7 +212,7 @@ const Map<String, String> kArabic = {
   'Enter your email first.': 'أدخل بريدك أولاً.',
   'If this email has an account, a reset link is on its way.': 'إذا كان لهذا البريد حساب، فسيصلك رابط إعادة التعيين.',
   'Sign in': 'تسجيل الدخول',
-  'Clear rules for deals between people and businesses across the Gulf.': 'قواعد واضحة لصفقات الأفراد والشركات بين دول الخليج.',
+  'Clear rules for deals between people and businesses across the Gulf.': 'قواعد واضحة لصفقات الأفراد وأصحاب الأعمال بين دول الخليج.',
   'Email': 'البريد الإلكتروني',
   'Password': 'كلمة المرور',
   'Signing in…': 'جارٍ تسجيل الدخول…',

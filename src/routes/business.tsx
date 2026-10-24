@@ -25,12 +25,12 @@ const SOLUTIONS: Feature[] = [
   { id: "suppliers", icon: Package, title: ["Buying from a neighbouring country", "الشراء من دولة مجاورة"], body: ["A supplier in Dubai, Manama or Kuwait: you pay in your currency, they are paid in theirs, at a rate locked for 15 minutes.", "مورد في دبي أو المنامة أو الكويت: تدفع بعملتك ويستلم بعملته، بسعر صرف ثابت 15 دقيقة."] },
   { id: "selling", icon: Truck, title: ["Selling to new customers", "البيع لعملاء جدد"], body: ["Ship to a buyer you have just met, knowing they have already paid into the deal. No more chasing invoices.", "اشحن لعميل تعرّفت عليه للتو وأنت تعلم أنه دفع في الصفقة. لا مزيد من ملاحقة الفواتير."] },
   { id: "contracting", icon: HardHat, title: ["Contracting and fit-out", "المقاولات والتجهيز"], body: ["2 to 20 milestones, an advance of up to 20%, each stage paid when approved, and retention released after the defects period.", "من 2 إلى 20 مرحلة، ودفعة مقدّمة حتى 20%، وكل مرحلة تُدفع حين تُعتمد، والمحتجز يُصرف بعد فترة ضمان العيوب."] },
-  { id: "services", icon: Handshake, title: ["Business services", "خدمات الشركات"], body: ["Marketing, software, consulting: deliverables and dates agreed up front, with payment after acceptance.", "تسويق، برمجة، استشارات: المخرجات والمواعيد متفق عليها مسبقاً، والدفع بعد القبول."] },
+  { id: "services", icon: Handshake, title: ["Business services", "خدمات الأعمال"], body: ["Marketing, software, consulting: deliverables and dates agreed up front, with payment after acceptance.", "تسويق، برمجة، استشارات: المخرجات والمواعيد متفق عليها مسبقاً، والدفع بعد القبول."] },
   { id: "auctions", icon: Gavel, title: ["Auction organisers", "منظمو المزادات"], body: ["You run the auction live on Instagram or TikTok; Insight sets the payment steps after it: the winner pays the payment provider within 24 hours, and the provider pays the owner and you separately.", "تدير المزاد في بث على إنستغرام أو تيك توك، وإنسايت تنظّم خطوات الدفع بعده: يدفع الفائز لمزوّد الدفع خلال 24 ساعة، ويحوّل المزوّد للمالك ولك كلٌّ على حدة."] },
 ];
 
 const TOOLS: Feature[] = [
-  { icon: BadgeCheck, title: ["Verified company profile", "ملف شركة موثّق"], body: ["Commercial registration, VAT number, authorised signatory and payout account, reviewed by the Insight team.", "السجل التجاري والرقم الضريبي والمفوّض بالتوقيع وحساب التحويل، يراجعها فريق إنسايت."] },
+  { icon: BadgeCheck, title: ["Verified company profile", "ملف منشأة موثّق"], body: ["Commercial registration, VAT number, authorised signatory and payout account, reviewed by the Insight team.", "السجل التجاري والرقم الضريبي والمفوّض بالتوقيع وحساب التحويل، يراجعها فريق إنسايت."] },
   { icon: Receipt, title: ["A tax invoice for every payment", "فاتورة ضريبية لكل دفعة"], body: ["Issued for the Insight fee on every deal — and on every milestone when you pay in stages — ready for your accountant.", "تصدر لرسوم إنسايت عن كل صفقة، وعن كل مرحلة إن دفعت على مراحل، جاهزة لمحاسبك."] },
   { icon: Coins, title: ["Seven currencies", "سبع عملات"], body: ["The six Gulf currencies and US dollars, with exact decimals and the exchange rate shown before you pay.", "عملات الخليج الست والدولار، بمنازل عشرية دقيقة، وسعر الصرف أمامك قبل الدفع."] },
   { icon: Layers, title: ["Payment in stages", "الدفع على مراحل"], body: ["Fund the whole deal up front, or each milestone when it is due — you choose when you create the deal.", "ادفع الصفقة كاملة مقدّماً أو كل مرحلة عند موعدها، وتختار ذلك عند إنشاء الصفقة."] },
@@ -73,11 +73,11 @@ function BusinessPage() {
   const { text } = useLocale();
   return <SiteShell><div data-no-localize>
     <PageHero
-      badge={["For business", "للشركات"]}
+      badge={["For business", "للأعمال"]}
       title={["Pay your suppliers with confidence,", "ادفع لمورديك بثقة،"]}
       highlight={["and get paid without chasing.", "واستلم من عملائك دون ملاحقة."]}
       body={["From importing from a factory abroad to fit-out contracts in stages: documented terms, payment in your currency, a tax invoice for every payment — and money that does not move until the other side delivers.", "من الاستيراد من مصنع في الخارج إلى عقود التجهيز على مراحل: شروط موثّقة، ودفع بعملتك، وفاتورة ضريبية لكل دفعة، ومبلغ لا يتحرك قبل أن يفي الطرف الآخر بالتزامه."]}
-      points={[["Verified company profile", "ملف شركة موثّق"], ["Tax invoice for every payment", "فاتورة ضريبية لكل دفعة"], ["Seven currencies", "سبع عملات"]]}
+      points={[["Verified company profile", "ملف منشأة موثّق"], ["Tax invoice for every payment", "فاتورة ضريبية لكل دفعة"], ["Seven currencies", "سبع عملات"]]}
       primary={{ label: ["Create a company account", "أنشئ حساب شركتك"], to: "/auth", signup: true }}
       secondary={{ label: ["Fee calculator", "حاسبة الرسوم"], to: "/pricing" }}
       aside={<MilestonePreview />}
@@ -89,12 +89,12 @@ function BusinessPage() {
     </section>
 
     <section className="bg-brand-strong text-primary-foreground"><div className="mx-auto max-w-7xl px-5 py-16 lg:py-20">
-      <SectionHeader dark eyebrow={["Built for companies", "صُممت للشركات"]} title={["The tools your finance team expects", "الأدوات التي يتوقعها فريقك المالي"]} />
+      <SectionHeader dark eyebrow={["Built for companies", "صُممت للأعمال"]} title={["The tools your finance team expects", "الأدوات التي يتوقعها فريقك المالي"]} />
       <FeatureGrid items={TOOLS} dark />
     </div></section>
 
     <section className="mx-auto max-w-7xl px-5 py-16 lg:py-20">
-      <SectionHeader title={["Compare before you pay", "قارن قبل أن تدفع"]} intro={["How Insight compares with the two ways most business deals are paid today.", "كيف يختلف إنسايت عن الطريقتين اللتين تُدفع بهما أغلب صفقات الشركات اليوم."]} />
+      <SectionHeader title={["Compare before you pay", "قارن قبل أن تدفع"]} intro={["How Insight compares with the two ways most business deals are paid today.", "كيف يختلف إنسايت عن الطريقتين اللتين تُدفع بهما أغلب صفقات الأعمال اليوم."]} />
       <CompareTable />
     </section>
 
@@ -104,7 +104,7 @@ function BusinessPage() {
     </div></section>
 
     <section className="mx-auto max-w-4xl px-5 pb-16 lg:pb-20">
-      <SectionHeader title={["Questions from companies", "أسئلة تطرحها الشركات"]} />
+      <SectionHeader title={["Questions from companies", "أسئلة أصحاب الأعمال"]} />
       <FaqList items={FAQ} />
       <Link to="/faq" className="mt-6 inline-block font-semibold text-primary">{text("All questions", "كل الأسئلة")}</Link>
     </section>

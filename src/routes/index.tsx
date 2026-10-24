@@ -43,17 +43,17 @@ function HomePage() {
       ["The seller sees the money is paid — no screenshots of receipts.", "البائع يرى أن المبلغ مدفوع، دون صور إيصالات."],
       ["A clear dispute path if something arrives wrong.", "مسار نزاع واضح إن وصل شيء غير مطابق."],
     ], Users, "/individuals", ["Insight for individuals", "إنسايت للأفراد"]],
-    ["For business", "للشركات", [
+    ["For business", "للأعمال", [
       ["Imports from factories abroad and suppliers in neighbouring countries, in your currency.", "الاستيراد من مصانع في الخارج والشراء من دول مجاورة، بعملتك."],
       ["Fit-out and contracting in 2 to 20 milestones, with retention.", "التجهيز والمقاولات على 2 إلى 20 مرحلة، مع محتجز ضمان."],
       ["A tax invoice for every payment and a full audit trail.", "فاتورة ضريبية لكل دفعة، وسجل كامل للتدقيق."],
-    ], Building2, "/business", ["Insight for business", "إنسايت للشركات"]],
+    ], Building2, "/business", ["Insight for business", "إنسايت للأعمال"]],
   ];
   const types: [typeof Package, string, string, string, string][] = [
     [Globe, "Importing from a factory abroad", "الاستيراد من مصنع في الخارج", "Agreed a shipment in US dollars with a factory in China or Turkey? Pay into the deal; the factory is paid only after the shipment arrives and you inspect it.", "اتفقت مع مصنع في الصين أو تركيا على شحنة بالدولار؟ ادفع في الصفقة، ولا يُحوَّل المبلغ للمصنع إلا بعد وصول الشحنة وفحصها."],
     [Package, "Buying from a neighbouring country", "الشراء من دولة مجاورة", "Buying from a supplier in Dubai or selling to a buyer in Kuwait? Each side pays and gets paid in its own currency, at a rate locked for 15 minutes.", "تشتري من مورد في دبي أو تبيع لمشترٍ في الكويت؟ كلٌّ يدفع ويستلم بعملته، بسعر صرف ثابت 15 دقيقة."],
     [HardHat, "Contracting & fit-out", "المقاولات والتجهيز", "Fit out your showroom or office in stages: each milestone is paid when you approve it, and retention is released after the defects period.", "جهّز معرضك أو مكتبك على مراحل: كل مرحلة تُدفع حين تعتمدها، والمحتجز يُصرف بعد فترة ضمان العيوب."],
-    [BriefcaseBusiness, "Business services", "خدمات الشركات", "Marketing, software, consulting: clear deliverables and a set date, with payment after acceptance.", "تسويق، برمجة، استشارات: مخرجات واضحة وموعد محدد، والدفع بعد القبول."],
+    [BriefcaseBusiness, "Business services", "خدمات الأعمال", "Marketing, software, consulting: clear deliverables and a set date, with payment after acceptance.", "تسويق، برمجة، استشارات: مخرجات واضحة وموعد محدد، والدفع بعد القبول."],
     [PenTool, "Freelance", "العمل الحر", "Freelancers start knowing the client has paid; clients pay knowing nothing moves until they accept the work.", "المستقل يبدأ وهو يعلم أن العميل دفع، والعميل يدفع وهو يعلم أن المبلغ لن يُحوَّل قبل أن يقبل العمل."],
     [Gavel, "Social-media auctions", "مزادات وسائل التواصل", "Run your auction live on Instagram or TikTok; Insight sets the payment steps after it: 24 hours for the winner, two backup bidders, and separate payouts from the payment provider to owner and organiser. The bidding itself does not take place on Insight.", "تدير مزادك في بث على إنستغرام أو تيك توك، وإنسايت تنظّم خطوات الدفع بعده: 24 ساعة للفائز، ومزايدان احتياطيان، وتحويل منفصل من مزوّد الدفع للمالك والمنظّم. المزايدة نفسها لا تجري داخل إنسايت."],
   ];
@@ -70,7 +70,7 @@ function HomePage() {
     ["How much does it cost?", "كم تكلف الخدمة؟", "Creating a deal is free. The fee is charged only when the deal is paid, from USD 15 and never more than USD 3,500 per deal, and you choose who pays it.", "إنشاء الصفقة مجاني. تُحتسب الرسوم عند الدفع فقط، تبدأ من 15 دولاراً ولا تتجاوز 3,500 دولار للصفقة، وتختاران من يدفعها."],
     ["Can I deal with a supplier outside the Gulf?", "هل أتعامل مع مورد خارج الخليج؟", "Yes. Choose \"Outside the Gulf\" as the supplier's country and set the deal in US dollars. You pay in your own currency and the supplier is paid in dollars. At launch, the countries a payout can reach depend on the licensed payment provider.", "نعم. اختر «خارج الخليج» دولةً للمورد وحدّد مبلغ الصفقة بالدولار الأمريكي. تدفع بعملتك ويستلم المورد بالدولار. عند الإطلاق تعتمد الدول التي يصلها التحويل على مزوّد الدفع المرخّص."],
     ["What if the other side does not deliver?", "ماذا لو لم يُسلّم الطرف الآخر ما اتفقتما عليه؟", "Open a dispute. The amount stays in the deal and is not paid out until a decision is issued.", "افتح نزاعاً. يبقى المبلغ في الصفقة ولا يُحوَّل للطرف الآخر حتى يصدر القرار."],
-    ["Is it for businesses or individuals?", "هل الخدمة للشركات أم للأفراد؟", "Both. A company buying stock from a factory, or a person hiring a designer, use the same steps: agree, pay, deliver, inspect.", "للاثنين. الشركة التي تشتري بضاعة من مصنع، والشخص الذي يتعاقد مع مصمم، يمرّان بالخطوات نفسها: اتفاق، دفع، تسليم، فحص."],
+    ["Is it for businesses or individuals?", "هل الخدمة للأعمال أم للأفراد؟", "Both. A company buying stock from a factory, or a person hiring a designer, use the same steps: agree, pay, deliver, inspect.", "للاثنين. المنشأة التي تشتري بضاعة من مصنع، والشخص الذي يتعاقد مع مصمم، يمرّان بالخطوات نفسها: اتفاق، دفع، تسليم، فحص."],
   ];
 
   return <SiteShell><ContactPopup /><div data-no-localize>
@@ -79,7 +79,7 @@ function HomePage() {
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
       <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 pt-10 pb-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-24">
         <div className="text-center lg:text-start">
-          <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-accent-foreground"><ShieldCheck className="size-4 shrink-0" />{text("For businesses and individuals: the other side is paid only after you receive", "للشركات والأفراد: لا يصل المبلغ للطرف الآخر قبل أن تستلم")}</span>
+          <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-accent-foreground"><ShieldCheck className="size-4 shrink-0" />{text("For businesses and individuals: the other side is paid only after you receive", "للأعمال والأفراد: لا يصل المبلغ للطرف الآخر قبل أن تستلم")}</span>
           <h1 className="mt-6 text-[2.6rem] leading-[1.3] font-bold sm:text-[3.4rem]">{text("Pay with confidence.", "ادفع حين تطمئن،")}<br /><span className="text-primary">{text("Get paid on delivery.", "واستلم حين تُسلِّم.")}</span></h1>
           <p className="mx-auto mt-6 max-w-xl text-lg leading-9 text-foreground/80 lg:mx-0">{text("Agree the terms, pay in your own currency, and the money waits in the deal until you receive and check what you bought. If something goes wrong, it stays there until the matter is settled.", "اتفقا على الشروط، وادفع بعملتك، ويبقى المبلغ في الصفقة حتى تستلم ما اشتريته وتتأكد منه. وإن حدثت مشكلة، يبقى حيث هو حتى تُحسم.")}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
