@@ -10,6 +10,7 @@ import '../widgets/common.dart';
 
 const kDealCurrencies = ['SAR', 'BHD', 'AED', 'QAR', 'KWD', 'OMR', 'USD'];
 const kCountries = {'SA': 'Saudi Arabia', 'BH': 'Bahrain', 'AE': 'United Arab Emirates', 'KW': 'Kuwait', 'QA': 'Qatar', 'OM': 'Oman'};
+const kPayeeCountries = {...kCountries, 'OTHER': 'Outside the Gulf'};
 
 class _MilestoneRow {
   final title = TextEditingController();
@@ -131,10 +132,11 @@ class _NewDealScreenState extends State<NewDealScreen> {
     }
   }
 
-  Widget _dropdown<T>(String label, T value, Map<T, String> items, ValueChanged<T> onChanged) => DropdownButtonFormField<T>(
+  Widget _dropdown<T>(String label, T value, Map<T, String> items, ValueChanged<T> onChanged, {bool localized = false}) => DropdownButtonFormField<T>(
         initialValue: value,
         decoration: InputDecoration(labelText: label),
-        items: [for (final e in items.entries) DropdownMenuItem(value: e.key, child: Text(tr(e.value)))],
+        isExpanded: true,
+        items: [for (final e in items.entries) DropdownMenuItem(value: e.key, child: Text(localized ? e.value : tr(e.value)))],
         onChanged: (v) {
           if (v != null) setState(() => onChanged(v));
         },
@@ -162,7 +164,7 @@ class _NewDealScreenState extends State<NewDealScreen> {
           const SizedBox(height: 6),
           Text(tr('Contracting and freelance deals are created on the website.'), style: const TextStyle(fontSize: 12, color: InsightColors.muted)),
           gap,
-          _dropdown<String>(tr('Your side'), _role, {'seller': 'I am the supplier', 'buyer': 'I am the buyer'}, (v) => _role = v),
+          _dropdown<String>(tr('Your side'), _role, {'seller': partyText('I am the {payee}', _type), 'buyer': partyText('I am the {payer}', _type)}, (v) => _role = v, localized: true),
           gap,
           TextFormField(
             controller: _title,
@@ -192,12 +194,12 @@ class _NewDealScreenState extends State<NewDealScreen> {
             Expanded(flex: 2, child: _dropdown<String>(tr('Currency'), _currency, {for (final c in kDealCurrencies) c: c}, (v) => _currency = v)),
           ]),
           gap,
-          _dropdown<String>(tr('Fee paid by'), _feePayer, {'split': 'Split 50/50', 'buyer': 'Buyer pays the fee', 'seller': 'Supplier pays the fee'}, (v) => _feePayer = v),
+          _dropdown<String>(tr('Fee paid by'), _feePayer, {for (final v in ['split', 'buyer', 'seller']) v: feePayerLabel(v, _type)}, (v) => _feePayer = v, localized: true),
           gap,
           Row(children: [
-            Expanded(child: _dropdown<String>(tr('Supplier country'), _supplierCountry, kCountries, (v) => _supplierCountry = v)),
+            Expanded(child: _dropdown<String>(partyText('{Payee} country', _type), _supplierCountry, kPayeeCountries, (v) => _supplierCountry = v)),
             const SizedBox(width: 10),
-            Expanded(child: _dropdown<String>(tr('Buyer country'), _deliveryCountry, kCountries, (v) => _deliveryCountry = v)),
+            Expanded(child: _dropdown<String>(partyText('{Payer} country', _type), _deliveryCountry, kCountries, (v) => _deliveryCountry = v)),
           ]),
           gap,
           _dropdown<int>(tr('Inspection period'), _inspection, {for (final n in [1, 2, 3, 5, 7, 10, 14]) n: trf('{n} day(s)', {'n': n})}, (v) => _inspection = v),
@@ -219,7 +221,7 @@ class _NewDealScreenState extends State<NewDealScreen> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(tr('Shipping needed')),
-              subtitle: Text(tr('The supplier ships and adds the tracking number.')),
+              subtitle: Text(partyText('The {payee} ships and adds the tracking number.', _type)),
               value: _shipping,
               onChanged: (v) => setState(() => _shipping = v),
             ),

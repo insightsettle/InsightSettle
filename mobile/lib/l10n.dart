@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n_ar.dart';
+import 'roles.dart';
 
 /// App language: Arabic by default (as on the website), English on request.
 class AppLocale {
@@ -38,6 +39,28 @@ String trf(String en, Map<String, Object> values) {
   values.forEach((k, v) => s = s.replaceAll('{$k}', v.toString()));
   return s;
 }
+
+/// Localized contextual names in UI templates; never used for API values.
+String partyText(String en, String? dealType) {
+  final roles = rolesFor(dealType);
+  final ar = AppLocale.isArabic;
+  return trf(en, {
+    'payer': ar ? roles.payer.ar : roles.payer.en,
+    'Payer': ar ? roles.payer.ar : roles.payer.capitalized,
+    'payee': ar ? roles.payee.ar : roles.payee.en,
+    'Payee': ar ? roles.payee.ar : roles.payee.capitalized,
+    'payeeTo': ar ? roles.payee.arabicTo : 'to the ${roles.payee.en}',
+  });
+}
+
+String feePayerLabel(String? feePayer, String? dealType) => partyText(
+      switch (feePayer) {
+        'seller' => '{Payee} pays the fee',
+        'split' => 'Split half and half',
+        _ => '{Payer} pays the fee',
+      },
+      dealType,
+    );
 
 const Map<String, String> kStatusEn = {
   'pending_funding': 'Pending funding',

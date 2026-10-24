@@ -7,7 +7,7 @@ import 'package:insight_mobile/l10n_ar.dart';
 /// Every literal passed to tr()/trf() in lib/ must have an Arabic entry, so the Arabic app never shows English.
 void main() {
   test('every UI string has an Arabic translation', () {
-    final pattern = RegExp(r"""\btrf?\(\s*'((?:[^'\\]|\\.)*)'""");
+    final pattern = RegExp(r"""\b(?:trf?|partyText)\(\s*'((?:[^'\\]|\\.)*)'""");
     final missing = <String>{};
     for (final f in Directory('lib').listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart'))) {
       for (final m in pattern.allMatches(f.readAsStringSync())) {

@@ -174,14 +174,14 @@ class DealCard extends StatelessWidget {
               StatusBadge(deal.status),
             ]),
             const SizedBox(height: 6),
-            Text('${deal.ref} · ${dealTypeLabel(deal.dealType)} · ${isBuyer ? tr('You are the buyer') : tr('You are the supplier')}',
+            Text('${deal.ref} · ${dealTypeLabel(deal.dealType)} · ${partyText(isBuyer ? 'You are the {payer}' : 'You are the {payee}', deal.dealType)}',
                 style: const TextStyle(color: InsightColors.muted, fontSize: 12.5)),
             const SizedBox(height: 10),
             Row(children: [
               Expanded(
                 child: next == null
                     ? const SizedBox.shrink()
-                    : Text(tr(next!), style: const TextStyle(color: InsightColors.primary, fontSize: 13, fontWeight: FontWeight.w500)),
+                    : Text(partyText(next!, deal.dealType), style: const TextStyle(color: InsightColors.primary, fontSize: 13, fontWeight: FontWeight.w500)),
               ),
               Text(formatMoney(deal.amount, deal.currency), textDirection: TextDirection.ltr, style: const TextStyle(fontWeight: FontWeight.w700)),
             ]),
