@@ -1,7 +1,54 @@
-import { Img, Body, Button, Container, Head, Heading, Html, Preview, Text } from '@react-email/components';
-import type { TemplateEntry } from './registry';
+import * as React from 'react'
+import { BrandEmail } from './layout'
+import type { TemplateEntry } from './registry'
 
 function AuctionOffer({ title = '', link = '', deadline = '', ended = false }: { title?: string; link?: string; deadline?: string; ended?: boolean }) {
-  return <Html lang="ar" dir="rtl"><Head /><Preview>{ended ? 'انتهى عرض القطعة — لم يتم الخصم' : 'رابط دفع قطعة المزاد'}</Preview><Body style={{ backgroundColor: '#ffffff', fontFamily: "'Thmanyah Sans', Arial, sans-serif" }}><Container style={{ padding: '24px' }}><Img src="https://insightsettle.com/brand/insight-logo.png" alt="Insight" width="140" height="67" /><Text>{title}</Text><Text>{ended ? 'انتهى عرضك لهذه القطعة، ولم يتم خصم أي مبلغ.' : 'الدفع يعني قبول شروط القطعة. مزوّد الدفع محاكى ولا تتحرك أموال حقيقية في هذه النسخة التجريبية.'}</Text>{!ended && <><Text>مهلة الدفع: {deadline}</Text><Button href={link}>عرض القطعة والدفع</Button></>}<Text>{ended ? 'Your offer ended. No payment was charged.' : 'Payment accepts the lot terms. Demo environment: the payment provider is simulated.'}</Text></Container></Body></Html>;
+  if (ended) {
+    return (
+      <BrandEmail
+        preview="انتهى عرضك على قطعة المزاد · Your auction offer ended"
+        ar={{
+          heading: 'انتهى عرضك على القطعة',
+          paragraphs: ['انتهت مهلة عرضك على هذه القطعة، ولم يُخصم منك أي مبلغ.'],
+          facts: title ? [{ label: 'القطعة', value: title }] : undefined,
+        }}
+        en={{
+          heading: 'Your offer has ended',
+          paragraphs: ['Your offer on this lot has ended. No payment was taken.'],
+          facts: title ? [{ label: 'Lot', value: title }] : undefined,
+        }}
+      />
+    )
+  }
+  return (
+    <BrandEmail
+      preview="أنت الفائز — أكمل الدفع لقطعة المزاد · You won — complete payment for your lot"
+      actionUrl={link}
+      ar={{
+        heading: 'مبروك، القطعة بانتظارك',
+        paragraphs: ['أكمل الدفع قبل انتهاء المهلة. يبقى المبلغ محفوظاً في الصفقة حتى تستلم القطعة وتتأكد منها. الدفع يعني قبول شروط القطعة.'],
+        facts: [
+          ...(title ? [{ label: 'القطعة', value: title }] : []),
+          ...(deadline ? [{ label: 'مهلة الدفع', value: <bdi dir="ltr">{deadline}</bdi> }] : []),
+        ],
+        button: 'عرض القطعة والدفع',
+      }}
+      en={{
+        heading: 'Congratulations, your lot is waiting',
+        paragraphs: ['Complete payment before the deadline. The amount stays held in the deal until you receive and check the item. Paying accepts the lot terms.'],
+        facts: [
+          ...(title ? [{ label: 'Lot', value: title }] : []),
+          ...(deadline ? [{ label: 'Payment deadline', value: deadline }] : []),
+        ],
+        button: 'View lot and pay',
+      }}
+    />
+  )
 }
-export const template = { component: AuctionOffer, subject: 'Insight — تحديث عرض المزاد / Auction offer update' } satisfies TemplateEntry;
+
+export const template = {
+  component: AuctionOffer,
+  subject: (d: Record<string, any>) => d?.['ended'] ? 'إنسايت · انتهى عرض المزاد | Insight · Auction offer ended' : 'إنسايت · أكمل دفع قطعة المزاد | Insight · Complete your auction payment',
+  displayName: 'Auction offer',
+  previewData: { title: 'Vintage watch', link: 'https://insightsettle.com/auctions/demo', deadline: '26 Oct 2026, 18:00', ended: false },
+} satisfies TemplateEntry

@@ -1,82 +1,28 @@
 import * as React from 'react'
-
-import {
-  Img,
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Preview,
-  Text,
-} from '@react-email/components'
+import { BrandEmail } from './layout'
 
 interface RecoveryEmailProps {
   siteName: string
   confirmationUrl: string
 }
 
-export const RecoveryEmail = ({
-  siteName,
-  confirmationUrl,
-}: RecoveryEmailProps) => (
-  <Html lang="en" dir="ltr">
-    <Head>
-      <style>{darkModeCss}</style>
-    </Head>
-    <Preview>Reset your password for {siteName}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Img src="https://insightsettle.com/brand/insight-logo.png" alt="Insight" width="140" height="67" style={{ marginBottom: "16px" }} />
-        <Heading style={h1}>Reset your password</Heading>
-        <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
-        </Text>
-        <Button className="dm-btn" style={button} href={confirmationUrl}>
-          Reset Password
-        </Button>
-        <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
-        </Text>
-      </Container>
-    </Body>
-  </Html>
+export const RecoveryEmail = ({ confirmationUrl }: RecoveryEmailProps) => (
+  <BrandEmail
+    preview="رابط تعيين كلمة مرور جديدة لحسابك في إنسايت · Reset your Insight password"
+    actionUrl={confirmationUrl}
+    ar={{
+      heading: 'تعيين كلمة مرور جديدة',
+      paragraphs: ['وصلنا طلب لتعيين كلمة مرور جديدة لحسابك. اضغط الزر أدناه واختر كلمة مرور جديدة.'],
+      button: 'تعيين كلمة المرور',
+      note: 'الرابط صالح لفترة محدودة ولاستخدام واحد. إذا لم تطلب ذلك، تجاهل الرسالة وستبقى كلمة مرورك كما هي.',
+    }}
+    en={{
+      heading: 'Reset your password',
+      paragraphs: ['We received a request to set a new password for your account. Use the button below to choose a new one.'],
+      button: 'Set a new password',
+      note: "This link works once and for a limited time. If you didn't ask for it, ignore this email and your password stays the same.",
+    }}
+  />
 )
 
 export default RecoveryEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: "'Thmanyah Sans', Arial, sans-serif" }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  border: '1px solid #000000',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
-// Rendered as a text child, which React may HTML-escape: keep this CSS free of >, &, and quotes.
-const darkModeCss = `
-  @media (prefers-color-scheme: dark) {
-    .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  }
-  [data-ogsc] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  [data-ogsb] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-`

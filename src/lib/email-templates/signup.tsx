@@ -1,17 +1,5 @@
 import * as React from 'react'
-
-import {
-  Img,
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Link,
-  Preview,
-  Text,
-} from '@react-email/components'
+import { BrandEmail } from './layout'
 
 interface SignupEmailProps {
   siteName: string
@@ -20,78 +8,29 @@ interface SignupEmailProps {
   confirmationUrl: string
 }
 
-export const SignupEmail = ({
-  siteName,
-  siteUrl,
-  recipient,
-  confirmationUrl,
-}: SignupEmailProps) => (
-  <Html lang="en" dir="ltr">
-    <Head>
-      <style>{darkModeCss}</style>
-    </Head>
-    <Preview>Confirm your email for {siteName}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Img src="https://insightsettle.com/brand/insight-logo.png" alt="Insight" width="140" height="67" style={{ marginBottom: "16px" }} />
-        <Heading style={h1}>Confirm your email</Heading>
-        <Text style={text}>
-          Thanks for signing up for{' '}
-          <Link href={siteUrl} style={link}>
-            <strong>{siteName}</strong>
-          </Link>
-          !
-        </Text>
-        <Text style={text}>
-          Please confirm your email address (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ) by clicking the button below:
-        </Text>
-        <Button className="dm-btn" style={button} href={confirmationUrl}>
-          Verify Email
-        </Button>
-        <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
-        </Text>
-      </Container>
-    </Body>
-  </Html>
+export const SignupEmail = ({ recipient, confirmationUrl }: SignupEmailProps) => (
+  <BrandEmail
+    preview="أكّد بريدك لتفعيل حسابك في إنسايت · Confirm your email for Insight"
+    actionUrl={confirmationUrl}
+    ar={{
+      heading: 'مرحباً بك في إنسايت',
+      paragraphs: [
+        'شكراً لإنشاء حسابك. خطوة أخيرة: أكّد بريدك الإلكتروني لتفعيل الحساب والبدء بأول صفقة.',
+        <>البريد المسجّل: <bdi dir="ltr">{recipient}</bdi></>,
+      ],
+      button: 'تأكيد البريد الإلكتروني',
+      note: 'إذا لم تُنشئ هذا الحساب، تجاهل هذه الرسالة ولن يتم تفعيل أي شيء.',
+    }}
+    en={{
+      heading: 'Welcome to Insight',
+      paragraphs: [
+        'Thanks for creating your account. One last step: confirm your email to activate it and start your first deal.',
+        <>Registered email: <bdi>{recipient}</bdi></>,
+      ],
+      button: 'Confirm email',
+      note: "If you didn't create this account, you can ignore this email and nothing will be activated.",
+    }}
+  />
 )
 
 export default SignupEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: "'Thmanyah Sans', Arial, sans-serif" }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const link = { color: 'inherit', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  border: '1px solid #000000',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
-// Rendered as a text child, which React may HTML-escape: keep this CSS free of >, &, and quotes.
-const darkModeCss = `
-  @media (prefers-color-scheme: dark) {
-    .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  }
-  [data-ogsc] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  [data-ogsb] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-`

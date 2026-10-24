@@ -1,26 +1,34 @@
-import { Body, Container, Head, Heading, Html, Img, Preview, Text } from "@react-email/components";
-import { CONTACT_RECIPIENT } from "../contact-request";
-import type { TemplateEntry } from "./registry";
+import * as React from 'react'
+import { CONTACT_RECIPIENT } from '../contact-request'
+import { BrandEmail } from './layout'
+import type { TemplateEntry } from './registry'
 
-function ContactRequest({ email = "" }: { email?: string }) {
-  return <Html lang="ar" dir="rtl"><Head /><Preview>مهتم جديد بالتواصل مع Insight</Preview>
-    <Body style={{ backgroundColor: "#ffffff", fontFamily: "Arial, sans-serif" }}>
-      <Container style={{ padding: "32px 24px" }}>
-        <Img src="https://insightsettle.com/brand/insight-logo.png" alt="Insight" width="140" />
-        <Heading>طلب تواصل جديد</Heading>
-        <Text>أرسل أحد زوّار الموقع بريده ووافق على التواصل معه بشأن اهتمامه بإنسايت.</Text>
-        <Text dir="ltr">{email}</Text>
-        <Text>يمكنك الرد على هذه الرسالة للتواصل معه مباشرة.</Text>
-        <Text>New contact request from the Insight homepage. Reply to this email to contact the visitor.</Text>
-      </Container>
-    </Body>
-  </Html>;
+function ContactRequest({ email = '' }: { email?: string }) {
+  return (
+    <BrandEmail
+      preview="طلب تواصل جديد من موقع إنسايت · New contact request"
+      demo={false}
+      footer={{ ar: 'رسالة داخلية لفريق إنسايت. ردّك على هذه الرسالة يصل إلى الزائر مباشرة.', en: 'Internal message for the Insight team. Replying to this email reaches the visitor directly.' }}
+      ar={{
+        heading: 'طلب تواصل جديد',
+        paragraphs: ['أرسل زائر بريده من الموقع ووافق على التواصل معه. الطلب محفوظ أيضاً في صندوق الدعم بلوحة الإدارة.'],
+        facts: [{ label: 'بريد الزائر', value: <bdi dir="ltr">{email}</bdi> }],
+        note: 'ردّ على هذه الرسالة للتواصل معه، ثم حدّث حالة الطلب في صندوق الدعم.',
+      }}
+      en={{
+        heading: 'New contact request',
+        paragraphs: ['A visitor left their email on the website and agreed to be contacted. The request is also saved in the console support inbox.'],
+        facts: [{ label: 'Visitor email', value: email }],
+        note: 'Reply to this email to reach them, then update the request status in the support inbox.',
+      }}
+    />
+  )
 }
 
 export const template = {
   component: ContactRequest,
-  subject: "Insight — طلب تواصل جديد / New contact request",
+  subject: 'إنسايت · طلب تواصل جديد | Insight · New contact request',
   to: CONTACT_RECIPIENT,
-  displayName: "Contact request",
-  previewData: { email: "visitor@example.com" },
-} satisfies TemplateEntry;
+  displayName: 'Contact request',
+  previewData: { email: 'visitor@example.com' },
+} satisfies TemplateEntry
