@@ -1725,6 +1725,13 @@ export type Database = {
         Args: { _actor: string; _reason: string; _settings: Json }
         Returns: undefined
       }
+      staff_search_email: {
+        Args: { _actor: string; _query: string }
+        Returns: {
+          email: string
+          id: string
+        }[]
+      }
       sweep_auction_deadlines: { Args: never; Returns: Json }
     }
     Enums: {
