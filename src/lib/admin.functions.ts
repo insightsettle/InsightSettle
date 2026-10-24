@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { levelFromRoles, rolesForLevel, STAFF_LEVELS, STAFF_ROLE_NAMES } from "@/lib/staff-levels";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -13,9 +14,9 @@ const dealStatuses = [
   "disputed",
 ] as const;
 
-async function assertStaff(context: { supabase: any; userId: string; claims?: any }) {
+async function assertStaff(context: { supabase: any; userId: string; claims?: any }, capability: "read" | "support" | "finance" | "admin" = "read") {
   const { requireStaffAccess } = await import("@/lib/staff-auth.server");
-  return requireStaffAccess(context);
+  return requireStaffAccess(context, capability);
 }
 
 export type PlatformUser = {
@@ -28,6 +29,7 @@ export type PlatformUser = {
   createdAt: string;
   lastSignInAt: string | null;
   isStaff: boolean;
+  staffLevel: import("@/lib/staff-levels").StaffLevel | null;
   dealCount: number;
   dealValue: number;
   businessStatus?: string | undefined;
@@ -64,7 +66,8 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
         accountState: (profile as { account_state?: string } | undefined)?.account_state ?? "active",
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at ?? null,
-        isStaff: (roles ?? []).some((r) => r.user_id === u.id && r.role === "admin"),
+        isStaff: levelFromRoles((roles ?? []).filter((r) => r.user_id === u.id).map((r) => String(r.role))) !== null,
+        staffLevel: levelFromRoles((roles ?? []).filter((r) => r.user_id === u.id).map((r) => String(r.role))),
         dealCount: mine.length,
         dealValue: mine.reduce((s, d) => s + Number(d.amount), 0),
       };
@@ -79,7 +82,7 @@ export const setVerificationStatus = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
+    const admin = await assertStaff(context, "support");
     const { error } = await admin
       .from("profiles")
       .update({ verification_status: data.status })
@@ -88,34 +91,37 @@ export const setVerificationStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Admin only: set a team member's permission level (none, view only, support, finance, operations, admin). Audited. */
 export const setStaffRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string; isStaff: boolean }) =>
-    z.object({ userId: z.string().uuid(), isStaff: z.boolean() }).parse(input),
+  .inputValidator((input: unknown) =>
+    z.object({ userId: z.string().uuid(), level: z.enum(["none", ...STAFF_LEVELS]), reason: z.string().trim().min(3).max(500) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
-    if (data.isStaff) {
-      const { error } = await admin
-        .from("user_roles")
-        .upsert({ user_id: data.userId, role: "admin" }, { onConflict: "user_id,role" });
-      if (error) throw error;
-    } else {
-      const { error } = await admin
-        .from("user_roles")
-        .delete()
-        .eq("user_id", data.userId)
-        .eq("role", "admin");
+    const admin = await assertStaff(context, "admin");
+    if (data.userId === context.userId && data.level !== "admin") throw new Error("You cannot lower your own access. Ask another admin.");
+    const { data: current, error: readError } = await admin.from("user_roles").select("user_id, role").in("role", [...STAFF_ROLE_NAMES]);
+    if (readError) throw readError;
+    const before = levelFromRoles((current ?? []).filter((r: any) => r.user_id === data.userId).map((r: any) => String(r.role)));
+    const admins = new Set((current ?? []).filter((r: any) => r.role === "admin" || r.role === "super_admin").map((r: any) => r.user_id));
+    if (before === "admin" && data.level !== "admin" && admins.size <= 1) throw new Error("At least one admin must remain.");
+    const { error: delError } = await admin.from("user_roles").delete().eq("user_id", data.userId).in("role", ["admin", "staff", "support", "finance", "compliance"]);
+    if (delError) throw delError;
+    const rows = rolesForLevel(data.level).map((role) => ({ user_id: data.userId, role: role as "admin" | "staff" | "support" | "finance" | "compliance" }));
+    if (rows.length) {
+      const { error } = await admin.from("user_roles").insert(rows);
       if (error) throw error;
     }
-    return { ok: true };
+    const { error: auditError } = await admin.rpc("staff_control_audit", { _actor: context.userId, _action: "STAFF_LEVEL", _entity: "user_roles", _id: data.userId, _old: { level: before ?? "none" }, _new: { level: data.level }, _reason: data.reason });
+    if (auditError) throw auditError;
+    return { ok: true, level: data.level };
   });
 
 export const verifyBusinessProfile = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
+    const admin = await assertStaff(context, "support");
     const { verifyMemberRecord } = await import('./staff-verification.server');
     return verifyMemberRecord(admin, context.userId, data.userId, 'business', false);
   });
@@ -124,7 +130,7 @@ export const verifyPayoutAccount = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
+    const admin = await assertStaff(context, "finance");
     const [{ verifyMemberRecord }, { getPaymentProvider }] = await Promise.all([import('./staff-verification.server'), import('./payment-provider.server')]);
     return verifyMemberRecord(admin, context.userId, data.userId, 'payout', !getPaymentProvider().connected);
   });
@@ -263,7 +269,7 @@ export const setDealStatus = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
+    const admin = await assertStaff(context, "finance");
     if (["released", "refunded", "partially_refunded", "cancelled"].includes(data.status))
       throw new Error("Use the existing release, refund or cancellation review action; the status control cannot move money.");
     const { error } = await admin
@@ -304,7 +310,7 @@ export const setFeeOverride = createServerFn({ method: "POST" })
         .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
+    const admin = await assertStaff(context, "finance");
     const { error } = await admin
       .from("deals")
       .update({
@@ -333,7 +339,7 @@ export const postStaffMessage = createServerFn({ method: "POST" })
     z.object({ dealId: z.string().uuid(), body: z.string().min(1).max(2000) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
+    const admin = await assertStaff(context, "support");
     const { error } = await admin.from("deal_messages").insert({
       deal_id: data.dealId,
       author_id: context.userId,
@@ -429,7 +435,7 @@ export const setDealRisk = createServerFn({ method: "POST" })
         .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const admin = await assertStaff(context);
+    const admin = await assertStaff(context, "support");
     const { error } = await admin
       .from("deals")
       .update({

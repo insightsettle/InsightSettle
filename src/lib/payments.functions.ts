@@ -487,7 +487,7 @@ export const settleTransaction = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { requireStaffAccess } = await import("@/lib/staff-auth.server");
-    await requireStaffAccess(context);
+    await requireStaffAccess(context, "finance");
     const { admin, provider, notify } = await serverDeps();
     const { settleTransactionCore } = await import("@/lib/settlement.server");
     if (!provider.connected) {
@@ -509,7 +509,7 @@ export const addReconciliationNote = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { requireStaffAccess } = await import("@/lib/staff-auth.server");
-    const admin = await requireStaffAccess(context);
+    const admin = await requireStaffAccess(context, "finance");
     const { data: tx } = await admin.from("deal_transactions").select("id, deal_id").eq("id", data.transactionId).maybeSingle();
     if (!tx) throw new Error("Transaction not found.");
     const { error } = await admin.from("deal_events").insert({

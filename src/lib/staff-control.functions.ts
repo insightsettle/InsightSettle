@@ -3,10 +3,9 @@ import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { auctionSettingsSchema } from './auction-fees';
 const reason=z.string().trim().min(3).max(2000);
-async function staff(context: {supabase:any;userId:string}, adminOnly=false) {
+async function staff(context: {supabase:any;userId:string}, need: boolean|'support'|'finance'=false) {
  const {requireStaffAccess}=await import('./staff-auth.server');
- if(adminOnly){const {data,error}=await context.supabase.rpc('has_role',{_user_id:context.userId,_role:'admin'});if(error||data!==true)throw new Error('Admin only');}
- return await requireStaffAccess(context) as any;
+ return await requireStaffAccess(context, need===true?'admin':need===false?'read':need) as any;
 }
 async function checked(p:PromiseLike<any>){const r=await p;if(r.error)throw r.error;return r.data;}
 async function audit(db:any,actor:string,action:string,entity:string,id:string,old:any,value:any,why:string){await checked(db.rpc('staff_control_audit',{_actor:actor,_action:action,_entity:entity,_id:id,_old:old,_new:value,_reason:why}));}
@@ -20,7 +19,7 @@ export const listStaffLots=createServerFn({method:'GET'}).middleware([requireSup
  const db=await staff(context);return await checked(db.from('auction_lots').select('id,title,owner_pct,organiser_pct,status,funded_deal_id,auctions(title,currency)').order('id').limit(100)) as any[];
 });
 export const editStaffLotSplit=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({lotId:z.string().uuid(),organiser:z.number().min(0).max(100),reason}).parse(i)).handler(async({context,data})=>{
- const db=await staff(context);await checked(db.rpc('staff_edit_auction_split',{_actor:context.userId,_lot:data.lotId,_organiser:data.organiser,_reason:data.reason}));return {ok:true};
+ const db=await staff(context, 'finance');await checked(db.rpc('staff_edit_auction_split',{_actor:context.userId,_lot:data.lotId,_organiser:data.organiser,_reason:data.reason}));return {ok:true};
 });
 export const customer360=createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({userId:z.string().uuid()}).parse(i)).handler(async({context,data})=>{
  const db=await staff(context);const u=await db.auth.admin.getUserById(data.userId);if(u.error||!u.data.user)throw new Error('User not found');
@@ -42,7 +41,7 @@ export const customer360=createServerFn({method:'GET'}).middleware([requireSupab
  return {user:{id:u.data.user.id,email:u.data.user.email??'',phone:u.data.user.phone??'',lastSignIn:u.data.user.last_sign_in_at??null,emailConfirmed:!!u.data.user.email_confirmed_at},profile,payout,business,documents,deals,notifications,notes,payments,invoices,disputes} as {user:{id:string;email:string;phone:string;lastSignIn:string|null;emailConfirmed:boolean};profile:any;payout:any;business:any;documents:any[];deals:any[];notifications:any[];notes:any[];payments:any[];invoices:any[];disputes:any[]};
 });
 export const customerIntervention=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({userId:z.string().uuid(),action:z.enum(['reset','verify_email','email','phone','suspend','reactivate','note']),value:z.string().trim().max(2000).default(''),reason}).parse(i)).handler(async({context,data})=>{
- const db=await staff(context);const r=await db.auth.admin.getUserById(data.userId);const u=r.data.user;if(r.error||!u)throw new Error('User not found');
+ const db=await staff(context, 'support');const r=await db.auth.admin.getUserById(data.userId);const u=r.data.user;if(r.error||!u)throw new Error('User not found');
  if(data.action==='suspend'||data.action==='reactivate'){await checked(db.rpc('staff_account_state',{_actor:context.userId,_user:data.userId,_state:data.action==='suspend'?'suspended':'active',_reason:data.reason}));return {ok:true,message:'Account state updated'};}
  if(data.action==='note'){if(data.value.length<3)throw new Error('Note is required');await audit(db,context.userId,'INTERNAL_NOTE','profiles',data.userId,null,{internal_note:data.value},data.reason);return {ok:true,message:'Internal note saved'};}
  if(data.action==='email'){
@@ -65,7 +64,7 @@ export const customerIntervention=createServerFn({method:'POST'}).middleware([re
  return {ok:true,message:'Email request accepted; delivery is not confirmed'};
 });
 export const dealIntervention=createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({dealId:z.string().uuid(),action:z.enum(['payment','delivery','inspection','freeze','unfreeze','email','note','invite','notification']),value:z.string().trim().max(2000).default(''),reason}).parse(i)).handler(async({context,data})=>{
- const db=await staff(context);
+ const db=await staff(context, 'support');
  if(data.action==='email')z.string().email().parse(data.value);
  if(['payment','delivery','inspection'].includes(data.action))z.string().datetime().parse(data.value);
  if(data.action==='note'&&data.value.length<3)throw new Error('Note is required');

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { STAFF_LEVELS, STAFF_LEVEL_LABEL, type StaffLevel } from "@/lib/staff-levels";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { BadgeCheck, Search, ShieldCheck, UserX } from "lucide-react";
@@ -51,7 +52,7 @@ function ConsoleUsers() {
     onSuccess: refresh,
   });
   const staff = useMutation({
-    mutationFn: (vars: { userId: string; isStaff: boolean }) => updateStaff({ data: vars }),
+    mutationFn: (vars: { userId: string; level: StaffLevel | "none"; reason: string }) => updateStaff({ data: vars }),
     onSuccess: refresh,
   });
 
@@ -99,9 +100,9 @@ function ConsoleUsers() {
                     >
                       {u.verificationStatus}
                     </span>
-                    {u.isStaff && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-foreground/10 px-2.5 py-0.5 text-xs font-semibold">
-                        <ShieldCheck className="size-3" /> Insight team
+                    {u.staffLevel && (
+                      <span data-no-localize className="inline-flex items-center gap-1 rounded-full bg-foreground/10 px-2.5 py-0.5 text-xs font-semibold">
+                        <ShieldCheck className="size-3" /> {text(...STAFF_LEVEL_LABEL[u.staffLevel])}
                       </span>
                     )}
                   </div>
@@ -141,13 +142,8 @@ function ConsoleUsers() {
                       <UserX /> Reject
                     </Button>
                   )}
-                  <Button
-                    size="sm"
-                    variant={u.isStaff ? "outline" : "secondary"}
-                    onClick={() => staff.mutate({ userId: u.id, isStaff: !u.isStaff })}
-                  >
-                    {u.isStaff ? "Remove team access" : "Grant team access"}
-                  </Button>
+                  <TeamLevelControl userId={u.id} level={u.staffLevel} pending={staff.isPending} onApply={(level, reason) => staff.mutate({ userId: u.id, level, reason })} />
+                  {staff.isError && staff.variables?.userId === u.id && <p role="alert" className="w-full text-xs text-destructive">{(staff.error as Error).message}</p>}
                 </div>
                 <div className="lg:col-span-3">
                   <AccountStateControl userId={u.id} state={(u as { accountState?: string }).accountState} />
@@ -160,6 +156,31 @@ function ConsoleUsers() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+
+function TeamLevelControl({ userId, level, pending, onApply }: { userId: string; level: StaffLevel | null; pending: boolean; onApply: (level: StaffLevel | "none", reason: string) => void }) {
+  const { text } = useLocale();
+  const [next, setNext] = useState<StaffLevel | "none">(level ?? "none");
+  const [reason, setReason] = useState("");
+  const changed = next !== (level ?? "none");
+  return (
+    <div data-no-localize className="flex w-full min-w-0 flex-wrap items-end gap-2 rounded-md border border-border p-2 sm:w-auto">
+      <label className="grid min-w-0 gap-1 text-xs">
+        <span className="text-muted-foreground">{text("Team level", "صلاحية الفريق")}</span>
+        <select id={`level-${userId}`} className="h-9 min-w-0 rounded-md border border-input bg-card px-2 text-sm" value={next} onChange={(e) => setNext(e.target.value as StaffLevel | "none")}>
+          {(["none", ...STAFF_LEVELS] as const).map((l) => <option key={l} value={l}>{text(...STAFF_LEVEL_LABEL[l])}</option>)}
+        </select>
+      </label>
+      {changed && <>
+        <label className="grid min-w-0 flex-1 gap-1 text-xs">
+          <span className="text-muted-foreground">{text("Reason (staff history)", "السبب (سجل الموظفين)")}</span>
+          <input className="h-9 min-w-0 rounded-md border border-input bg-card px-2 text-sm" value={reason} onChange={(e) => setReason(e.target.value)} />
+        </label>
+        <Button size="sm" disabled={pending || reason.trim().length < 3} onClick={() => { onApply(next, reason); setReason(""); }}>{text("Apply", "تطبيق")}</Button>
+      </>}
     </div>
   );
 }

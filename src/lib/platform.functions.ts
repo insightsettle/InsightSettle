@@ -5,13 +5,9 @@ import { platformSettingsSchema, SUPPORT_STATUSES } from "./platform-switches";
 
 const reason = z.string().trim().min(3).max(2000);
 
-async function staff(context: { supabase: any; userId: string }, adminOnly = false) {
+async function staff(context: { supabase: any; userId: string }, need: boolean | "support" | "finance" = false) {
   const { requireStaffAccess } = await import("./staff-auth.server");
-  if (adminOnly) {
-    const { data, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (error || data !== true) throw new Error("Admin only");
-  }
-  return (await requireStaffAccess(context)) as any;
+  return (await requireStaffAccess(context, need === true ? "admin" : need === false ? "read" : need)) as any;
 }
 async function checked(p: PromiseLike<any>) { const r = await p; if (r.error) throw r.error; return r.data; }
 
@@ -49,7 +45,7 @@ export const listSupportRequests = createServerFn({ method: "GET" }).middleware(
 export const updateSupportRequest = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), status: z.enum(SUPPORT_STATUSES), assigneeId: z.string().uuid().nullable(), note: z.string().max(4000), reason }).parse(i))
   .handler(async ({ context, data }) => {
-    const db = await staff(context);
+    const db = await staff(context, "support");
     await checked(db.rpc("staff_update_support_request", { _actor: context.userId, _id: data.id, _status: data.status, _assignee: data.assigneeId, _note: data.note, _reason: data.reason }));
     return { ok: true };
   });

@@ -5,8 +5,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getStaffAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { isStaffUser } = await import("@/lib/staff-auth.server");
-    return { isStaff: await isStaffUser(context) };
+    const { isStaffUser, staffLevelFor } = await import("@/lib/staff-auth.server");
+    const isStaff = await isStaffUser(context);
+    return { isStaff, level: isStaff ? await staffLevelFor(context) : null };
   });
 
 export const getStaffAuctions = createServerFn({ method: 'GET' })
@@ -108,7 +109,7 @@ export const resetDemoData = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { requireStaffAccess } = await import('@/lib/staff-auth.server');
-    const db = await requireStaffAccess(context);
+    const db = await requireStaffAccess(context, "admin");
     const { getPaymentProvider } = await import('@/lib/payment-provider.server');
     if (getPaymentProvider().connected) throw new Error('The demo reset is disabled when a live payment provider is connected.');
     const { data, error } = await (db as any).rpc('reset_demo_data', { _actor: context.userId });

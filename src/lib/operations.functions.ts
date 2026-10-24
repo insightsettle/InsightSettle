@@ -15,9 +15,9 @@ async function admin() {
   return { db: supabaseAdmin as any, notify };
 }
 
-async function requireStaff(ctx: Ctx) {
+async function requireStaff(ctx: Ctx, capability: "read" | "support" | "finance" | "admin" = "read") {
   const { requireStaffAccess } = await import("@/lib/staff-auth.server");
-  await requireStaffAccess(ctx);
+  await requireStaffAccess(ctx, capability);
 }
 
 async function simConfirm(db: any, notify: any, ids: string[]) {
@@ -135,7 +135,7 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
         .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await requireStaff(context);
+    await requireStaff(context, "finance");
     const { db, notify } = await admin();
     const { data: dispute } = await db.from("disputes").select("*").eq("id", data.disputeId).maybeSingle();
     if (!dispute || dispute.status === "resolved") throw new Error("This dispute is already closed.");
@@ -371,7 +371,7 @@ export const staffAction = createServerFn({ method: "POST" })
         .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await requireStaff(context);
+    await requireStaff(context, data.action === "cancel" ? "finance" : "support");
     const { db, notify } = await admin();
     const log = (entity: string, id: string, value: any) =>
       db.from("audit_logs").insert({

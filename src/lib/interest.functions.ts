@@ -46,7 +46,7 @@ export const deleteInterest = createServerFn({ method: "POST" })
   .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { requireStaffAccess } = await import("@/lib/staff-auth.server");
-    const db = await requireStaffAccess(context);
+    const db = await requireStaffAccess(context, "support");
     const { error } = await (db as any).from("interest_register").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     await (db as any).from("audit_logs").insert({ user_id: context.userId, action: "interest_deleted_on_request", entity: "interest_register", entity_id: data.id });

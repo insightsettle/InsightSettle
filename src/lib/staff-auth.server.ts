@@ -1,6 +1,8 @@
 /**
  * Single staff authorisation check used by every staff-only server function.
+ * Reads need any staff level; writes name the capability they need (support, finance or admin).
  */
+import { CAPABILITY_DENIED, levelAllows, levelFromRoles, STAFF_ROLE_NAMES, type StaffCapability, type StaffLevel } from "@/lib/staff-levels";
 
 // Set to true together with restoring MfaGate in the console route (SRS SEC-1, decision D-19)
 export const STAFF_MFA_REQUIRED = false;
@@ -19,11 +21,26 @@ export async function isStaffUser(ctx: StaffCtx): Promise<boolean> {
   return false;
 }
 
-/** Throws unless the caller is staff. Returns the privileged client for staff work. */
-export async function requireStaffAccess(ctx: StaffCtx) {
+/** The caller's staff level, or null when not staff. */
+export async function staffLevelFor(ctx: StaffCtx): Promise<StaffLevel | null> {
+  const roles: string[] = [];
+  for (const role of STAFF_ROLE_NAMES) {
+    const { data, error } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: role });
+    if (error) throw error;
+    if (data === true) roles.push(role);
+  }
+  return levelFromRoles(roles);
+}
+
+/** Throws unless the caller is staff with the capability. Returns the privileged client for staff work. */
+export async function requireStaffAccess(ctx: StaffCtx, capability: StaffCapability = "read") {
   if (!(await isStaffUser(ctx))) throw new Error("Forbidden");
   if (STAFF_MFA_REQUIRED && ctx.claims?.aal !== "aal2")
     throw new Error("Complete two-step verification to use staff actions.");
+  if (capability !== "read") {
+    const level = await staffLevelFor(ctx);
+    if (!levelAllows(level, capability)) throw new Error(CAPABILITY_DENIED[capability]);
+  }
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin;
 }
