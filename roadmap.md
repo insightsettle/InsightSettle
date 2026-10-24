@@ -1,4 +1,9 @@
 # Roadmap
+- [x] 24 Oct: visitor-initiated contact popup verified closed after 31 seconds and scroll; manual open/close verified EN desktop and AR mobile, design unchanged.
+- [x] 24 Oct: DL-24817 two-staff 70/30 decision completed; BHD 700 refund + 295.410 net payout + 4.173 fee + 0.417 VAT = 1,000; escrow zero and each currency ledger balanced. Temporary reviewer role removed.
+- [x] 24 Oct: per-milestone DL-26588 created with BHD 500/1,000/1,500 stages; first funded/submitted/released, second funded, separate INV-1040/1041 verified; next funding BHD 1,500. Correct stale pricing/invoice refresh and consumed quote display; legacy funding history classified from actual transaction kind without financial changes.
+- [ ] 24 Oct: auction decline/backup funding/completion E2E blocked: fictional organiser password invalid and account-specific session approval unavailable. No auction mutation attempted.
+- [x] 24 Oct: console reset restored two pending demo deals, one auction, one open lot and zero payment transactions. Money logic and mobile unchanged; no publication.
 - [x] Mobile 18 Oct wording parity: contextual roles, generic copy, receipt/release label, supported OTHER outside-Gulf country option and widget coverage added; business logic/API calls unchanged. Static translation and legacy-label checks pass. No web edits or publication.
 - [ ] Mobile Flutter test/analyze execution: Flutter unavailable locally; existing GitHub Actions runs these checks on push; CI result not yet verified.
 - [x] Delivered Arabic X cover at 1500×500 using official logo, original Thmanyah Sans and platform colours; visually checked unclipped text. Bio (129 characters), separate UTM profile/pinned links and demo-aware pinned post (217 weighted characters) supplied for manual upload; no account posting.

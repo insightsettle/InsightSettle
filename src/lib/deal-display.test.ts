@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { quoteAmountLine } from "./deal-display";
+import { paymentEventNote, quoteAmountLine } from "./deal-display";
 import { roundMoney } from "./money";
 
 describe("D22 displayed quote reconciliation", () => {
@@ -12,5 +12,14 @@ describe("D22 displayed quote reconciliation", () => {
     const quote = { total: 1015.997, fee: 13.910, vat: 2.087, target_currency: "BHD" };
     expect(quoteAmountLine(quote)).toBe(1000);
     expect(roundMoney(quoteAmountLine(quote) + quote.fee + quote.vat, "BHD")).toBe(1015.997);
+  });
+});
+
+describe("milestone payment event classification", () => {
+  it("uses the matching transaction kind without changing actual refund events", () => {
+    const transactions = [{ kind: "funding", provider_ref: "SIM-FUND" }, { kind: "refund", provider_ref: "SIM-REFUND" }];
+    expect(paymentEventNote("Milestone refund · SIM-FUND", transactions)).toEqual(["Milestone funding · SIM-FUND", "تمويل المرحلة · SIM-FUND"]);
+    expect(paymentEventNote("Milestone refund · SIM-REFUND", transactions)).toBeNull();
+    expect(paymentEventNote("Milestone refund · SIM-UNKNOWN", transactions)).toBeNull();
   });
 });

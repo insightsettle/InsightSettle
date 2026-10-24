@@ -15,7 +15,7 @@ import {
 import { CustodyNote } from "@/components/deal/DealPresentation";
 import { NextStepCard } from "@/components/deal/NextStep";
 import { ACCEPT_LABEL, DELIVER_LABEL, RELEASE_LABEL, nextStepFor, type NextStepAction } from "@/lib/next-step";
-import { quoteAmountLine } from "@/lib/deal-display";
+import { paymentEventNote, quoteAmountLine } from "@/lib/deal-display";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import {
@@ -177,6 +177,8 @@ function OrdinaryDealPage() {
     queryClient.invalidateQueries({ queryKey: ["deal-ratings", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-milestones", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["deal-terms-all", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["invoice", deal?.id] });
+    queryClient.invalidateQueries({ queryKey: ["deal-pricing", deal?.id] });
     queryClient.invalidateQueries({ queryKey: ["my-deals"] });
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
@@ -221,6 +223,7 @@ function OrdinaryDealPage() {
     mutationFn: async (fn: () => Promise<PaymentResult>) => fn(),
     onSuccess: (result) => {
       setPaymentNotice(result);
+      if (result.ok) setQuote(null);
       refresh();
     },
     onError: (error: unknown) => {
@@ -904,9 +907,9 @@ function OrdinaryDealPage() {
                       <li key={e.id} className="relative">
                         <span className="absolute -start-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
                         <p className="text-sm font-medium" data-no-localize>{text(e.title)}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground" data-no-localize>
                           {formatDate(e.created_at)}
-                          {e.note ? ` · ${text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note)}` : ""}
+                          {e.note ? ` · ${(() => { const corrected = paymentEventNote(e.note, transactions.data ?? []); return corrected ? text(corrected[0], corrected[1]) : text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note); })()}` : ""}
                         </p>
                       </li>
                     ))}

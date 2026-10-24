@@ -31,6 +31,7 @@
 
 - Authenticated client chrome is owned by the pathless client layout and shared AppShell; SiteShell omits public chrome there, while ConsoleShell supplies staff navigation to AppShell, keeping all routes and actions unchanged.
 - Client layout helpers in DealPresentation and deal-display are presentation-only; they reuse server pricing and existing action eligibility without authorizing mutations or calculating new charges.
+- Legacy milestone event labels are classified from matching payment records only in presentation, and explicit bilingual event text bypasses DOM translation so asynchronous record loading cannot restore obsolete labels.
 
 - Staff overview reads are paginated and guarded by the existing staff authorization; reconciliation must mark provider balance unverified without an independent provider statement, never infer a match from internal ledger data.
 - The staff status control routes cancellation to the existing staff cancel action; other statuses retain the existing setter so financial and permission checks remain server-owned.

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -23,17 +23,8 @@ export function ContactPopup() {
   const [retryAt, setRetryAt] = useState(0);
   const requestId = useRef<string | null>(null);
 
-  useEffect(() => {
-    let shown = false;
-    try { shown = sessionStorage.getItem("insight-contact-shown") === "1"; } catch { /* Storage is optional. */ }
-    if (shown) return;
-    const timer = window.setTimeout(() => setOpen(true), 1200);
-    return () => window.clearTimeout(timer);
-  }, []);
-
   function changeOpen(next: boolean) {
     setOpen(next);
-    try { sessionStorage.setItem("insight-contact-shown", "1"); } catch { /* Storage is optional. */ }
   }
 
   return <Dialog.Root open={open} onOpenChange={changeOpen}>
