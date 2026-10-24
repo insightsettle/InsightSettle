@@ -5,10 +5,13 @@ import { z } from 'zod';
 
 it('suspended funding stops before any quote is consumed in whole-deal and per-milestone modes', async () => {
   let mode = 'upfront';
+  let state = 'suspended';
+  let frozen = false;
+  let deadline: string | null = null;
   const accessed: string[] = [];
   const db = { from(table: string) {
     accessed.push(table);
-    const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ error: null, data: table === 'profiles' ? { account_state: 'suspended' } : { buyer_id: 'buyer', seller_id: 'seller', funding_mode: mode, status: 'pending_funding' } }) };
+    const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ error: null, data: table === 'profiles' ? { account_state: state } : { buyer_id: 'buyer', seller_id: 'seller', funding_mode: mode, status: 'pending_funding', frozen, payment_deadline_at: deadline } }) };
     return q;
   } };
   const createServerFn = () => {
@@ -27,4 +30,10 @@ it('suspended funding stops before any quote is consumed in whole-deal and per-m
     expect(result.message).toContain('suspended');
     expect(accessed).toEqual(['deals', 'profiles']);
   }
+  state = 'active'; frozen = true; accessed.length = 0;
+  expect((await fund({data:{dealId:'deal'},context:{userId:'buyer',supabase:db}})).message).toContain('frozen');
+  expect(accessed).toEqual(['deals','profiles']);
+  frozen = false; deadline = '2020-01-01T00:00:00Z'; accessed.length = 0;
+  expect((await fund({data:{dealId:'deal'},context:{userId:'buyer',supabase:db}})).message).toContain('deadline');
+  expect(accessed).toEqual(['deals','profiles']);
 });
