@@ -177,6 +177,20 @@ describe('T22 auction real confirmation path', () => {
     expect(pricing.breakdown.fee).toBe(730.63);
     expect(pricing.breakdown.buyerVat).toBe(0);
   });
+  it('auction setting changes price new quotes only and preserve funded invoice and payout legs',async()=>{
+    const {db,tables,pricing,notify}=await fixture();
+    const locked=JSON.stringify(tables['fx_quotes']);
+    Object.assign(tables['auction_fee_settings']?.[0]??{}, {mode:'fixed',fixed_usd:4});
+    const newPrice=await priceDeal(db,tables['deals']?.[0],'SAR');
+    expect(newPrice.breakdown.fee).toBe(15);
+    expect(pricing.breakdown.fee).toBe(845.63);
+    expect(JSON.stringify(tables['fx_quotes'])).toBe(locked);
+    expect(tables['tax_invoices']?.[0].fee).toBe(845.63);
+    for(const transactionId of ['owner-release','org-release'])await settleTransactionCore(db,notify,{transactionId,outcome:'succeeded',actorId:null});
+    expect(tables['deal_transactions']?.find(t=>t.id==='owner-release').amount).toBe(40800);
+    expect(tables['deal_transactions']?.find(t=>t.id==='org-release').amount).toBe(7200);
+    expect(ledgerBalance(tables['ledger_entries']??[])).toEqual({SAR:0});
+  });
   it('assigns the 3-decimal rounding remainder to the owner',()=>{
     expect(auctionReleaseAmounts(1000.001,'BHD',85,15)).toEqual({owner:850.001,organiser:150});
   });
