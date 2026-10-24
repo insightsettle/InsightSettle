@@ -107,7 +107,19 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
         </section>
       </div>
 
-      <section className="relative px-6 pt-6">
+      <section className="relative px-6 pt-6 sm:hidden">
+        <div className="rounded-xl border border-border p-4 text-sm">
+          <Bi ar={<strong>{`رسوم خدمة إنسايت لإدارة الصفقة وحفظ مبلغها — ${view.deal.ref}`}</strong>} en={`Insight service fee for managing and holding the deal — ${view.deal.ref}`} />
+          <div className="mt-3">
+            <Row ar="الكمية" en="Qty" value="1" />
+            <Row ar="المبلغ الخاضع" en="Taxable amount" value={formatMoney(inv.fee, inv.currency)} />
+            <Row ar="نسبة الضريبة" en="VAT rate" value={rate} />
+            <Row ar="الضريبة" en="VAT" value={formatMoney(inv.vat, inv.currency)} />
+            <Row ar="الإجمالي" en="Total" value={formatMoney(inv.total, inv.currency)} strong />
+          </div>
+        </div>
+      </section>
+      <section className="relative hidden px-6 pt-6 sm:block">
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full min-w-[520px] text-sm">
             <thead className="bg-muted/60 text-xs">
