@@ -40,3 +40,8 @@ export function countdown(deadline: string | null | undefined, now: number) {
 export function lotCategory(status: string) {
   return status === 'pending_funding' ? 'awaiting' : ['delivered', 'under_review', 'disputed'].includes(status) ? 'inspection' : ['released','refunded','partially_refunded'].includes(status) ? 'completed' : 'other';
 }
+
+/** Display only: a closed deal must not retain an active inspection countdown. */
+export function auctionInspectionDeadline(deal: { status: string; auto_release_at?: string | null }) {
+  return ['delivered', 'under_review', 'disputed'].includes(deal.status) ? deal.auto_release_at ?? null : null;
+}
