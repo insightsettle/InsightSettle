@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] 24 Oct 12:07 milestone form: labeled bilingual fields, 375px containment, equal allocation, opt-in retention and advance copy; verify AR/EN creation with No/Yes without financial/server/mobile changes, preserve empty deal/calculator inputs.
 - [x] 24 Oct: visitor-initiated contact popup verified closed after 31 seconds and scroll; manual open/close verified EN desktop and AR mobile, design unchanged.
 - [x] 24 Oct: DL-24817 two-staff 70/30 decision completed; BHD 700 refund + 295.410 net payout + 4.173 fee + 0.417 VAT = 1,000; escrow zero and each currency ledger balanced. Temporary reviewer role removed.
 - [x] 24 Oct: per-milestone DL-26588 created with BHD 500/1,000/1,500 stages; first funded/submitted/released, second funded, separate INV-1040/1041 verified; next funding BHD 1,500. Correct stale pricing/invoice refresh and consumed quote display; legacy funding history classified from actual transaction kind without financial changes.
