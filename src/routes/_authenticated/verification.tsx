@@ -118,8 +118,8 @@ function VerificationPage() {
             {direction === "rtl" ? <ArrowRight className="size-4" /> : <ArrowLeft className="size-4" />}{text("Back to my account", "العودة إلى حسابي")}
           </Link>
         )}
-        {section === "details" && <div data-no-localize className="mt-4"><h1 className="text-3xl font-extrabold">{text("Personal details and address", "البيانات الشخصية والعنوان")}</h1><PersonalDetailsCard /><BusinessDetailsCard /></div>}
-        {section === "payout" && <div data-no-localize className="mt-4"><h1 className="text-3xl font-extrabold">{text("Payout account", "الحساب البنكي")}</h1><PayoutAccountCard /></div>}
+        {section === "details" && <div className="mt-4"><h1 data-no-localize className="text-3xl font-extrabold">{text("Personal details and address", "البيانات الشخصية والعنوان")}</h1><PersonalDetailsCard /><BusinessDetailsCard /></div>}
+        {section === "payout" && <div className="mt-4"><h1 data-no-localize className="text-3xl font-extrabold">{text("Payout account", "الحساب البنكي")}</h1><PayoutAccountCard /></div>}
         {section === "identity" && <>
         <h1 id="identity" className="mt-4 text-3xl font-extrabold" data-no-localize>{text("Identity verification", "توثيق الهوية")}</h1>
         <p className="mt-2 text-muted-foreground" data-no-localize>
