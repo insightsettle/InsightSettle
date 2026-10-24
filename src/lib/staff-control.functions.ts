@@ -55,7 +55,7 @@ export const customerIntervention=createServerFn({method:'POST'}).middleware([re
  if(data.action==='phone'){
   const phone=z.string().regex(/^\+?[0-9 ()-]{7,30}$/).parse(data.value);const p=await checked(db.from('profiles').select('phone').eq('id',data.userId).single());
   await audit(db,context.userId,'PHONE_CHANGE_REQUEST','profiles',data.userId,{phone:p.phone},{phone},data.reason);
-  await checked(db.from('profiles').update({phone}).eq('id',data.userId));return {ok:true,message:'Phone updated'};
+  await checked(db.from('profiles').update({phone}).eq('id',data.userId));await audit(db,context.userId,'PHONE_CHANGED','profiles',data.userId,{phone:p.phone},{phone},data.reason);return {ok:true,message:'Phone updated'};
  }
  if(!u.email)throw new Error('No email on account');
  if(data.action==='verify_email'&&u.email_confirmed_at)throw new Error('Email is already verified');
