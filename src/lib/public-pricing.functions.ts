@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { auctionSettingsSchema } from "@/lib/auction-fees";
 import { dealFee, splitFee } from "@/lib/fees";
 
 export const publicPricing = createServerFn({ method: "GET" })
@@ -26,5 +27,6 @@ export const publicPricing = createServerFn({ method: "GET" })
     const inputs = await loadPricingInputs(client, data.currency);
     const fee = dealFee(data.amount, data.currency, inputs.usdPerUnit, inputs.schedule);
     const breakdown = splitFee({ amount: data.amount, currency: data.currency, fee, feePayer: data.payer, buyerCountry: data.buyerCountry, supplierCountry: data.supplierCountry, vatTable: inputs.vatTable });
-    return { available: true as const, schedule: inputs.schedule, breakdown };
+    const {data: auction,error: auctionError}=await client.from('auction_fee_settings').select('*').eq('id',true).single();
+    return { available: true as const, schedule: inputs.schedule, breakdown, auction: auctionError ? null : auctionSettingsSchema.parse(auction) };
   });
