@@ -148,6 +148,13 @@
       "when": 1792845791219,
       "tag": "0020_staff_account_and_dispute_safety",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792845812004,
+      "tag": "0021_suspended_deal_creation_guard",
+      "breakpoints": true
     }
   ]
 }
