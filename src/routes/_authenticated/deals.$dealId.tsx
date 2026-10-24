@@ -907,7 +907,7 @@ function OrdinaryDealPage() {
                       <li key={e.id} className="relative">
                         <span className="absolute -start-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
                         <p className="text-sm font-medium" data-no-localize>{text(e.title)}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground" data-no-localize>
                           {formatDate(e.created_at)}
                           {e.note ? ` · ${(() => { const corrected = paymentEventNote(e.note, transactions.data ?? []); return corrected ? text(corrected[0], corrected[1]) : text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note); })()}` : ""}
                         </p>
