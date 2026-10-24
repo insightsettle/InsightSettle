@@ -28,7 +28,7 @@ export function ContactPopup() {
   }
 
   return <Dialog.Root open={open} onOpenChange={changeOpen}>
-    <Dialog.Trigger asChild><Button data-no-localize className="fixed bottom-5 end-5 z-40 h-12 gap-2 rounded-full px-5 shadow-lg" aria-label={text("Contact Insight", "تواصل مع إنسايت")}><MessageCircle className="size-5" />{text("Let's connect", "لنتواصل")}</Button></Dialog.Trigger>
+    <Dialog.Trigger asChild><Button className="fixed bottom-5 end-5 z-40 h-12 gap-2 rounded-full px-5 shadow-lg" aria-label={text("Contact Insight", "تواصل مع إنسايت")}><MessageCircle className="size-5" />{text("Let's connect", "لنتواصل")}</Button></Dialog.Trigger>
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-50 bg-foreground/50 backdrop-blur-sm motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0" />
       <Dialog.Content dir={direction} data-no-localize className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md max-h-[calc(100dvh-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border bg-card p-6 text-start shadow-xl outline-none sm:p-9 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:zoom-in-95">
