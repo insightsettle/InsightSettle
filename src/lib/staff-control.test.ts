@@ -33,6 +33,9 @@ CREATE UNIQUE INDEX terms_version_unique ON deal_term_versions(deal_id,version);
 INSERT INTO profiles(id,verification_status,full_name) VALUES('${actor}','verified','Demo admin');`);
 await db.exec(readFileSync(new URL('../../drizzle/migrations/0018_staff_control_centre.sql',import.meta.url),'utf8'));
 await db.exec(readFileSync(new URL('../../drizzle/migrations/0019_staff_payment_deadline_column.sql',import.meta.url),'utf8'));
+await db.exec(readFileSync(new URL('../../drizzle/migrations/0020_staff_account_and_dispute_safety.sql',import.meta.url),'utf8'));
+await db.exec(readFileSync(new URL('../../drizzle/migrations/0021_suspended_deal_creation_guard.sql',import.meta.url),'utf8'));
+await db.exec('CREATE TRIGGER active_creator BEFORE INSERT ON deals FOR EACH ROW EXECUTE FUNCTION block_inactive_accounts()');
 },30000);
 afterAll(async()=>{await db?.close();});
 beforeEach(async()=>{
@@ -84,4 +87,13 @@ await expect(db.exec(`SELECT staff_operational_update('${actor}','${deal}','unfr
 it('configured commission maximum refuses 31 percent when maximum is 30',async()=>{
 await db.exec(`SELECT staff_save_auction_settings('${actor}','{"max_commission":30,"default_commission":15}','Demo settings')`);
 await expect(db.exec(`SELECT staff_edit_auction_split('${actor}','${lot}',31,'Demo request')`)).rejects.toThrow(/commission/);
+});
+
+it('suspended creator cannot bypass through service-role deal insertion',async()=>{
+await db.exec(`SELECT staff_account_state('${actor}','${buyer}','suspended','Demo suspension')`);
+await expect(db.exec(`INSERT INTO deals(created_by,title) VALUES('${buyer}','Fictional blocked deal')`)).rejects.toThrow(/suspended/);
+});
+it('direct unfreeze is refused with unresolved disputes too',async()=>{
+await db.exec(`SELECT staff_operational_update('${actor}','${deal}','freeze','','Demo freeze');INSERT INTO disputes(id,deal_id,status) VALUES(gen_random_uuid(),'${deal}','open')`);
+await expect(db.exec('UPDATE deals SET frozen=false')).rejects.toThrow(/four-eyes/);
 });
