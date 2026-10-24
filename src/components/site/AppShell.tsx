@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Search, Settings, LogOut } from "lucide-react";
+import { ConsoleSearch } from "@/components/site/ConsoleSearch";
 import { BrandLogo } from "@/components/site/BrandLogo";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -60,7 +61,7 @@ export function AppShell({ children, navigation, title, staff = false, mobileNav
           <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setOpen(true)} aria-label={text("Open navigation")}><Menu /></Button>
           <p className="min-w-0 truncate text-lg font-bold">{text(title)}</p>
           <div className="ms-auto flex shrink-0 items-center gap-2">
-            <div className="relative hidden w-[260px] xl:block"><Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label={text("Search")} placeholder={text("Search by deal ref or party…")} className="h-10 bg-background ps-9 text-sm" /></div>
+            {staff ? <ConsoleSearch /> : <div className="relative hidden w-[260px] xl:block"><Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label={text("Search")} placeholder={text("Search by deal ref or party…")} className="h-10 bg-background ps-9 text-sm" /></div>}
             <NotificationBell /><LanguageToggle />
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gold-subtle text-sm font-medium text-gold-foreground" data-no-localize>{name.charAt(0)}</span>
             <div className="hidden max-w-36 sm:block"><p className="truncate text-xs font-medium" data-no-localize>{name}</p><p className="text-xs text-muted-foreground">{text(staff ? "Staff console" : "Customer view")}</p></div>

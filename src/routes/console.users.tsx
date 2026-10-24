@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { BadgeCheck, Search, ShieldCheck, UserX } from "lucide-react";
 import { useState } from "react";
@@ -121,6 +121,7 @@ function ConsoleUsers() {
                   <p className="text-muted-foreground">{formatSAR(u.dealValue)} total value</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <Button asChild size="sm" variant="outline"><Link to="/console/users/$userId" params={{userId:u.id}}>{text("Customer 360","ملف العميل الشامل")}</Link></Button>
                   {u.businessStatus && u.businessStatus !== 'verified' && <Button size="sm" variant="outline" disabled={approval.isPending || u.verificationStatus !== 'verified'} onClick={() => approval.mutate({ userId: u.id, kind: 'business' })}><BadgeCheck />{text('Verify business profile','توثيق السجل التجاري')}</Button>}
                   {u.hasPayout && !u.payoutVerified && <div className="space-y-1"><Button size="sm" variant="outline" disabled={approval.isPending || u.verificationStatus !== 'verified'} onClick={() => approval.mutate({ userId: u.id, kind: 'payout' })}><BadgeCheck />{text('Verify payout account','توثيق حساب الصرف')}</Button><p className="text-xs text-warning">{text('Demo: provider check simulated','تجريبي: تحقق مزوّد الدفع محاكى')}</p></div>}
                   {u.verificationStatus !== "verified" && (
