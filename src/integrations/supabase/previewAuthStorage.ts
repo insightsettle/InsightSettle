@@ -54,7 +54,7 @@ export function brokeredPreviewStorage(): PreviewAuthStorage | undefined {
   // detached frame has no parent and not every browser implements ancestorOrigins.
   const parentWindow = window.parent as Window | null;
   const framed = parentWindow !== null && parentWindow !== window;
-  if (!projectId || !framed) return localStorage;
+  if (!projectId || !framed) return safeLocalStorage();
 
   // Post only to the real editor ancestor, validated as a Lovable origin, so the
   // session token can never reach an untrusted embedder.
@@ -140,4 +140,19 @@ export function brokeredPreviewStorage(): PreviewAuthStorage | undefined {
       return request('lovable-preview-auth:remove', key, local ?? undefined).then(() => {});
     },
   };
+}
+
+
+/** localStorage when the browser allows it; otherwise an in-memory store so the site still works (sign-in lasts for this visit only). */
+function safeLocalStorage(): Storage | { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem(k: string): void } {
+  try {
+    const ls = window.localStorage;
+    const probe = "__insight_probe__";
+    ls.setItem(probe, "1");
+    ls.removeItem(probe);
+    return ls;
+  } catch {
+    const mem = new Map<string, string>();
+    return { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => { mem.set(k, v); }, removeItem: (k) => { mem.delete(k); } };
+  }
 }
