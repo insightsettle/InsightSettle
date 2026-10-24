@@ -23,7 +23,7 @@ export function FxCustomerQuote() {
     ],
     [settings.rates],
   );
-  const [amount, setAmount] = useState(10000);
+  const [amount, setAmount] = useState<number | "">("");
   const [supplier, setSupplier] = useState("AED");
   const [buyer, setBuyer] = useState("SAR");
 
@@ -34,7 +34,7 @@ export function FxCustomerQuote() {
   // SAR per 1 unit, margin applied once on the conversion
   const margin = same ? 0 : Math.max(s.spread, b.spread);
   const rate = same ? 1 : (s.base / b.base) * (1 + margin);
-  const total = (amount || 0) * rate;
+  const total = (Number(amount) || 0) * rate;
 
   const select = (id: string, value: string, set: (v: string) => void) => (
     <select
@@ -69,7 +69,7 @@ export function FxCustomerQuote() {
                 min={0}
                 step={moneyInputStep(supplier)}
                 value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
+                onChange={(e) => setAmount(e.target.value === "" ? "" : Number(e.target.value))}
                 className="mt-2"
               />
             </div>
@@ -93,7 +93,7 @@ export function FxCustomerQuote() {
             <dl className="mt-4 space-y-3 text-sm">
               <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-3">
                 <dt className="text-muted-foreground">{text("Supplier receives", "مبلغ الصفقة بعملة المورد")}</dt>
-                <dd className="break-words text-end font-semibold" dir="ltr">{fmt(amount || 0, s.code)}</dd>
+                <dd className="break-words text-end font-semibold" dir="ltr">{fmt(Number(amount) || 0, s.code)}</dd>
               </div>
               <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-3">
                 <dt className="text-muted-foreground">

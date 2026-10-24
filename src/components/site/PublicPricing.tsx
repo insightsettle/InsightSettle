@@ -21,7 +21,7 @@ export function PublicPricing() {
   const { data: initial } = useSuspenseQuery(publicPricingOptions);
   const calculate = useServerFn(publicPricing);
   const [result, setResult] = useState(initial);
-  const [amount, setAmount] = useState("10000");
+  const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<typeof SUPPORTED_CURRENCIES[number]>("USD");
   const [payer, setPayer] = useState<FeePayer>("split");
   const [buyerCountry, setBuyerCountry] = useState<Country>("SA");

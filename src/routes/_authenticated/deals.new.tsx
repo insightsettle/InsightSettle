@@ -59,7 +59,7 @@ function NewDeal() {
   const createFn = useServerFn(createTypedDeal);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("5000");
+  const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("SAR");
   const [role, setRole] = useState<"buyer" | "seller">("buyer");
   const [counterpartyEmail, setCounterpartyEmail] = useState("");
@@ -293,9 +293,6 @@ function NewDeal() {
             <div className="space-y-2">
               <Label htmlFor="quantity">{text("Quantity")}</Label>
               <Input id="quantity" type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
-              <p className="text-xs text-muted-foreground" dir="ltr">
-                {text("Unit price", "سعر الوحدة")}: {formatMoney(numericAmount / Math.max(1, Number(quantity) || 1), currency)}
-              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="supplierCountry">{text(`${RC.payee[0]} country`, `دولة ${R.payee.ar}`)}</Label>
