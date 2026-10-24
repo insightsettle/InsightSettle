@@ -250,6 +250,10 @@ html[dir="rtl"] [class*="tracking-"] { letter-spacing: 0; }
   /* Print only the page content: no demo strip, notices, phone tab bar or shell padding. */
   .app-column > div:first-child, .app-column > [role="status"], .app-column > nav { display: none !important; }
   .app-content { padding: 0 !important; }
-  @page { size: A4; margin: 10mm; }
+  @page { size: A4; margin: 8mm; }
+  .invoice-a4-stack { position: static !important; left: auto !important; z-index: auto !important; }
+  .invoice-a4-page { break-after: page; page-break-after: always; display: flex; justify-content: center; }
+  .invoice-a4-page:last-child { break-after: auto; page-break-after: auto; }
+  .invoice-a4-page > div { zoom: 0.86; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff !important; }
 }

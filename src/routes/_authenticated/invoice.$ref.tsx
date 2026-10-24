@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import QRCode from "qrcode";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { InvoiceDocument, downloadInvoicesPdf } from "@/components/invoice/InvoiceDocument";
 import { countryLabel, zatcaTlv, type FeeInvoice } from "@/lib/fee-invoice";
 import { getFeeInvoices, type FeeInvoiceView } from "@/lib/fee-invoice.functions";
 import { useLocale } from "@/lib/locale";
@@ -60,7 +61,7 @@ function InvoiceSheet({ inv, view }: { inv: FeeInvoice; view: FeeInvoiceView }) 
   const payerRole = inv.party === "buyer" ? { ar: "الطرف الدافع", en: "Paying party" } : { ar: "الطرف المستلم", en: "Receiving party" };
 
   return (
-    <article className="invoice-sheet relative break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card shadow-sm print:break-after-page print:rounded-none print:border-0 print:text-[11px] print:shadow-none">
+    <article className="invoice-sheet relative print:hidden break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card shadow-sm print:break-after-page print:rounded-none print:border-0 print:text-[11px] print:shadow-none">
       <div className="pointer-events-none absolute inset-0 grid place-items-center print:flex" aria-hidden="true">
         <span className="rotate-[-24deg] select-none text-5xl font-extrabold text-muted-foreground/10 sm:text-7xl">DEMO · نموذج تجريبي</span>
       </div>
@@ -180,14 +181,52 @@ function InvoicePage() {
       <Button asChild variant="outline" className="mt-4"><Link to="/documents">{text("Back", "رجوع")}</Link></Button>
     </div>
   );
-  const view = q.data;
+  return <InvoiceList view={q.data} />;
+}
+
+function useQr(inv: FeeInvoice) {
+  const [qr, setQr] = useState<string | null>(null);
+  useEffect(() => {
+    const payload = zatcaTlv([SELLER.en, SELLER.vat, new Date(inv.issuedAt).toISOString(), inv.total.toFixed(2), inv.vat.toFixed(2)]);
+    QRCode.toDataURL(payload, { margin: 1, width: 240 }).then(setQr).catch(() => setQr(null));
+  }, [inv]);
+  return qr;
+}
+
+function A4Invoice({ inv, view, register }: { inv: FeeInvoice; view: FeeInvoiceView; register: (el: HTMLDivElement | null) => void }) {
+  const qr = useQr(inv);
+  const milestone = inv.milestoneId ? view.milestones.find((m) => m.id === inv.milestoneId) ?? null : null;
+  return <div className="invoice-a4-page"><InvoiceDocument ref={register} inv={inv} dealRef={view.deal.ref} milestone={milestone} qr={qr} /></div>;
+}
+
+function InvoiceList({ view }: { view: FeeInvoiceView }) {
+  const { text } = useLocale();
+  const nodes = useRef<(HTMLDivElement | null)[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function download() {
+    setBusy(true); setError(null);
+    try {
+      const els = nodes.current.filter((n): n is HTMLDivElement => !!n);
+      const name = view.invoices.length === 1 ? `Insight_${view.invoices[0]!.number}.pdf` : `Insight_${view.deal.ref}_invoices.pdf`;
+      await downloadInvoicesPdf(els, name);
+    } catch {
+      setError(text("The PDF could not be created on this device. Opening print instead.", "تعذّر إنشاء ملف PDF على هذا الجهاز، سنفتح الطباعة بدلاً منه."));
+      window.print();
+    } finally { setBusy(false); }
+  }
   return (
     <div data-no-localize className="mx-auto max-w-4xl space-y-8 bg-background p-4 text-foreground sm:p-8 print:max-w-none print:space-y-0 print:p-0">
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Bi ar={<strong className="text-lg">فواتير رسوم إنسايت</strong>} en="Insight fee invoices" />
-        <Button onClick={() => window.print()}>{text("Print or save as PDF", "طباعة أو حفظ PDF")}</Button>
+        <Button onClick={() => void download()} disabled={busy}>{busy ? text("Preparing PDF…", "جارٍ تجهيز الملف…") : text("Download invoice (PDF)", "تنزيل الفاتورة (PDF)")}</Button>
       </div>
+      {error && <p role="alert" className="text-sm text-destructive print:hidden">{error}</p>}
       {view.invoices.map((inv) => <InvoiceSheet key={inv.number} inv={inv} view={view} />)}
+      {/* Fixed A4 copies: off-screen for the PDF download, the only thing shown when printing. */}
+      <div aria-hidden="true" className="invoice-a4-stack pointer-events-none fixed top-0 -z-10 opacity-100" style={{ left: -10000 }}>
+        {view.invoices.map((inv, i) => <A4Invoice key={inv.number} inv={inv} view={view} register={(el) => { nodes.current[i] = el; }} />)}
+      </div>
     </div>
   );
 }
