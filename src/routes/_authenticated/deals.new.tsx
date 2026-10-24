@@ -24,6 +24,7 @@ import { CustodyNote, FormStepper } from "@/components/deal/DealPresentation";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { fxCurrencies } from "@/lib/fx";
+import { retentionFormValues } from "@/lib/milestone-editor";
 
 export const Route = createFileRoute("/_authenticated/deals/new")({
   head: () => ({
@@ -53,6 +54,7 @@ function NewDeal() {
   const [useMilestones, setUseMilestones] = useState(false);
   const [rows, setRows] = useState<EditableMilestone[]>([blankRow(), blankRow()]);
   const [retention, setRetention] = useState("5");
+  const [retentionEnabled, setRetentionEnabled] = useState(false);
   const [fundingMode, setFundingMode] = useState<"upfront" | "per_milestone">("upfront");
   const [dlp, setDlp] = useState("90");
   const [revisions, setRevisions] = useState("2");
@@ -160,8 +162,7 @@ function NewDeal() {
         cancellationConditions,
         autoRelease,
         revisionsIncluded: Math.min(20, Math.max(0, Number(revisions) || 0)),
-        retentionPercent: Math.min(10, Math.max(0, Number(retention) || 0)),
-        defectsLiabilityDays: Math.min(365, Math.max(0, Math.round(Number(dlp) || 0))),
+        ...retentionFormValues(dealType === "contracting" && retentionEnabled, retention, dlp),
         fundingMode: milestonesOn ? fundingMode : "upfront",
         milestones: milestonesOn ? rows.map(toInput) : [],
       } });
@@ -425,20 +426,27 @@ function NewDeal() {
             </label>
           )}
           {milestonesOn && (
-            <div className="space-y-3 rounded-md border border-border p-4">
-              <p className="font-semibold">Milestones</p>
+            <div className="min-w-0 space-y-5" data-no-localize>
+              <h2 className="font-semibold">{text("Milestones", "المراحل")}</h2>
               <MilestoneEditor rows={rows} onChange={setRows} currency={currency} total={numericAmount} allowAdvance={dealType === "contracting"} />
               {dealType === "contracting" && (
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="retention">{text("Retention %")}</Label>
-                    <Input id="retention" type="number" min={0} max={10} step="0.5" dir="ltr" value={retention} onChange={(e) => setRetention(e.target.value)} />
+                <fieldset className="min-w-0 space-y-3 border-t border-border pt-5">
+                  <legend className="max-w-full text-sm font-semibold">{text("Do you want to retain a percentage as a guarantee after delivery?", "هل تريد حجز نسبة من المبلغ ضماناً بعد التسليم؟")}</legend>
+                  <p className="text-xs leading-6 text-muted-foreground">{text("Part of the amount is held during the warranty period, then paid to the contractor if there are no defects.", "يُحجز جزء من المبلغ لفترة الضمان ثم يُحوّل للمقاول إن لم توجد عيوب")}</p>
+                  <div className="flex gap-5">
+                    {([false, true] as const).map(enabled => <label key={String(enabled)} className="flex items-center gap-2 text-sm"><input type="radio" name="retentionChoice" checked={retentionEnabled === enabled} onChange={() => setRetentionEnabled(enabled)} />{enabled ? text("Yes", "نعم") : text("No", "لا")}</label>)}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dlp">{text("Defects liability period (days)")}</Label>
-                    <Input id="dlp" type="number" min={0} max={365} dir="ltr" value={dlp} onChange={(e) => setDlp(e.target.value)} />
-                  </div>
-                </div>
+                  {retentionEnabled && <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+                    <div className="min-w-0 space-y-2">
+                      <Label htmlFor="retention">{text("Retention %", "نسبة الضمان المحتجزة (%)")}</Label>
+                      <Input id="retention" className="min-w-0 w-full" type="number" min={0} max={10} step="0.5" dir="ltr" value={retention} onChange={(e) => setRetention(e.target.value)} />
+                    </div>
+                    <div className="min-w-0 space-y-2">
+                      <Label htmlFor="dlp">{text("Defects liability period (days)", "فترة ضمان العيوب (أيام)")}</Label>
+                      <Input id="dlp" className="min-w-0 w-full" type="number" min={0} max={365} dir="ltr" value={dlp} onChange={(e) => setDlp(e.target.value)} />
+                    </div>
+                  </div>}
+                </fieldset>
               )}
               <div className="space-y-2 sm:max-w-sm">
                 <Label htmlFor="funding">{text("Funding")}</Label>

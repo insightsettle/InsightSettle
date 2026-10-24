@@ -12,6 +12,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Milestone editor convenience allocation and retention opt-in serialization live in a browser-safe form helper; server validation and financial allocation stay authoritative and unchanged.
 - Mobile party labels use a browser-independent Dart role table and localized placeholder expansion; screens retain buyer/seller identifiers and existing action rules so copy cannot change authorization or pricing.
 - Homepage contact requests use a dedicated validated public server function and a fixed-recipient managed email template; no contact queue or email tables are created, preventing arbitrary-recipient sending.
 - Positive currency inputs share moneyInputStep for minimum and step so native validation uses an aligned minor-unit base.

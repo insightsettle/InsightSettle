@@ -1,11 +1,12 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Circle, FileCheck2, HardHat, Laptop, Package, Plus, ShieldCheck, Trash2, Truck, Wrench } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -20,6 +21,7 @@ import { escrowStep, type DealType } from "@/lib/milestones";
 import { formatMoney, minorUnitsFor, roundMoney } from "@/lib/money";
 import { CustodyNote, DEMO_CUSTODY_EN } from "@/components/deal/DealPresentation";
 import { useLocale } from "@/lib/locale";
+import { equalMilestoneAmounts } from "@/lib/milestone-editor";
 
 /** C09-D31: the retention a milestone will withhold, shown from funding (recorded amount once released). */
 function retentionFor(m: { amount: unknown; retention_amount: unknown; status: string }, percent: number, currency: string) {
@@ -276,35 +278,61 @@ export function MilestoneEditor({ rows, onChange, currency, total, allowAdvance 
   rows: EditableMilestone[]; onChange: (r: EditableMilestone[]) => void; currency: string; total: number; allowAdvance: boolean;
 }) {
   const { text } = useLocale();
+  const fieldId = useId();
   const sum = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
   const diff = roundMoney(total - sum, currency);
   const set = (i: number, patch: Partial<EditableMilestone>) => onChange(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-4" data-no-localize>
+      <Button type="button" variant="secondary" className="h-auto min-h-10 w-full whitespace-normal sm:w-auto" disabled={total <= 0 || rows.some(r => r.locked)} onClick={() => {
+        const amounts = equalMilestoneAmounts(total, rows.length, currency);
+        onChange(rows.map((r, i) => ({ ...r, amount: amounts[i] ?? "" })));
+      }}>{text("Split amount equally", "وزّع المبلغ بالتساوي")}</Button>
       {rows.map((r, i) => (
-        <div key={i} className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-[2fr_1fr_1fr_auto]">
-          <Input aria-label={text("Milestone title", "عنوان المرحلة")} placeholder={text("Milestone title", "عنوان المرحلة")} value={r.title} disabled={r.locked} onChange={(e) => set(i, { title: e.target.value })} />
-          <div className="min-w-0">
-            <Input aria-label={text("Amount", "المبلغ")} type="number" min={0} step={10 ** -minorUnitsFor(currency)} dir="ltr" value={r.amount} disabled={r.locked} onChange={(e) => set(i, { amount: e.target.value })}
-              onBlur={() => { if (r.amount.trim() && Number.isFinite(Number(r.amount))) set(i, { amount: Number(r.amount).toFixed(minorUnitsFor(currency)) }); }} />
-            {r.amount.trim() && Number.isFinite(Number(r.amount)) && <p className="mt-1 text-xs text-muted-foreground" dir="ltr">{formatMoney(Number(r.amount), currency)}</p>}
+        <div key={i} data-milestone-card className="min-w-0 rounded-md border border-border bg-card p-4">
+          <header className="mb-4 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+            <h3 className="min-w-0 font-semibold">{text(`Milestone ${i + 1}`, `المرحلة ${i + 1}`)}</h3>
+            <Button type="button" size="icon" variant="ghost" className="shrink-0" title={text("Remove milestone", "حذف المرحلة")} aria-label={text("Remove milestone", "حذف المرحلة")} disabled={r.locked || rows.length <= 2} onClick={() => onChange(rows.filter((_, j) => j !== i))}><Trash2 /></Button>
+          </header>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <div className="min-w-0 space-y-2">
+              <Label htmlFor={`${fieldId}-${i}-title`}>{text("Milestone title", "عنوان المرحلة")}</Label>
+              <Input id={`${fieldId}-${i}-title`} className="min-w-0 w-full" aria-describedby={`${fieldId}-${i}-title-hint`} value={r.title} disabled={r.locked} onChange={(e) => set(i, { title: e.target.value })} />
+              <p id={`${fieldId}-${i}-title-hint`} className="text-xs text-muted-foreground">{text("e.g. Material supply", "مثال: توريد المواد")}</p>
+            </div>
+            <div className="min-w-0 space-y-2">
+              <Label htmlFor={`${fieldId}-${i}-amount`}>{text("Milestone amount", "مبلغ المرحلة")}</Label>
+              <div className="relative min-w-0">
+                <Input id={`${fieldId}-${i}-amount`} className="min-w-0 w-full pe-16" aria-describedby={`${fieldId}-${i}-amount-hint`} type="number" min={0} step={10 ** -minorUnitsFor(currency)} dir="ltr" value={Number(r.amount) === 0 ? "" : r.amount} disabled={r.locked} onChange={(e) => set(i, { amount: e.target.value })}
+                  onBlur={() => { if (r.amount.trim() && Number.isFinite(Number(r.amount))) set(i, { amount: Number(r.amount) === 0 ? "" : Number(r.amount).toFixed(minorUnitsFor(currency)) }); }} />
+                <span dir="ltr" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currency}</span>
+              </div>
+              <p id={`${fieldId}-${i}-amount-hint`} className={`text-xs tabular-nums ${diff === 0 ? "text-primary" : "text-destructive"}`}>{text("Remaining to allocate:", "المتبقي للتوزيع:")} <bdi>{formatMoney(diff, currency)}</bdi></p>
+            </div>
+            <div className="min-w-0 space-y-2">
+              <Label htmlFor={`${fieldId}-${i}-due`}>{text("Expected delivery date", "تاريخ التسليم المتوقع")}</Label>
+              <Input id={`${fieldId}-${i}-due`} className="block min-w-0 w-full max-w-full appearance-none" aria-describedby={`${fieldId}-${i}-due-hint`} type="date" value={r.dueDate} disabled={r.locked} onChange={(e) => set(i, { dueDate: e.target.value })} />
+              <p id={`${fieldId}-${i}-due-hint`} className="text-xs text-muted-foreground">{text("Optional — when this milestone is expected to finish.", "اختياري — الموعد المتوقع لإنجاز هذه المرحلة.")}</p>
+            </div>
+            <div className="min-w-0 space-y-2">
+              <Label htmlFor={`${fieldId}-${i}-proof`}>{text("Proof required", "ما يثبت إنجاز المرحلة")}</Label>
+              <Input id={`${fieldId}-${i}-proof`} className="min-w-0 w-full" aria-describedby={`${fieldId}-${i}-proof-hint`} value={r.evidenceRequired} disabled={r.locked} onChange={(e) => set(i, { evidenceRequired: e.target.value })} />
+              <p id={`${fieldId}-${i}-proof-hint`} className="text-xs text-muted-foreground">{text("Optional — e.g. site photos or acceptance report.", "اختياري — مثال: صور الموقع أو محضر الاستلام.")}</p>
+            </div>
           </div>
-          <Input aria-label={text("Due date", "تاريخ الاستحقاق")} type="date" value={r.dueDate} disabled={r.locked} onChange={(e) => set(i, { dueDate: e.target.value })} />
-          <Button type="button" size="icon" variant="ghost" aria-label={text("Remove milestone", "حذف المرحلة")} disabled={r.locked || rows.length <= 2} onClick={() => onChange(rows.filter((_, j) => j !== i))}><Trash2 /></Button>
-          <Input className="sm:col-span-3" aria-label={text("Evidence required", "الإثبات المطلوب")} placeholder={text("Evidence required (e.g. site photos, inspection sign-off)", "الإثبات المطلوب (مثل صور الموقع أو محضر الفحص)")} value={r.evidenceRequired} disabled={r.locked} onChange={(e) => set(i, { evidenceRequired: e.target.value })} />
           {allowAdvance && i === 0 && (
-            <label className="flex items-center gap-2 text-xs">
-              <input type="checkbox" checked={r.kind === "advance"} disabled={r.locked} onChange={(e) => set(i, { kind: e.target.checked ? "advance" : "work" })} />
-              <span>{text('Advance payment (mobilisation, up to 20%)', 'دفعة مقدّمة (تجهيز، حتى 20%)')}</span>
+            <label className="mt-4 flex min-w-0 items-start gap-2 text-sm">
+              <input type="checkbox" className="mt-1 shrink-0" checked={r.kind === "advance"} disabled={r.locked} onChange={(e) => set(i, { kind: e.target.checked ? "advance" : "work" })} />
+              <span className="min-w-0">{text('Advance payment to the contractor (up to 20%)', 'دفعة مقدّمة للمقاول (حتى 20%)')}</span>
             </label>
           )}
         </div>
       ))}
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <Button type="button" size="sm" variant="outline" disabled={rows.length >= 20} onClick={() => onChange([...rows, { title: "", amount: "", dueDate: "", evidenceRequired: "", kind: "work" }])}><Plus /> {text("Add milestone", "إضافة مرحلة")}</Button>
-        <span className={diff === 0 ? "text-primary" : "text-destructive"}>
-          {diff === 0 ? <span>{text('Milestones match the deal amount', 'مبالغ المراحل تطابق مبلغ الصفقة')}</span> : <><span>{text('Difference to the deal amount:', 'الفارق عن مبلغ الصفقة:')}</span> <span dir="ltr">{formatMoney(diff, currency)}</span></>}
+      <div data-milestone-allocation className="sticky bottom-[calc(5rem+env(safe-area-inset-bottom))] z-10 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border bg-card p-3 text-sm sm:static sm:flex sm:justify-between">
+        <span role="status" className={`min-w-0 break-words tabular-nums ${diff === 0 ? "text-primary" : "text-destructive"}`}>
+          {text('Unallocated:', 'غير موزّع:')} <bdi>{formatMoney(diff, currency)}</bdi>
         </span>
+        <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={rows.length >= 20} onClick={() => onChange([...rows, { title: "", amount: "", dueDate: "", evidenceRequired: "", kind: "work" }])}><Plus /> {text("Add milestone", "إضافة مرحلة")}</Button>
       </div>
     </div>
   );
