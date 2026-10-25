@@ -6,7 +6,7 @@ import { z } from "zod";
 
 type Opt = readonly [key: string, en: string, ar: string];
 export type SurveyQuestion = { id: SurveyField; en: string; ar: string; multi?: boolean; options: readonly Opt[] };
-export type SurveyField = "respondent" | "country" | "unknown_party" | "problems" | "deal_size" | "current_method" | "would_use" | "fee_ok" | "heard_of";
+export type SurveyField = "respondent" | "country" | "unknown_party" | "deals_per_year" | "channel" | "cross_border" | "problems" | "deal_size" | "current_method" | "would_use" | "fee_ok" | "heard_of";
 
 export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
   { id: "respondent", en: "Which describes you best?", ar: "أيّ وصف ينطبق عليك أكثر؟", options: [
@@ -24,6 +24,21 @@ export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
   { id: "unknown_party", en: "In the last 12 months, did you pay or get paid by someone you had not dealt with before?", ar: "خلال آخر 12 شهراً، هل دفعت أو استلمت مبلغاً من طرف لم تتعامل معه من قبل؟", options: [
     ["often", "Yes, often", "نعم، كثيراً"], ["sometimes", "Yes, a few times", "نعم، بضع مرات"], ["never", "No", "لا"],
   ] },
+  { id: "deals_per_year", en: "About how many deals like this do you make in a year?", ar: "كم صفقة من هذا النوع تجري تقريباً في السنة؟", options: [
+    ["1_2", "1 or 2", "1 أو 2"], ["3_10", "3 to 10", "من 3 إلى 10"], ["11_50", "11 to 50", "من 11 إلى 50"], ["gt50", "More than 50", "أكثر من 50"],
+  ] },
+  { id: "channel", en: "Where do these deals usually start? (choose all that apply)", ar: "أين تبدأ هذه الصفقات عادةً؟ (اختر كل ما ينطبق)", multi: true, options: [
+    ["social", "Social media (Instagram, Snapchat, X, TikTok)", "مواقع التواصل (إنستغرام، سناب شات، إكس، تيك توك)"],
+    ["whatsapp", "WhatsApp or direct messages", "واتساب أو الرسائل المباشرة"],
+    ["classifieds", "Listing sites (e.g. Haraj, OpenSooq)", "مواقع الإعلانات (مثل حراج، السوق المفتوح)"],
+    ["online_store", "An online store or marketplace", "متجر إلكتروني أو منصة بيع"],
+    ["referral", "Through people I know", "عن طريق معارف"],
+    ["business", "Business contacts, tenders or trade shows", "علاقات عمل أو مناقصات أو معارض"],
+    ["other", "Elsewhere", "أخرى"],
+  ] },
+  { id: "cross_border", en: "Do you deal with someone in another Gulf country?", ar: "هل تتعامل مع أطراف في دولة خليجية أخرى؟", options: [
+    ["often", "Yes, often", "نعم، كثيراً"], ["sometimes", "Sometimes", "أحياناً"], ["never", "No", "لا"],
+  ] },
   { id: "problems", en: "Which of these has happened to you? (choose all that apply)", ar: "أيّ مما يلي حدث معك؟ (اختر كل ما ينطبق)", multi: true, options: [
     ["late_payment", "I was paid late or not at all", "تأخّر الدفع لي أو لم يُدفع"],
     ["not_delivered", "I paid and nothing arrived", "دفعت ولم يصلني شيء"],
@@ -38,7 +53,7 @@ export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
     ["5k_25k", "SAR 5,000 to 25,000", "من 5,000 إلى 25,000 ريال"], ["25k_100k", "SAR 25,000 to 100,000", "من 25,000 إلى 100,000 ريال"],
     ["gt100k", "More than SAR 100,000", "أكثر من 100,000 ريال"],
   ] },
-  { id: "current_method", en: "How do you usually protect yourself today?", ar: "كيف تحمي نفسك عادةً اليوم؟", options: [
+  { id: "current_method", en: "How do you usually protect yourself today? (choose all that apply)", ar: "كيف تحمي نفسك عادةً اليوم؟ (اختر كل ما ينطبق)", multi: true, options: [
     ["trust", "I rely on trust or reviews", "أعتمد على الثقة أو التقييمات"],
     ["half_advance", "Part up front, the rest on delivery", "جزء مقدماً والباقي عند التسليم"],
     ["cash_on_delivery", "Cash or payment on delivery", "الدفع عند الاستلام"],
@@ -68,9 +83,12 @@ export const surveySchema = z.object({
   respondent: one("respondent"),
   country: one("country"),
   unknown_party: one("unknown_party"),
+  deals_per_year: one("deals_per_year"),
+  channel: many("channel"),
+  cross_border: one("cross_border"),
   problems: many("problems"),
   deal_size: one("deal_size"),
-  current_method: one("current_method"),
+  current_method: many("current_method"),
   would_use: one("would_use"),
   fee_ok: one("fee_ok"),
   heard_of: many("heard_of"),

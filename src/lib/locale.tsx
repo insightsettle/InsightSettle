@@ -1195,6 +1195,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("ar");
 
   useEffect(() => {
+    // A shared link can choose the language (e.g. /survey?lang=en); the visitor can still switch from the header.
+    const fromLink = new URLSearchParams(window.location.search).get("lang");
+    if (fromLink === "ar" || fromLink === "en") { setLocaleState(fromLink); return; }
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === "ar" || saved === "en") setLocaleState(saved);
   }, []);
