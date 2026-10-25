@@ -61,6 +61,12 @@ function SurveyResults() {
                       );
                     })}
                   </ul>
+                  {qq.others.length > 0 && (
+                    <div className="mt-3 border-t pt-3">
+                      <p className="text-xs font-medium text-muted-foreground">{text("Written answers for “other”", "الإجابات المكتوبة لـ«أخرى»")}</p>
+                      <ul className="mt-1 space-y-1 text-sm">{qq.others.slice(0, 30).map((t, j) => <li key={j} dir="auto">• {t}</li>)}</ul>
+                    </div>
+                  )}
                 </section>
               );
             })}

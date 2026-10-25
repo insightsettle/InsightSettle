@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocale } from "@/lib/locale";
-import { SURVEY_QUESTIONS, type SurveyField } from "@/lib/survey";
+import { chose, OTHER_KEY, SURVEY_QUESTIONS, type SurveyField } from "@/lib/survey";
 import { submitSurvey } from "@/lib/survey.functions";
 
 export const Route = createFileRoute("/survey")({
@@ -32,12 +32,15 @@ function SurveyPage() {
   const [comment, setComment] = useState("");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
+  const [others, setOthers] = useState<Partial<Record<SurveyField, string>>>({});
   const [tried, setTried] = useState(false);
-  const missing = SURVEY_QUESTIONS.filter((q) => { const v = a[q.id]; return !v || (Array.isArray(v) && v.length === 0); }).map((q) => q.id);
+  const needsOther = (id: SurveyField) => chose(a[id], OTHER_KEY) && !(others[id] ?? "").trim();
+  const missing = SURVEY_QUESTIONS.filter((q) => { const v = a[q.id]; return !v || (Array.isArray(v) && v.length === 0) || needsOther(q.id); }).map((q) => q.id);
   const m = useMutation({
     mutationFn: () => send({ data: {
       lang: locale === "en" ? "en" : "ar", ...(a as any), comment, pilot_email: email,
       source: (src ?? "link").replace(/[^a-z0-9_-]/gi, "").slice(0, 40) || "link", website,
+      other_answers: Object.fromEntries(Object.entries(others).map(([k, v]) => [k, (v ?? "").trim()]).filter(([, v]) => v)),
     } }),
   });
   const pick = (q: (typeof SURVEY_QUESTIONS)[number], key: string) => setA((p) => {
@@ -83,7 +86,12 @@ function SurveyPage() {
                         );
                       })}
                     </div>
-                    {bad && <p className="mt-2 text-sm text-destructive">{text("Please choose an answer.", "يرجى اختيار إجابة.")}</p>}
+                    {chose(v, OTHER_KEY) && (
+                      <Input aria-label={text("Your answer", "إجابتك")} className="mt-3" maxLength={120} autoFocus
+                        placeholder={text("Please write your answer", "يرجى كتابة إجابتك")}
+                        value={others[q.id] ?? ""} onChange={(e) => setOthers((p) => ({ ...p, [q.id]: e.target.value }))} />
+                    )}
+                    {bad && <p className="mt-2 text-sm text-destructive">{needsOther(q.id) ? text("Please write your answer.", "يرجى كتابة إجابتك.") : text("Please choose an answer.", "يرجى اختيار إجابة.")}</p>}
                   </fieldset>
                 </CardContent>
               </Card>

@@ -16,6 +16,7 @@ export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
     ["services", "I sell services or freelance", "أقدّم خدمات أو أعمل مستقلاً"],
     ["contractor", "Contractor or fit-out", "مقاول أو تشطيبات"],
     ["auction", "I run or join social-media auctions", "أنظّم أو أشارك في مزادات التواصل الاجتماعي"],
+    ["other", "Something else", "غير ذلك"],
   ] },
   { id: "country", en: "Where are you based?", ar: "أين مقرّك؟", options: [
     ["SA", "Saudi Arabia", "السعودية"], ["BH", "Bahrain", "البحرين"], ["AE", "UAE", "الإمارات"],
@@ -60,6 +61,7 @@ export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
     ["bank", "Bank guarantee or letter of credit", "ضمان بنكي أو اعتماد مستندي"],
     ["contract", "A written contract only", "عقد مكتوب فقط"],
     ["nothing", "Nothing in particular", "لا شيء محدد"],
+    ["other", "Another way", "طريقة أخرى"],
   ] },
   { id: "would_use", en: "Would you use a service where the payment stays with a licensed payment provider and is paid out only after delivery is confirmed?", ar: "هل تستخدم خدمة يبقى فيها المبلغ لدى مزوّد دفع مرخّص ولا يُحوَّل إلا بعد تأكيد التسليم؟", options: [
     ["yes", "Yes", "نعم"], ["maybe", "Maybe, depends on the fee", "ربما، حسب الرسوم"], ["no", "No", "لا"],
@@ -68,11 +70,16 @@ export const SURVEY_QUESTIONS: readonly SurveyQuestion[] = [
     ["lt1", "Under 1%", "أقل من 1%"], ["1_2", "1% to 2%", "من 1% إلى 2%"], ["2_3", "2% to 3%", "من 2% إلى 3%"], ["gt3", "More than 3%", "أكثر من 3%"], ["none", "I would not pay a fee", "لن أدفع رسوماً"],
   ] },
   { id: "heard_of", en: "Have you used any of these? (choose all that apply)", ar: "هل استخدمت أياً مما يلي؟ (اختر كل ما ينطبق)", multi: true, options: [
-    ["waffy", "Waffy", "وفّي"], ["other_escrow", "Another escrow service", "خدمة ضمان دفع أخرى"],
+    ["other_escrow", "A service that holds the payment until delivery (escrow)", "خدمة تحفظ المبلغ حتى التسليم (ضمان دفع)"],
     ["marketplace", "A marketplace that holds payment (e.g. an online store app)", "منصة بيع تحتفظ بالمبلغ (مثل تطبيق متجر)"],
-    ["lc", "A bank letter of credit", "اعتماد مستندي من بنك"], ["none", "None", "لا شيء"],
+    ["lc", "A bank letter of credit", "اعتماد مستندي من بنك"], ["other", "Something else", "شيء آخر"], ["none", "None", "لا شيء"],
   ] },
 ] as const;
+
+/** Questions with an "other" option: choosing it asks the respondent to write their answer. */
+export const OTHER_KEY = "other";
+export const OTHER_QUESTIONS = SURVEY_QUESTIONS.filter((q) => q.options.some((o) => o[0] === OTHER_KEY)).map((q) => q.id);
+export const chose = (v: unknown, key: string) => (Array.isArray(v) ? v.includes(key) : v === key);
 
 const keys = (id: SurveyField) => SURVEY_QUESTIONS.find((q) => q.id === id)!.options.map((o) => o[0]) as [string, ...string[]];
 const one = (id: SurveyField) => z.enum(keys(id));
@@ -96,7 +103,16 @@ export const surveySchema = z.object({
   pilot_email: z.string().trim().email().max(200).or(z.literal("")).default(""),
   source: z.string().trim().max(40).regex(/^[a-z0-9_-]*$/i).default("link"),
   website: z.string().max(0).default(""), // honeypot: must stay empty
-});
+  other_answers: z.record(z.string(), z.string().trim().max(120)).default({}),
+}).superRefine((d, ctx) => {
+  for (const id of OTHER_QUESTIONS)
+    if (chose((d as any)[id], OTHER_KEY) && !d.other_answers[id])
+      ctx.addIssue({ code: "custom", path: ["other_answers", id], message: "Please write your answer for “other”." });
+}).transform((d) => ({
+  ...d,
+  // keep only the texts for questions where "other" was chosen
+  other_answers: Object.fromEntries(OTHER_QUESTIONS.filter((id) => chose((d as any)[id], OTHER_KEY) && d.other_answers[id]).map((id) => [id, d.other_answers[id]!])),
+}));
 export type SurveyInput = z.input<typeof surveySchema>;
 
 /** Counts per option for every question. Multi-choice questions count each selected option. */
@@ -107,6 +123,7 @@ export function tallySurvey(rows: Record<string, unknown>[]) {
       const v = r[q.id];
       for (const k of Array.isArray(v) ? v : [v]) if (typeof k === "string" && k in counts) counts[k] = (counts[k] ?? 0) + 1;
     }
-    return { id: q.id, en: q.en, ar: q.ar, multi: !!q.multi, options: q.options.map(([k, en, ar]) => ({ key: k, en, ar, count: counts[k] ?? 0 })) };
+    const others = rows.map((r) => (r["other_answers"] as Record<string, string> | null | undefined)?.[q.id]).filter((t): t is string => !!t);
+    return { id: q.id, en: q.en, ar: q.ar, multi: !!q.multi, others, options: q.options.map(([k, en, ar]) => ({ key: k, en, ar, count: counts[k] ?? 0 })) };
   });
 }
