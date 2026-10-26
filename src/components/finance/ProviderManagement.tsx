@@ -152,7 +152,7 @@ function ConnectionTab({ p, data }: { p: ProviderConfig; data: Data }) {
   const creds = data.credentials.filter(c => c.provider === p.code && c.environment === 'sandbox');
   const origin = typeof window === 'undefined' ? 'https://insightsettle.com' : window.location.origin;
   return <div className="mt-4 space-y-6">
-    <div className="flex flex-wrap items-center gap-2"><span className="font-medium">{text('Adapter', 'المحوّل')}: <span dir="ltr">{p.adapter}</span></span>{adapter.implemented ? <StatusBadge status="simulated" /> : <StatusBadge status="pending_approval" />}</div>
+    <div className="flex flex-wrap items-center gap-2"><span className="font-medium">{text('Adapter', 'المحوّل')}: <span dir="ltr">{p.adapter}</span></span>{adapter.implemented ? <StatusBadge status="simulated" /> : <StatusBadge status="not_connected" />}</div>
     {!adapter.implemented && <p className="rounded-lg border border-border bg-muted p-3 text-sm">{text("Adapter not built yet: waiting for the provider's official API documentation. Credentials can be stored for later but no call is made.", 'لم يُبنَ المحوّل بعد: بانتظار وثائق الواجهة الرسمية. يمكن حفظ بيانات الاعتماد لاحقاً دون إجراء أي اتصال.')}</p>}
     <div className="space-y-3"><h3 className="font-semibold">{text('Sandbox credentials', 'بيانات اعتماد بيئة الاختبار')}</h3>
       {!adapter.credentialFields.length && <p className="text-sm text-muted-foreground">{text('This adapter needs no credentials.', 'لا يحتاج هذا المحوّل بيانات اعتماد.')}</p>}
