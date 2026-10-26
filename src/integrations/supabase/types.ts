@@ -1084,6 +1084,48 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_provider_credentials: {
+        Row: {
+          ciphertext: string
+          environment: string
+          field: string
+          id: string
+          iv: string
+          last4: string
+          proposal_id: string | null
+          provider: string
+          set_at: string
+          set_by: string
+          status: string
+        }
+        Insert: {
+          ciphertext: string
+          environment: string
+          field: string
+          id?: string
+          iv: string
+          last4: string
+          proposal_id?: string | null
+          provider: string
+          set_at?: string
+          set_by: string
+          status?: string
+        }
+        Update: {
+          ciphertext?: string
+          environment?: string
+          field?: string
+          id?: string
+          iv?: string
+          last4?: string
+          proposal_id?: string | null
+          provider?: string
+          set_at?: string
+          set_by?: string
+          status?: string
+        }
+        Relationships: []
+      }
       finance_records: {
         Row: {
           actor_id: string
@@ -1862,6 +1904,8 @@ export type Database = {
           payout_split_id: string | null
           provider: string | null
           provider_ref: string | null
+          route_provider: string | null
+          route_rule_version: string | null
           seller_id: string | null
           status: string | null
           updated_at: string | null
