@@ -1588,6 +1588,72 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_responses: {
+        Row: {
+          channel: string[]
+          comment: string
+          country: string
+          created_at: string
+          cross_border: string | null
+          current_method: string[]
+          deal_size: string
+          deals_per_year: string | null
+          fee_ok: string
+          heard_of: string[]
+          id: string
+          lang: string
+          other_answers: Json
+          pilot_email: string | null
+          problems: string[]
+          respondent: string
+          source: string
+          unknown_party: string
+          would_use: string
+        }
+        Insert: {
+          channel?: string[]
+          comment?: string
+          country: string
+          created_at?: string
+          cross_border?: string | null
+          current_method: string[]
+          deal_size: string
+          deals_per_year?: string | null
+          fee_ok: string
+          heard_of?: string[]
+          id?: string
+          lang?: string
+          other_answers?: Json
+          pilot_email?: string | null
+          problems?: string[]
+          respondent: string
+          source?: string
+          unknown_party: string
+          would_use: string
+        }
+        Update: {
+          channel?: string[]
+          comment?: string
+          country?: string
+          created_at?: string
+          cross_border?: string | null
+          current_method?: string[]
+          deal_size?: string
+          deals_per_year?: string | null
+          fee_ok?: string
+          heard_of?: string[]
+          id?: string
+          lang?: string
+          other_answers?: Json
+          pilot_email?: string | null
+          problems?: string[]
+          respondent?: string
+          source?: string
+          unknown_party?: string
+          would_use?: string
+        }
+        Relationships: []
+      }
       tax_invoices: {
         Row: {
           currency: string
