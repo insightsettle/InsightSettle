@@ -77,7 +77,7 @@ describe('credential activation needs a second admin (PGlite)', () => {
       CREATE FUNCTION has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=$1 AND role=$2) $$;
       CREATE TABLE audit_logs(id serial, action text);CREATE FUNCTION staff_control_audit(uuid,text,text,text,jsonb,jsonb,text) RETURNS void LANGUAGE sql AS $$ INSERT INTO audit_logs(action) VALUES($2) $$;
       CREATE TABLE platform_settings(id boolean PRIMARY KEY DEFAULT true, updated_at timestamptz);INSERT INTO platform_settings VALUES(true,now());
-      CREATE TABLE deals(id uuid PRIMARY KEY, ref text);CREATE TABLE fx_quotes(id uuid PRIMARY KEY, deal_id uuid);
+      CREATE TABLE deals(id uuid PRIMARY KEY, ref text, buyer_id uuid, seller_id uuid);CREATE TABLE fx_quotes(id uuid PRIMARY KEY, deal_id uuid);
       CREATE TABLE deal_transactions(id uuid, deal_id uuid, kind text, amount numeric, fee numeric, currency text, status text, provider text, provider_ref text, created_at timestamptz, updated_at timestamptz, original_transaction_id uuid, milestone_id uuid, payout_split_id uuid, fx_quote_id uuid);`);
     const f26 = readFileSync(new URL('../../drizzle/migrations/0026_finance_operational_center.sql', import.meta.url), 'utf8');
     await db.exec(f26);
