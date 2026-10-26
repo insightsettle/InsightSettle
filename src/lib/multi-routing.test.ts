@@ -55,7 +55,7 @@ describe('routing rules', () => {
     // SA payer pays in SAR (lite/geidea/tap can collect) but payee is in BH (none of them pays out there).
     const r = resolveRoute(SEED_PRICE_BOOK, t, { ...sa('mada', 5000), payeeCountry: 'BH', payoutCurrency: 'SAR' });
     expect(r.provider).toBeNull(); expect(r.reasons).toEqual(['no_route']);
-    expect(r.rejected.every(x => x.reasons.includes('payout_corridor_not_supported'))).toBe(true);
+    expect(r.rejected.filter(x => ['lite', 'geidea', 'tap'].includes(x.provider)).every(x => x.reasons.includes('payout_corridor_not_supported'))).toBe(true);
   });
   it('a funded deal keeps its provider after a rule change', () => {
     const changed: RoutingTable = { version: 'v2', rules: [{ id: 'X', priority: 1, enabled: true, action: { provider: 'geidea' } }] };
