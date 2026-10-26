@@ -752,6 +752,10 @@ export type Database = {
           risk_level: string | null
           risk_score: number | null
           risk_summary: string | null
+          route_locked_at: string | null
+          route_provider: string | null
+          route_reasons: Json | null
+          route_rule_version: string | null
           seller_id: string | null
           shipped_at: string | null
           shipping_carrier: string | null
@@ -815,6 +819,10 @@ export type Database = {
           risk_level?: string | null
           risk_score?: number | null
           risk_summary?: string | null
+          route_locked_at?: string | null
+          route_provider?: string | null
+          route_reasons?: Json | null
+          route_rule_version?: string | null
           seller_id?: string | null
           shipped_at?: string | null
           shipping_carrier?: string | null
@@ -878,6 +886,10 @@ export type Database = {
           risk_level?: string | null
           risk_score?: number | null
           risk_summary?: string | null
+          route_locked_at?: string | null
+          route_provider?: string | null
+          route_reasons?: Json | null
+          route_rule_version?: string | null
           seller_id?: string | null
           shipped_at?: string | null
           shipping_carrier?: string | null
@@ -1119,6 +1131,9 @@ export type Database = {
           id: string
           provider_amount: number
           provider_rate: number
+          route_provider: string | null
+          route_reasons: Json | null
+          route_rule_version: string | null
           source_amount: number
           source_currency: string
           target_currency: string
@@ -1139,6 +1154,9 @@ export type Database = {
           id?: string
           provider_amount: number
           provider_rate: number
+          route_provider?: string | null
+          route_reasons?: Json | null
+          route_rule_version?: string | null
           source_amount: number
           source_currency: string
           target_currency?: string
@@ -1159,6 +1177,9 @@ export type Database = {
           id?: string
           provider_amount?: number
           provider_rate?: number
+          route_provider?: string | null
+          route_reasons?: Json | null
+          route_rule_version?: string | null
           source_amount?: number
           source_currency?: string
           target_currency?: string
@@ -1485,32 +1506,38 @@ export type Database = {
       platform_settings: {
         Row: {
           auctions_enabled: boolean
+          cross_provider_settlement: boolean
           id: boolean
           new_deals_enabled: boolean
           notice_active: boolean
           notice_ar: string
           notice_en: string
           notice_tone: string
+          routing_mode: string
           updated_at: string
         }
         Insert: {
           auctions_enabled?: boolean
+          cross_provider_settlement?: boolean
           id?: boolean
           new_deals_enabled?: boolean
           notice_active?: boolean
           notice_ar?: string
           notice_en?: string
           notice_tone?: string
+          routing_mode?: string
           updated_at?: string
         }
         Update: {
           auctions_enabled?: boolean
+          cross_provider_settlement?: boolean
           id?: boolean
           new_deals_enabled?: boolean
           notice_active?: boolean
           notice_ar?: string
           notice_en?: string
           notice_tone?: string
+          routing_mode?: string
           updated_at?: string
         }
         Relationships: []
