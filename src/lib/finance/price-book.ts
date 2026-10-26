@@ -23,15 +23,6 @@ export type PriceRow = {
   offered?: boolean;
 };
 
-/** Payout corridors each provider can pay out to (stated or assumed for sandbox; never verified). */
-export const PAYOUT_CORRIDORS: Record<string, { countries: string[]; currencies: string[] }> = {
-  manual: { countries: ['SA', 'BH', 'AE', 'KW', 'OM', 'QA', 'OTHER'], currencies: ['SAR', 'BHD', 'AED', 'KWD', 'OMR', 'QAR', 'USD'] },
-  lite: { countries: ['SA'], currencies: ['SAR'] },
-  geidea: { countries: ['SA'], currencies: ['SAR'] },
-  tap: { countries: ['SA'], currencies: ['SAR'] },
-  afs: { countries: ['BH', 'AE', 'KW', 'OM', 'QA'], currencies: ['BHD', 'AED', 'KWD', 'OMR', 'QAR', 'USD', 'SAR'] },
-};
-
 const V = '2026-10-26';
 const SIM = (method: RouteMethod, percent: number, fixed: number): PriceRow[] =>
   ['SA', 'BH', 'AE', 'KW', 'OM', 'QA', 'OTHER'].flatMap(country => ['SAR', 'BHD', 'AED', 'KWD', 'OMR', 'QAR', 'USD'].map(currency => ({
