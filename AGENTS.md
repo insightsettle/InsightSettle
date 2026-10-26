@@ -12,6 +12,8 @@
 <!-- LOVABLE:END -->
 
 ## Architecture decisions
+- Finance Center is an additive sandbox operational read model with immutable metadata approvals/imports; it reuses existing staff capabilities and money workflows, never treats report matching as provider confirmation or credentials as live activation.
+- Finance Center aggregates numeric-string transaction amounts in exact currency minor units; existing pricing stays authoritative and displayed summaries explicitly cover only the current page until full-period database aggregates can be applied.
 - Invoice PDF tools are project dependencies dynamically imported only by the download handler, preserving fixed A4 rendering without runtime CDN scripts.
 - Staff operational interventions use service-only audited RPCs after the shared staff guard; legacy controls call the same RPCs so audit and dispute restrictions cannot be bypassed.
 - Auction fee settings feed only new auction quotes through a pure auction adapter; accepted splits change only before funding with new term versions, preserving prior snapshots and consumed quotes.
