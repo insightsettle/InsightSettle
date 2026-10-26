@@ -52,3 +52,4 @@
 
 - Auth follow-up pages use un-nested route IDs while preserving /auth/* URLs; the sign-in page is content, not a layout, so its redirect must not swallow recovery and confirmation pages.
 - Multi-provider routing is sandbox metadata: one provider per deal for both legs, chosen before funding, recorded on quote and locked on the deal by triggers; price book/rules/mode change only through approved finance_records proposals and `routing_mode=simulated_only` keeps legacy pricing.
+- Provider credentials are AES-GCM encrypted server-side into a service-only table and exposed only as last-4 masks; adapters live one file per provider under src/lib/finance/adapters and stubs never report success.
