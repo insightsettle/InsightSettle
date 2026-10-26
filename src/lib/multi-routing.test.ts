@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { checkMethod, PAYMENT_METHODS } from '@/lib/payment-methods';
-import { resolveRoute, rowCost, SEED_PRICE_BOOK, SEED_ROUTING, holdingDaysFor, effectiveConfig, type RouteInput, type RoutingTable } from './price-book';
+import { resolveRoute, rowCost, SEED_PRICE_BOOK, SEED_ROUTING, holdingDaysFor, effectiveConfig, type RouteInput, type RoutingTable } from './finance/price-book';
 
 const sa = (method: RouteInput['method'], amountSar: number, holdingDays = 7, dealType: RouteInput['dealType'] = 'goods'): RouteInput =>
   ({ dealType, payerCountry: 'SA', payInCurrency: 'SAR', method, payeeCountry: 'SA', payoutCurrency: 'SAR', amountSar, holdingDays });
@@ -93,9 +93,9 @@ describe('database guards (PGlite)', () => {
       CREATE TABLE audit_logs(id serial, action text);CREATE FUNCTION staff_control_audit(uuid,text,text,text,jsonb,jsonb,text) RETURNS void LANGUAGE sql AS $$ INSERT INTO audit_logs(action) VALUES($2) $$;
       CREATE TABLE platform_settings(id boolean PRIMARY KEY DEFAULT true, updated_at timestamptz);INSERT INTO platform_settings VALUES(true,now());
       CREATE TABLE deals(id uuid PRIMARY KEY);CREATE TABLE fx_quotes(id uuid PRIMARY KEY, deal_id uuid);CREATE TABLE deal_transactions(id serial, deal_id uuid, kind text, fx_quote_id uuid);`);
-    const f26 = readFileSync(new URL('../../../drizzle/migrations/0026_finance_operational_center.sql', import.meta.url), 'utf8');
+    const f26 = readFileSync(new URL('../../drizzle/migrations/0026_finance_operational_center.sql', import.meta.url), 'utf8');
     await db.exec(f26.slice(f26.indexOf('CREATE TABLE public.finance_records')));
-    await db.exec(readFileSync(new URL('../../../drizzle/migrations/0027_multi_provider_routing.sql', import.meta.url), 'utf8').replace(/--> statement-breakpoint/g, ''));
+    await db.exec(readFileSync(new URL('../../drizzle/migrations/0027_multi_provider_routing.sql', import.meta.url), 'utf8').replace(/--> statement-breakpoint/g, ''));
   });
   afterAll(async () => { await db?.close(); });
   const append = (actor: string, kind: string, subject: string, payload: string) =>
