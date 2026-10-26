@@ -53,3 +53,46 @@ Until managed migration history is repaired, overview totals remain **page-only*
 - Live escrow/custody: pending licensed partner, eligibility and regulatory/legal approval; disabled. This delivery does not establish production readiness.
 
 Nothing published. Public header/site and `mobile/` unchanged.
+## Multi-provider routing (27 Oct 2026)
+
+### Business rule enforced in code
+**One deal = one provider, from pay-in to payout.** The route is chosen once per deal, before funding, and must satisfy both legs (payer country, pay-in currency, payment method AND payee country, payout currency) with the same provider. Legs are never split; if no single provider serves both, there is no route.
+- `fx_quotes.route_provider / route_rule_version / route_reasons` record the route on every new quote.
+- Trigger `deal_transactions_route_lock` copies the quote's route onto `deals.route_*` at the first funding.
+- Trigger `deals_route_lock` refuses any later change of a deal's provider or rule version; trigger `fx_quotes_route_guard` refuses a quote whose provider differs from the deal's locked provider. Milestones, retention, refunds and auction split payouts therefore stay with that provider.
+- Deals funded before routing existed are treated as locked to the simulated provider.
+- `platform_settings.cross_provider_settlement` exists as a future flag; a CHECK constraint keeps it `false` (pending approval).
+
+### What works (sandbox)
+| Item | Status |
+|---|---|
+| Versioned price book (`src/lib/finance/price-book.ts`) | Seed rows for lite (verbal), Geidea (written), Tap (reference, bank transfer not offered), AFS (awaiting quote), simulated provider (former `PROVIDER_COST`). Edits = `price_book_proposal` records, approved by a second admin; append-only. |
+| Routing table | Seed rules R1–R5 (lite mada; cheapest card; lite bank transfer; AFS outside SA/SAR; simulated fallback). Enable/disable and roll back are new `routing_table_proposal` revisions. |
+| Eligibility | Pay-in method/country/currency, payout corridor, max holding days (lite mada 14), max per payment, capability not unavailable. Unverified candidates are flagged "unverified · sandbox only". |
+| `checkMethod` (D-66) | Optional routed provider cost; no route ⇒ method not offered with the existing reason text. Customer fee, caps and texts unchanged; provider names never shown to customers. |
+| `routing_mode` | `simulated_only` (default, unchanged behaviour) or `price_book_sandbox`; switched only through an approved `routing_mode_proposal`. Public pricing page always uses the simulated behaviour. |
+| Console `/console/finance/multi-provider` | Mode, pending proposals with second-admin approval, price book editor, routing table, simulator with the six founder cases, coverage matrix. |
+
+Holding days = inspection days + defects-liability days when retention is held (no delivery period column exists yet; simulator accepts any number).
+
+### Founder test cases (seed configuration, tested)
+| Case | Route | Cost / margin |
+|---|---|---|
+| SAR 2,000 mada SA→SA | lite (R1) | SAR 17 · 1.65% — offered |
+| SAR 20,000 credit card SA→SA | lite, cheapest (R2) | SAR 450 · 0.25% — **not offered** (below 0.5%) |
+| SAR 550,000 bank transfer SA→SA | lite (R3) | SAR 0 · fee capped SAR 13,125 (2.39%) |
+| SAR 20,000 mada, 30 days | not lite (hold 14) → simulated fallback | — |
+| BHD 55,000 bank transfer BH→SA | AFS rejected (awaiting quote; payout to SA not in corridor) → simulated fallback | — |
+| SAR 100,000 contracting, 12-month retention | mada: simulated fallback (lite hold too short); credit card: over SAR 50,000 limit | — |
+
+Note: with these prices, cards at SAR 20,000 fail the 0.5% rule for every candidate. That is a commercial finding, not a bug.
+
+### Tests
+`src/lib/multi-routing.test.ts`: 16 passed (founder cases, cap, cheapest, no split legs, locked deal, approved-only config, simulated_only unchanged, PGlite: self-approval refused, immutable records, route lock triggers, cross-provider flag stays OFF). Full suite: **206 passed, 10 skipped**. Build OK. Authenticated console UI not verified in a browser in this run.
+
+### Simulated / waiting for providers
+- Only the simulated provider executes; lite, Geidea, Tap, AFS remain NOT CONNECTED.
+- Waiting: lite written quote (and hold period for cards/wallet), AFS quote, corridors and specifications, Tap marketplace/split-payout answers, Geidea payout and hold terms.
+
+### Migration numbering fix
+Snapshot files were out of step with the journal (`0027_snapshot.json` belonged to journal idx 25 `0027_market_survey`, and two snapshots shared a parent). Only metadata was changed: `0027_snapshot.json` renamed to `0025_snapshot.json` and the `prevId` chain re-linked (0024 → 0025 → 0026). No applied SQL file or data was edited or dropped; `drizzle-kit check` passes. The tool names migrations by journal position, so the new file is `0027_multi_provider_routing.sql` (it sits next to the older `0027_market_survey.sql`; different tags, no collision). It applied successfully.

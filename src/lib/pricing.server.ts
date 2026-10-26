@@ -79,7 +79,29 @@ export type DealPricing = {
   breakdown: FeeBreakdown; payIn: PayInQuote; usdPerUnit: number; buyerCountry: string; supplierCountry: string;
   /** The payment method this price is for (D-66), and which methods can be offered for this deal. */
   method: PaymentMethod; methods: MethodCheck[];
+  /** Sandbox route per method (routing_mode=price_book_sandbox); one provider serves pay-in and payout. */
+  routes?: Partial<Record<PaymentMethod, import("@/lib/finance/price-book").RouteResult>>;
+  routingMode?: "simulated_only" | "price_book_sandbox";
 };
+
+/** Resolves one provider per method for this deal, or null when routing_mode is simulated_only. */
+async function dealRoutes(admin: any, deal: any, countries: { buyerCountry: string; supplierCountry: string }, payCurrency: string, amountSar: number) {
+  const { data: settings } = await admin.from("platform_settings").select("routing_mode").eq("id", true).maybeSingle();
+  if (settings?.routing_mode !== "price_book_sandbox") return null;
+  const { effectiveConfig, resolveRoute, holdingDaysFor } = await import("@/lib/finance/price-book");
+  const { data: records } = await admin.from("finance_records").select("id,kind,subject_id,payload,created_at")
+    .in("kind", ["approval", "price_book_proposal", "routing_table_proposal"]).order("created_at").limit(2000);
+  const { book, table } = effectiveConfig(records ?? []);
+  // Deals funded before routing existed were paid through the simulated provider and stay with it.
+  const { count: funded } = deal.route_provider || !deal.id ? { count: 0 } : await admin.from("deal_transactions").select("id", { count: "exact", head: true })
+    .eq("deal_id", deal.id).eq("kind", "funding").in("status", ["pending", "processing", "succeeded"]);
+  const locked = deal.route_provider ? { provider: deal.route_provider, version: deal.route_rule_version ?? "locked" }
+    : (funded ?? 0) > 0 ? { provider: "manual", version: "pre-routing" } : null;
+  return Object.fromEntries(PAYMENT_METHODS.map((m) => [m, resolveRoute(book, table, {
+    dealType: deal.deal_type ?? "goods", payerCountry: countries.buyerCountry, payInCurrency: payCurrency, method: m,
+    payeeCountry: countries.supplierCountry, payoutCurrency: deal.currency, amountSar, holdingDays: holdingDaysFor(deal),
+  }, locked)])) as NonNullable<DealPricing["routes"]>;
+}
 
 /** The one place a deal is priced. The fee depends on the payment method: the cap applies to bank transfer only (D-66). */
 export async function priceDeal(admin: any, deal: any, payCurrency?: string | null, method: PaymentMethod = DEFAULT_METHOD): Promise<DealPricing> {
@@ -99,13 +121,14 @@ export async function priceDeal(admin: any, deal: any, payCurrency?: string | nu
       : dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, schedule, override);
   };
   const amountSar = Number(deal.amount) * inputs.sarPerUnit;
-  const methods = PAYMENT_METHODS.map((m) => checkMethod(m, amountSar, feeFor(m) * inputs.sarPerUnit));
+  const routes = await dealRoutes(admin, deal, countries, inputs.payCurrency, amountSar);
+  const methods = PAYMENT_METHODS.map((m) => checkMethod(m, amountSar, feeFor(m) * inputs.sarPerUnit, routes ? (routes[m]?.provider ? routes[m]!.costSar : null) : undefined));
   const fee = feeFor(method);
   const breakdown = splitFee({
     amount: Number(deal.amount), currency: deal.currency, fee, feePayer: deal.deal_type === 'auction' ? 'buyer' : deal.fee_payer, ...countries, vatTable: inputs.vatTable,
   });
   const payIn = payInQuote(breakdown, inputs.payCurrency, inputs.providerRate, inputs.customerRate);
-  return { breakdown, payIn, usdPerUnit: inputs.usdPerUnit, ...countries, method, methods };
+  return { breakdown, payIn, usdPerUnit: inputs.usdPerUnit, ...countries, method, methods, routingMode: routes ? "price_book_sandbox" : "simulated_only", ...(routes ? { routes } : {}) };
 }
 
 export function ledgerPreview(p: DealPricing) {

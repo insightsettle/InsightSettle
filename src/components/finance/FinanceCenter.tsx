@@ -15,7 +15,7 @@ import { capabilities, providers } from '@/lib/finance/providers';
 import type { RoutingRule } from '@/lib/finance/routing';
 export const defaultFilters=()=>({query:'',currency:'',provider:'',status:'',from:new Date(Date.now()-30*86400000).toISOString().slice(0,10)+'T00:00:00.000Z',to:new Date(Date.now()+86400000).toISOString().slice(0,10)+'T00:00:00.000Z',page:0});
 export const financeOptions=()=>queryOptions({queryKey:['finance-center',defaultFilters()],queryFn:()=>financeList({data:defaultFilters()})});
-export type FinanceSection='overview'|'transactions'|'providers'|'queue'|'reconciliation'|'routing'|'monitoring';
+export type FinanceSection='overview'|'transactions'|'providers'|'queue'|'reconciliation'|'routing'|'monitoring'|'multi';
 const nav: {section:FinanceSection;to:string;en:string;ar:string}[]=[
   {section:'overview',to:'/console/finance',en:'Overview',ar:'نظرة عامة'},
   {section:'transactions',to:'/console/finance/transactions',en:'Transactions',ar:'المعاملات'},
@@ -23,6 +23,7 @@ const nav: {section:FinanceSection;to:string;en:string;ar:string}[]=[
   {section:'queue',to:'/console/finance/queue',en:'Refunds & disputes',ar:'الاسترداد والنزاعات'},
   {section:'reconciliation',to:'/console/finance/reconciliation',en:'Reconciliation',ar:'المطابقة'},
   {section:'routing',to:'/console/finance/routing',en:'Routing',ar:'التوجيه'},
+  {section:'multi',to:'/console/finance/multi-provider',en:'Price book & routes',ar:'الأسعار والمسارات'},
   {section:'monitoring',to:'/console/finance/monitoring',en:'Monitoring',ar:'المراقبة'},
 ];
 export function FinanceNav(){const {text}=useLocale();return <div className="mt-6 min-w-0 space-y-4" data-no-localize>

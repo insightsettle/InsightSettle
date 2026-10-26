@@ -51,3 +51,4 @@
 - Authentication pages use AuthShell, separate from public/customer chrome, with the shared locale provider so recovery screens stay branded and bilingual for signed-out and recovery sessions.
 
 - Auth follow-up pages use un-nested route IDs while preserving /auth/* URLs; the sign-in page is content, not a layout, so its redirect must not swallow recovery and confirmation pages.
+- Multi-provider routing is sandbox metadata: one provider per deal for both legs, chosen before funding, recorded on quote and locked on the deal by triggers; price book/rules/mode change only through approved finance_records proposals and `routing_mode=simulated_only` keeps legacy pricing.

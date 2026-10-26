@@ -76,3 +76,52 @@ export const financeExport = createServerFn({method:'POST'}).middleware([require
 export const financeQueue = createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).handler(async({context})=>{
   const db=await staff(context);return checked(db.from('disputes').select('id,deal_id,reason,status,outcome,created_at,response_deadline,evidence_deadline,resolution_deadline,deals(ref,currency)').order('created_at',{ascending:false}).limit(100)) as Promise<any[]>;
 });
+// ── Multi-provider routing (sandbox). One deal = one provider for pay-in and payout. ──
+const countryCode = z.enum(['SA','BH','AE','KW','OM','QA','OTHER']);
+const methodCode = z.enum(['mada','credit_card','bank_transfer','benefit_debit','benefitpay','apple_pay']);
+const priceRowSchema = z.object({ provider:z.enum(['manual','afs','tap','lite','geidea']), method:methodCode, country:countryCode, currency, percent:z.number().min(0).max(20).nullable(), fixed:z.number().min(0).max(10000), cap:z.number().positive().max(1e7).nullable(), maxPerPayment:z.number().positive().max(1e9).nullable(), maxHoldDays:z.number().int().min(0).max(3650).nullable(), validFrom:z.string().regex(/^\d{4}-\d{2}-\d{2}$/), source:z.enum(['verbal','written','contract','reference']), evidence:z.string().trim().min(3).max(500), offered:z.boolean().optional() });
+const ruleRowSchema = z.object({ id:z.string().min(1).max(20), priority:z.number().int().min(0).max(100000), enabled:z.boolean(), dealType:z.enum(['goods','services','contracting','freelance','auction','any']).optional(), payerCountry:z.string().max(8).optional(), payInCurrency:z.string().max(8).optional(), method:z.union([methodCode,z.literal('any')]).optional(), payeeCountry:z.string().max(8).optional(), payoutCurrency:z.string().max(8).optional(), minAmount:z.number().nullable().optional(), maxAmount:z.number().nullable().optional(), maxHoldingDays:z.number().nullable().optional(), outsideSaudi:z.boolean().optional(), action:z.union([z.object({provider:z.enum(['manual','afs','tap','lite','geidea'])}),z.object({strategy:z.literal('cheapest')})]) });
+async function routingState(db:any){
+  const { effectiveConfig } = await import('./finance/price-book');
+  const records = await checked(db.from('finance_records').select('id,actor_id,kind,subject_id,payload,reason,created_at').in('kind',['approval','price_book_proposal','routing_table_proposal','routing_mode_proposal']).order('created_at').limit(2000)) as FinanceRecord[];
+  const settings = await checked(db.from('platform_settings').select('routing_mode,cross_provider_settlement').eq('id',true).single());
+  return { records, ...effectiveConfig(records), mode: settings.routing_mode as 'simulated_only'|'price_book_sandbox', crossProviderSettlement: Boolean(settings.cross_provider_settlement) };
+}
+export const financeRoutingConfig = createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).handler(async({context})=>{
+  const db=await staff(context); return { ...(await routingState(db)), actorId: context.userId };
+});
+export const financeRoutingPropose = createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.discriminatedUnion('kind',[
+  z.object({kind:z.literal('price_book_proposal'),row:priceRowSchema,reason,key:z.string().uuid()}),
+  z.object({kind:z.literal('routing_table_proposal'),table:z.object({version:z.string().max(80),rules:z.array(ruleRowSchema).min(1).max(100)}),reason,key:z.string().uuid()}),
+  z.object({kind:z.literal('routing_mode_proposal'),mode:z.enum(['simulated_only','price_book_sandbox']),reason,key:z.string().uuid()}),
+]).parse(i)).handler(async({context,data})=>{
+  const db=await staff(context,'admin');
+  const subject = data.kind==='price_book_proposal'?`${data.row.provider}:${data.row.method}:${data.row.country}:${data.row.currency}`:data.kind==='routing_table_proposal'?'routing_table':'routing_mode';
+  const body = data.kind==='price_book_proposal'?{row:data.row}:data.kind==='routing_table_proposal'?{table:data.table}:{mode:data.mode};
+  return {id:String(await append(db,context,data.kind,subject,{environment:'sandbox',live:false,...body},data.reason,data.key))};
+});
+export const financeRouteSimulate = createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({payerCountry:countryCode,payeeCountry:countryCode,currency,amount,dealType:z.enum(['goods','services','contracting','freelance','auction']),holdingDays:z.number().int().min(0).max(3650)}).parse(i)).handler(async({context,data})=>{
+  const db=await staff(context);
+  const state=await routingState(db);
+  return simulateAll(db,state,data);
+});
+async function simulateAll(db:any,state:{book:any;table:any},data:{payerCountry:string;payeeCountry:string;currency:string;amount:string;dealType:any;holdingDays:number}){
+  const { resolveRoute } = await import('./finance/price-book');
+  const { loadPricingInputs } = await import('./pricing.server');
+  const { dealFee } = await import('./fees');
+  const { checkMethod, PAYMENT_METHODS, scheduleForMethod } = await import('./payment-methods');
+  const inputs = await loadPricingInputs(db, data.currency);
+  const amount = Number(data.amount); const amountSar = amount*inputs.sarPerUnit;
+  return PAYMENT_METHODS.map(method=>{
+    const route = resolveRoute(state.book,state.table,{dealType:data.dealType,payerCountry:data.payerCountry,payInCurrency:data.currency,method,payeeCountry:data.payeeCountry,payoutCurrency:data.currency,amountSar,holdingDays:data.holdingDays});
+    const feeSar = dealFee(amount,data.currency,inputs.usdPerUnit,scheduleForMethod(inputs.schedule,method))*inputs.sarPerUnit;
+    const check = checkMethod(method,amountSar,feeSar,route.provider?route.costSar:null);
+    return { method, route, feeSar:Math.round(feeSar*100)/100, amountSar:Math.round(amountSar*100)/100, margin:check.margin, allowed:check.allowed, reason:check.reason };
+  });
+}
+export const financeCoverage = createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).handler(async({context})=>{
+  const db=await staff(context); const state=await routingState(db);
+  const { resolveRoute } = await import('./finance/price-book');
+  const corridors:[string,string,string][]=[['SA','SA','SAR'],['SA','BH','SAR'],['BH','SA','BHD'],['BH','BH','BHD'],['AE','AE','AED'],['OTHER','SA','USD']];
+  return corridors.map(([payer,payee,cur])=>({corridor:`${payer}→${payee} · ${cur}`,cells:(['mada','credit_card','bank_transfer'] as const).map(method=>{const r=resolveRoute(state.book,state.table,{dealType:'goods',payerCountry:payer,payInCurrency:cur,method,payeeCountry:payee,payoutCurrency:cur,amountSar:10000,holdingDays:7});return {method,provider:r.provider,ruleId:r.ruleId,unverified:r.unverified};})}));
+});
