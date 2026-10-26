@@ -1,7 +1,7 @@
 import { minor } from './money';
 export type StatementRow = { provider_ref: string; amount: string; currency: string; kind: string; fee: string; bank_reference: string };
 export type MatchTransaction = { id: string; provider_ref: string | null; amount: string; currency: string; kind: string; status: string };
-export type MatchResult = { row: StatementRow; transactionId: string | null; outcome: 'matched' | 'duplicate' | 'missing' | 'ambiguous' | 'currency_mismatch' | 'amount_mismatch' | 'status_mismatch' };
+export type MatchResult = { row: StatementRow; transactionId: string | null; outcome: 'matched' | 'duplicate' | 'missing' | 'ambiguous' | 'currency_mismatch' | 'amount_mismatch' | 'status_mismatch' | 'fee_unverified' };
 export function reconcile(rows: StatementRow[], transactions: MatchTransaction[]): MatchResult[] {
   const seen = new Set<string>();
   return rows.map(row => {
@@ -17,6 +17,7 @@ export function reconcile(rows: StatementRow[], transactions: MatchTransaction[]
       if (t.currency !== row.currency) outcome = 'currency_mismatch';
       else if (minor(t.amount, t.currency) !== minor(row.amount, row.currency)) outcome = 'amount_mismatch';
       else if (t.status !== 'succeeded') outcome = 'status_mismatch';
+      else if (row.fee !== '') outcome = 'fee_unverified';
     }
     seen.add(key);
     return { row, outcome, transactionId: candidates.length === 1 ? candidates[0]?.id ?? null : null };

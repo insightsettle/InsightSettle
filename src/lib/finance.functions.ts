@@ -5,6 +5,7 @@ import { providers, simulatedAdapter } from './finance/providers';
 import { parseStatement, reconcile } from './finance/reconciliation';
 import { simulateRouting } from './finance/routing';
 import { summarize } from './finance/summary';
+import { minor } from './finance/money';
 const reason = z.string().trim().min(3).max(2000);
 const currency = z.enum(['SAR','BHD','KWD','OMR','AED','QAR','USD']);
 const amount = z.string().regex(/^\d+(\.\d{1,3})?$/).max(22);
@@ -40,6 +41,7 @@ export const financeDetail = createServerFn({method:'GET'}).middleware([requireS
 export const financeProposal = createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({kind:z.enum(['provider_proposal','routing_proposal']),provider:z.enum(['manual','afs','tap','lite','geidea']),enabled:z.boolean(),rule:ruleSchema.optional(),reason,key:z.string().uuid()}).parse(i)).handler(async({context,data})=>{
   const db=await staff(context,'admin');
   if(data.kind==='routing_proposal'&&!data.rule)throw new Error('Routing rule required');
+  if(data.rule&&(data.rule.provider!==data.provider||minor(data.rule.maxAmount,data.rule.currency)<=0n))throw new Error('Invalid routing limit or provider');
   const id=await append(db,context,data.kind,data.provider,{environment:'sandbox',live:false,provider:data.provider,enabled:data.enabled,...(data.rule?{rule:data.rule}:{})},data.reason,data.key);
   return {id:String(id)};
 });
@@ -47,7 +49,11 @@ export const financeApprove = createServerFn({method:'POST'}).middleware([requir
   const db=await staff(context,'admin');return {id:String(await append(db,context,'approval',data.id,{environment:'sandbox'},data.reason,data.key))};
 });
 export const financeSimulate = createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({rule:ruleSchema,amount,country:z.enum(['SA','BH','AE','KW','OM','QA']),currency,method:z.enum(['mada','credit_card','bank_transfer']),previousOutcome:z.enum(['none','failed_safe','unknown','succeeded']),reason,key:z.string().uuid()}).parse(i)).handler(async({context,data})=>{
-  const db=await staff(context,'finance');const result=simulateRouting(data.rule,data);
+  const db=await staff(context,'finance');
+  const records=await checked(db.from('finance_records').select('*').in('kind',['provider_proposal','approval']).order('created_at',{ascending:false}).limit(1000)) as FinanceRecord[];
+  const approved=new Set(records.filter(r=>r.kind==='approval').map(r=>r.subject_id));
+  const setting=records.find(r=>r.kind==='provider_proposal'&&r.subject_id===data.rule.provider&&approved.has(r.id));
+  const result=simulateRouting({...data.rule,enabled:data.rule.enabled&&setting?.payload?.enabled!==false},data);
   await append(db,context,'routing_simulation',data.rule.version,{input:data,rule:data.rule,result},data.reason,data.key);return result;
 });
 export const financeImport = createServerFn({method:'POST'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({csv:z.string().max(100000),filename:z.string().max(120),reason,key:z.string().uuid()}).parse(i)).handler(async({context,data})=>{

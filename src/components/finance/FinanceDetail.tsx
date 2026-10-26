@@ -6,9 +6,9 @@ import Decimal from 'decimal.js';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/lib/locale';
 import { financeDetail } from '@/lib/finance.functions';
-import { FinanceNav, TransactionTable, statusText } from './FinanceCenter';
+import { TransactionTable, statusText } from './FinanceCenter';
 export const detailOptions=(id:string)=>queryOptions({queryKey:['finance-detail',id],queryFn:()=>financeDetail({data:{id}})});
-export function FinanceDetail({id}:{id:string}){return <><FinanceNav/><Suspense fallback={<p>…</p>}><Detail id={id}/></Suspense></>}
+export function FinanceDetail({id}:{id:string}){return <Suspense fallback={<p>…</p>}><Detail id={id}/></Suspense>}
 function Detail({id}:{id:string}){
  const {text}=useLocale();const fetch=useServerFn(financeDetail);const {data,refetch}=useSuspenseQuery({queryKey:['finance-detail',id],queryFn:()=>fetch({data:{id}})});const t=data.transaction;
  const balances=[...new Set(data.ledger.map(l=>l.currency))].map(currency=>{const rows=data.ledger.filter(l=>l.currency===currency);return {currency,balance:rows.reduce((sum,l)=>sum.plus(String(l.debit)).minus(String(l.credit)),new Decimal(0)).toFixed(['BHD','KWD','OMR'].includes(currency)?3:2),held:rows.filter(l=>l.account==='escrow_held').reduce((sum,l)=>sum.plus(String(l.credit)).minus(String(l.debit)),new Decimal(0)).toFixed(['BHD','KWD','OMR'].includes(currency)?3:2),fees:rows.filter(l=>l.account==='insight_fee_revenue').reduce((sum,l)=>sum.plus(String(l.credit)).minus(String(l.debit)),new Decimal(0)).toFixed(['BHD','KWD','OMR'].includes(currency)?3:2)};});
