@@ -6,6 +6,7 @@
  * which is SAR for every priced row today.
  */
 import { providers } from './providers';
+import { jobReasons, SEED_PROVIDERS, effectiveProviders, type ProviderConfig } from './provider-config';
 
 export const ROUTE_METHODS = ['mada', 'credit_card', 'bank_transfer', 'benefit_debit', 'benefitpay', 'apple_pay'] as const;
 export type RouteMethod = (typeof ROUTE_METHODS)[number];
@@ -98,22 +99,23 @@ function priceRow(book: PriceRow[], provider: string, i: RouteInput) {
   return rows.sort((a, b) => b.validFrom.localeCompare(a.validFrom))[0] ?? null;
 }
 
-/** Why this provider cannot serve both legs of this deal ([] = eligible). */
-export function eligibility(book: PriceRow[], provider: string, i: RouteInput): { reasons: string[]; row: PriceRow | null; unverified: boolean } {
+/** Why this provider cannot serve both legs of this deal ([] = eligible). Uses the provider's assigned jobs plus the price book. */
+export function eligibility(book: PriceRow[], provider: string, i: RouteInput, list: ProviderConfig[] = SEED_PROVIDERS, funded = false): { reasons: string[]; row: PriceRow | null; unverified: boolean } {
   const reasons: string[] = [];
-  const p = providers.find(x => x.id === provider);
+  const p = list.find(x => x.code === provider);
   if (!p) return { reasons: ['unknown_provider'], row: null, unverified: false };
   const row = priceRow(book, provider, i);
+  // A funded deal keeps its provider: job switches and rule changes never re-route it.
+  if (funded) return { reasons: [], row, unverified: p.status !== 'simulated' };
+  reasons.push(...jobReasons(p, i));
   if (!row) reasons.push('payin_method_country_currency_not_supported');
   else if (row.offered === false) reasons.push('method_not_offered');
   else if (row.percent == null) reasons.push('awaiting_quote');
-  const corridor = PAYOUT_CORRIDORS[provider];
-  if (!corridor || !corridor.countries.includes(i.payeeCountry) || !corridor.currencies.includes(i.payoutCurrency)) reasons.push('payout_corridor_not_supported');
   if (row?.maxHoldDays != null && row.maxHoldDays < i.holdingDays) reasons.push('holding_days_exceed_provider_max');
   if (row?.maxPerPayment != null && i.amountSar > row.maxPerPayment) reasons.push('amount_above_provider_max');
-  if (p.capabilities.checkout === 'unavailable' || p.capabilities.payout === 'unavailable') reasons.push('capability_unavailable');
-  const unverified = p.state !== 'simulated';
-  return { reasons, row, unverified };
+  const cap = providers.find(x => x.id === provider)?.capabilities;
+  if (cap && (cap.checkout === 'unavailable' || cap.payout === 'unavailable')) reasons.push('capability_unavailable');
+  return { reasons: [...new Set(reasons)], row, unverified: p.status !== 'simulated' };
 }
 
 function matches(r: RouteRule, i: RouteInput) {
@@ -131,14 +133,14 @@ function matches(r: RouteRule, i: RouteInput) {
  * the next matching rule is tried. Legs are never split: a provider must pass pay-in AND payout checks itself.
  * `locked` = provider already recorded on a funded deal; it is the only candidate (rule changes never re-route).
  */
-export function resolveRoute(book: PriceRow[], table: RoutingTable, i: RouteInput, locked?: { provider: string; version: string } | null): RouteResult {
+export function resolveRoute(book: PriceRow[], table: RoutingTable, i: RouteInput, locked?: { provider: string; version: string } | null, list: ProviderConfig[] = SEED_PROVIDERS): RouteResult {
   const rejected: Rejection[] = [];
-  const pick = (provider: string, ruleId: string | null, version: string, extra: string[]): RouteResult | null => {
-    const e = eligibility(book, provider, i);
+  const pick = (provider: string, ruleId: string | null, version: string, extra: string[], funded = false): RouteResult | null => {
+    const e = eligibility(book, provider, i, list, funded);
     if (e.reasons.length) { rejected.push({ provider, reasons: e.reasons }); return null; }
-    return { provider, ruleId, version, costSar: rowCost(e.row!, i.amountSar), reasons: extra, rejected, unverified: e.unverified, priceSource: e.row!.source };
+    return { provider, ruleId, version, costSar: e.row ? rowCost(e.row, i.amountSar) : null, reasons: extra, rejected, unverified: e.unverified, priceSource: e.row?.source ?? null };
   };
-  if (locked) return pick(locked.provider, null, locked.version, ['locked_on_funded_deal']) ?? { provider: null, ruleId: null, version: locked.version, costSar: null, reasons: ['locked_provider_cannot_serve'], rejected, unverified: false, priceSource: null };
+  if (locked) return pick(locked.provider, null, locked.version, ['locked_on_funded_deal'], true) ?? { provider: null, ruleId: null, version: locked.version, costSar: null, reasons: ['locked_provider_cannot_serve'], rejected, unverified: false, priceSource: null };
   for (const r of [...table.rules].sort((a, b) => a.priority - b.priority)) {
     if (!matches(r, i)) continue;
     if ('provider' in r.action) {
@@ -146,7 +148,7 @@ export function resolveRoute(book: PriceRow[], table: RoutingTable, i: RouteInpu
       if (got) return got;
       continue;
     }
-    const candidates = providers.map(p => p.id).filter(id => id !== 'manual');
+    const candidates = list.map(p => p.code).filter(id => id !== 'manual');
     let best: RouteResult | null = null;
     for (const id of candidates) {
       const got = pick(id, r.id, table.version, [`rule_${r.id}`, 'cheapest_eligible']);
@@ -176,5 +178,5 @@ export function effectiveConfig(records: { id: string; kind: string; subject_id:
     }
     if (r.kind === 'routing_table_proposal' && r.payload?.table) table = { ...(r.payload.table as RoutingTable), version: `v-${r.id.slice(0, 8)}` };
   }
-  return { book, table };
+  return { book, table, providers: effectiveProviders(records) };
 }
