@@ -96,3 +96,46 @@ Note: with these prices, cards at SAR 20,000 fail the 0.5% rule for every candid
 
 ### Migration numbering fix
 Snapshot files were out of step with the journal (`0027_snapshot.json` belonged to journal idx 25 `0027_market_survey`, and two snapshots shared a parent). Only metadata was changed: `0027_snapshot.json` renamed to `0025_snapshot.json` and the `prevId` chain re-linked (0024 → 0025 → 0026). No applied SQL file or data was edited or dropped; `drizzle-kit check` passes. The tool names migrations by journal position, so the new file is `0027_multi_provider_routing.sql` (it sits next to the older `0027_market_survey.sql`; different tags, no collision). It applied successfully.
+
+## Finance Center reorganised around providers (27 Oct 2026)
+
+### New structure (`/console/finance`)
+| Section | URL | Contents |
+|---|---|---|
+| Overview | `/console/finance` | Sandbox banner, routing mode, provider strip with job chips, pending approvals and reconciliation counts, totals by currency |
+| Providers | `/console/finance/providers` | Card grid + "Add provider". Provider page `/providers/$providerId` with tabs Profile, Connection (API), Jobs & coverage, Prices, Limits & holding, Activity |
+| Routing | `/console/finance/routing` | Mode, warnings, ordered rules, route simulator (six founder cases), coverage matrix |
+| Transactions | `/console/finance/transactions` | List/detail; each row shows routed provider and rule version |
+| Operations & approvals | `/console/finance/operations` | Approvals inbox (all proposal types; approve/reject with reason; proposer cannot approve) + refunds/disputes queue |
+| Reconciliation | `/console/finance/reconciliation` | Unchanged |
+| Reports & monitoring | `/console/finance/reports` | CSV export + provider health |
+
+Old URLs redirect: `/queue` → `/operations`, `/monitoring` → `/reports`, `/multi-provider` → `/routing`.
+
+### Real vs stubbed
+| Item | Status |
+|---|---|
+| Provider profile, rename (EN/AR), status, archive, add provider | Real (sandbox). Proposal + second-admin approval. Codes fixed; archive blocked while an enabled rule pins the provider or an unused quote is routed to it; never hard-deleted. |
+| Jobs & coverage per provider | Real. Routing uses jobs + price book. Turning a job off affects only new routes; funded deals keep their provider. |
+| Limits & holding | Real (max per payment, daily limit stored, settlement days stored, max hold per method). Daily limit and settlement days are recorded only; not yet enforced. |
+| Credentials | Real storage: AES-GCM encrypted in `finance_provider_credentials` (service role only), key `FINANCE_CREDENTIAL_KEY` (server secret). Browser receives only `••••last4`, who and when. Set/replace/remove are proposals; active only after a second admin approves. Sandbox only; production credentials refused. |
+| Test connection | Simulated adapter: internal check. lite, Tap, Geidea, AFS, generic: stubs return "Adapter not built yet: waiting for the provider's official API documentation" (never success). Every test is recorded. |
+| Webhook URL | `/api/public/finance-webhook/{code}/{sandbox|production}` exists and refuses every request (501) without reading or storing it. |
+| Holding / conditional release | Pending approval for every candidate; simulated only for the demo provider. |
+| Production | Locked (`liveFlags` false); checklist shown on each provider page. |
+
+Seeded jobs: lite mada + bank transfer On, credit card Off; Geidea credit card On, mada Off; Tap all Off; AFS all Off (awaiting quote); simulated all On. Effect: SAR 20,000 credit card now routes to Geidea (cost SAR 481) and still fails the 0.5% margin rule.
+
+### What each provider must send before its adapter can be built
+| Provider | Needed |
+|---|---|
+| lite | Written price quote (mada, cards, wallet bank transfer, hold periods); official API docs; sandbox merchant ID + keys; webhook spec (events, signature algorithm, retries); payout/refund API and settlement report format |
+| Geidea | API docs for checkout, refunds and payouts; sandbox credentials; webhook signature spec; payout corridors and hold terms |
+| Tap | Integration meeting outcome; marketplace / split-payout answers; API docs; sandbox keys; webhook spec |
+| AFS | Price quote; supported methods, countries and currencies (incl. BenefitPay / Benefit debit); API docs; sandbox credentials; webhook spec; payout corridors |
+
+### Migration
+`0030_provider_management.sql`: credentials table, new proposal kinds (profile, jobs, limits, credential, rejection, connection test), approval/rejection logic, routed provider columns on the transaction view. The tool generated it as 0028; only the file name and its journal tag were changed to 0030 after it applied (applied-state tracking uses the journal timestamp, not the name). `drizzle-kit check` passes. 0026/0027 untouched.
+
+### Tests
+`provider-management.test.ts` (10) + updated `multi-routing.test.ts` (16): no secret returned, masked display, second admin activates credentials, stubs never succeed, job off vs funded deal, rename keeps code, archive blocked, founder seeds. Full suite: 216 passed, 10 skipped (existing database-race tests). Browser check signed in as admin: all sections at 375px and 1280px, no page errors, no horizontal page scroll; test connection on lite showed "Adapter not built yet".

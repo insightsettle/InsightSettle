@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { checkMethod, PAYMENT_METHODS } from '@/lib/payment-methods';
+import { SEED_PROVIDERS } from './finance/provider-config';
 import { resolveRoute, rowCost, SEED_PRICE_BOOK, SEED_ROUTING, holdingDaysFor, effectiveConfig, type RouteInput, type RoutingTable } from './finance/price-book';
 
 const sa = (method: RouteInput['method'], amountSar: number, holdingDays = 7, dealType: RouteInput['dealType'] = 'goods'): RouteInput =>
@@ -15,9 +16,10 @@ describe('founder test cases', () => {
     expect(route(sa('mada', 2000))).toMatchObject({ provider: 'lite', ruleId: 'R1', costSar: 17 });
     expect(margin(sa('mada', 2000))).toMatchObject({ allowed: true }); expect(margin(sa('mada', 2000)).margin).toBeCloseTo(0.0165, 6);
   });
-  it('SAR 20,000 credit card → cheapest is lite 2.25% (450); margin 0.25% fails the 0.5% rule', () => {
-    expect(route(sa('credit_card', 20000))).toMatchObject({ provider: 'lite', ruleId: 'R2', costSar: 450 });
-    const m = margin(sa('credit_card', 20000)); expect(m.allowed).toBe(false); expect(m.margin).toBeCloseTo(0.0025, 6);
+  it('SAR 20,000 credit card → lite cards are Off, so cheapest is Geidea 2.40% + 1 (481); margin 0.095% fails the 0.5% rule', () => {
+    expect(route(sa('credit_card', 20000))).toMatchObject({ provider: 'geidea', ruleId: 'R2', costSar: 481 });
+    expect(route(sa('credit_card', 20000)).rejected.find(x => x.provider === 'lite')?.reasons).toContain('job_off');
+    const m = margin(sa('credit_card', 20000)); expect(m.allowed).toBe(false); expect(m.margin).toBeCloseTo(19 / 20000, 6);
   });
   it('SAR 550,000 bank transfer → lite wallet 0%, fee capped at SAR 13,125', () => {
     expect(route(sa('bank_transfer', 550000))).toMatchObject({ provider: 'lite', costSar: 0 });
@@ -47,8 +49,9 @@ describe('routing rules', () => {
   });
   it('cheapest eligible uses the cap: at SAR 100,000 lite mada (200) beats Geidea (900)', () => {
     const t: RoutingTable = { version: 't', rules: [{ id: 'C', priority: 1, enabled: true, action: { strategy: 'cheapest' } }] };
-    expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000))).toMatchObject({ provider: 'lite', costSar: 200 });
-    expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000, 30))).toMatchObject({ provider: 'geidea', costSar: 900 });
+    const list = SEED_PROVIDERS.map(p => p.code === 'geidea' ? { ...p, jobs: { ...p.jobs, payin: { ...p.jobs.payin, mada: { ...p.jobs.payin.mada, on: true } } } } : p);
+    expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000), null, list)).toMatchObject({ provider: 'lite', costSar: 200 });
+    expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000, 30), null, list)).toMatchObject({ provider: 'geidea', costSar: 900 });
   });
   it('pay-in and payout must be the same provider; never split → no route', () => {
     const t: RoutingTable = { version: 't', rules: [{ id: 'C', priority: 1, enabled: true, action: { strategy: 'cheapest' } }] };

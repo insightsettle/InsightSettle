@@ -197,6 +197,13 @@
       "when": 1793055997841,
       "tag": "0027_multi_provider_routing",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1793056843298,
+      "tag": "0030_provider_management",
+      "breakpoints": true
     }
   ]
 }

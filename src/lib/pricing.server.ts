@@ -90,8 +90,8 @@ async function dealRoutes(admin: any, deal: any, countries: { buyerCountry: stri
   if (settings?.routing_mode !== "price_book_sandbox") return null;
   const { effectiveConfig, resolveRoute, holdingDaysFor } = await import("@/lib/finance/price-book");
   const { data: records } = await admin.from("finance_records").select("id,kind,subject_id,payload,created_at")
-    .in("kind", ["approval", "price_book_proposal", "routing_table_proposal"]).order("created_at").limit(2000);
-  const { book, table } = effectiveConfig(records ?? []);
+    .in("kind", ["approval", "price_book_proposal", "routing_table_proposal", "provider_profile_proposal", "provider_jobs_proposal", "provider_limits_proposal"]).order("created_at").limit(2000);
+  const { book, table, providers } = effectiveConfig(records ?? []);
   // Deals funded before routing existed were paid through the simulated provider and stay with it.
   const { count: funded } = deal.route_provider || !deal.id ? { count: 0 } : await admin.from("deal_transactions").select("id", { count: "exact", head: true })
     .eq("deal_id", deal.id).eq("kind", "funding").in("status", ["pending", "processing", "succeeded"]);
@@ -100,7 +100,7 @@ async function dealRoutes(admin: any, deal: any, countries: { buyerCountry: stri
   return Object.fromEntries(PAYMENT_METHODS.map((m) => [m, resolveRoute(book, table, {
     dealType: deal.deal_type ?? "goods", payerCountry: countries.buyerCountry, payInCurrency: payCurrency, method: m,
     payeeCountry: countries.supplierCountry, payoutCurrency: deal.currency, amountSar, holdingDays: holdingDaysFor(deal),
-  }, locked)])) as NonNullable<DealPricing["routes"]>;
+  }, locked, providers)])) as NonNullable<DealPricing["routes"]>;
 }
 
 /** The one place a deal is priced. The fee depends on the payment method: the cap applies to bank transfer only (D-66). */
