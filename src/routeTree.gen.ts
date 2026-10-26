@@ -68,6 +68,7 @@ import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.in
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
 import { Route as ConsoleFinanceIndexRouteImport } from './routes/console.finance.index'
 import { Route as ConsoleFinanceMonitoringRouteImport } from './routes/console.finance.monitoring'
+import { Route as ConsoleFinanceMultiProviderRouteImport } from './routes/console.finance.multi-provider'
 import { Route as ConsoleFinanceProvidersRouteImport } from './routes/console.finance.providers'
 import { Route as ConsoleFinanceQueueRouteImport } from './routes/console.finance.queue'
 import { Route as ConsoleFinanceReconciliationRouteImport } from './routes/console.finance.reconciliation'
@@ -378,6 +379,12 @@ const ConsoleFinanceMonitoringRoute =
     path: '/monitoring',
     getParentRoute: () => ConsoleFinanceRoute,
   } as any)
+const ConsoleFinanceMultiProviderRoute =
+  ConsoleFinanceMultiProviderRouteImport.update({
+    id: '/multi-provider',
+    path: '/multi-provider',
+    getParentRoute: () => ConsoleFinanceRoute,
+  } as any)
 const ConsoleFinanceProvidersRoute = ConsoleFinanceProvidersRouteImport.update({
   id: '/providers',
   path: '/providers',
@@ -496,6 +503,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
+  '/console/finance/multi-provider': typeof ConsoleFinanceMultiProviderRoute
   '/console/finance/providers': typeof ConsoleFinanceProvidersRoute
   '/console/finance/queue': typeof ConsoleFinanceQueueRoute
   '/console/finance/reconciliation': typeof ConsoleFinanceReconciliationRoute
@@ -565,6 +573,7 @@ export interface FileRoutesByTo {
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
+  '/console/finance/multi-provider': typeof ConsoleFinanceMultiProviderRoute
   '/console/finance/providers': typeof ConsoleFinanceProvidersRoute
   '/console/finance/queue': typeof ConsoleFinanceQueueRoute
   '/console/finance/reconciliation': typeof ConsoleFinanceReconciliationRoute
@@ -637,6 +646,7 @@ export interface FileRoutesById {
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
+  '/console/finance/multi-provider': typeof ConsoleFinanceMultiProviderRoute
   '/console/finance/providers': typeof ConsoleFinanceProvidersRoute
   '/console/finance/queue': typeof ConsoleFinanceQueueRoute
   '/console/finance/reconciliation': typeof ConsoleFinanceReconciliationRoute
@@ -710,6 +720,7 @@ export interface FileRouteTypes {
     | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/finance/monitoring'
+    | '/console/finance/multi-provider'
     | '/console/finance/providers'
     | '/console/finance/queue'
     | '/console/finance/reconciliation'
@@ -779,6 +790,7 @@ export interface FileRouteTypes {
     | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/finance/monitoring'
+    | '/console/finance/multi-provider'
     | '/console/finance/providers'
     | '/console/finance/queue'
     | '/console/finance/reconciliation'
@@ -850,6 +862,7 @@ export interface FileRouteTypes {
     | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/finance/monitoring'
+    | '/console/finance/multi-provider'
     | '/console/finance/providers'
     | '/console/finance/queue'
     | '/console/finance/reconciliation'
@@ -1314,6 +1327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleFinanceMonitoringRouteImport
       parentRoute: typeof ConsoleFinanceRoute
     }
+    '/console/finance/multi-provider': {
+      id: '/console/finance/multi-provider'
+      path: '/multi-provider'
+      fullPath: '/console/finance/multi-provider'
+      preLoaderRoute: typeof ConsoleFinanceMultiProviderRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
     '/console/finance/providers': {
       id: '/console/finance/providers'
       path: '/providers'
@@ -1444,6 +1464,7 @@ const ConsoleFinanceTransactionsRouteWithChildren =
 
 interface ConsoleFinanceRouteChildren {
   ConsoleFinanceMonitoringRoute: typeof ConsoleFinanceMonitoringRoute
+  ConsoleFinanceMultiProviderRoute: typeof ConsoleFinanceMultiProviderRoute
   ConsoleFinanceProvidersRoute: typeof ConsoleFinanceProvidersRoute
   ConsoleFinanceQueueRoute: typeof ConsoleFinanceQueueRoute
   ConsoleFinanceReconciliationRoute: typeof ConsoleFinanceReconciliationRoute
@@ -1454,6 +1475,7 @@ interface ConsoleFinanceRouteChildren {
 
 const ConsoleFinanceRouteChildren: ConsoleFinanceRouteChildren = {
   ConsoleFinanceMonitoringRoute: ConsoleFinanceMonitoringRoute,
+  ConsoleFinanceMultiProviderRoute: ConsoleFinanceMultiProviderRoute,
   ConsoleFinanceProvidersRoute: ConsoleFinanceProvidersRoute,
   ConsoleFinanceQueueRoute: ConsoleFinanceQueueRoute,
   ConsoleFinanceReconciliationRoute: ConsoleFinanceReconciliationRoute,
