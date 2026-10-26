@@ -7,20 +7,10 @@ export type PaymentProvider = {
 };
 
 /**
- * Resolves the active payment provider from server secrets.
- * When no provider key is present, Insight runs in manual settlement mode:
- * every money movement is still recorded and confirmed by the Insight team.
+ * Sandbox is the only enabled adapter. Credential presence is not evidence of
+ * an integration and must never activate live money operations.
  */
 export function getPaymentProvider(): PaymentProvider {
-  const stripe = process.env["STRIPE_SECRET_KEY"];
-  if (stripe && stripe.length > 10) {
-    return {
-      id: "stripe",
-      label: "Payment provider",
-      connected: true,
-      notice: "Funds are held by a licensed payment provider. Insight runs the deal rules and keeps the record.",
-    };
-  }
   return {
     id: "manual",
     label: "Payment provider simulation",
