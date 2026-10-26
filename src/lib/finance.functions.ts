@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { providers, simulatedAdapter } from './finance/providers';
 import { parseStatement, reconcile } from './finance/reconciliation';
 import { simulateRouting } from './finance/routing';
+import { summarize } from './finance/summary';
 const reason = z.string().trim().min(3).max(2000);
 const currency = z.enum(['SAR','BHD','KWD','OMR','AED','QAR','USD']);
 const amount = z.string().regex(/^\d+(\.\d{1,3})?$/).max(22);
@@ -21,15 +22,15 @@ export const financeList = createServerFn({method:'GET'}).middleware([requireSup
   const search=data.query.replace(/[^a-zA-Z0-9-]/g,'');if(search)q=q.or(`deal_ref.ilike.%${search}%,provider_ref.ilike.%${search}%`);
   const r=await q.range(data.page*50,data.page*50+49);if(r.error)throw new Error(r.error.message);
   const records=await checked(db.from('finance_records').select('*').order('created_at',{ascending:false}).limit(200));
-  const summary=await checked(db.rpc('finance_summary',{_from:data.from,_to:data.to,_currency:data.currency||null,_provider:data.provider||null,_status:data.status||null}));
-  return {transactions:r.data as FinanceTransaction[],count:r.count??0,records:records as FinanceRecord[],summary:summary as any[],providers,actorId:context.userId};
+  const summary=summarize(r.data as FinanceTransaction[]);
+  return {transactions:r.data as FinanceTransaction[],count:r.count??0,records:records as FinanceRecord[],summary,providers,actorId:context.userId};
 });
 export const financeDetail = createServerFn({method:'GET'}).middleware([requireSupabaseAuth]).inputValidator(i=>z.object({id:z.string().uuid()}).parse(i)).handler(async({context,data})=>{
   const db=await staff(context);const t=await checked(db.from('finance_transactions').select('*').eq('id',data.id).single()) as FinanceTransaction;
   const [events,ledger,invoices,history,audit,disputes]=await Promise.all([
     checked(db.from('deal_events').select('id,title,note,created_at').eq('deal_id',t.deal_id).order('created_at')),
-    checked(db.from('finance_ledger').select('*').eq('deal_id',t.deal_id).order('created_at')),
-    checked(db.from('finance_invoices').select('*').eq('deal_id',t.deal_id)),
+    checked(db.from('ledger_entries').select('id,account,debit,credit,currency,reference,created_at').eq('deal_id',t.deal_id).order('created_at')),
+    checked(db.from('tax_invoices').select('id,invoice_number,fee,vat,total,currency,issued_at').eq('deal_id',t.deal_id)),
     checked(db.from('finance_transactions').select('*').eq('deal_id',t.deal_id).order('created_at')),
     checked(db.from('audit_logs').select('id,action,created_at').eq('entity_id',t.deal_id).order('created_at').limit(100)),
     checked(db.from('disputes').select('id,status,reason,outcome,response_deadline,evidence_deadline,resolution_deadline').eq('deal_id',t.deal_id)),
