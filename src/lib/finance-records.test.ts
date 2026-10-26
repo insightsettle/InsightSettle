@@ -1,0 +1,16 @@
+import { readFileSync } from 'node:fs';
+import { PGlite } from '@electric-sql/pglite';
+import { beforeAll,afterAll,it,expect } from 'vitest';
+let db:PGlite;
+const maker='00000000-0000-4000-8000-000000000001',checker='00000000-0000-4000-8000-000000000002',viewer='00000000-0000-4000-8000-000000000003';
+const proposal='00000000-0000-4000-8000-000000000010';
+beforeAll(async()=>{
+ db=new PGlite();await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE TABLE user_roles(user_id uuid,role text);INSERT INTO user_roles VALUES('${maker}','admin'),('${checker}','admin'),('${viewer}','staff'),('${viewer}','compliance');CREATE FUNCTION has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=$1 AND role=$2) $$;CREATE SCHEMA auth;CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT NULL::uuid $$;CREATE TABLE audit_logs(action text,entity_id text);CREATE FUNCTION staff_control_audit(uuid,text,text,text,jsonb,jsonb,text) RETURNS void LANGUAGE sql AS $$ INSERT INTO audit_logs VALUES($2,$4) $$;`);
+ const sql=readFileSync(new URL('../../drizzle/migrations/0026_finance_operational_center.sql',import.meta.url),'utf8');await db.exec(sql.slice(sql.indexOf('CREATE TABLE public.finance_records')));
+});
+afterAll(async()=>{await db.close();});
+const append=(actor:string,kind:string,subject:string,key:string,payload='{"environment":"sandbox","live":false}')=>db.query<{id:string}>('select finance_append_record($1,$2,$3,$4::jsonb,$5,$6) as id',[actor,kind,subject,payload,'Fictional operational test',key]);
+it('idempotent proposal returns one record and one audit, conflicting replay rejected',async()=>{const a=await append(maker,'provider_proposal','manual',proposal);const b=await append(maker,'provider_proposal','manual',proposal);expect(a.rows[0]?.id).toBe(b.rows[0]?.id);expect((await db.query('select * from audit_logs')).rows).toHaveLength(1);await expect(append(maker,'routing_proposal','manual',proposal)).rejects.toThrow('Idempotency conflict');});
+it('self approval fails; independent approval succeeds once',async()=>{const r=await append(maker,'provider_proposal','manual',proposal);const id=r.rows[0]?.id;if(!id)throw new Error('missing id');await expect(append(maker,'approval',id,'00000000-0000-4000-8000-000000000011')).rejects.toThrow('Independent approver');await append(checker,'approval',id,'00000000-0000-4000-8000-000000000012');await expect(append(checker,'approval',id,'00000000-0000-4000-8000-000000000013')).rejects.toThrow();});
+it('viewer writes and live proposals are forbidden',async()=>{await expect(append(viewer,'export','transactions','00000000-0000-4000-8000-000000000014')).rejects.toThrow('Finance capability');await expect(append(maker,'provider_proposal','manual','00000000-0000-4000-8000-000000000015','{"environment":"production"}')).rejects.toThrow('Live operations disabled');});
+it('metadata approvals do not grant update/delete privileges',async()=>{const r=await db.query<{can_update:boolean;can_delete:boolean}>("select has_table_privilege('service_role','finance_records','UPDATE') as can_update,has_table_privilege('service_role','finance_records','DELETE') as can_delete");expect(r.rows[0]).toEqual({can_update:false,can_delete:false});});

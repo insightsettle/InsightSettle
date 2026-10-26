@@ -1,0 +1,1 @@
+export function financeHead(title:string,description:string){return {meta:[{title:`${title} | Insight Finance`},{name:'description',content:description},{property:'og:title',content:`${title} | Insight Finance`},{property:'og:description',content:description},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'},{name:'robots',content:'noindex'}]};}

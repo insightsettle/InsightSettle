@@ -125,6 +125,13 @@ export type Database = {
             referencedRelation: "deal_transactions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "auction_lots_funding_tx_id_fkey"
+            columns: ["funding_tx_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       auctions: {
@@ -487,6 +494,13 @@ export type Database = {
             referencedRelation: "deal_transactions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "deal_payout_splits_release_tx_id_fkey"
+            columns: ["release_tx_id"]
+            isOneToOne: true
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       deal_ratings: {
@@ -671,6 +685,13 @@ export type Database = {
             columns: ["original_transaction_id"]
             isOneToOne: false
             referencedRelation: "deal_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_original_transaction_id_fkey"
+            columns: ["original_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
             referencedColumns: ["id"]
           },
           {
@@ -1051,6 +1072,39 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_records: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          idempotency_key: string
+          kind: string
+          payload: Json
+          reason: string
+          subject_id: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          kind: string
+          payload?: Json
+          reason: string
+          subject_id: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          payload?: Json
+          reason?: string
+          subject_id?: string
+        }
+        Relationships: []
+      }
       fx_quotes: {
         Row: {
           breakdown: Json | null
@@ -1283,6 +1337,13 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "deal_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -1588,6 +1649,72 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_responses: {
+        Row: {
+          channel: string[]
+          comment: string
+          country: string
+          created_at: string
+          cross_border: string | null
+          current_method: string[]
+          deal_size: string
+          deals_per_year: string | null
+          fee_ok: string
+          heard_of: string[]
+          id: string
+          lang: string
+          other_answers: Json
+          pilot_email: string | null
+          problems: string[]
+          respondent: string
+          source: string
+          unknown_party: string
+          would_use: string
+        }
+        Insert: {
+          channel?: string[]
+          comment?: string
+          country: string
+          created_at?: string
+          cross_border?: string | null
+          current_method: string[]
+          deal_size: string
+          deals_per_year?: string | null
+          fee_ok: string
+          heard_of?: string[]
+          id?: string
+          lang?: string
+          other_answers?: Json
+          pilot_email?: string | null
+          problems?: string[]
+          respondent: string
+          source?: string
+          unknown_party: string
+          would_use: string
+        }
+        Update: {
+          channel?: string[]
+          comment?: string
+          country?: string
+          created_at?: string
+          cross_border?: string | null
+          current_method?: string[]
+          deal_size?: string
+          deals_per_year?: string | null
+          fee_ok?: string
+          heard_of?: string[]
+          id?: string
+          lang?: string
+          other_answers?: Json
+          pilot_email?: string | null
+          problems?: string[]
+          respondent?: string
+          source?: string
+          unknown_party?: string
+          would_use?: string
+        }
+        Relationships: []
+      }
       tax_invoices: {
         Row: {
           currency: string
@@ -1689,7 +1816,67 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      finance_transactions: {
+        Row: {
+          amount: string | null
+          buyer_id: string | null
+          created_at: string | null
+          currency: string | null
+          deal_id: string | null
+          deal_ref: string | null
+          environment: string | null
+          fee: string | null
+          fx_quote_id: string | null
+          id: string | null
+          kind: string | null
+          milestone_id: string | null
+          operational_status: string | null
+          original_transaction_id: string | null
+          payout_split_id: string | null
+          provider: string | null
+          provider_ref: string | null
+          seller_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_transactions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_fx_quote_id_fkey"
+            columns: ["fx_quote_id"]
+            isOneToOne: false
+            referencedRelation: "fx_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_original_transaction_id_fkey"
+            columns: ["original_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "deal_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_original_transaction_id_fkey"
+            columns: ["original_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "finance_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_transactions_payout_split_id_fkey"
+            columns: ["payout_split_id"]
+            isOneToOne: false
+            referencedRelation: "deal_payout_splits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       advance_auction_bidder: {
@@ -1731,6 +1918,17 @@ export type Database = {
       }
       demo_quiet: { Args: never; Returns: boolean }
       demo_reset_active: { Args: never; Returns: boolean }
+      finance_append_record: {
+        Args: {
+          _actor: string
+          _key: string
+          _kind: string
+          _payload: Json
+          _reason: string
+          _subject: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
