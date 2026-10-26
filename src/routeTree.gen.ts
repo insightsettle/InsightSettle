@@ -47,6 +47,7 @@ import { Route as ConsoleAuctionsRouteImport } from './routes/console.auctions'
 import { Route as ConsoleAuditRouteImport } from './routes/console.audit'
 import { Route as ConsoleDisputesRouteImport } from './routes/console.disputes'
 import { Route as ConsoleFeesRouteImport } from './routes/console.fees'
+import { Route as ConsoleFinanceRouteImport } from './routes/console.finance'
 import { Route as ConsoleInterestRouteImport } from './routes/console.interest'
 import { Route as ConsoleKycRouteImport } from './routes/console.kyc'
 import { Route as ConsolePlatformRouteImport } from './routes/console.platform'
@@ -65,7 +66,16 @@ import { Route as ApiPublicAutoReleaseRouteImport } from './routes/api/public/au
 import { Route as ApiV1ActionRouteImport } from './routes/api/v1/$action'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
+import { Route as ConsoleFinanceIndexRouteImport } from './routes/console.finance.index'
+import { Route as ConsoleFinanceMonitoringRouteImport } from './routes/console.finance.monitoring'
+import { Route as ConsoleFinanceProvidersRouteImport } from './routes/console.finance.providers'
+import { Route as ConsoleFinanceQueueRouteImport } from './routes/console.finance.queue'
+import { Route as ConsoleFinanceReconciliationRouteImport } from './routes/console.finance.reconciliation'
+import { Route as ConsoleFinanceRoutingRouteImport } from './routes/console.finance.routing'
+import { Route as ConsoleFinanceTransactionsRouteImport } from './routes/console.finance.transactions'
 import { Route as ConsoleUsersUserIdRouteImport } from './routes/console.users_.$userId'
+import { Route as ConsoleFinanceTransactionsIndexRouteImport } from './routes/console.finance.transactions.index'
+import { Route as ConsoleFinanceTransactionsTransactionIdRouteImport } from './routes/console.finance.transactions.$transactionId'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -260,6 +270,11 @@ const ConsoleFeesRoute = ConsoleFeesRouteImport.update({
   path: '/fees',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleFinanceRoute = ConsoleFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 const ConsoleInterestRoute = ConsoleInterestRouteImport.update({
   id: '/interest',
   path: '/interest',
@@ -352,11 +367,61 @@ const ConsoleDealsDealIdRoute = ConsoleDealsDealIdRouteImport.update({
   path: '/deals/$dealId',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleFinanceIndexRoute = ConsoleFinanceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConsoleFinanceRoute,
+} as any)
+const ConsoleFinanceMonitoringRoute =
+  ConsoleFinanceMonitoringRouteImport.update({
+    id: '/monitoring',
+    path: '/monitoring',
+    getParentRoute: () => ConsoleFinanceRoute,
+  } as any)
+const ConsoleFinanceProvidersRoute = ConsoleFinanceProvidersRouteImport.update({
+  id: '/providers',
+  path: '/providers',
+  getParentRoute: () => ConsoleFinanceRoute,
+} as any)
+const ConsoleFinanceQueueRoute = ConsoleFinanceQueueRouteImport.update({
+  id: '/queue',
+  path: '/queue',
+  getParentRoute: () => ConsoleFinanceRoute,
+} as any)
+const ConsoleFinanceReconciliationRoute =
+  ConsoleFinanceReconciliationRouteImport.update({
+    id: '/reconciliation',
+    path: '/reconciliation',
+    getParentRoute: () => ConsoleFinanceRoute,
+  } as any)
+const ConsoleFinanceRoutingRoute = ConsoleFinanceRoutingRouteImport.update({
+  id: '/routing',
+  path: '/routing',
+  getParentRoute: () => ConsoleFinanceRoute,
+} as any)
+const ConsoleFinanceTransactionsRoute =
+  ConsoleFinanceTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => ConsoleFinanceRoute,
+  } as any)
 const ConsoleUsersUserIdRoute = ConsoleUsersUserIdRouteImport.update({
   id: '/users_/$userId',
   path: '/users/$userId',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const ConsoleFinanceTransactionsIndexRoute =
+  ConsoleFinanceTransactionsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ConsoleFinanceTransactionsRoute,
+  } as any)
+const ConsoleFinanceTransactionsTransactionIdRoute =
+  ConsoleFinanceTransactionsTransactionIdRouteImport.update({
+    id: '/$transactionId',
+    path: '/$transactionId',
+    getParentRoute: () => ConsoleFinanceTransactionsRoute,
+  } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -411,6 +476,7 @@ export interface FileRoutesByFullPath {
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/finance': typeof ConsoleFinanceRouteWithChildren
   '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/platform': typeof ConsolePlatformRoute
@@ -429,11 +495,20 @@ export interface FileRoutesByFullPath {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
+  '/console/finance/providers': typeof ConsoleFinanceProvidersRoute
+  '/console/finance/queue': typeof ConsoleFinanceQueueRoute
+  '/console/finance/reconciliation': typeof ConsoleFinanceReconciliationRoute
+  '/console/finance/routing': typeof ConsoleFinanceRoutingRoute
+  '/console/finance/transactions': typeof ConsoleFinanceTransactionsRouteWithChildren
   '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
+  '/console/finance/': typeof ConsoleFinanceIndexRoute
+  '/console/finance/transactions/$transactionId': typeof ConsoleFinanceTransactionsTransactionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/console/finance/transactions/': typeof ConsoleFinanceTransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -489,11 +564,19 @@ export interface FileRoutesByTo {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
+  '/console/finance/providers': typeof ConsoleFinanceProvidersRoute
+  '/console/finance/queue': typeof ConsoleFinanceQueueRoute
+  '/console/finance/reconciliation': typeof ConsoleFinanceReconciliationRoute
+  '/console/finance/routing': typeof ConsoleFinanceRoutingRoute
   '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals': typeof ConsoleDealsIndexRoute
+  '/console/finance': typeof ConsoleFinanceIndexRoute
+  '/console/finance/transactions/$transactionId': typeof ConsoleFinanceTransactionsTransactionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/console/finance/transactions': typeof ConsoleFinanceTransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -534,6 +617,7 @@ export interface FileRoutesById {
   '/console/audit': typeof ConsoleAuditRoute
   '/console/disputes': typeof ConsoleDisputesRoute
   '/console/fees': typeof ConsoleFeesRoute
+  '/console/finance': typeof ConsoleFinanceRouteWithChildren
   '/console/interest': typeof ConsoleInterestRoute
   '/console/kyc': typeof ConsoleKycRoute
   '/console/platform': typeof ConsolePlatformRoute
@@ -552,11 +636,20 @@ export interface FileRoutesById {
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
+  '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
+  '/console/finance/providers': typeof ConsoleFinanceProvidersRoute
+  '/console/finance/queue': typeof ConsoleFinanceQueueRoute
+  '/console/finance/reconciliation': typeof ConsoleFinanceReconciliationRoute
+  '/console/finance/routing': typeof ConsoleFinanceRoutingRoute
+  '/console/finance/transactions': typeof ConsoleFinanceTransactionsRouteWithChildren
   '/console/users_/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
+  '/console/finance/': typeof ConsoleFinanceIndexRoute
+  '/console/finance/transactions/$transactionId': typeof ConsoleFinanceTransactionsTransactionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/console/finance/transactions/': typeof ConsoleFinanceTransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -597,6 +690,7 @@ export interface FileRouteTypes {
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/finance'
     | '/console/interest'
     | '/console/kyc'
     | '/console/platform'
@@ -615,11 +709,20 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/finance/monitoring'
+    | '/console/finance/providers'
+    | '/console/finance/queue'
+    | '/console/finance/reconciliation'
+    | '/console/finance/routing'
+    | '/console/finance/transactions'
     | '/console/users/$userId'
     | '/console/deals/'
+    | '/console/finance/'
+    | '/console/finance/transactions/$transactionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/console/finance/transactions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -675,11 +778,19 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/finance/monitoring'
+    | '/console/finance/providers'
+    | '/console/finance/queue'
+    | '/console/finance/reconciliation'
+    | '/console/finance/routing'
     | '/console/users/$userId'
     | '/console/deals'
+    | '/console/finance'
+    | '/console/finance/transactions/$transactionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/console/finance/transactions'
   id:
     | '__root__'
     | '/'
@@ -719,6 +830,7 @@ export interface FileRouteTypes {
     | '/console/audit'
     | '/console/disputes'
     | '/console/fees'
+    | '/console/finance'
     | '/console/interest'
     | '/console/kyc'
     | '/console/platform'
@@ -737,11 +849,20 @@ export interface FileRouteTypes {
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
+    | '/console/finance/monitoring'
+    | '/console/finance/providers'
+    | '/console/finance/queue'
+    | '/console/finance/reconciliation'
+    | '/console/finance/routing'
+    | '/console/finance/transactions'
     | '/console/users_/$userId'
     | '/console/deals/'
+    | '/console/finance/'
+    | '/console/finance/transactions/$transactionId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/console/finance/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1046,6 +1167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleFeesRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/finance': {
+      id: '/console/finance'
+      path: '/finance'
+      fullPath: '/console/finance'
+      preLoaderRoute: typeof ConsoleFinanceRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
     '/console/interest': {
       id: '/console/interest'
       path: '/interest'
@@ -1172,12 +1300,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleDealsDealIdRouteImport
       parentRoute: typeof ConsoleRoute
     }
+    '/console/finance/': {
+      id: '/console/finance/'
+      path: '/'
+      fullPath: '/console/finance/'
+      preLoaderRoute: typeof ConsoleFinanceIndexRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
+    '/console/finance/monitoring': {
+      id: '/console/finance/monitoring'
+      path: '/monitoring'
+      fullPath: '/console/finance/monitoring'
+      preLoaderRoute: typeof ConsoleFinanceMonitoringRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
+    '/console/finance/providers': {
+      id: '/console/finance/providers'
+      path: '/providers'
+      fullPath: '/console/finance/providers'
+      preLoaderRoute: typeof ConsoleFinanceProvidersRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
+    '/console/finance/queue': {
+      id: '/console/finance/queue'
+      path: '/queue'
+      fullPath: '/console/finance/queue'
+      preLoaderRoute: typeof ConsoleFinanceQueueRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
+    '/console/finance/reconciliation': {
+      id: '/console/finance/reconciliation'
+      path: '/reconciliation'
+      fullPath: '/console/finance/reconciliation'
+      preLoaderRoute: typeof ConsoleFinanceReconciliationRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
+    '/console/finance/routing': {
+      id: '/console/finance/routing'
+      path: '/routing'
+      fullPath: '/console/finance/routing'
+      preLoaderRoute: typeof ConsoleFinanceRoutingRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
+    '/console/finance/transactions': {
+      id: '/console/finance/transactions'
+      path: '/transactions'
+      fullPath: '/console/finance/transactions'
+      preLoaderRoute: typeof ConsoleFinanceTransactionsRouteImport
+      parentRoute: typeof ConsoleFinanceRoute
+    }
     '/console/users_/$userId': {
       id: '/console/users_/$userId'
       path: '/users/$userId'
       fullPath: '/console/users/$userId'
       preLoaderRoute: typeof ConsoleUsersUserIdRouteImport
       parentRoute: typeof ConsoleRoute
+    }
+    '/console/finance/transactions/': {
+      id: '/console/finance/transactions/'
+      path: '/'
+      fullPath: '/console/finance/transactions/'
+      preLoaderRoute: typeof ConsoleFinanceTransactionsIndexRouteImport
+      parentRoute: typeof ConsoleFinanceTransactionsRoute
+    }
+    '/console/finance/transactions/$transactionId': {
+      id: '/console/finance/transactions/$transactionId'
+      path: '/$transactionId'
+      fullPath: '/console/finance/transactions/$transactionId'
+      preLoaderRoute: typeof ConsoleFinanceTransactionsTransactionIdRouteImport
+      parentRoute: typeof ConsoleFinanceTransactionsRoute
     }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
@@ -1234,12 +1425,54 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ConsoleFinanceTransactionsRouteChildren {
+  ConsoleFinanceTransactionsTransactionIdRoute: typeof ConsoleFinanceTransactionsTransactionIdRoute
+  ConsoleFinanceTransactionsIndexRoute: typeof ConsoleFinanceTransactionsIndexRoute
+}
+
+const ConsoleFinanceTransactionsRouteChildren: ConsoleFinanceTransactionsRouteChildren =
+  {
+    ConsoleFinanceTransactionsTransactionIdRoute:
+      ConsoleFinanceTransactionsTransactionIdRoute,
+    ConsoleFinanceTransactionsIndexRoute: ConsoleFinanceTransactionsIndexRoute,
+  }
+
+const ConsoleFinanceTransactionsRouteWithChildren =
+  ConsoleFinanceTransactionsRoute._addFileChildren(
+    ConsoleFinanceTransactionsRouteChildren,
+  )
+
+interface ConsoleFinanceRouteChildren {
+  ConsoleFinanceMonitoringRoute: typeof ConsoleFinanceMonitoringRoute
+  ConsoleFinanceProvidersRoute: typeof ConsoleFinanceProvidersRoute
+  ConsoleFinanceQueueRoute: typeof ConsoleFinanceQueueRoute
+  ConsoleFinanceReconciliationRoute: typeof ConsoleFinanceReconciliationRoute
+  ConsoleFinanceRoutingRoute: typeof ConsoleFinanceRoutingRoute
+  ConsoleFinanceTransactionsRoute: typeof ConsoleFinanceTransactionsRouteWithChildren
+  ConsoleFinanceIndexRoute: typeof ConsoleFinanceIndexRoute
+}
+
+const ConsoleFinanceRouteChildren: ConsoleFinanceRouteChildren = {
+  ConsoleFinanceMonitoringRoute: ConsoleFinanceMonitoringRoute,
+  ConsoleFinanceProvidersRoute: ConsoleFinanceProvidersRoute,
+  ConsoleFinanceQueueRoute: ConsoleFinanceQueueRoute,
+  ConsoleFinanceReconciliationRoute: ConsoleFinanceReconciliationRoute,
+  ConsoleFinanceRoutingRoute: ConsoleFinanceRoutingRoute,
+  ConsoleFinanceTransactionsRoute: ConsoleFinanceTransactionsRouteWithChildren,
+  ConsoleFinanceIndexRoute: ConsoleFinanceIndexRoute,
+}
+
+const ConsoleFinanceRouteWithChildren = ConsoleFinanceRoute._addFileChildren(
+  ConsoleFinanceRouteChildren,
+)
+
 interface ConsoleRouteChildren {
   ConsoleAuctionSettingsRoute: typeof ConsoleAuctionSettingsRoute
   ConsoleAuctionsRoute: typeof ConsoleAuctionsRoute
   ConsoleAuditRoute: typeof ConsoleAuditRoute
   ConsoleDisputesRoute: typeof ConsoleDisputesRoute
   ConsoleFeesRoute: typeof ConsoleFeesRoute
+  ConsoleFinanceRoute: typeof ConsoleFinanceRouteWithChildren
   ConsoleInterestRoute: typeof ConsoleInterestRoute
   ConsoleKycRoute: typeof ConsoleKycRoute
   ConsolePlatformRoute: typeof ConsolePlatformRoute
@@ -1261,6 +1494,7 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleAuditRoute: ConsoleAuditRoute,
   ConsoleDisputesRoute: ConsoleDisputesRoute,
   ConsoleFeesRoute: ConsoleFeesRoute,
+  ConsoleFinanceRoute: ConsoleFinanceRouteWithChildren,
   ConsoleInterestRoute: ConsoleInterestRoute,
   ConsoleKycRoute: ConsoleKycRoute,
   ConsolePlatformRoute: ConsolePlatformRoute,
