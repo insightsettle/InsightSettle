@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocale } from '@/lib/locale';
-import { financeApprove, financeCoverage, financeRouteSimulate, financeRoutingConfig, financeRoutingPropose } from '@/lib/finance.functions';
+import { financeCoverage, financeRouteSimulate, financeRoutingConfig, financeRoutingPropose } from '@/lib/finance.functions';
 import { providers } from '@/lib/finance/providers';
 import type { PriceRow, RouteRule, RoutingTable } from '@/lib/finance/price-book';
 
@@ -15,6 +15,12 @@ export const routingConfigOptions = () => queryOptions({ queryKey: ['finance-rou
 const coverageOptions = () => queryOptions({ queryKey: ['finance-coverage'], queryFn: () => financeCoverage() });
 
 const providerName = (id: string | null) => (id ? providers.find(p => p.id === id)?.name ?? id : null);
+import { coverageWarnings, type ProviderConfig } from '@/lib/finance/provider-config';
+export function RoutingWarnings({ providers: list }: { providers: ProviderConfig[] }) {
+  const { text } = useLocale();
+  const w = coverageWarnings(list);
+  return w.length ? <ul className="space-y-1 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">{w.map(x => <li key={x.en}>⚠ {text(x.en, x.ar)}</li>)}</ul> : null;
+}
 type Sim = { payerCountry: string; payeeCountry: string; currency: string; amount: string; dealType: 'goods' | 'services' | 'contracting' | 'freelance' | 'auction'; holdingDays: number };
 const FOUNDER_CASES: { en: string; ar: string; sim: Sim }[] = [
   { en: 'SAR 2,000 mada SA→SA', ar: '2,000 ريال مدى', sim: { payerCountry: 'SA', payeeCountry: 'SA', currency: 'SAR', amount: '2000', dealType: 'goods', holdingDays: 7 } },
@@ -36,20 +42,21 @@ const REASONS: Record<string, [string, string]> = {
 };
 
 export function MultiProviderPanel() {
+  return <RoutingPanelV2 />;
+}
+function RoutingPanelV2() {
   const { text } = useLocale();
   const { data } = useSuspenseQuery(routingConfigOptions());
   const propose = useServerFn(financeRoutingPropose);
-  const approve = useServerFn(financeApprove);
   const cache = useQueryClient();
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const approved = new Set(data.records.filter(r => r.kind === 'approval').map(r => r.subject_id));
-  const pending = data.records.filter(r => r.kind !== 'approval' && !approved.has(r.id));
   const approvedTables = data.records.filter(r => r.kind === 'routing_table_proposal' && approved.has(r.id));
 
   async function run(fn: () => Promise<unknown>, ok: string) {
     setBusy(true);
-    try { await fn(); toast.success(ok); await cache.invalidateQueries({ queryKey: ['finance-routing'] }); await cache.invalidateQueries({ queryKey: ['finance-coverage'] }); }
+    try { await fn(); toast.success(ok); await cache.invalidateQueries({ predicate: q => String(q.queryKey[0]).startsWith('finance') }); }
     catch (e) { toast.error(e instanceof Error ? e.message : text('Action failed', 'تعذّر الإجراء')); }
     finally { setBusy(false); }
   }
@@ -69,16 +76,7 @@ export function MultiProviderPanel() {
       </div>
     </div>
 
-    <div className="space-y-3">
-      <h3 className="text-lg font-semibold">{text('Pending proposals · second administrator approves', 'مقترحات معلّقة · يعتمدها مدير ثانٍ')}</h3>
-      {pending.length ? <ul className="divide-y divide-border rounded-lg border border-border">{pending.map(r => <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 p-3 text-sm">
-        <span className="min-w-0 break-words"><b>{r.kind}</b> · <span dir="ltr">{r.subject_id}</span> · {r.reason}</span>
-        {r.actor_id === data.actorId ? <span className="text-muted-foreground">{text('Your proposal — another administrator must approve', 'مقترحك — يجب أن يعتمده مدير آخر')}</span>
-          : <Button size="sm" disabled={busy || reason.trim().length < 3} onClick={() => run(() => approve({ data: { id: r.id, reason, key: crypto.randomUUID() } }), text('Approved; version is now immutable.', 'اعتُمد؛ النسخة الآن غير قابلة للتعديل.'))}>{text('Approve', 'اعتماد')}</Button>}
-      </li>)}</ul> : <p className="text-sm text-muted-foreground">{text('No pending proposals.', 'لا توجد مقترحات معلّقة.')}</p>}
-    </div>
-
-    <PriceBook rows={data.book} busy={busy} reason={reason} onPropose={row => run(() => propose({ data: { kind: 'price_book_proposal', row: row as any, reason, key: crypto.randomUUID() } }), text('Price proposal saved.', 'حُفظ مقترح السعر.'))} />
+    <RoutingWarnings providers={data.providers} />
 
     <div className="space-y-3">
       <h3 className="text-lg font-semibold">{text('Routing table', 'جدول التوجيه')} · <span dir="ltr">{data.table.version}</span></h3>
@@ -98,9 +96,10 @@ export function MultiProviderPanel() {
   </section>;
 }
 
-function PriceBook({ rows, busy, reason, onPropose }: { rows: PriceRow[]; busy: boolean; reason: string; onPropose: (r: PriceRow) => void }) {
+export function PriceBook({ rows, busy, reason, onPropose }: { rows: PriceRow[]; busy: boolean; reason: string; onPropose: (r: PriceRow) => void }) {
   const { text } = useLocale();
   const visible = rows.filter(r => r.provider !== 'manual' || (r.country === 'SA' && r.currency === 'SAR'));
+  if (!visible.length) return <p className="text-sm text-muted-foreground">{text('No price rows for this provider yet — awaiting quote.', 'لا توجد أسعار لهذا المزوّد بعد — بانتظار عرض السعر.')}</p>;
   const [edit, setEdit] = useState<PriceRow | null>(null);
   const num = (v: string) => (v.trim() === '' ? null : Number(v));
   return <div className="space-y-3">

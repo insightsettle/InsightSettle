@@ -80,6 +80,7 @@ import { Route as ConsoleFinanceTransactionsTransactionIdRouteImport } from './r
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as ApiPublicFinanceWebhookProviderEnvironmentRouteImport } from './routes/api/public/finance-webhook.$provider.$environment'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -445,6 +446,12 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicFinanceWebhookProviderEnvironmentRoute =
+  ApiPublicFinanceWebhookProviderEnvironmentRouteImport.update({
+    id: '/api/public/finance-webhook/$provider/$environment',
+    path: '/api/public/finance-webhook/$provider/$environment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -517,6 +524,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/console/finance/transactions/': typeof ConsoleFinanceTransactionsIndexRoute
+  '/api/public/finance-webhook/$provider/$environment': typeof ApiPublicFinanceWebhookProviderEnvironmentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -586,6 +594,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/console/finance/transactions': typeof ConsoleFinanceTransactionsIndexRoute
+  '/api/public/finance-webhook/$provider/$environment': typeof ApiPublicFinanceWebhookProviderEnvironmentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -660,6 +669,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/console/finance/transactions/': typeof ConsoleFinanceTransactionsIndexRoute
+  '/api/public/finance-webhook/$provider/$environment': typeof ApiPublicFinanceWebhookProviderEnvironmentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -734,6 +744,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/console/finance/transactions/'
+    | '/api/public/finance-webhook/$provider/$environment'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -803,6 +814,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/console/finance/transactions'
+    | '/api/public/finance-webhook/$provider/$environment'
   id:
     | '__root__'
     | '/'
@@ -876,6 +888,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/console/finance/transactions/'
+    | '/api/public/finance-webhook/$provider/$environment'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -910,6 +923,7 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  ApiPublicFinanceWebhookProviderEnvironmentRoute: typeof ApiPublicFinanceWebhookProviderEnvironmentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1411,6 +1425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/finance-webhook/$provider/$environment': {
+      id: '/api/public/finance-webhook/$provider/$environment'
+      path: '/api/public/finance-webhook/$provider/$environment'
+      fullPath: '/api/public/finance-webhook/$provider/$environment'
+      preLoaderRoute: typeof ApiPublicFinanceWebhookProviderEnvironmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1567,6 +1588,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  ApiPublicFinanceWebhookProviderEnvironmentRoute:
+    ApiPublicFinanceWebhookProviderEnvironmentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
