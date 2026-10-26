@@ -88,7 +88,7 @@ describe('database guards (PGlite)', () => {
   const maker = '00000000-0000-4000-8000-000000000001', checker = '00000000-0000-4000-8000-000000000002';
   beforeAll(async () => {
     db = new PGlite();
-    await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE TABLE user_roles(user_id uuid,role text);INSERT INTO user_roles VALUES('${maker}','admin'),('${checker}','admin');
+    await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE SCHEMA auth;CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT NULL::uuid $$;CREATE TABLE user_roles(user_id uuid,role text);INSERT INTO user_roles VALUES('${maker}','admin'),('${checker}','admin');
       CREATE FUNCTION has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=$1 AND role=$2) $$;
       CREATE TABLE audit_logs(id serial, action text);CREATE FUNCTION staff_control_audit(uuid,text,text,text,jsonb,jsonb,text) RETURNS void LANGUAGE sql AS $$ INSERT INTO audit_logs(action) VALUES($2) $$;
       CREATE TABLE platform_settings(id boolean PRIMARY KEY DEFAULT true, updated_at timestamptz);INSERT INTO platform_settings VALUES(true,now());
