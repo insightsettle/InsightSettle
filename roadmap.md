@@ -1,4 +1,10 @@
 # Roadmap
+- [ ] Finance Center: inspect existing flows and record file-specific architecture.
+- [ ] Finance Center: provider capability registry and sandbox-only adapter boundary.
+- [ ] Finance Center: normalized exact-decimal transaction reads and currency-separated reporting.
+- [ ] Finance Center: existing-console overview, transactions/detail, providers, queue, reconciliation, routing, exports and monitoring.
+- [ ] Finance Center: append-only audited maker-checker metadata, idempotency and safe routing/reconciliation tests.
+- [ ] Finance Center: authenticated bilingual phone/desktop verification, full regression tests and STATUS documentation; preserve data, no publication.
 - [x] 24 Oct 12:20 batch 1 initial console reset: 6 deals removed, two demo deals/one auction/one lot restored through UI.
 - [x] Staff batch 1 A: admin auction-only standard/percentage/fixed modes, commission defaults/cap, audited pre-payment split edits and public pricing. Live USD 4/public disclosure and 85/15→80/20 split verified; defaults standard/15/100 restored. Currency/VAT/standard-deal/locked-quote regressions pass.
 - [x] Staff batch 1 B: Customer 360 and audited reason-required account actions; notes, phone update/removal, suspend/reactivate, signed-in create/fund rejection and reset-request acceptance verified. Fixed suspended funding consuming a quote; retry after reactivation succeeded. Original demo phone restored; no impersonation.
