@@ -22,7 +22,7 @@ export const METHOD_LABEL: Record<PaymentMethod, readonly [en: string, ar: strin
   credit_card: ["Credit card", "بطاقة ائتمانية"],
 };
 
-/** Provider cost per payment: percent of the amount plus a fixed SAR amount (Tap reference prices). */
+/** Simulated provider cost per payment (routing_mode=simulated_only). Real candidates live in the versioned price book (src/lib/finance/price-book.ts). */
 export const PROVIDER_COST: Record<PaymentMethod, { percent: number; fixedSar: number }> = {
   bank_transfer: { percent: 0, fixedSar: 10 },
   mada: { percent: 1.75, fixedSar: 1 },
@@ -53,12 +53,17 @@ export type MethodCheck = {
   reason: readonly [en: string, ar: string] | null;
 };
 
-/** Whether a method can be offered for a deal of this size and fee. */
-export function checkMethod(method: PaymentMethod, amountSar: number, feeSar: number): MethodCheck {
-  const margin = amountSar > 0 ? (feeSar - providerCostSar(amountSar, method)) / amountSar : 0;
+/**
+ * Whether a method can be offered for a deal of this size and fee.
+ * `routedCostSar` (routing_mode=price_book_sandbox): the routed provider's price-book cost; null = no route for this deal.
+ * Omitted = today's behaviour with the simulated provider's PROVIDER_COST.
+ */
+export function checkMethod(method: PaymentMethod, amountSar: number, feeSar: number, routedCostSar?: number | null): MethodCheck {
+  const cost = routedCostSar === undefined ? providerCostSar(amountSar, method) : routedCostSar;
+  const margin = amountSar > 0 && cost != null ? (feeSar - cost) / amountSar : 0;
   if (method === "credit_card" && amountSar > CREDIT_CARD_MAX_SAR)
     return { method, allowed: false, feeSar, margin, reason: ["Credit cards are available up to SAR 50,000. Use a bank transfer or mada.", "البطاقة الائتمانية متاحة حتى 50,000 ريال. استخدم التحويل البنكي أو مدى."] };
-  if (margin < MIN_MARGIN)
+  if (cost == null || margin < MIN_MARGIN)
     return { method, allowed: false, feeSar, margin, reason: ["This payment method is not available for this amount. Choose another method.", "طريقة الدفع هذه غير متاحة لهذا المبلغ. اختر طريقة أخرى."] };
   return { method, allowed: true, feeSar, margin, reason: null };
 }
