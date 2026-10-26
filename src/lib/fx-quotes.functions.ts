@@ -95,6 +95,10 @@ export const requestFxQuote = createServerFn({ method: "POST" })
         fee: p.payIn.insightFee,
         vat: p.payIn.vatPayable,
         total: p.payIn.total,
+        // One deal = one provider: the route is recorded on the quote and copied onto the deal at funding.
+        route_provider: p.routes?.[p.method]?.provider ?? "manual",
+        route_rule_version: p.routes ? `${p.routes[p.method]?.version}/${p.routes[p.method]?.ruleId ?? "locked"}` : "simulated_only",
+        route_reasons: p.routes?.[p.method] ? { reasons: p.routes[p.method]!.reasons, rejected: p.routes[p.method]!.rejected, unverified: p.routes[p.method]!.unverified } : { reasons: ["routing_mode_simulated_only"] },
         breakdown: { ...p, terms_version: deal.terms_version, ...(milestone ? { milestone } : {}) },
         expires_at: new Date(Date.now() + QUOTE_MINUTES * 60_000).toISOString(),
         created_by: context.userId,
