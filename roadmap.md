@@ -1,10 +1,11 @@
 # Roadmap
-- [ ] Finance Center: inspect existing flows and record file-specific architecture.
-- [ ] Finance Center: provider capability registry and sandbox-only adapter boundary.
-- [ ] Finance Center: normalized exact-decimal transaction reads and currency-separated reporting.
-- [ ] Finance Center: existing-console overview, transactions/detail, providers, queue, reconciliation, routing, exports and monitoring.
-- [ ] Finance Center: append-only audited maker-checker metadata, idempotency and safe routing/reconciliation tests.
-- [ ] Finance Center: authenticated bilingual phone/desktop verification, full regression tests and STATUS documentation; preserve data, no publication.
+- [x] Finance Center: inspect existing flows and record file-specific architecture and STATUS documentation.
+- [x] Finance Center: candidate capability catalogue and sandbox-only adapter boundary; no implicit live activation.
+- [x] Finance Center: normalized exact-decimal transaction projection, page-only currency-separated totals and all seven console sections implemented; authenticated UI remains unverified.
+- [x] Finance Center: additive append-only metadata, independent configuration approval, idempotency and matching/routing tests; full suite 190 passed, 10 skipped; automatic build OK. Existing money/public/mobile unchanged; no reset/publication.
+- [ ] Finance Center: authenticated bilingual phone/desktop E2E, uploads and approvals — blocked by demo sign-in failure and unavailable explicit-user session approval.
+- [ ] Finance Center: full-period exact aggregates and ledger/invoice string projections — blocked by managed migration snapshot parent collision; second migration not applied.
+- [ ] Finance Center: live/provider-specific executors, signed events, settlements, real balances and verified fees — pending official documentation, credentials, partner/regulatory approval and founder authorization; disabled.
 - [x] 24 Oct 12:20 batch 1 initial console reset: 6 deals removed, two demo deals/one auction/one lot restored through UI.
 - [x] Staff batch 1 A: admin auction-only standard/percentage/fixed modes, commission defaults/cap, audited pre-payment split edits and public pricing. Live USD 4/public disclosure and 85/15→80/20 split verified; defaults standard/15/100 restored. Currency/VAT/standard-deal/locked-quote regressions pass.
 - [x] Staff batch 1 B: Customer 360 and audited reason-required account actions; notes, phone update/removal, suspend/reactivate, signed-in create/fund rejection and reset-request acceptance verified. Fixed suspended funding consuming a quote; retry after reactivation succeeded. Original demo phone restored; no impersonation.
