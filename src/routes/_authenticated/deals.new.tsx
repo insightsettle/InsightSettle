@@ -255,7 +255,7 @@ function NewDeal() {
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <form ref={formRef} noValidate className="min-w-0 space-y-5" onSubmit={handleSubmit}>
           <div data-step="0" hidden={step !== 0} className="space-y-5">
-          <fieldset data-no-localize>
+          <fieldset data-no-localize className="min-w-0">
             <legend className="text-sm font-semibold">{text("Start from a ready template (optional)", "ابدأ من نموذج جاهز (اختياري)")}</legend>
             <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
               {DEAL_TEMPLATES.map((tp) => (
