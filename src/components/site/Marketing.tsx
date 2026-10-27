@@ -53,21 +53,21 @@ export function PageHero({ badge, title, highlight, body, points, aside, primary
   return (
     <section className="relative overflow-hidden border-b border-border bg-secondary">
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
-      <div aria-hidden="true" className="absolute -top-40 -end-40 size-[28rem] rounded-full bg-brand-teal/10 blur-3xl" />
+      <div aria-hidden="true" className="blob-drift absolute -top-40 -end-40 size-[28rem] rounded-full bg-brand-teal/10 blur-3xl" />
       <div className={cn("relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-14 lg:py-20", aside && "lg:grid-cols-[1.1fr_0.9fr] lg:gap-16")}>
-        <div className="text-center lg:text-start">
+        <div className="reveal text-center lg:text-start">
           <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-primary">{text(badge[0], badge[1])}</span>
           <h1 className="mt-5 text-4xl leading-[1.3] font-bold sm:text-5xl">{text(title[0], title[1])}<br /><span className="text-primary">{text(highlight[0], highlight[1])}</span></h1>
           <p className="mx-auto mt-5 max-w-xl text-lg leading-9 text-foreground/80 lg:mx-0">{text(body[0], body[1])}</p>
           {(primary || secondary) && (
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-              {primary && <Button asChild size="lg" className="h-14 rounded-full px-7 text-base shadow-[0_14px_30px_-16px_rgb(19_128_101/0.9)] sm:h-12"><Link to={primary.to} {...(primary.signup ? { search: { mode: "signup" as const } } : {})}>{text(primary.label[0], primary.label[1])}<ArrowUpRight className="size-4" /></Link></Button>}
+              {primary && <Button asChild size="lg" className="group relative h-14 overflow-hidden rounded-full px-7 text-base shadow-[0_14px_30px_-16px_rgb(19_128_101/0.9)] hover:-translate-y-0.5 sm:h-12"><Link to={primary.to} {...(primary.signup ? { search: { mode: "signup" as const } } : {})}><span aria-hidden className="checkout-sheen pointer-events-none absolute inset-0" />{text(primary.label[0], primary.label[1])}<ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></Link></Button>}
               {secondary && <Button asChild size="lg" variant="outline" className="h-14 rounded-full bg-card px-7 text-base sm:h-12"><Link to={secondary.to} {...(secondary.hash ? { hash: secondary.hash } : {})}>{text(secondary.label[0], secondary.label[1])}</Link></Button>}
             </div>
           )}
           {points && <ul className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground lg:justify-start">{points.map(([en, ar]) => <li key={en} className="flex items-center gap-2"><Check className="size-4 text-primary" />{text(en, ar)}</li>)}</ul>}
         </div>
-        {aside}
+        {aside && <div className="animate-in fade-in zoom-in-95 duration-700 fill-mode-both delay-200">{aside}</div>}
       </div>
     </section>
   );
@@ -103,10 +103,10 @@ export function StepsFlow({ steps = DEAL_STEPS }: { steps?: [T2, T2][] }) {
   const { text } = useLocale();
   return (
     <ol className="relative mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <span aria-hidden="true" className="gradient-brand absolute inset-x-[12.5%] top-[2.85rem] hidden h-0.5 opacity-60 lg:block" />
+      <span aria-hidden="true" className="steps-line gradient-brand absolute inset-x-[12.5%] top-[2.85rem] hidden h-0.5 opacity-60 lg:block" />
       {steps.map(([title, body], i) => (
         <li key={title[0]} className="relative rounded-2xl border border-border bg-card p-6">
-          <span className="gradient-brand relative grid size-11 place-items-center rounded-full text-lg font-bold text-white ring-4 ring-card">{i + 1}</span>
+          <span aria-hidden="true" className="gradient-brand relative grid size-11 place-items-center rounded-full text-lg font-bold text-white ring-4 ring-card">{i + 1}</span>
           <h3 className="mt-5 text-lg font-semibold">{text(title[0], title[1])}</h3>
           <p className="mt-2 leading-7 text-muted-foreground">{text(body[0], body[1])}</p>
         </li>
@@ -178,9 +178,10 @@ export function CtaBand({ title, body, label = ["Create a free account", "أنش
   return (
     <section className="relative overflow-hidden bg-brand-strong text-primary-foreground">
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
+      <div aria-hidden="true" className="blob-drift pointer-events-none absolute -bottom-24 -end-24 size-72 rounded-full bg-brand-mint/15 blur-3xl" />
       <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-5 py-14 sm:flex-row sm:items-center">
         <div><h2 className="text-3xl font-bold">{text(title[0], title[1])}</h2><p className="mt-3 text-white/75">{text(body[0], body[1])}</p></div>
-        <Button asChild size="lg" variant="secondary" className="h-12 px-6 text-base"><Link to="/auth" search={{ mode: "signup" }}>{text(label[0], label[1])}<ArrowUpRight className="size-4" /></Link></Button>
+        <Button asChild size="lg" variant="secondary" className="group relative h-12 overflow-hidden px-6 text-base hover:-translate-y-0.5"><Link to="/auth" search={{ mode: "signup" }}><span aria-hidden className="checkout-sheen pointer-events-none absolute inset-0" />{text(label[0], label[1])}<ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></Link></Button>
       </div>
     </section>
   );

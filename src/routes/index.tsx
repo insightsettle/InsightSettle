@@ -78,29 +78,29 @@ function HomePage() {
     <section className="relative overflow-hidden border-b border-border bg-secondary">
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
       <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 pt-10 pb-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-24">
-        <div className="text-center lg:text-start">
+        <div className="reveal text-center lg:text-start">
           <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-accent-foreground"><ShieldCheck className="size-4 shrink-0" />{text("For businesses and individuals: the other side is paid only after you receive", "للأعمال والأفراد: لا يصل المبلغ للطرف الآخر قبل أن تستلم")}</span>
           <h1 className="mt-6 text-[2.6rem] leading-[1.3] font-bold sm:text-[3.4rem]">{text("Pay with confidence.", "ادفع حين تطمئن،")}<br /><span className="text-primary">{text("Get paid on delivery.", "واستلم حين تُسلِّم.")}</span></h1>
           <p className="mx-auto mt-6 max-w-xl text-lg leading-9 text-foreground/80 lg:mx-0">{text("Agree the terms, pay in your own currency, and the money waits in the deal until you receive and check what you bought. If something goes wrong, it stays there until the matter is settled.", "اتفقا على الشروط، وادفع بعملتك، ويبقى المبلغ في الصفقة حتى تستلم ما اشتريته وتتأكد منه. وإن حدثت مشكلة، يبقى حيث هو حتى تُحسم.")}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
-            <Button asChild size="lg" className="h-14 rounded-full px-7 text-base shadow-[0_14px_30px_-16px_rgb(19_128_101/0.9)] sm:h-12"><Link to="/auth" search={{ mode: "signup" }}>{text("Start your first deal", "ابدأ صفقتك الأولى")}<ArrowUpRight className="size-4" /></Link></Button>
+            <Button asChild size="lg" className="group relative h-14 overflow-hidden rounded-full px-7 text-base shadow-[0_14px_30px_-16px_rgb(19_128_101/0.9)] hover:-translate-y-0.5 sm:h-12"><Link to="/auth" search={{ mode: "signup" }}><span aria-hidden className="checkout-sheen pointer-events-none absolute inset-0" />{text("Start your first deal", "ابدأ صفقتك الأولى")}<ArrowUpRight className="size-4" /></Link></Button>
             <Button asChild size="lg" variant="outline" className="h-14 rounded-full bg-card px-7 text-base sm:h-12"><Link to="/how-it-works">{text("See how it works", "شاهد كيف تعمل")}</Link></Button>
           </div>
           <ul className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground lg:justify-start">{[["Free to create a deal", "إنشاء الصفقة مجاني"], ["Fees only when you pay", "الرسوم عند الدفع فقط"], ["Arabic and English", "بالعربية والإنجليزية"]].map(([en, ar]) => <li key={en} className="flex items-center gap-2"><Check className="size-4 text-primary" />{text(en ?? "", ar)}</li>)}</ul>
           <p className="mx-auto mt-6 max-w-xl text-xs leading-6 text-muted-foreground lg:mx-0">{text("Demo: the payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider, and Insight runs the deal rules and keeps the record.", "نسخة تجريبية: مزوّد الدفع محاكى ولا تتحرك أموال حقيقية. عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، وتدير إنسايت قواعد الصفقة وتحفظ سجلها.")}</p>
         </div>
-        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-          <div aria-hidden="true" className="absolute -top-8 -start-6 size-44 rounded-full bg-brand-mint/25 blur-3xl" />
-          <div aria-hidden="true" className="absolute -bottom-10 -end-6 size-44 rounded-full bg-brand-teal/25 blur-3xl" />
+        <div className="relative mx-auto w-full max-w-md animate-in fade-in zoom-in-95 duration-700 fill-mode-both delay-200 lg:max-w-none">
+          <div aria-hidden="true" className="blob-drift absolute -top-8 -start-6 size-44 rounded-full bg-brand-mint/25 blur-3xl" />
+          <div aria-hidden="true" className="blob-drift absolute -bottom-10 -end-6 size-44 rounded-full bg-brand-teal/25 blur-3xl [animation-delay:2s]" />
           <div className="relative rounded-[2rem] bg-gradient-to-br from-accent via-card to-secondary p-4 pb-14 ring-1 ring-border shadow-[0_40px_80px_-50px_rgb(12_42_34/0.6)] sm:p-7 sm:pb-16">
-          <ul aria-hidden="true" className="absolute -end-3 top-12 z-10 flex flex-col gap-3 sm:-end-5">{[Lock, Coins, Truck].map((I, k) => <li key={k} className="grid size-12 place-items-center rounded-full bg-card text-primary shadow-[0_12px_24px_-12px_rgb(12_42_34/0.5)] ring-1 ring-border"><I className="size-5" strokeWidth={1.9} /></li>)}</ul>
+          <ul aria-hidden="true" className="hero-float absolute -end-3 top-12 z-10 flex flex-col gap-3 sm:-end-5">{[Lock, Coins, Truck].map((I, k) => <li key={k} className="grid size-12 place-items-center rounded-full bg-card text-primary shadow-[0_12px_24px_-12px_rgb(12_42_34/0.5)] ring-1 ring-border"><I className="size-5" strokeWidth={1.9} /></li>)}</ul>
         <div className="me-8 rounded-3xl border border-border bg-card p-5 shadow-[0_30px_60px_-40px_rgb(12_42_34/0.45)] sm:me-10 sm:p-7">
           <div className="flex items-start justify-between gap-3">
             <div><p className="text-xs text-muted-foreground">{text("Example deal", "مثال")} · {text("Jeddah – Shenzhen", "جدة – شنتشن")}</p><h2 className="mt-2 text-lg font-semibold">{text("Office chairs from a factory", "كراسي مكتبية من مصنع")}</h2></div>
             <span className="shrink-0 whitespace-nowrap rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{text("Shipped", "تم الشحن")}</span>
           </div>
           <p className="mt-6 text-3xl font-bold tabular-nums"><bdi dir="ltr">{formatMoney(12000, "USD")}</bdi></p>
-          <div className="mt-6 grid grid-cols-4 gap-1.5" aria-hidden="true"><span className="h-2 rounded bg-brand-mint" /><span className="h-2 rounded bg-brand-mint" /><span className="gradient-brand h-2 rounded" /><span className="h-2 rounded bg-surface" /></div>
+          <div className="mt-6 grid grid-cols-4 gap-1.5" aria-hidden="true"><span className="h-2 rounded bg-brand-mint" /><span className="h-2 rounded bg-brand-mint" /><span className="gradient-brand checkout-sheen relative h-2 overflow-hidden rounded" /><span className="h-2 rounded bg-surface" /></div>
           <ol className="mt-2 grid grid-cols-4 gap-1.5 text-xs text-muted-foreground"><li>{text("Agreed", "الاتفاق")}</li><li>{text("Paid", "الدفع")}</li><li className="font-semibold text-primary">{text("Shipping", "الشحن")}</li><li>{text("Payout", "التحويل")}</li></ol>
           <div className="mt-6 space-y-3">{([[BadgeCheck, "Both parties verified", "الطرفان موثّقان"], [Truck, "Shipment on its way · DEMO-24817", "الشحنة في الطريق · DEMO-24817"], [Wallet, "Paid to the factory after a 5-day inspection", "يُحوَّل للمصنع بعد فحص 5 أيام"]] as const).map(([I, en, ar]) => <div key={en} className="flex items-center gap-3 rounded-xl bg-background p-3 text-sm"><I className="size-5 shrink-0 text-primary" /><span>{text(en, ar)}</span></div>)}</div>
         </div>

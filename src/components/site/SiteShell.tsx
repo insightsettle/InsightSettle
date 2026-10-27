@@ -3,7 +3,7 @@ import { SiteNotice } from "@/components/site/SiteNotice";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { Menu, ShieldAlert } from "lucide-react";
 import { BrandLogo } from "@/components/site/BrandLogo";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { InAppShell } from "@/components/site/AppShell";
 
 import { NotificationBell } from "@/components/site/NotificationBell";
@@ -207,8 +207,36 @@ export function SiteShell({
     <div className="flex min-h-screen flex-col bg-background">
       <SiteNotice />
       <SiteHeader />
-      <main className={cn("flex-1", className)}>{children}</main>
+      <PublicMain className={className}>{children}</PublicMain>
       <SiteFooter />
     </div>
   );
+}
+
+/**
+ * Public pages: sections below the fold rise in as they scroll into view, and their cards follow one after another
+ * (founder, 27 Oct). Sections already on screen are never hidden, so nothing flashes on first load, and without
+ * JavaScript every section simply shows. Presentation only.
+ */
+function PublicMain({ children, className }: { children: React.ReactNode; className?: string | undefined }) {
+  const ref = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const root = ref.current;
+    if (!root || typeof IntersectionObserver === "undefined") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("sr-in"); io.unobserve(e.target); }
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    const frame = requestAnimationFrame(() => {
+      root.querySelectorAll("section").forEach((el) => {
+        if (el.classList.contains("sr")) return;
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return; // already visible: leave it alone
+        el.classList.add("sr");
+        io.observe(el);
+      });
+    });
+    return () => { cancelAnimationFrame(frame); io.disconnect(); };
+  }, [pathname]);
+  return <main ref={ref} className={cn("site-main flex-1", className)}>{children}</main>;
 }
