@@ -292,9 +292,9 @@ html[dir="rtl"] .checkout-progress { --origin: right; }
 /* A page with its own .reveal inside the console keeps a single stagger. */
 .reveal-deep > .reveal > * { animation-name: reveal-up; }
 /* .lift: a clickable card rises a little on hover and presses on click. */
-.lift { transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s, border-color 0.2s; }
-.lift:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgb(12 42 34 / 0.45); border-color: color-mix(in oklab, var(--primary) 35%, var(--border)); }
-.lift:active { transform: translateY(0) scale(0.995); }
+.lift { transition: translate 0.2s cubic-bezier(0.22, 1, 0.36, 1), scale 0.2s, box-shadow 0.2s, border-color 0.2s; }
+.lift:hover { translate: 0 -2px; box-shadow: 0 14px 30px -18px rgb(12 42 34 / 0.45); border-color: color-mix(in oklab, var(--primary) 35%, var(--border)); }
+.lift:active { translate: 0 0; scale: 0.995; }
 /* Cards gain a soft shadow on hover; tables highlight the row under the pointer. */
 .app-content .rounded-\[16px\].border { transition: box-shadow 0.2s, border-color 0.2s; }
 .app-content .rounded-\[16px\].border:hover { box-shadow: 0 10px 28px -22px rgb(12 42 34 / 0.45); }
@@ -305,7 +305,7 @@ html[dir="rtl"] .checkout-progress { --origin: right; }
 ::selection { background: color-mix(in oklab, var(--primary) 22%, transparent); }
 @media (prefers-reduced-motion: reduce) {
   .reveal > *, .reveal-deep > * > *, .app-content details[open] > summary ~ * { animation: none; }
-  .lift, .lift:hover, .lift:active { transform: none; }
+  .lift, .lift:hover, .lift:active { translate: none; scale: none; }
 }
 .app-content select { transition: border-color 0.15s, box-shadow 0.15s; }
 .app-content select:hover { border-color: color-mix(in oklab, var(--primary) 40%, var(--input)); }

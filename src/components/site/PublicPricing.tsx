@@ -7,6 +7,7 @@ import { useLocale } from "@/lib/locale";
 import { formatMoney, moneyInputStep, SUPPORTED_CURRENCIES } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AnimatedNumber } from "@/components/motion/Motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,7 +43,7 @@ export function PublicPricing() {
     const label = side === "buyer" ? text("Payer's country", "دولة الدافع") : text("Payee's country", "دولة المستفيد");
     return <div className="space-y-2"><Label>{label}</Label><Select value={side === "buyer" ? buyerCountry : supplierCountry} onValueChange={(v: Country) => { side === "buyer" ? setBuyerCountry(v) : setSupplierCountry(v); setDirty(true); }}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{countries.map(([code, en, ar]) => <SelectItem key={code} value={code}>{text(en, ar)}</SelectItem>)}</SelectContent></Select></div>;
   }
-  return <div data-no-localize className="grid items-start gap-8 lg:grid-cols-[1fr_440px]">
+  return <div data-no-localize className="reveal grid items-start gap-8 lg:grid-cols-[1fr_440px]">
     <div>
       <h3 className="text-xl font-semibold">{text("Your fee, before you pay", "رسومك قبل أن تدفع")}</h3>
       <p className="mt-3 text-sm leading-7 text-muted-foreground">{text("Enter the deal amount in the calculator to see the exact fee, each party's share and VAT by country. Fees are provisional and may change before launch.", "أدخل مبلغ الصفقة في الحاسبة لترى الرسوم بالضبط وحصة كل طرف والضريبة حسب الدولة. الرسوم مؤقتة وقد تتغير قبل الإطلاق.")}</p>
@@ -56,7 +57,7 @@ export function PublicPricing() {
       <div className="grid grid-cols-2 gap-3">{countrySelect("buyer")}{countrySelect("supplier")}</div>
       <Button className="w-full" disabled={busy} type="submit"><RefreshCw className={busy ? "size-4 animate-spin" : "size-4"} />{text("Calculate fees", "احسب الرسوم")}</Button>
       {(error || !result.available) && <p role="status" className="rounded-lg bg-warning-subtle p-3 text-sm leading-6 text-foreground">{text("Live pricing is unavailable for public access. No estimated numbers are substituted.", "التسعير الحالي غير متاح للعامة. لا تُعرض أرقام تقديرية بدلاً منه.")}</p>}
-      <dl className="divide-y divide-border border-t border-border">{[[text("Total fee","إجمالي الرسوم"),b?.fee],[text("Payer share","حصة الدافع"),b?.buyerShare],[text("Payee share","حصة المستفيد"),b?.sellerShare],[text("Payer VAT","ضريبة الدافع"),b?.buyerVat],[text("Payee VAT","ضريبة المستفيد"),b?.sellerVat],[text("Payee receives before its VAT","صافي المستفيد قبل ضريبته"),b ? b.amount-b.sellerShare : null]].map(([label,value],i) => <div key={String(label)} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold tabular-nums"><bdi>{value == null ? "—" : ((i===3 && b?.buyerVatRate===0) || (i===4 && b?.sellerVatRate===0)) ? text("No VAT","لا توجد ضريبة") : formatMoney(Number(value),currency)}</bdi></dd></div>)}</dl>
+      <dl className="divide-y divide-border border-t border-border">{[[text("Total fee","إجمالي الرسوم"),b?.fee],[text("Payer share","حصة الدافع"),b?.buyerShare],[text("Payee share","حصة المستفيد"),b?.sellerShare],[text("Payer VAT","ضريبة الدافع"),b?.buyerVat],[text("Payee VAT","ضريبة المستفيد"),b?.sellerVat],[text("Payee receives before its VAT","صافي المستفيد قبل ضريبته"),b ? b.amount-b.sellerShare : null]].map(([label,value],i) => <div key={String(label)} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold tabular-nums"><bdi>{value == null ? "—" : ((i===3 && b?.buyerVatRate===0) || (i===4 && b?.sellerVatRate===0)) ? text("No VAT","لا توجد ضريبة") : <AnimatedNumber value={Number(value)} format={(v) => formatMoney(v, currency)} />}</bdi></dd></div>)}</dl>
       {result.available && !dirty && result.methodAllowed === false && result.methodReason && <p role="status" className="rounded-lg bg-warning-subtle p-3 text-sm leading-6 text-foreground">{text(result.methodReason[0], result.methodReason[1])}</p>}
       {dirty && <p className="text-xs text-muted-foreground">{text("Calculate to refresh your result.", "احسب لتحديث النتيجة.")}</p>}
     </form></CardContent></Card>

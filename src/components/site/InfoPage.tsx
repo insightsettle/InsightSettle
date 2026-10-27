@@ -10,13 +10,13 @@ export function InfoPage({ eyebrow, title, intro, sections }: { eyebrow: string;
   const { text } = useLocale();
   return (
     <SiteShell>
-      <div data-no-localize className="mx-auto max-w-4xl px-4 py-14">
+      <div data-no-localize className="reveal mx-auto max-w-4xl px-4 py-14">
         <p className="text-sm font-semibold text-primary">{text(eyebrow)}</p>
         <h1 className="mt-2 text-4xl font-extrabold">{text(title)}</h1>
         <p className="mt-4 max-w-2xl text-muted-foreground">{text(intro)}</p>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+        <div className="reveal mt-10 grid gap-6 sm:grid-cols-2">
           {sections.map((s) => (
-            <section key={text(s.h)} className="rounded-xl border border-border p-6">
+            <section key={text(s.h)} className="lift rounded-xl border border-border bg-card p-6">
               <h2 className="text-lg font-bold">{text(s.h)}</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text(s.p)}</p>
               {s.points && (

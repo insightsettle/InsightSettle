@@ -63,15 +63,15 @@ function HelpPage() {
   const { text } = useLocale();
   return (
     <SiteShell>
-      <div data-no-localize className="mx-auto max-w-3xl px-4 py-14">
+      <div data-no-localize className="reveal mx-auto max-w-3xl px-4 py-14">
         <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
           <LifeBuoy className="size-3.5" />{text("Help centre")}</span>
         <h1 className="mt-4 text-4xl font-extrabold">{text("Questions, answered")}</h1>
         <p className="mt-3 text-muted-foreground">{text("Everything you need to know before opening your first deal.")}</p>
 
-        <div className="mt-8 space-y-3">
+        <div className="reveal mt-8 space-y-3">
           {faqs.map((f) => (
-            <Card key={text(f.q)}>
+            <Card key={text(f.q)} className="lift">
               <CardContent className="p-6">
                 <h2 className="font-bold">{text(f.q)}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text(f.a)}</p>
