@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useSessionUser } from "@/hooks/use-session";
 import { getDealByRef } from "@/lib/deals";
 import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
-import { useLocale } from "@/lib/locale";
+import { translateText, useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { DEFAULT_METHOD, METHOD_LABEL, PAYMENT_METHODS, type PaymentMethod } from "@/lib/payment-methods";
 import { startDealFunding, type PaymentResult } from "@/lib/payments.functions";
@@ -93,6 +93,7 @@ function CheckoutPage() {
         <p className="mt-3 leading-7 text-muted-foreground">{r.ok
           ? text("The amount is now held in the deal. The other party is told to deliver; you confirm when you receive it.", "المبلغ الآن محفوظ في الصفقة. سيُبلَّغ الطرف الآخر بالتسليم، وتؤكد أنت عند الاستلام.")
           : text("No money was taken. You can try again or choose another payment method.", "لم يُخصم أي مبلغ. يمكنك المحاولة مرة أخرى أو اختيار طريقة دفع أخرى.")}</p>
+        {!r.ok && r.message && <p className="mt-3 rounded-lg bg-muted px-3 py-2 text-sm">{text(r.message, translateText(r.message))}</p>}
         <div className="mt-6 flex justify-center gap-2">
           <Button asChild><Link to="/deals/$dealId" params={{ dealId: ref }}>{text("Back to the deal", "العودة إلى الصفقة")}</Link></Button>
           {!r.ok && <Button variant="outline" onClick={() => pay.reset()}>{text("Try again", "حاول مرة أخرى")}</Button>}

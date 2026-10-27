@@ -33,6 +33,10 @@ export const createDealLink = createServerFn({ method: "POST" })
     const db = await admin();
     const { data: me } = await db.from("profiles").select("account_state").eq("id", context.userId).maybeSingle();
     if (!me || me.account_state !== "active") throw new Error("Your account cannot create deal links while suspended or restricted. Contact Insight support.");
+    // Buyers can only pay a deal whose seller has a verified payout account in the deal currency (D-24).
+    const { supplierPayoutOk } = await import("@/lib/deal-rules.server");
+    if (!(await supplierPayoutOk(db, { seller_id: context.userId, currency: data.currency })))
+      throw new Error(`Add a verified payout bank account in ${data.currency} (Account → Settlement bank account) before creating a link in this currency.`);
     const { count } = await db.from("deal_links").select("id", { count: "exact", head: true }).eq("owner_id", context.userId).eq("active", true);
     if ((count ?? 0) >= 50) throw new Error("You already have 50 active deal links. Pause one before creating another.");
     const shipping = data.dealType === "goods" ? data.shippingRequired : false;
