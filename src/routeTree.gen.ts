@@ -65,6 +65,7 @@ import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedInvoiceRefRouteImport } from './routes/_authenticated/invoice.$ref'
+import { Route as AuthenticatedPayDealIdRouteImport } from './routes/_authenticated/pay.$dealId'
 import { Route as ApiPublicAutoReleaseRouteImport } from './routes/api/public/auto-release'
 import { Route as ApiV1ActionRouteImport } from './routes/api/v1/$action'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
@@ -370,6 +371,11 @@ const AuthenticatedInvoiceRefRoute = AuthenticatedInvoiceRefRouteImport.update({
   path: '/invoice/$ref',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPayDealIdRoute = AuthenticatedPayDealIdRouteImport.update({
+  id: '/pay/$dealId',
+  path: '/pay/$dealId',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicAutoReleaseRoute = ApiPublicAutoReleaseRouteImport.update({
   id: '/api/public/auto-release',
   path: '/api/public/auto-release',
@@ -548,6 +554,7 @@ export interface FileRoutesByFullPath {
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
+  '/pay/$dealId': typeof AuthenticatedPayDealIdRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
@@ -625,6 +632,7 @@ export interface FileRoutesByTo {
   '/deals/new': typeof AuthenticatedDealsNewRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
+  '/pay/$dealId': typeof AuthenticatedPayDealIdRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
@@ -705,6 +713,7 @@ export interface FileRoutesById {
   '/_authenticated/deals/new': typeof AuthenticatedDealsNewRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
+  '/_authenticated/pay/$dealId': typeof AuthenticatedPayDealIdRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
@@ -786,6 +795,7 @@ export interface FileRouteTypes {
     | '/deals/new'
     | '/invite/$token'
     | '/invoice/$ref'
+    | '/pay/$dealId'
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
@@ -863,6 +873,7 @@ export interface FileRouteTypes {
     | '/deals/new'
     | '/invite/$token'
     | '/invoice/$ref'
+    | '/pay/$dealId'
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
@@ -942,6 +953,7 @@ export interface FileRouteTypes {
     | '/_authenticated/deals/new'
     | '/_authenticated/invite/$token'
     | '/_authenticated/invoice/$ref'
+    | '/_authenticated/pay/$dealId'
     | '/api/public/auto-release'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
@@ -1396,6 +1408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoiceRefRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pay/$dealId': {
+      id: '/_authenticated/pay/$dealId'
+      path: '/pay/$dealId'
+      fullPath: '/pay/$dealId'
+      preLoaderRoute: typeof AuthenticatedPayDealIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/auto-release': {
       id: '/api/public/auto-release'
       path: '/api/public/auto-release'
@@ -1567,6 +1586,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDealsNewRoute: typeof AuthenticatedDealsNewRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedInvoiceRefRoute: typeof AuthenticatedInvoiceRefRoute
+  AuthenticatedPayDealIdRoute: typeof AuthenticatedPayDealIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1583,6 +1603,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDealsNewRoute: AuthenticatedDealsNewRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedInvoiceRefRoute: AuthenticatedInvoiceRefRoute,
+  AuthenticatedPayDealIdRoute: AuthenticatedPayDealIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

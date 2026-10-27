@@ -28,7 +28,7 @@ import {
   TermVersionsCard,
 } from "@/components/site/DealExtras";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   AlertCircle,
@@ -114,6 +114,7 @@ function OrdinaryDealPage() {
   const { user } = useSessionUser();
 
   const dealQuery = useQuery({ queryKey: ["deal", dealId], queryFn: () => getDealByRef(dealId) });
+  const navigate = useNavigate();
   const deal = dealQuery.data ?? null;
 
   const timeline = useQuery({
@@ -308,6 +309,7 @@ function OrdinaryDealPage() {
     if (a === "accept-terms") action.mutate(() => agreeFn({ data: { dealId: deal.id } }));
     else if (a === "deliver") action.mutate(() => deliverFn({ data: { dealId: deal.id } }));
     else if (a === "release") payment.mutate(() => release({ data: { dealId: deal.id } }));
+    else if (a === "scroll-pay" && canFund) void navigate({ to: "/pay/$dealId", params: { dealId: deal.ref } });
     else scrollTo(a === "scroll-pay" ? "deal-actions" : a === "scroll-ship" ? "shipping" : a === "scroll-terms" ? "terms" : a === "scroll-milestones" ? "milestones" : "dispute");
   };
 
