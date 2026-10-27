@@ -8,6 +8,7 @@ import { useLocale } from "@/lib/locale";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ListSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/console/support")({
   head: () => ({ meta: [
@@ -38,7 +39,7 @@ function SupportPage() {
       <div className="mt-4 flex flex-wrap gap-2" role="tablist">
         {filters.map(([key, en, ar]) => <Button key={key} type="button" size="sm" variant={filter === key ? "default" : "outline"} onClick={() => setFilter(key)}>{text(en, ar)}</Button>)}
       </div>
-      {q.isPending && <p className="mt-6">{text("Loading…", "جارٍ التحميل…")}</p>}
+      {q.isPending && <ListSkeleton label={text("Loading…", "جارٍ التحميل…")} />}
       {q.isError && <p role="alert" className="mt-6 text-destructive">{(q.error as Error).message}</p>}
       {q.data && q.data.requests.length === 0 && <p className="mt-6 text-muted-foreground">{text("No requests here.", "لا توجد طلبات هنا.")}</p>}
       <div className="mt-5 space-y-4">

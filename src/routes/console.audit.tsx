@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { listAuditLog } from "@/lib/admin.functions";
 import { downloadCsv } from "@/lib/csv";
 import { useLocale } from "@/lib/locale";
+import { ListSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/console/audit")({
   head: () => ({ meta: [
@@ -56,7 +57,7 @@ function AuditPage() {
       <Card className="mt-5 min-w-0 max-w-full">
         <CardContent className="max-w-full overflow-x-auto p-0">
           {log.isLoading ? (
-            <p className="p-5 text-sm text-muted-foreground">{text("Loading…")}</p>
+            <ListSkeleton label={text("Loading…", "جارٍ التحميل…")} />
           ) : log.isError ? (
             <p className="p-5 text-sm text-destructive">{text("Could not load the history.")}</p>
           ) : (

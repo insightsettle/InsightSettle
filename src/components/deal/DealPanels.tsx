@@ -70,9 +70,9 @@ export function EscrowStepper({ status, termsStatus }: { status: string; termsSt
           const state = done || i < current ? "done" : i === current ? "current" : "next";
           return (
             <li key={s[0]} aria-current={state === "current" ? "step" : undefined} className="flex min-w-0 flex-col gap-2">
-              <span aria-hidden="true" className={`h-2 rounded-full ${state === "done" ? "bg-brand-mint" : state === "current" ? "gradient-brand" : "bg-surface"}`} />
+              <span aria-hidden="true" className="relative h-2 overflow-hidden rounded-full bg-surface">{state !== "next" && <span className={`checkout-progress absolute inset-0 rounded-full ${state === "done" ? "bg-brand-mint" : "gradient-brand checkout-sheen"}`} style={{ ["--dur" as string]: "0.6s", animationDelay: `${i * 120}ms`, animationFillMode: "both" }} />}</span>
               <span className={`flex min-w-0 items-start gap-1 text-xs leading-5 sm:text-sm ${state === "current" ? "font-bold text-primary" : state === "done" ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                {state === "done" && <CheckCircle2 className="mt-0.5 hidden size-3.5 shrink-0 text-primary sm:block" />}
+                {state === "done" && <CheckCircle2 className="checkout-pop mt-0.5 hidden size-3.5 shrink-0 text-primary sm:block" />}{state === "current" && <span className="relative mt-1.5 hidden size-2 shrink-0 sm:flex"><span className="absolute inset-0 rounded-full bg-primary opacity-60 motion-safe:animate-ping" /><span className="relative size-2 rounded-full bg-primary" /></span>}
                 <span className="min-w-0 break-words">{text(s[0], s[1])}</span>
               </span>
             </li>

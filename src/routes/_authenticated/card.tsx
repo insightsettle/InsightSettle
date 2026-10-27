@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { getMyCard } from "@/lib/member-card.functions";
+import { PageSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/_authenticated/card")({
   head: () => ({ meta: [{ title: "My Insight card | Insight" }, { name: "description", content: "Your Insight member card and the amounts in your deals." }] }),
@@ -30,19 +31,19 @@ function CardPage() {
   const main = c?.totals[0];
 
   return (
-    <div data-no-localize className="min-w-0">
+    <div data-no-localize className="reveal min-w-0">
       <h1 className="text-3xl font-bold">{text("My Insight card", "بطاقتي في إنسايت")}</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">{text("Your member card with the amounts in your deals. Soon you can add it to Apple Wallet or Google Wallet and see updates on your phone.",
         "بطاقة عضويتك مع مبالغ صفقاتك. قريباً تستطيع إضافتها إلى Apple Wallet أو Google Wallet لتصلك التحديثات على جوالك.")}</p>
 
-      {card.isPending ? <p className="mt-6 text-muted-foreground">{text("Loading…", "جارٍ التحميل…")}</p>
+      {card.isPending ? <PageSkeleton label={text("Loading…", "جارٍ التحميل…")} />
       : card.isError || !c ? <p role="alert" className="mt-6 text-destructive">{text("Your card could not be loaded.", "تعذّر تحميل بطاقتك.")}</p>
       : (
         <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
           {/* The card: member-card style (not a bank card), Insight brand colours */}
-          <div className="relative aspect-[1.586/1] w-full overflow-hidden rounded-[22px] p-5 text-white shadow-[0_24px_48px_-24px_rgb(12_42_34/0.7)] sm:p-6"
+          <div className="[perspective:1000px]"><div className="group relative aspect-[1.586/1] w-full overflow-hidden rounded-[22px] p-5 text-white shadow-[0_24px_48px_-24px_rgb(12_42_34/0.7)] transition-transform duration-500 ease-out [transform-style:preserve-3d] hover:[transform:rotateY(-10deg)_rotateX(5deg)] sm:p-6"
             style={{ background: "radial-gradient(120% 120% at 100% 0%, #5cc4ba 0%, rgba(92,196,186,0) 45%), linear-gradient(135deg, #138065 0%, #0c5a47 70%, #0b3d30 100%)" }}>
-            <svg aria-hidden className="pointer-events-none absolute -bottom-10 -end-10 size-48 opacity-[0.12]" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="none" stroke="white" strokeWidth="2" /><circle cx="100" cy="100" r="64" fill="none" stroke="white" strokeWidth="2" /><circle cx="100" cy="100" r="32" fill="none" stroke="white" strokeWidth="2" /></svg>
+            <span className="checkout-sheen pointer-events-none absolute inset-0" /><svg aria-hidden className="pointer-events-none absolute -bottom-10 -end-10 size-48 opacity-[0.12] transition-transform duration-700 group-hover:rotate-45" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="none" stroke="white" strokeWidth="2" /><circle cx="100" cy="100" r="64" fill="none" stroke="white" strokeWidth="2" /><circle cx="100" cy="100" r="32" fill="none" stroke="white" strokeWidth="2" /></svg>
             <div className="flex h-full flex-col justify-between">
               <div className="flex items-start justify-between gap-3">
                 <img src="/brand/insight-logo-white.svg" alt="Insight" className="h-7 w-auto" />
@@ -57,7 +58,7 @@ function CardPage() {
                 {qr && <img src={qr} alt={text("QR code to open your Insight account", "رمز QR لفتح حسابك في إنسايت")} className="size-16 shrink-0 rounded-lg bg-white p-1.5 sm:size-[72px]" />}
               </div>
             </div>
-          </div>
+          </div></div>
 
           <div className="min-w-0 space-y-4">
             <div className="grid grid-cols-2 gap-3">

@@ -136,7 +136,7 @@ function DocumentsPage() {
 
   return (
     <SiteShell>
-      <div data-no-localize className="mx-auto max-w-6xl px-4 py-12">
+      <div data-no-localize className="reveal mx-auto max-w-6xl px-4 py-12">
         <p className="text-sm font-semibold text-primary">{text("DEAL MANAGER TOOLS")}</p>
         <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{text("Deal documents", "مستندات الصفقة")}</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">{text("Upload the deal's documents: contracts, scopes of work, or the seller's invoices. Insight AI extracts the obligations and risks, then compares them with the deal record so mismatches surface before payment.", "ارفع مستندات الصفقة: العقود أو نطاقات العمل أو فواتير البائع. يستخرج ذكاء إنسايت الاصطناعي الالتزامات والمخاطر، ثم يقارنها بسجل الصفقة لإظهار أوجه الاختلاف قبل الدفع.")}</p>

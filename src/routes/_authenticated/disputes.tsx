@@ -103,7 +103,7 @@ function DisputesPage() {
 
   return (
     <SiteShell>
-      <div data-no-localize className="mx-auto max-w-6xl px-4 py-12">
+      <div data-no-localize className="reveal mx-auto max-w-6xl px-4 py-12">
         {dealsError && <div role="alert" className="mb-4 text-sm text-destructive">{text("Deals could not be loaded.", "تعذّر تحميل الصفقات.")}<Button variant="outline" onClick={retry}>{text("Try again", "حاول مرة أخرى")}</Button></div>}
         <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
           <div>

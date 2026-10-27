@@ -110,7 +110,7 @@ function VerificationPage() {
   if (staffLoading || isStaff) return null;
   return (
     <SiteShell>
-      <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
+      <div className="reveal mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
         {!section && <>
           <AccountSummary name={(user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email?.split("@")[0] ?? ""} email={user?.email ?? ""} />
         <WhatsAppPreference />

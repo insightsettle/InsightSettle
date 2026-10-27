@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PageSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/console/platform")({
   head: () => ({ meta: [
@@ -27,7 +28,7 @@ function PlatformPage() {
   const { text } = useLocale();
   const load = useServerFn(readPlatformSettings);
   const q = useQuery({ queryKey: ["platform-settings-admin"], queryFn: () => load(), retry: false });
-  if (q.isPending) return <p className="mt-6">{text("Loading…", "جارٍ التحميل…")}</p>;
+  if (q.isPending) return <PageSkeleton label={text("Loading…", "جارٍ التحميل…")} />;
   if (q.isError || !q.data) return <p role="alert" className="mt-6 text-destructive">{text("Admin access required", "يتطلب صلاحية مدير")}</p>;
   const { updated_at, ...initial } = q.data;
   return (

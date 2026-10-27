@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { useLocale } from "@/lib/locale";
 import { getSurveyResults } from "@/lib/survey.functions";
+import { ListSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/console/survey")({
   head: () => ({ meta: [
@@ -32,7 +33,7 @@ function SurveyResults() {
         {text("Public link: ", "الرابط العام: ")}<a className="font-medium text-primary underline" dir="ltr" href={link} target="_blank" rel="noreferrer">{link}</a>
         {text(" — add ?src=whatsapp (or any label) to see where answers came from.", " — أضف ‎?src=whatsapp‎ (أو أي وسم) لمعرفة مصدر الإجابات.")}
       </p>
-      {q.isPending && <p className="mt-6">{text("Loading…", "جارٍ التحميل…")}</p>}
+      {q.isPending && <ListSkeleton label={text("Loading…", "جارٍ التحميل…")} />}
       {q.isError && <p role="alert" className="mt-6 text-destructive">{(q.error as Error).message}</p>}
       {q.data && (
         <>

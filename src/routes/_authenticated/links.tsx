@@ -14,6 +14,7 @@ import { createDealLink, listMyDealLinks, setDealLinkActive } from "@/lib/deal-l
 import { dealLinkUrl, LINK_STATE_TEXT, shareText, type DealLinkInput } from "@/lib/deal-links";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
+import { ListSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/_authenticated/links")({
   head: () => ({ meta: [{ title: "Deal links | Insight" }, { name: "description", content: "Create a link for your offer and share it with buyers." }] }),
@@ -33,6 +34,7 @@ function LinksPage() {
   const [f, setF] = useState({ dealType: "goods", title: "", description: "", amount: "", currency: "SAR", feePayer: "buyer", inspectionDays: "3", deliveryDays: "7", shippingRequired: true, maxUses: "", expiresInDays: "30", acceptanceCriteria: "", refundConditions: "" });
   const set = (k: keyof typeof f, v: string | boolean) => setF((p) => ({ ...p, [k]: v }));
   const create = useMutation({
+    meta: { successToast: text("Your deal link is ready to share.", "رابط صفقتك جاهز للمشاركة.") },
     mutationFn: () => createFn({ data: {
       dealType: f.dealType as DealLinkInput["dealType"], title: f.title, description: f.description, amount: Number(f.amount), currency: f.currency as "SAR",
       feePayer: f.feePayer as "buyer", inspectionDays: Number(f.inspectionDays) || 3, deliveryDays: Number(f.deliveryDays) || 7,
@@ -42,11 +44,11 @@ function LinksPage() {
     } }),
     onSuccess: () => { setOpen(false); setF((p) => ({ ...p, title: "", description: "", amount: "" })); void qc.invalidateQueries({ queryKey: ["my-deal-links"] }); },
   });
-  const toggle = useMutation({ mutationFn: (v: { id: string; active: boolean }) => activeFn({ data: v }), onSuccess: () => void qc.invalidateQueries({ queryKey: ["my-deal-links"] }) });
+  const toggle = useMutation({ meta: { successToast: text("Link updated.", "حُدّث الرابط.") }, mutationFn: (v: { id: string; active: boolean }) => activeFn({ data: v }), onSuccess: () => void qc.invalidateQueries({ queryKey: ["my-deal-links"] }) });
   const origin = typeof window === "undefined" ? "https://insightsettle.com" : window.location.origin;
 
   return (
-    <div data-no-localize className="min-w-0">
+    <div data-no-localize className="reveal min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">{text("Deal links", "روابط الصفقات")}</h1>
@@ -57,7 +59,7 @@ function LinksPage() {
       </div>
 
       {open && (
-        <Card className="mt-6"><CardContent className="space-y-4 p-6">
+        <Card className="mt-6 animate-in fade-in slide-in-from-top-2 duration-300"><CardContent className="space-y-4 p-6">
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2"><Label htmlFor="dl-type">{text("What are you offering?", "ما الذي تعرضه؟")}</Label>
@@ -93,7 +95,7 @@ function LinksPage() {
       )}
 
       <div className="mt-6 space-y-4">
-        {links.isPending ? <p className="text-muted-foreground">{text("Loading…", "جارٍ التحميل…")}</p>
+        {links.isPending ? <ListSkeleton label={text("Loading…", "جارٍ التحميل…")} />
         : links.isError ? <p role="alert" className="text-destructive">{text("Your links could not be loaded.", "تعذّر تحميل روابطك.")}</p>
         : (links.data ?? []).length === 0 ? (
           <Card><CardContent className="flex flex-col items-center gap-3 p-10 text-center">
@@ -105,7 +107,7 @@ function LinksPage() {
           const url = dealLinkUrl(origin, l.code);
           const amountText = formatMoney(l.amount, l.currency);
           return (
-            <Card key={l.id}><CardContent className="p-5">
+            <Card key={l.id} className="lift"><CardContent className="p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold">{l.title}</p>

@@ -247,20 +247,20 @@ function NewDeal() {
 
   return (
     <SiteShell>
-      <div className="min-w-0">
+      <div className="reveal min-w-0">
         <h1 className="text-3xl font-bold">{text("New deal", "صفقة جديدة")}</h1>
         <p className="mt-2 text-base text-muted-foreground">{text("Three short steps, then you get an invitation link for the other party.", "ثلاث خطوات قصيرة، ثم تحصل على رابط دعوة للطرف الآخر.")}</p>
 
         <div className="mt-6"><FormStepper current={step} /></div>
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <form ref={formRef} noValidate className="min-w-0 space-y-5" onSubmit={handleSubmit}>
-          <div data-step="0" hidden={step !== 0} className="space-y-5">
+          <div data-step="0" hidden={step !== 0} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-5">
           <fieldset data-no-localize className="min-w-0">
             <legend className="text-sm font-semibold">{text("Start from a ready template (optional)", "ابدأ من نموذج جاهز (اختياري)")}</legend>
             <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
               {DEAL_TEMPLATES.map((tp) => (
                 <button type="button" key={tp.id} onClick={() => applyTemplate(tp)} aria-pressed={template?.id === tp.id}
-                  className={`min-w-44 shrink-0 rounded-xl border p-3 text-start text-sm transition ${template?.id === tp.id ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                  className={`min-w-44 shrink-0 rounded-xl border p-3 text-start text-sm transition ${template?.id === tp.id ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"}`}>
                   <b className="block">{text(tp.label[0], tp.label[1])}</b>
                   <span className="mt-0.5 block text-xs text-muted-foreground">{text(tp.hint[0], tp.hint[1])}</span>
                 </button>
@@ -273,7 +273,7 @@ function NewDeal() {
             <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
               {([["buyer", Wallet, ["I am paying", "أنا من يدفع"], ["You pay into the deal; nothing moves until you receive and check.", "تدفع في الصفقة، ولا يتحرك المبلغ قبل أن تستلم وتتأكد."], R.payer], ["seller", PackageCheck, ["I am being paid", "أنا من يستلم المبلغ"], ["You deliver what you agreed, knowing the money is already in the deal.", "تُنجز ما اتفقتما عليه وأنت تعلم أن مستحقك محفوظ في الصفقة."], R.payee]] as const).map(([value, Icon, title, hint, name]) => (
                 <Button variant="outline" type="button" key={value} role="radio" aria-checked={role === value} aria-label={text(title[0], title[1])} onClick={() => setRole(value)}
-                  className={`h-auto whitespace-normal flex items-start gap-4 rounded-2xl border bg-card p-5 text-start transition ${role === value ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                  className={`h-auto whitespace-normal flex items-start gap-4 rounded-2xl border bg-card p-5 text-start transition-all duration-200 active:scale-[0.99] ${role === value ? "border-primary ring-2 ring-primary/30" : "border-border hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"}`}>
                   <IconTile icon={Icon} tone={role === value ? "brand" : "soft"} />
                   <span className="min-w-0"><b className="block text-base">{text(title[0], title[1])}{dealType && <span className="ms-1 text-sm font-normal text-muted-foreground">({text(name.en, name.ar)})</span>}</b><span className="mt-1 block text-sm leading-6 text-muted-foreground">{text(hint[0], hint[1])}</span></span>
                 </Button>
@@ -288,7 +288,7 @@ function NewDeal() {
                 const Icon = M.icon;
                 return (
                   <Button variant="outline" type="button" key={t} role="radio" aria-checked={dealType === t} onClick={() => chooseType(t)}
-                    className={`h-auto justify-start whitespace-normal items-start gap-3 rounded-lg border p-4 text-start transition ${dealType === t ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                    className={`h-auto justify-start whitespace-normal items-start gap-3 rounded-lg border p-4 text-start transition-all duration-200 active:scale-[0.99] ${dealType === t ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"}`}>
                     <Icon className="mt-0.5 size-6 shrink-0 text-primary" />
                     <span><b className="block">{M.label}</b><span className="mt-1 block text-xs text-muted-foreground">{M.hint}</span></span>
                   </Button>
@@ -298,7 +298,7 @@ function NewDeal() {
           </fieldset>
           </div>
           {dealType && (<>
-          <div data-step="0" hidden={step !== 0} className="space-y-5">
+          <div data-step="0" hidden={step !== 0} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="title">{text("Deal title")}</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -314,7 +314,7 @@ function NewDeal() {
             />
           </div>
           </div>
-          <div data-step="1" hidden={step !== 1} className="space-y-5">
+          <div data-step="1" hidden={step !== 1} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="amount">{text("Deal value")}</Label>
@@ -346,7 +346,7 @@ function NewDeal() {
             </div>
           </div>
           </div>
-          <div data-step="0" hidden={step !== 0} className="space-y-5">
+          <div data-step="0" hidden={step !== 0} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-5">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="quantity">{text("Quantity")}</Label>
@@ -378,7 +378,7 @@ function NewDeal() {
             </div>
           </div>
           </div>
-          <div data-step="1" hidden={step !== 1} className="space-y-5">
+          <div data-step="1" hidden={step !== 1} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="feePayer">{text("Who pays the escrow fee")}</Label>
@@ -456,7 +456,7 @@ function NewDeal() {
             </span>
           </label>
           </div>
-          <div data-step="2" hidden={step !== 2} className="space-y-5">
+          <div data-step="2" hidden={step !== 2} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="counterparty">{text("Other party email")}</Label>
             <Input
@@ -469,13 +469,13 @@ function NewDeal() {
             {(recent.data ?? []).length > 0 && (
               <div data-no-localize className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                 <span className="text-muted-foreground">{text("Recent:", "سابقاً:")}</span>
-                {(recent.data ?? []).map((e) => <button type="button" key={e} dir="ltr" onClick={() => setCounterpartyEmail(e)} className={`rounded-full border px-2.5 py-1 ${counterpartyEmail === e ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-primary/50"}`}>{e}</button>)}
+                {(recent.data ?? []).map((e) => <button type="button" key={e} dir="ltr" onClick={() => setCounterpartyEmail(e)} className={`rounded-full border px-2.5 py-1 ${counterpartyEmail === e ? "border-primary bg-primary/5 text-primary" : "border-border hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"}`}>{e}</button>)}
               </div>
             )}
           </div>
 
           </div>
-          <div data-step="1" hidden={step !== 1} className="space-y-5">
+          <div data-step="1" hidden={step !== 1} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-5">
           {dealType === "freelance" && (
             <div className="space-y-2">
               <Label htmlFor="revisions">{text("Included revisions")}</Label>

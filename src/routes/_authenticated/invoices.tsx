@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { listMyFeeInvoices } from "@/lib/fee-invoice.functions";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
+import { ListSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/_authenticated/invoices")({
   head: () => ({ meta: [
@@ -28,10 +29,10 @@ function InvoicesPage() {
   const q = useQuery({ queryKey: ["my-fee-invoices"], queryFn: () => list() });
   return (
     <SiteShell>
-      <div data-no-localize className="mx-auto max-w-4xl px-0 py-4 sm:px-4 sm:py-8">
+      <div data-no-localize className="reveal mx-auto max-w-4xl px-0 py-4 sm:px-4 sm:py-8">
         <h1 className="text-3xl font-extrabold">{text("Tax invoices", "الفواتير الضريبية")}</h1>
         <p className="mt-2 max-w-2xl leading-7 text-muted-foreground">{text("Invoices from Insight for the service fee you paid, at your country's VAT rate. Deal documents such as contracts and the seller's invoices are kept separately under Documents.", "فواتير من إنسايت عن رسوم الخدمة التي دفعتها، بنسبة ضريبة دولتك. أما مستندات الصفقة مثل العقود وفواتير البائع فهي في صفحة المستندات.")}</p>
-        {q.isPending && <p className="mt-6">{text("Loading…", "جارٍ التحميل…")}</p>}
+        {q.isPending && <ListSkeleton label={text("Loading…", "جارٍ التحميل…")} />}
         {q.isError && <div role="alert" className="mt-6 text-destructive">{text("Invoices could not be loaded.", "تعذّر تحميل الفواتير.")} <Button variant="outline" onClick={() => void q.refetch()}>{text("Try again", "حاول مرة أخرى")}</Button></div>}
         {q.data && q.data.length === 0 && (
           <div className="mt-8 rounded-2xl border border-dashed border-border p-8 text-center">

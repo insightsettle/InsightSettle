@@ -76,6 +76,7 @@ import {
   startDealFunding,
   type PaymentResult,
 } from "@/lib/payments.functions";
+import { AnimatedNumber, PageSkeleton } from "@/components/motion/Motion";
 
 /** Insight's own payment reference. Customers never see the provider's name or reference format (founder, 27 Oct). */
 const insightRef = (id: string) => `PAY-${id.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
@@ -102,7 +103,7 @@ function DealPage() {
   const viewFn = useServerFn(getAuctionDealView);
   const query = useQuery({ queryKey: ['auction-deal-view', dealId], queryFn: () => viewFn({ data: { ref: dealId } }) });
   const { text } = useLocale();
-  if (query.isPending) return <p data-no-localize>{text('Loading…', 'جارٍ التحميل…')}</p>;
+  if (query.isPending) return <PageSkeleton label={text("Loading…", "جارٍ التحميل…")} />;
   if (query.data && (query.data.owner || query.data.buyer)) return <AuctionDealScreen refCode={dealId} />;
   return <OrdinaryDealPage />;
 }
@@ -189,6 +190,7 @@ function OrdinaryDealPage() {
   };
 
   const action = useMutation({
+    meta: { successToast: text("Done. The deal is updated.", "تم. حُدّثت الصفقة.") },
     mutationFn: async (fn: () => Promise<unknown>) => fn(),
     onSuccess: () => {
       setReviewNote("");
@@ -250,9 +252,7 @@ function OrdinaryDealPage() {
     return (
       <SiteShell>
         <div className="mx-auto max-w-4xl px-4 py-20 text-center">
-          <h1 className="text-3xl font-bold">
-            {dealQuery.isLoading ? "Loading deal…" : "Deal not found"}
-          </h1>
+          {dealQuery.isLoading ? <PageSkeleton label={text("Loading deal…", "جارٍ تحميل الصفقة…")} /> : <h1 className="text-3xl font-bold">{text("Deal not found", "الصفقة غير موجودة")}</h1>}
           <Button asChild className="mt-6">
             <Link to="/dashboard">Back to dashboard</Link>
           </Button>
@@ -315,11 +315,11 @@ function OrdinaryDealPage() {
 
   return (
     <SiteShell>
-      <div className="min-w-0">
+      <div className="reveal min-w-0">
         <nav className="mb-5 flex items-center gap-2 text-xs text-muted-foreground" data-no-localize><Link to="/dashboard" hash="saved-deals">{text("Deals", "الصفقات")}</Link><span>‹</span><bdi>{deal.ref}</bdi></nav>
         <header className="grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]" data-no-localize>
           <div className="min-w-0"><div className="flex flex-wrap items-center gap-3"><h2 className="min-w-0 break-words text-2xl font-semibold">{deal.title}</h2><RefChip value={deal.ref} /><StatusBadge status={status} /><span className="rounded-full bg-gold-subtle px-3 py-1 text-xs font-medium text-gold-foreground">{text(({goods:"Goods",contracting:"Contracting & fit-out",services:"Services",freelance:"Freelance & digital work"} as Record<string,string>)[(deal as any).deal_type ?? "goods"] ?? "Goods")}</span></div><p className="mt-2 text-xs leading-6 text-muted-foreground">{text("with", "مع")} {partyProfiles.data?.find((p) => p.id === counterpartyId)?.full_name ?? (deal.counterparty_email !== user?.email ? deal.counterparty_email : null) ?? text("Other party", "الطرف الآخر")} ({text(partyProfiles.data?.find((p) => p.id === counterpartyId)?.country ?? (isBuyer ? deal.supplier_country : deal.delivery_country) ?? "—")}) · {text("created", "أُنشئت")} {new Date(deal.created_at).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB")} · <bdi>{deal.ref}</bdi></p><p className="mt-2 text-sm text-muted-foreground">{deal.description}</p></div>
-          <div className="text-end"><p className="text-xs text-muted-foreground">{text("Deal value", "قيمة الصفقة")}</p><p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr">{money(amount)}</bdi></p></div>
+          <div className="text-end"><p className="text-xs text-muted-foreground">{text("Deal value", "قيمة الصفقة")}</p><p className="mt-1 text-2xl font-bold tabular-nums"><bdi dir="ltr"><AnimatedNumber value={amount} format={(v) => money(v)} /></bdi></p></div>
         </header>
         <div className="mt-6"><EscrowStepper status={deal.status} termsStatus={deal.terms_status} /></div>
         <Button variant="ghost" size="sm" className="mt-3" onClick={() => scrollTo("deal-actions")}>{text("Payment and actions", "الدفع والإجراءات")}</Button>

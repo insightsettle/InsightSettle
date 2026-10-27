@@ -25,7 +25,10 @@ const arabicLabels: Record<DealStatus, string> = {
 export function StatusBadge({ status, className }: { status: DealStatus | keyof typeof additionalLabels; className?: string }) {
   const { text } = useLocale();
   const label = statusLabels[status as DealStatus] ?? additionalLabels[status] ?? status;
-  return <span data-no-localize className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", toneClass[statusTones[status] ?? "neutral"], className)}>
-    <span className="size-1.5 shrink-0 rounded-full bg-current" />{text(label, arabicLabels[status as DealStatus])}
+  const tone = statusTones[status] ?? "neutral";
+  // Statuses that wait on someone get a soft pulse so they stand out in lists.
+  const live = tone === "warning" || tone === "danger";
+  return <span data-no-localize className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium transition-colors", toneClass[tone], className)}>
+    <span className="relative flex size-1.5 shrink-0">{live && <span className="absolute inset-0 rounded-full bg-current opacity-60 motion-safe:animate-ping" />}<span className="relative size-1.5 rounded-full bg-current" /></span>{text(label, arabicLabels[status as DealStatus])}
   </span>;
 }

@@ -10,6 +10,7 @@ import { AuctionCountdown, AuctionStatus } from '@/components/auction/AuctionSha
 import { LiveDisputes } from '@/components/site/StaffOps';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { ListSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute('/console/auctions')({
   head:()=>({meta:[{title:'Auction operations | Insight staff console'},{name:'description',content:'Read-only auction organisers, lots, non-payment offers and auction disputes.'},{property:'og:title',content:'Auction operations | Insight'},{property:'og:description',content:'Review auction deadlines, direct payout shares and authenticity disputes.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'},{name:'robots',content:'noindex'}]}),
@@ -25,7 +26,7 @@ function ConsoleAuctions() {
   return <TooltipProvider><div className="mt-6 space-y-5" data-no-localize>
     <h2 className="text-xl font-semibold">{text('Auctions','المزادات')}</h2>
     <div role="tablist" className="flex flex-wrap gap-2">{[['organisers','Organisers','المنظّمون'],['lots','Lots','القطع'],['nonpayers','Non-payers queue','قائمة غير المسددين'],['disputes','Authenticity disputes','نزاعات الأصالة']].map(([key,en,ar])=><Button key={key} role="tab" aria-selected={tab===key} variant={tab===key?'secondary':'ghost'} onClick={()=>setTab(key??'lots')}>{text(en??'',ar)}</Button>)}</div>
-    {q.isPending&&<p>{text('Loading…','جارٍ التحميل…')}</p>}
+    {q.isPending&&<ListSkeleton label={text("Loading…", "جارٍ التحميل…")} />}
     {q.isError&&<p role="alert" className="text-destructive">{text('Auction records unavailable','تعذّر تحميل سجلات المزادات')}</p>}
     {tab==='disputes'?<LiveDisputes auctionOnly/>:d&&<div className="overflow-x-auto rounded-lg border border-border"><table className="w-full min-w-[750px] text-sm">
       {tab==='organisers'&&<>{header([text('Name','الاسم'),text('Verification status','حالة التحقق'),text('Payout account on file','حساب صرف مسجل'),text('Auctions','المزادات'),text('Lots','القطع')])}<tbody>{[...new Set<string>(d.auctions.map(a=>a.organiser_id))].map(id=>{const auctions=d.auctions.filter(a=>a.organiser_id===id);return <tr key={id} className="border-t even:bg-muted/40"><td className="p-4">{name(id)}</td><td className="p-4">{text(d.profiles.find(p=>p.id===id)?.verification_status??'—')}</td><td className="p-4">{d.payouts.some(p=>p.user_id===id)?text('Yes','نعم'):text('No','لا')}</td><td className="p-4 tabular-nums">{auctions.length}</td><td className="p-4 tabular-nums">{d.lots.filter(l=>auctions.some(a=>a.id===l.auction_id)).length}</td></tr>})}</tbody></>}

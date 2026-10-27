@@ -14,7 +14,7 @@ import { useSessionUser } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocale } from "@/lib/locale";
 
-export const shellNavClass = "flex h-10 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary data-[status=active]:bg-accent data-[status=active]:text-primary data-[status=active]:font-medium";
+export const shellNavClass = "group/nav relative flex h-10 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-primary active:scale-[0.98] [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110 before:absolute before:inset-y-2 before:start-0 before:w-[3px] before:scale-y-0 before:rounded-full before:bg-primary before:transition-transform before:duration-300 data-[status=active]:bg-accent data-[status=active]:text-primary data-[status=active]:font-medium data-[status=active]:before:scale-y-100";
 
 export function AppShell({ children, navigation, title, staff = false, mobileNav }: { children: ReactNode; navigation: ReactNode; title: string; staff?: boolean; mobileNav?: ReactNode }) {
   const { text, direction } = useLocale();

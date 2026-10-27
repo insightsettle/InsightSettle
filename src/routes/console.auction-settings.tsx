@@ -9,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { PageSkeleton } from "@/components/motion/Motion";
 export const Route=createFileRoute('/console/auction-settings')({head:()=>({meta:[{title:'Auction settings | Insight staff console'},{name:'description',content:'Admin auction fee modes, commission limits and pre-payment lot controls.'},{property:'og:title',content:'Auction settings | Insight'},{property:'og:description',content:'Audited auction-only pricing and percentage controls.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'},{name:'robots',content:'noindex'}]}),component:SettingsPage});
 function SettingsPage(){
  const {text}=useLocale();const load=useServerFn(readAuctionSettings);const q=useQuery({queryKey:['auction-settings'],queryFn:()=>load()});
- if(q.isPending)return <p>{text('Loading…','جارٍ التحميل…')}</p>;
+ if(q.isPending)return <PageSkeleton label={text("Loading…", "جارٍ التحميل…")} />;
  if(!q.data)return <p role="alert" className="text-destructive">{text('Admin access required','يتطلب صلاحية مدير')}</p>;
  return <div data-no-localize className="mt-6 min-w-0"><h2 className="text-2xl font-bold">{text('Auction settings','إعدادات المزادات')}</h2><SettingsForm key={JSON.stringify(q.data)} initial={q.data}/><LotControls/></div>;
 }

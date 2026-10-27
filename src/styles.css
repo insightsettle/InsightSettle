@@ -279,3 +279,34 @@ html[dir="rtl"] .checkout-progress { --origin: right; }
   .checkout-draw { animation: none; stroke-dashoffset: 0; }
   .checkout-pop, .checkout-progress { animation-duration: 1ms; }
 }
+
+/* Platform motion (founder, 27 Oct: interactive and professional everywhere). Presentation only. */
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes reveal-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* .reveal: direct children rise in one after another. The animation leaves no transform behind. */
+.reveal > *, .reveal-deep > * > * { animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+:is(.reveal > *, .reveal-deep > * > *):nth-child(2) { animation-delay: 60ms; } :is(.reveal > *, .reveal-deep > * > *):nth-child(3) { animation-delay: 120ms; }
+:is(.reveal > *, .reveal-deep > * > *):nth-child(4) { animation-delay: 180ms; } :is(.reveal > *, .reveal-deep > * > *):nth-child(5) { animation-delay: 240ms; }
+:is(.reveal > *, .reveal-deep > * > *):nth-child(6) { animation-delay: 300ms; } :is(.reveal > *, .reveal-deep > * > *):nth-child(7) { animation-delay: 360ms; }
+:is(.reveal > *, .reveal-deep > * > *):nth-child(n+8) { animation-delay: 400ms; }
+/* A page with its own .reveal inside the console keeps a single stagger. */
+.reveal-deep > .reveal > * { animation-name: reveal-up; }
+/* .lift: a clickable card rises a little on hover and presses on click. */
+.lift { transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s, border-color 0.2s; }
+.lift:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgb(12 42 34 / 0.45); border-color: color-mix(in oklab, var(--primary) 35%, var(--border)); }
+.lift:active { transform: translateY(0) scale(0.995); }
+/* Cards gain a soft shadow on hover; tables highlight the row under the pointer. */
+.app-content .rounded-\[16px\].border { transition: box-shadow 0.2s, border-color 0.2s; }
+.app-content .rounded-\[16px\].border:hover { box-shadow: 0 10px 28px -22px rgb(12 42 34 / 0.45); }
+.app-content tbody tr { transition: background-color 0.15s; }
+.app-content tbody tr:hover { background-color: color-mix(in oklab, var(--accent) 55%, transparent); }
+.app-content details > summary { transition: color 0.15s; }
+.app-content details[open] > summary ~ * { animation: reveal-up 0.3s ease-out; }
+::selection { background: color-mix(in oklab, var(--primary) 22%, transparent); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal > *, .reveal-deep > * > *, .app-content details[open] > summary ~ * { animation: none; }
+  .lift, .lift:hover, .lift:active { transform: none; }
+}
+.app-content select { transition: border-color 0.15s, box-shadow 0.15s; }
+.app-content select:hover { border-color: color-mix(in oklab, var(--primary) 40%, var(--input)); }
+.app-content select:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 15%, transparent); }

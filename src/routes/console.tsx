@@ -75,7 +75,8 @@ function AdminLayout() {
       title="Operations, revenue and controls"
       subtitle="Staff view of every member, deal, fee, currency rate, and dispute."
     >
-      <Outlet />
+      {/* Each console page's sections rise in one after another (presentation only). */}
+      <div className="reveal-deep min-w-0"><Outlet /></div>
     </ConsoleShell>
   );
 }

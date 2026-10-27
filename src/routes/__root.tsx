@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageToggle } from "@/components/site/LanguageToggle";
 import { LocaleProvider, useLocale } from "@/lib/locale";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   const { text } = useLocale();
@@ -154,6 +155,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <AppToaster />
     </QueryClientProvider>
   );
+}
+
+function AppToaster() {
+  const { direction } = useLocale();
+  return <Toaster position="top-center" dir={direction} closeButton toastOptions={{ classNames: { success: "[&_[data-icon]]:text-primary" } }} />;
 }

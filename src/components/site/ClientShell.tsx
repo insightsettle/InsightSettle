@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { clientAction } from "@/lib/deal-display";
 import { showCustomerPrompts } from "@/lib/account-display";
 import { auctionAccess } from "@/lib/auction-client";
+import { PageSkeleton } from "@/components/motion/Motion";
 
 export function ClientShell({ children }: { children: ReactNode }) {
   const { text } = useLocale();
@@ -64,6 +65,6 @@ export function ClientShell({ children }: { children: ReactNode }) {
       {tab("/verification", ["Account", "حسابي"], UserRound, pathname === "/verification")}
     </nav>
   );
-  if (!showCustomerPrompts(isStaff, staffLoading)) return <p data-no-localize>{text("Loading…", "جارٍ التحميل…")}</p>;
+  if (!showCustomerPrompts(isStaff, staffLoading)) return <PageSkeleton label={text("Loading…", "جارٍ التحميل…")} />;
   return <AppShell navigation={nav} title={title} mobileNav={mobileNav}>{(dealsQuery.isError || milestonesQuery.isError) && <div data-no-localize role="alert" className="mb-4 flex flex-wrap items-center gap-3 text-sm text-destructive">{text("Some account information could not be loaded.", "تعذّر تحميل بعض معلومات الحساب.")}<Button variant="outline" onClick={() => { void dealsQuery.refetch(); void milestonesQuery.refetch(); }}>{text("Try again", "حاول مرة أخرى")}</Button></div>}{children}</AppShell>;
 }

@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
-import { Copy, MessageCircle, QrCode } from "lucide-react";
+import { Check, Copy, MessageCircle, QrCode } from "lucide-react";
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,8 @@ export function ShareLink({ url, message, compact = false }: { url: string; mess
   return (
     <div data-no-localize>
       <div className="flex flex-wrap gap-2">
-        <Button type="button" size={compact ? "sm" : "default"} variant="outline" onClick={() => { void navigator.clipboard?.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1800); }}>
-          <Copy className="size-4" />{copied ? text("Copied", "تم النسخ") : text("Copy link", "انسخ الرابط")}
+        <Button type="button" size={compact ? "sm" : "default"} variant="outline" className={copied ? "border-primary text-primary" : ""} onClick={() => { void navigator.clipboard?.writeText(url); setCopied(true); toast.success(text("Link copied", "تم نسخ الرابط")); setTimeout(() => setCopied(false), 1800); }}>
+          {copied ? <Check className="checkout-pop size-4" /> : <Copy className="size-4" />}{copied ? text("Copied", "تم النسخ") : text("Copy link", "انسخ الرابط")}
         </Button>
         <Button type="button" size={compact ? "sm" : "default"} asChild className="bg-[#1f9d55] text-white hover:bg-[#178246]">
           <a href={whatsappShareUrl(message)} target="_blank" rel="noreferrer"><MessageCircle className="size-4" />{text("Share on WhatsApp", "شارك عبر واتساب")}</a>

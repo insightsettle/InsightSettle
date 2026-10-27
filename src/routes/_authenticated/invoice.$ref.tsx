@@ -10,6 +10,7 @@ import { countryLabel, zatcaTlv, type FeeInvoice } from "@/lib/fee-invoice";
 import { getFeeInvoices, type FeeInvoiceView } from "@/lib/fee-invoice.functions";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
+import { PageSkeleton } from "@/components/motion/Motion";
 
 export const Route = createFileRoute("/_authenticated/invoice/$ref")({
   head: () => ({
@@ -174,7 +175,7 @@ function InvoicePage() {
   const q = useQuery({ queryKey: ["fee-invoices", ref], queryFn: () => load({ data: { ref } }) });
 
   if (q.isError) return <div data-no-localize role="alert" className="p-6">{text("Invoice could not be loaded.", "تعذّر تحميل الفاتورة.")} <Button variant="outline" onClick={() => void q.refetch()}>{text("Try again", "حاول مرة أخرى")}</Button></div>;
-  if (q.isPending) return <p className="p-10 text-center">{text("Loading…", "جارٍ التحميل…")}</p>;
+  if (q.isPending) return <PageSkeleton label={text("Loading…", "جارٍ التحميل…")} />;
   if (!q.data || q.data.invoices.length === 0) return (
     <div data-no-localize className="mx-auto max-w-xl p-10 text-center">
       <p>{text("No fee invoice has been issued to you for this deal yet. An invoice is issued when the fee is paid.", "لم تصدر لك فاتورة رسوم لهذه الصفقة بعد. تصدر الفاتورة عند دفع الرسوم.")}</p>

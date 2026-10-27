@@ -20,6 +20,7 @@ import {
   resolveDisputeCase,
   staffAction,
 } from "@/lib/operations.functions";
+import { ListSkeleton } from "@/components/motion/Motion";
 
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
 
@@ -124,7 +125,7 @@ export function LiveDisputes({ auctionOnly = false }: { auctionOnly?: boolean } 
   const me = user?.id;
   return <div className="space-y-5" data-no-localize><h2 className="text-xl font-semibold">{text("Dispute cases", "قضايا النزاعات")}</h2>
     {error && <p role="alert" className="text-sm text-destructive">{text(error)}</p>}
-    {cases.isLoading && <p>{text("Loading…", "جارٍ التحميل…")}</p>}
+    {cases.isLoading && <ListSkeleton label={text("Loading…", "جارٍ التحميل…")} />}
     {cases.isError && <p role="alert" className="text-destructive">{text("Could not load disputes", "تعذر تحميل النزاعات")}</p>}
     {(cases.data ?? []).length === 0 && !cases.isLoading && <Card><CardContent className="p-5 text-sm text-muted-foreground">{text("No live disputes.", "لا توجد نزاعات حالية.")}</CardContent></Card>}
     {(cases.data ?? []).filter((c: any) => !auctionOnly || overview.data?.deals.some(d => d.id === c.deal_id && d.deal_type === 'auction')).map((c: any) => {
