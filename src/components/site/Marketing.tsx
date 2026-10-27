@@ -179,7 +179,7 @@ export function CtaBand({ title, body, label = ["Create a free account", "أنش
     <section className="relative overflow-hidden bg-brand-strong text-primary-foreground">
       <div aria-hidden="true" className="gradient-brand absolute inset-x-0 top-0 h-1" />
       <div aria-hidden="true" className="blob-drift pointer-events-none absolute -bottom-24 -end-24 size-72 rounded-full bg-brand-mint/15 blur-3xl" />
-      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-5 py-14 sm:flex-row sm:items-center">
+      <div className="relative mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-5 py-14 sm:flex-row sm:items-center">
         <div><h2 className="text-3xl font-bold">{text(title[0], title[1])}</h2><p className="mt-3 text-white/75">{text(body[0], body[1])}</p></div>
         <Button asChild size="lg" variant="secondary" className="group relative h-12 overflow-hidden px-6 text-base hover:-translate-y-0.5"><Link to="/auth" search={{ mode: "signup" }}><span aria-hidden className="checkout-sheen pointer-events-none absolute inset-0" />{text(label[0], label[1])}<ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></Link></Button>
       </div>
