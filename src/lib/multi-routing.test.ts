@@ -95,10 +95,11 @@ describe('database guards (PGlite)', () => {
       CREATE FUNCTION has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=$1 AND role=$2) $$;
       CREATE TABLE audit_logs(id serial, action text);CREATE FUNCTION staff_control_audit(uuid,text,text,text,jsonb,jsonb,text) RETURNS void LANGUAGE sql AS $$ INSERT INTO audit_logs(action) VALUES($2) $$;
       CREATE TABLE platform_settings(id boolean PRIMARY KEY DEFAULT true, updated_at timestamptz);INSERT INTO platform_settings VALUES(true,now());
-      CREATE TABLE deals(id uuid PRIMARY KEY);CREATE TABLE fx_quotes(id uuid PRIMARY KEY, deal_id uuid);CREATE TABLE deal_transactions(id serial, deal_id uuid, kind text, fx_quote_id uuid);`);
+      CREATE TABLE deals(id uuid PRIMARY KEY, ref text, buyer_id uuid, seller_id uuid);CREATE TABLE fx_quotes(id uuid PRIMARY KEY, deal_id uuid, breakdown jsonb);CREATE TABLE deal_transactions(id serial, deal_id uuid, kind text, fx_quote_id uuid, amount numeric, fee numeric, currency text, status text, provider text DEFAULT 'manual', provider_ref text, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now(), original_transaction_id uuid, milestone_id uuid, payout_split_id uuid);`);
     const f26 = readFileSync(new URL('../../drizzle/migrations/0026_finance_operational_center.sql', import.meta.url), 'utf8');
     await db.exec(f26.slice(f26.indexOf('CREATE TABLE public.finance_records')));
     await db.exec(readFileSync(new URL('../../drizzle/migrations/0027_multi_provider_routing.sql', import.meta.url), 'utf8').replace(/--> statement-breakpoint/g, ''));
+    await db.exec(readFileSync(new URL('../../drizzle/migrations/0032_private_deal_routes.sql', import.meta.url), 'utf8'));
   });
   afterAll(async () => { await db?.close(); });
   const append = (actor: string, kind: string, subject: string, payload: string) =>
@@ -117,11 +118,27 @@ describe('database guards (PGlite)', () => {
   });
   it('funding locks the provider; re-routing and mismatched quotes are refused; cross-provider settlement stays OFF', async () => {
     const deal = '00000000-0000-4000-8000-0000000000d1', q1 = '00000000-0000-4000-8000-0000000000a1';
-    await db.exec(`INSERT INTO deals(id) VALUES('${deal}');INSERT INTO fx_quotes(id,deal_id,route_provider,route_rule_version) VALUES('${q1}','${deal}','lite','seed-1/R1');
+    await db.exec(`INSERT INTO deals(id) VALUES('${deal}');INSERT INTO fx_quotes(id,deal_id) VALUES('${q1}','${deal}');
+      INSERT INTO fx_quote_routes(fx_quote_id,deal_id,provider,rule_version) VALUES('${q1}','${deal}','lite','seed-1/R1');
       INSERT INTO deal_transactions(deal_id,kind,fx_quote_id) VALUES('${deal}','funding','${q1}');`);
-    expect((await db.query<{ route_provider: string }>(`select route_provider from deals where id='${deal}'`)).rows[0]!.route_provider).toBe('lite');
-    await expect(db.exec(`UPDATE deals SET route_provider='geidea' WHERE id='${deal}'`)).rejects.toThrow('locked');
-    await expect(db.exec(`INSERT INTO fx_quotes(id,deal_id,route_provider) VALUES(gen_random_uuid(),'${deal}','geidea')`)).rejects.toThrow('must match');
+    expect((await db.query<{ provider: string }>(`select provider from deal_routes where deal_id='${deal}'`)).rows[0]!.provider).toBe('lite');
+    await expect(db.exec(`UPDATE deal_routes SET provider='geidea' WHERE deal_id='${deal}'`)).rejects.toThrow('locked');
+    await expect(db.exec(`DELETE FROM deal_routes WHERE deal_id='${deal}'`)).rejects.toThrow('locked');
+    const q2 = '00000000-0000-4000-8000-0000000000a2';
+    await db.exec(`INSERT INTO fx_quotes(id,deal_id) VALUES('${q2}','${deal}')`);
+    await expect(db.exec(`INSERT INTO fx_quote_routes(fx_quote_id,deal_id,provider) VALUES('${q2}','${deal}','geidea')`)).rejects.toThrow('must match');
     await expect(db.exec(`UPDATE platform_settings SET cross_provider_settlement=true`)).rejects.toThrow();
+  });
+  it('customers cannot see the provider: route tables and the finance view are service-only; deals and quotes carry no route', async () => {
+    const r = await db.query<Record<string, boolean>>(`select
+      has_table_privilege('authenticated','deal_routes','SELECT') dr, has_table_privilege('authenticated','fx_quote_routes','SELECT') qr,
+      has_table_privilege('authenticated','finance_transactions','SELECT') ft, has_table_privilege('anon','deal_routes','SELECT') anon_dr,
+      has_table_privilege('service_role','deal_routes','SELECT') svc`);
+    expect(r.rows[0]).toEqual({ dr: false, qr: false, ft: false, anon_dr: false, svc: true });
+    const cols = await db.query<{ c: number }>(`select count(*)::int c from information_schema.columns where table_name in ('deals','fx_quotes') and column_name like 'route%'`);
+    expect(cols.rows[0]!.c).toBe(0);
+    await expect(db.exec(`INSERT INTO deal_transactions(deal_id,kind,provider) VALUES(gen_random_uuid(),'funding','lite')`)).rejects.toThrow();
+    const view = await db.query<{ route_provider: string }>(`select route_provider from finance_transactions where deal_id='00000000-0000-4000-8000-0000000000d1' limit 1`);
+    expect(view.rows[0]!.route_provider).toBe('lite');
   });
 });

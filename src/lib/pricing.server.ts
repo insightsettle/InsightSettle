@@ -93,9 +93,10 @@ async function dealRoutes(admin: any, deal: any, countries: { buyerCountry: stri
     .in("kind", ["approval", "price_book_proposal", "routing_table_proposal", "provider_profile_proposal", "provider_jobs_proposal", "provider_limits_proposal"]).order("created_at").limit(2000);
   const { book, table, providers } = effectiveConfig(records ?? []);
   // Deals funded before routing existed were paid through the simulated provider and stay with it.
-  const { count: funded } = deal.route_provider || !deal.id ? { count: 0 } : await admin.from("deal_transactions").select("id", { count: "exact", head: true })
+  const { data: route } = deal.id ? await admin.from("deal_routes").select("provider,rule_version").eq("deal_id", deal.id).maybeSingle() : { data: null };
+  const { count: funded } = route || !deal.id ? { count: 0 } : await admin.from("deal_transactions").select("id", { count: "exact", head: true })
     .eq("deal_id", deal.id).eq("kind", "funding").in("status", ["pending", "processing", "succeeded"]);
-  const locked = deal.route_provider ? { provider: deal.route_provider, version: deal.route_rule_version ?? "locked" }
+  const locked = route ? { provider: route.provider, version: route.rule_version ?? "locked" }
     : (funded ?? 0) > 0 ? { provider: "manual", version: "pre-routing" } : null;
   return Object.fromEntries(PAYMENT_METHODS.map((m) => [m, resolveRoute(book, table, {
     dealType: deal.deal_type ?? "goods", payerCountry: countries.buyerCountry, payInCurrency: payCurrency, method: m,

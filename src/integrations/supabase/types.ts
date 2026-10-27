@@ -588,6 +588,18 @@ export type Database = {
           },
         ]
       }
+      deal_routes: {
+        Row: { deal_id: string; locked_at: string; provider: string; reasons: Json | null; rule_version: string | null }
+        Insert: { deal_id: string; locked_at?: string; provider: string; reasons?: Json | null; rule_version?: string | null }
+        Update: { deal_id?: string; locked_at?: string; provider?: string; reasons?: Json | null; rule_version?: string | null }
+        Relationships: []
+      }
+      fx_quote_routes: {
+        Row: { created_at: string; deal_id: string; fx_quote_id: string; provider: string; reasons: Json | null; rule_version: string | null }
+        Insert: { created_at?: string; deal_id: string; fx_quote_id: string; provider: string; reasons?: Json | null; rule_version?: string | null }
+        Update: { created_at?: string; deal_id?: string; fx_quote_id?: string; provider?: string; reasons?: Json | null; rule_version?: string | null }
+        Relationships: []
+      }
       deal_transactions: {
         Row: {
           amount: number
@@ -752,10 +764,6 @@ export type Database = {
           risk_level: string | null
           risk_score: number | null
           risk_summary: string | null
-          route_locked_at: string | null
-          route_provider: string | null
-          route_reasons: Json | null
-          route_rule_version: string | null
           seller_id: string | null
           shipped_at: string | null
           shipping_carrier: string | null
@@ -819,10 +827,6 @@ export type Database = {
           risk_level?: string | null
           risk_score?: number | null
           risk_summary?: string | null
-          route_locked_at?: string | null
-          route_provider?: string | null
-          route_reasons?: Json | null
-          route_rule_version?: string | null
           seller_id?: string | null
           shipped_at?: string | null
           shipping_carrier?: string | null
@@ -886,10 +890,6 @@ export type Database = {
           risk_level?: string | null
           risk_score?: number | null
           risk_summary?: string | null
-          route_locked_at?: string | null
-          route_provider?: string | null
-          route_reasons?: Json | null
-          route_rule_version?: string | null
           seller_id?: string | null
           shipped_at?: string | null
           shipping_carrier?: string | null
@@ -1173,9 +1173,6 @@ export type Database = {
           id: string
           provider_amount: number
           provider_rate: number
-          route_provider: string | null
-          route_reasons: Json | null
-          route_rule_version: string | null
           source_amount: number
           source_currency: string
           target_currency: string
@@ -1196,9 +1193,6 @@ export type Database = {
           id?: string
           provider_amount: number
           provider_rate: number
-          route_provider?: string | null
-          route_reasons?: Json | null
-          route_rule_version?: string | null
           source_amount: number
           source_currency: string
           target_currency?: string
@@ -1219,9 +1213,6 @@ export type Database = {
           id?: string
           provider_amount?: number
           provider_rate?: number
-          route_provider?: string | null
-          route_reasons?: Json | null
-          route_rule_version?: string | null
           source_amount?: number
           source_currency?: string
           target_currency?: string

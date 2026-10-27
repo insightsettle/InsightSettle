@@ -138,7 +138,9 @@ async function archiveCheck(db:any, code:string){
   const { archiveBlockers } = await import('./finance/provider-config');
   const state=await routingState(db);
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  const { count } = await (supabaseAdmin as any).from('fx_quotes').select('id',{count:'exact',head:true}).eq('route_provider',code).is('used_at',null).gt('expires_at',new Date().toISOString());
+  const { data: routed } = await (supabaseAdmin as any).from('fx_quote_routes').select('fx_quote_id').eq('provider',code).limit(1000);
+  const ids=(routed??[]).map((r:any)=>r.fx_quote_id);
+  const { count } = ids.length ? await (supabaseAdmin as any).from('fx_quotes').select('id',{count:'exact',head:true}).in('id',ids).is('used_at',null).gt('expires_at',new Date().toISOString()) : { count: 0 };
   return archiveBlockers(code,state.table.rules,count??0);
 }
 const jobSchema = z.object({ on:z.boolean(), countries:z.array(countryCode).max(10), currencies:z.array(currency).max(10), minAmount:z.number().min(0).nullable(), maxAmount:z.number().positive().nullable(), maxHoldDays:z.number().int().min(0).max(3650).nullable(), note:z.string().max(200).optional() });

@@ -44,6 +44,15 @@ const quoteInput = z.object({ dealId: z.string().uuid(), payCurrency: z.enum(PAY
 type QuoteInput = { dealId: string; payCurrency?: string | undefined; method?: string | undefined };
 
 /** Locks an exchange rate for 15 minutes. Every deal is funded from a quote (SAR deals at rate 1). */
+/** What a customer may see of a price: no provider names, provider costs or Insight's margin (founder, 27 Oct). */
+function customerMethods(methods: any[] | undefined) {
+  return (methods ?? []).map(({ margin: _m, ...m }: any) => m);
+}
+function customerPricing<T extends Record<string, any>>(p: T) {
+  const { routes: _r, routingMode: _rm, ...rest } = p as any;
+  return { ...rest, methods: customerMethods(rest.methods) } as T;
+}
+
 export const requestFxQuote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: QuoteInput) => quoteInput.parse(input))
@@ -95,17 +104,26 @@ export const requestFxQuote = createServerFn({ method: "POST" })
         fee: p.payIn.insightFee,
         vat: p.payIn.vatPayable,
         total: p.payIn.total,
-        // One deal = one provider: the route is recorded on the quote and copied onto the deal at funding.
-        route_provider: p.routes?.[p.method]?.provider ?? "manual",
-        route_rule_version: p.routes ? `${p.routes[p.method]?.version}${p.routes[p.method]?.ruleId ? `/${p.routes[p.method]!.ruleId}` : ""}` : "simulated_only",
-        route_reasons: p.routes?.[p.method] ? { reasons: p.routes[p.method]!.reasons, rejected: p.routes[p.method]!.rejected, unverified: p.routes[p.method]!.unverified } : { reasons: ["routing_mode_simulated_only"] },
-        breakdown: { ...p, terms_version: deal.terms_version, ...(milestone ? { milestone } : {}) },
+        // Customers can read fx_quotes: never store provider names, provider costs or Insight's margin here.
+        breakdown: { ...customerPricing(p), terms_version: deal.terms_version, ...(milestone ? { milestone } : {}) },
         expires_at: new Date(Date.now() + QUOTE_MINUTES * 60_000).toISOString(),
         created_by: context.userId,
       })
       .select("*")
       .single();
     if (qErr) throw qErr;
+    // One deal = one provider: the route is recorded privately (service role only) and locked onto the deal at funding.
+    const route = p.routes?.[p.method];
+    const { error: rErr } = await admin.from("fx_quote_routes").insert({
+      fx_quote_id: q.id, deal_id: deal.id,
+      provider: route?.provider ?? "manual",
+      rule_version: p.routes ? `${route?.version}${route?.ruleId ? `/${route.ruleId}` : ""}` : "simulated_only",
+      reasons: route ? { reasons: route.reasons, rejected: route.rejected, unverified: route.unverified } : { reasons: ["routing_mode_simulated_only"] },
+    });
+    if (rErr) {
+      await admin.from("fx_quotes").delete().eq("id", q.id);
+      throw new Error(/must match/.test(rErr.message) ? "This deal's payment route is fixed. Please contact Insight support." : "The quote could not be created. Please try again.");
+    }
     return {
       id: q.id,
       source_currency: q.source_currency,
@@ -149,8 +167,8 @@ export const getDealPricing = createServerFn({ method: "GET" })
       .maybeSingle();
     if (fund?.fx_quote_id) {
       const { data: q } = await admin.from("fx_quotes").select("breakdown").eq("id", fund.fx_quote_id).maybeSingle();
-      if (q?.breakdown?.breakdown) return { methods: [], method: "mada", ...q.breakdown, ledger: ledgerPreview(q.breakdown), locked: true };
+      if (q?.breakdown?.breakdown) return { methods: [], method: "mada", ...customerPricing(q.breakdown), ledger: ledgerPreview(q.breakdown), locked: true };
     }
     const p = await priceDeal(admin, deal, data.payCurrency, data.method);
-    return { breakdown: p.breakdown, payIn: p.payIn, ledger: ledgerPreview(p), locked: false, method: p.method, methods: p.methods };
+    return { breakdown: p.breakdown, payIn: p.payIn, ledger: ledgerPreview(p), locked: false, method: p.method, methods: customerMethods(p.methods) };
   });

@@ -77,6 +77,9 @@ import {
   type PaymentResult,
 } from "@/lib/payments.functions";
 
+/** Insight's own payment reference. Customers never see the provider's name or reference format (founder, 27 Oct). */
+const insightRef = (id: string) => `PAY-${id.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+
 export const Route = createFileRoute("/_authenticated/deals/$dealId")({
   head: ({ params }) => ({
     meta: [
@@ -400,7 +403,7 @@ function OrdinaryDealPage() {
                     {deal.fee_override_note ? ` ${deal.fee_override_note}` : ""}
                   </p>
                 )}
-                {transactions.data?.filter((t) => t.kind === "funding" && t.status === "succeeded").map((t) => <p key={t.id} className="mt-3 text-xs text-muted-foreground">{text("Provider confirmation", "تأكيد مزوّد الدفع")}: <bdi>{t.provider_ref ?? "—"}</bdi> · {formatDate(t.created_at)}</p>)}
+                {transactions.data?.filter((t) => t.kind === "funding" && t.status === "succeeded").map((t) => <p key={t.id} className="mt-3 text-xs text-muted-foreground">{text("Payment confirmation", "تأكيد الدفع")}: <bdi>{insightRef(t.id)}</bdi> · {formatDate(t.created_at)}</p>)}
                 <CustodyNote className="mt-4 border-t border-border pt-4" />
               </CardContent>
             </Card>
@@ -826,8 +829,7 @@ function OrdinaryDealPage() {
                         </span>
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {formatDate(t.created_at)} · {t.provider}
-                        {t.provider_ref ? ` · ${t.provider_ref}` : ""}
+                        {formatDate(t.created_at)} · {text("Payment reference", "مرجع الدفع")}: <bdi>{insightRef(t.id)}</bdi>
                       </p>
                       {t.error_message && (
                         <p className="mt-2 text-sm text-destructive">{t.error_message}</p>
