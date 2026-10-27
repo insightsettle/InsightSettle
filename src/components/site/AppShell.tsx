@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { SiteNotice } from "@/components/site/SiteNotice";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Search, Settings, LogOut } from "lucide-react";
@@ -23,6 +23,8 @@ export function AppShell({ children, navigation, title, staff = false, mobileNav
   const [signOutError, setSignOutError] = useState("");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  // Soft fade between pages (opacity only, so sticky and fixed children keep their position).
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const name = typeof user?.user_metadata?.["full_name"] === "string" ? user.user_metadata["full_name"] : user?.email?.split("@")[0] ?? text("Account");
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -69,7 +71,7 @@ export function AppShell({ children, navigation, title, staff = false, mobileNav
             <div className="hidden max-w-36 sm:block"><p className="truncate text-xs font-medium" data-no-localize>{name}</p><p className="text-xs text-muted-foreground">{text(staff ? "Staff console" : "Customer view")}</p></div>
           </div>
         </header>
-        <main className={`app-content min-w-0 p-4 lg:p-8 ${mobileNav ? "pb-32 lg:pb-8" : ""}`}>{signOutError && <p data-no-localize role="alert" className="mb-4 text-sm text-destructive">{signOutError}</p>}{children}</main>
+        <main key={pathname} className={`app-content min-w-0 p-4 animate-in fade-in duration-300 lg:p-8 ${mobileNav ? "pb-32 lg:pb-8" : ""}`}>{signOutError && <p data-no-localize role="alert" className="mb-4 text-sm text-destructive">{signOutError}</p>}{children}</main>
         {!staff && mobileNav}
       </div>
     </div>

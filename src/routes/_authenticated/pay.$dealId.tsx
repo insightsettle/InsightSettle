@@ -157,7 +157,7 @@ function CheckoutPage() {
                 );
               })}
               <div className="relative flex min-h-[84px] items-center justify-between gap-3 rounded-2xl border border-dashed p-4 animate-in fade-in slide-in-from-bottom-2 fill-mode-both" style={{ animationDelay: "180ms" }}>
-                <span className="flex h-11 min-w-0 flex-1 items-center justify-center rounded-xl bg-black px-4 opacity-60" aria-hidden><img src="/brand/payments/applepay-white.svg" alt="" className="h-6 w-auto" /></span>
+                <span className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-xl bg-black px-4 opacity-80" aria-hidden><img src="/brand/payments/applepay-white.svg" alt="" className="h-11 w-auto" /></span>
                 <span className="shrink-0 rounded-full bg-gold-subtle px-2.5 py-1 text-[11px] font-semibold text-gold-foreground">{text("Apple Pay · soon", "Apple Pay · قريباً")}</span>
               </div>
             </div>
@@ -258,7 +258,7 @@ function Stepper({ done = false }: { done?: boolean }) {
         return (
           <li key={s} className="flex min-w-0 flex-1 items-center gap-2" aria-current={state === "now" ? "step" : undefined}>
             <span className={`grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold transition-colors ${state === "done" ? "bg-primary text-primary-foreground" : state === "now" ? "bg-primary/15 text-primary ring-2 ring-primary" : "bg-muted text-muted-foreground"}`}>{state === "done" ? <Check className="size-3.5" strokeWidth={3} /> : i + 1}</span>
-            <span className={`truncate ${state === "next" ? "text-muted-foreground" : "font-medium"}`}>{s}</span>
+            <span className={`truncate ${state === "next" ? "text-muted-foreground" : "font-medium"} ${state === "now" ? "" : "hidden sm:inline"}`}>{s}</span>
             {i < steps.length - 1 && <span className="h-0.5 min-w-4 flex-1 overflow-hidden rounded-full bg-muted"><span className={`block h-full bg-primary transition-all duration-700 ${i < current ? "w-full" : "w-0"}`} /></span>}
           </li>
         );
@@ -329,7 +329,7 @@ function ProcessingOverlay({ method }: { method: PaymentMethod }) {
 }
 
 function ResultScreen({ r, q, dealRef, dealTitle, method, onRetry }: { r: PaymentResult; q: FxQuote | null; dealRef: string; dealTitle: string; method: PaymentMethod; onRetry: () => void }) {
-  const { text } = useLocale();
+  const { text, locale } = useLocale();
   if (!r.ok) {
     return (
       <div data-no-localize><div className="mx-auto max-w-lg py-10 text-center">
@@ -367,7 +367,7 @@ function ResultScreen({ r, q, dealRef, dealTitle, method, onRetry }: { r: Paymen
       <Card className="mt-6 overflow-hidden animate-in fade-in slide-in-from-bottom-4 fill-mode-both delay-500 duration-500"><CardContent className="p-0">
         <div className="flex items-center justify-between gap-3 border-b bg-muted/40 px-5 py-3">
           <img src="/brand/insight-logo.svg" alt="Insight" className="h-5 w-auto" />
-          <span className="text-xs text-muted-foreground">{new Date().toLocaleString()}</span>
+          <span className="text-xs text-muted-foreground">{new Date().toLocaleString(locale === "en" ? "en-GB" : "ar-u-nu-latn-ca-gregory", { dateStyle: "medium", timeStyle: "short" })}</span>
         </div>
         <dl className="space-y-3 p-5 text-sm">
           <Row k={text("Deal", "الصفقة")} v={`${dealTitle} · ${dealRef}`} />
