@@ -4,3 +4,7 @@
 INSERT INTO public.fee_rules (label, currency, amount_from, amount_to, percent, min_fee, max_fee, provisional)
 SELECT 'Flat 2.5% (D-64, BHD per D-69)', 'BHD', 0, NULL, 2.5, 6, 1300, true
 WHERE NOT EXISTS (SELECT 1 FROM public.fee_rules WHERE currency = 'BHD');
+
+-- The public calculator reads fee rules as anon; allow the BHD schedule alongside USD (applied 28 Oct).
+DROP POLICY IF EXISTS fee_rules_public_read ON public.fee_rules;
+CREATE POLICY fee_rules_public_read ON public.fee_rules FOR SELECT TO anon USING (currency IN ('USD', 'BHD'));
