@@ -28,5 +28,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "### Typecheck" >> $GITHUB_STEP_SUMMARY; (grep -c "error TS" tsc.log || true) >> $GITHUB_STEP_SUMMARY
-          echo "### Tests" >> $GITHUB_STEP_SUMMARY; grep -E "Test Files|Tests " test.log >> $GITHUB_STEP_SUMMARY || true
+          echo "::notice title=typecheck::$(grep -c 'error TS' tsc.log || true) TypeScript errors"
+          echo "::notice title=tests::$(grep -E 'Test Files|Tests ' test.log | tr '\n' ' ' | sed 's/\x1b\[[0-9;]*m//g')"
+          echo "::notice title=build::$(grep -E 'built in|error' build.log | tail -2 | tr '\n' ' ')"
+          f=$(grep -E ' (FAIL|×) ' test.log | head -20 | tr '\n' ' ' | sed 's/\x1b\[[0-9;]*m//g'); [ -n "$f" ] && echo "::error title=failed tests::$f" || true
