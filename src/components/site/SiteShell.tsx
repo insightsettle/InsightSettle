@@ -3,7 +3,8 @@ import { SiteNotice } from "@/components/site/SiteNotice";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { Menu, ShieldAlert } from "lucide-react";
 import { BrandLogo } from "@/components/site/BrandLogo";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { InAppShell } from "@/components/site/AppShell";
 
 import { NotificationBell } from "@/components/site/NotificationBell";
 import { LanguageToggle } from "@/components/site/LanguageToggle";
@@ -198,8 +199,10 @@ export function SiteShell({
   className?: string;
 }) {
   const { pathname } = useLocation();
+  const inApp = useContext(InAppShell);
   // Client chrome is owned by the authenticated parent; keep public chrome unchanged.
-  if (["/dashboard", "/disputes", "/documents", "/invoices", "/verification"].includes(pathname) || ["/deals/", "/invoice/", "/invite/"].some((prefix) => pathname.startsWith(prefix))) return <>{children}</>;
+  // The context check also covers route transitions, when the old page briefly sees the next pathname.
+  if (inApp || ["/dashboard", "/disputes", "/documents", "/invoices", "/verification"].includes(pathname) || ["/deals/", "/invoice/", "/invite/"].some((prefix) => pathname.startsWith(prefix))) return <>{children}</>;
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteNotice />

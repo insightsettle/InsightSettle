@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Search, Settings, LogOut } from "lucide-react";
 import { ConsoleSearch } from "@/components/site/ConsoleSearch";
 import { BrandLogo } from "@/components/site/BrandLogo";
-import { useState, type ReactNode } from "react";
+import { createContext, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -13,6 +13,9 @@ import { NotificationBell } from "@/components/site/NotificationBell";
 import { useSessionUser } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocale } from "@/lib/locale";
+
+/** True inside the signed-in app chrome, so pages that also use SiteShell never add the public header there. */
+export const InAppShell = createContext(false);
 
 export const shellNavClass = "group/nav relative flex h-10 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-primary active:scale-[0.98] [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110 before:absolute before:inset-y-2 before:start-0 before:w-[3px] before:scale-y-0 before:rounded-full before:bg-primary before:transition-transform before:duration-300 data-[status=active]:bg-accent data-[status=active]:text-primary data-[status=active]:font-medium data-[status=active]:before:scale-y-100";
 
@@ -71,7 +74,7 @@ export function AppShell({ children, navigation, title, staff = false, mobileNav
             <div className="hidden max-w-36 sm:block"><p className="truncate text-xs font-medium" data-no-localize>{name}</p><p className="text-xs text-muted-foreground">{text(staff ? "Staff console" : "Customer view")}</p></div>
           </div>
         </header>
-        <main key={pathname} className={`app-content min-w-0 p-4 animate-in fade-in duration-300 lg:p-8 ${mobileNav ? "pb-32 lg:pb-8" : ""}`}>{signOutError && <p data-no-localize role="alert" className="mb-4 text-sm text-destructive">{signOutError}</p>}{children}</main>
+        <main key={pathname} className={`app-content min-w-0 p-4 animate-in fade-in duration-300 lg:p-8 ${mobileNav ? "pb-32 lg:pb-8" : ""}`}>{signOutError && <p data-no-localize role="alert" className="mb-4 text-sm text-destructive">{signOutError}</p>}<InAppShell.Provider value={true}>{children}</InAppShell.Provider></main>
         {!staff && mobileNav}
       </div>
     </div>
