@@ -48,7 +48,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
     </nav>
   </>;
   // Phone tab bar: hidden on a single deal page, which carries its own sticky action instead.
-  const onDealPage = pathname.startsWith("/deals/") && pathname !== "/deals/new";
+  const onDealPage = (pathname.startsWith("/deals/") && pathname !== "/deals/new") || pathname.startsWith("/pay/");
   const tab = (to: string, label: [string, string], Icon: typeof Home, active: boolean, badge?: number, hashTo?: string) => (
     <Link to={to} {...(hashTo ? { hash: hashTo } : {})} aria-current={active ? "page" : undefined} className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[11px] font-medium transition-colors ${active ? "bg-accent text-primary" : "text-muted-foreground"}`}>
       <Icon className="size-5" strokeWidth={active ? 2.2 : 1.8} />{text(label[0], label[1])}

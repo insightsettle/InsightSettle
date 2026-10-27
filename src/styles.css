@@ -257,3 +257,25 @@ html[dir="rtl"] [class*="tracking-"] { letter-spacing: 0; }
   .invoice-a4-page > div { zoom: 0.86; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff !important; }
 }
+
+/* Checkout motion (founder, 27 Oct: an interactive, professional checkout). Disabled for reduced motion. */
+@keyframes checkout-sheen { 0% { transform: translateX(-120%) skewX(-18deg); } 60%, 100% { transform: translateX(220%) skewX(-18deg); } }
+.checkout-sheen { overflow: hidden; }
+.checkout-sheen::after { content: ""; position: absolute; inset: -20% auto -20% 0; width: 35%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.22), transparent); animation: checkout-sheen 4.5s ease-in-out infinite; }
+@keyframes checkout-draw { to { stroke-dashoffset: 0; } }
+.checkout-draw { stroke-dasharray: 60; stroke-dashoffset: 60; animation: checkout-draw 0.6s 0.25s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
+@keyframes checkout-pop { 0% { transform: scale(0.6); opacity: 0; } 70% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); } }
+.checkout-pop { animation: checkout-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes checkout-pulse { 0% { transform: scale(0.9); opacity: 0.55; } 100% { transform: scale(1.6); opacity: 0; } }
+.checkout-pulse { animation: checkout-pulse 1.6s ease-out infinite; }
+@keyframes checkout-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.checkout-progress { transform-origin: var(--origin, left); animation: checkout-progress var(--dur, 2s) linear forwards; }
+html[dir="rtl"] .checkout-progress { --origin: right; }
+@keyframes checkout-shimmer { 100% { transform: translateX(100%); } }
+.checkout-skeleton { position: relative; overflow: hidden; background: var(--muted); border-radius: 6px; }
+.checkout-skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent); animation: checkout-shimmer 1.3s infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .checkout-sheen::after, .checkout-pulse, .checkout-skeleton::after { animation: none; }
+  .checkout-draw { animation: none; stroke-dashoffset: 0; }
+  .checkout-pop, .checkout-progress { animation-duration: 1ms; }
+}
