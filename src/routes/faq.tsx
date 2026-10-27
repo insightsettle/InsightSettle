@@ -38,8 +38,8 @@ export const Route = createFileRoute("/faq")({
           p: ["Yes. You send one invitation link; they sign up in a few minutes, review and accept the terms, and the deal can start.",
               "نعم. ترسل له رابط دعوة واحداً، فيسجّل خلال دقائق ويراجع الشروط ويوافق عليها، ثم تبدأ الصفقة."] },
         { h: ["Do I need a commercial registration?", "هل أحتاج إلى سجل تجاري؟"],
-          p: ["No. Individuals use a personal account with a verified ID. Companies can add their commercial registration to deal as a business.",
-              "لا. يستخدم الأفراد حساباً شخصياً مع توثيق الهوية، ويمكن للشركات إضافة سجلها التجاري للتعامل باسم المنشأة."] },
+          p: ["No. Individuals use a personal account with a verified ID. Businesses can add their commercial registration to deal in the business's name.",
+              "لا. يستخدم الأفراد حساباً شخصياً مع توثيق الهوية، ويمكن لأصحاب الأعمال إضافة السجل التجاري للتعامل باسم المنشأة."] },
       ]}
     />
   ),

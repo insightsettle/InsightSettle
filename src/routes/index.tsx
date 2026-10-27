@@ -82,9 +82,9 @@ function HomePage() {
     ["What if the other side never delivers?", "ماذا لو لم يُسلّم الطرف الآخر أبداً؟",
       "Open a dispute. The amount stays in the deal and is not paid to them while the case is reviewed. If the decision is in your favour, the amount is refunded to you.",
       "افتح نزاعاً. يبقى المبلغ في الصفقة ولا يُحوَّل له أثناء مراجعة الحالة، وإذا صدر القرار لصالحك يُعاد المبلغ إليك."],
-    ["Is Insight for companies or for individuals?", "هل إنسايت للشركات أم للأفراد؟",
-      "Both, with the same steps: agree, pay into the deal, deliver, check. A company importing stock from a factory and a person buying a used car from a stranger are protected the same way.",
-      "للاثنين، وبالخطوات نفسها: اتفاق، دفع في الصفقة، تسليم، فحص. الشركة التي تستورد بضاعة من مصنع، والشخص الذي يشتري سيارة مستعملة من شخص لا يعرفه، يحصلان على الحماية نفسها."],
+    ["Is Insight for businesses or for individuals?", "هل إنسايت لأصحاب الأعمال أم للأفراد؟",
+      "Both, with the same steps: agree, pay into the deal, deliver, check. A business importing stock from a factory and a person buying a used car from a stranger are protected the same way.",
+      "للاثنين، وبالخطوات نفسها: اتفاق، دفع في الصفقة، تسليم، فحص. المنشأة التي تستورد بضاعة من مصنع، والشخص الذي يشتري سيارة مستعملة من شخص لا يعرفه، يحصلان على الحماية نفسها."],
   ];
 
   return <SiteShell><ContactPopup /><div data-no-localize>
