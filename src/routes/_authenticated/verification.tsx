@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useLocale } from "@/lib/locale";
+import { useServerFn } from "@tanstack/react-start";
+import { getWhatsAppPreference, setWhatsAppPreference } from "@/lib/whatsapp.functions";
 import { auctionAccess } from "@/lib/auction-client";
 import { useStaffAccess } from "@/hooks/use-staff";
 import { useSessionUser } from "@/hooks/use-session";
@@ -111,6 +113,7 @@ function VerificationPage() {
       <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
         {!section && <>
           <AccountSummary name={(user?.user_metadata?.["full_name"] as string | undefined) ?? user?.email?.split("@")[0] ?? ""} email={user?.email ?? ""} />
+        <WhatsAppPreference />
         <Card className="mt-4" data-no-localize><CardContent className="flex items-start justify-between gap-4 p-6"><div><Label htmlFor="organises-auctions">{text('I organise auctions', 'أنا أنظّم مزادات')}</Label><p className="mt-2 text-xs leading-6 text-muted-foreground">{text('Auction organisers must be verified business accounts.', 'يجب أن يكون منظّم المزاد حساب أعمال موثّقًا.')}</p>{preferenceMutation.error && <p role="alert" className="mt-2 text-xs text-destructive">{text('Unable to update this preference.', 'تعذّر تحديث هذا الخيار.')}</p>}</div><Switch id="organises-auctions" checked={auctionPreference.data?.enabled ?? false} disabled={preferenceMutation.isPending || (!auctionPreference.data?.eligible && !auctionPreference.data?.enabled)} onCheckedChange={value => preferenceMutation.mutate(value)} /></CardContent></Card>
         </>}
         {section && (
@@ -232,5 +235,27 @@ function VerificationPage() {
         </>}
       </div>
     </SiteShell>
+  );
+}
+
+/** Deal updates on WhatsApp: explicit opt-in, uses the mobile number on the account (founder, 27 Oct). */
+function WhatsAppPreference() {
+  const { text } = useLocale();
+  const qc = useQueryClient();
+  const getFn = useServerFn(getWhatsAppPreference);
+  const setFn = useServerFn(setWhatsAppPreference);
+  const pref = useQuery({ queryKey: ["whatsapp-pref"], queryFn: () => getFn() });
+  const save = useMutation({ mutationFn: (optIn: boolean) => setFn({ data: { optIn } }), onSuccess: () => void qc.invalidateQueries({ queryKey: ["whatsapp-pref"] }) });
+  return (
+    <Card className="mt-4" data-no-localize><CardContent className="flex items-start justify-between gap-4 p-6">
+      <div>
+        <Label htmlFor="whatsapp-updates">{text("Deal updates on WhatsApp", "تحديثات الصفقات عبر واتساب")}</Label>
+        <p className="mt-2 text-xs leading-6 text-muted-foreground">{text("Get a short message when the other party pays, ships, confirms or opens a case.", "تصلك رسالة قصيرة عندما يدفع الطرف الآخر أو يشحن أو يؤكد أو يفتح طلباً.")}
+          {pref.data?.phoneMasked && <> {text("Sent to", "تُرسل إلى")} <bdi dir="ltr">{pref.data.phoneMasked}</bdi>.</>}
+          {pref.data && !pref.data.phoneOk && <> {text("Add a Gulf mobile number in your personal details first.", "أضف رقم جوال خليجياً في بياناتك الشخصية أولاً.")}</>}</p>
+        {save.error && <p role="alert" className="mt-2 text-xs text-destructive">{(save.error as Error).message}</p>}
+      </div>
+      <Switch id="whatsapp-updates" checked={pref.data?.optIn ?? false} disabled={save.isPending || !pref.data || (!pref.data.phoneOk && !pref.data.optIn)} onCheckedChange={(v) => save.mutate(v)} />
+    </CardContent></Card>
   );
 }

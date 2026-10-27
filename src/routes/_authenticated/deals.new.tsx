@@ -22,6 +22,9 @@ import { DEAL_TYPES, DEAL_TYPE_DEFAULTS, validateMilestones, type DealType } fro
 
 import { CustodyNote, FormStepper } from "@/components/deal/DealPresentation";
 import { useLocale } from "@/lib/locale";
+import { ShareLink } from "@/components/share/ShareLink";
+import { DEAL_TEMPLATES, templateMilestoneAmounts, type DealTemplate } from "@/lib/deal-templates";
+import { supabase } from "@/integrations/supabase/client";
 import { formatMoney } from "@/lib/money";
 import { fxCurrencies } from "@/lib/fx";
 import { retentionFormValues } from "@/lib/milestone-editor";
@@ -46,7 +49,7 @@ export const Route = createFileRoute("/_authenticated/deals/new")({
 const blankRow = (): EditableMilestone => ({ title: "", amount: "", dueDate: "", evidenceRequired: "", kind: "work" });
 
 function NewDeal() {
-  const { text } = useLocale();
+  const { text, locale } = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
   const [dealType, setDealType] = useState<DealType | null>(null);
   const R = rolesFor(dealType);
@@ -100,6 +103,47 @@ function NewDeal() {
   const planError = dealType && milestonesOn
     ? validateMilestones(numericAmount, currency, rows.map(toInput), dealType)
     : null;
+
+  // Templates (founder, 27 Oct): pre-fill everything; the user can still change any field.
+  const [template, setTemplate] = useState<DealTemplate | null>(null);
+  const [templatePct, setTemplatePct] = useState<number[] | null>(null);
+  function applyTemplate(tp: DealTemplate) {
+    const L = (v: readonly [string, string]) => (locale === "en" ? v[0] : v[1]);
+    setTemplate(tp);
+    setRole(tp.role);
+    chooseType(tp.type);
+    setTitle(L(tp.title));
+    setDescription(L(tp.description));
+    setAcceptanceCriteria(L(tp.acceptance));
+    setRefundConditions(L(tp.refund));
+    setInspectionDays(String(tp.inspectionDays));
+    setShippingRequired(tp.shipping);
+    setShippingResponsibility(tp.shipping ? "seller" : "none");
+    if (tp.revisions != null) setRevisions(String(tp.revisions));
+    if (tp.retentionPercent) { setRetentionEnabled(true); setRetention(String(tp.retentionPercent)); setDlp(String(tp.defectsLiabilityDays ?? 90)); }
+    else setRetentionEnabled(false);
+    if (tp.milestones?.length) {
+      setUseMilestones(true);
+      const amounts = templateMilestoneAmounts(numericAmount, tp.milestones.map((m) => m.pct), currency);
+      setRows(tp.milestones.map((m, i) => ({ title: L(m.title), amount: amounts[i] ?? "", dueDate: "", evidenceRequired: L(m.evidence), kind: m.kind })));
+      setTemplatePct(tp.milestones.map((m) => m.pct));
+    } else { setUseMilestones(false); setTemplatePct(null); }
+  }
+  // Keep template milestone amounts in step with the deal amount until the user edits the plan.
+  useEffect(() => {
+    if (!templatePct) return;
+    const amounts = templateMilestoneAmounts(numericAmount, templatePct, currency);
+    setRows((r) => r.map((row, i) => ({ ...row, amount: amounts[i] ?? row.amount })));
+  }, [numericAmount, currency, templatePct]);
+  // People you created deals with before: one tap fills the email.
+  const recent = useQuery({
+    queryKey: ["recent-counterparties"],
+    queryFn: async () => {
+      const { data } = await supabase.from("deals").select("counterparty_email, created_at").not("counterparty_email", "is", null).order("created_at", { ascending: false }).limit(50);
+      return Array.from(new Set((data ?? []).map((d: any) => String(d.counterparty_email).toLowerCase()))).slice(0, 6);
+    },
+    staleTime: 300_000,
+  });
 
   function chooseType(t: DealType) {
     setDealType(t);
@@ -186,8 +230,8 @@ function NewDeal() {
             <CardContent className="p-6">
               <Label htmlFor="invite">{text("Invitation link", "رابط الدعوة")}</Label>
               <Input id="invite" readOnly value={inviteUrl} className="mt-2" dir="ltr" />
+              <div className="mt-4"><ShareLink url={inviteUrl} message={locale === "en" ? `You are invited to an Insight deal: ${title}. The amount stays held until delivery is confirmed.\n${inviteUrl}` : `دعوة لصفقة عبر إنسايت: ${title}. يبقى المبلغ محفوظاً حتى تأكيد التسليم.\n${inviteUrl}`} /></div>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button type="button" onClick={() => navigator.clipboard?.writeText(inviteUrl)}>{text("Copy link", "انسخ الرابط")}</Button>
                 <Button asChild variant="outline"><Link to="/deals/$dealId" params={{ dealId: created.ref }}>{text("Open the deal", "افتح الصفقة")}</Link></Button>
                 <Button asChild variant="ghost"><Link to="/dashboard">{text("Back to home", "العودة للرئيسية")}</Link></Button>
               </div>
@@ -211,6 +255,19 @@ function NewDeal() {
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <form ref={formRef} noValidate className="min-w-0 space-y-5" onSubmit={handleSubmit}>
           <div data-step="0" hidden={step !== 0} className="space-y-5">
+          <fieldset data-no-localize>
+            <legend className="text-sm font-semibold">{text("Start from a ready template (optional)", "ابدأ من نموذج جاهز (اختياري)")}</legend>
+            <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+              {DEAL_TEMPLATES.map((tp) => (
+                <button type="button" key={tp.id} onClick={() => applyTemplate(tp)} aria-pressed={template?.id === tp.id}
+                  className={`min-w-44 shrink-0 rounded-xl border p-3 text-start text-sm transition ${template?.id === tp.id ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                  <b className="block">{text(tp.label[0], tp.label[1])}</b>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{text(tp.hint[0], tp.hint[1])}</span>
+                </button>
+              ))}
+            </div>
+            {template && <p className="mt-2 text-xs text-muted-foreground">{text("Filled from the template. You can change anything before you send it.", "عُبّئت الحقول من النموذج، ويمكنك تعديل أي شيء قبل الإرسال.")}</p>}
+          </fieldset>
           <fieldset data-no-localize>
             <legend className="text-sm font-semibold">{text("Your role in the deal", "دورك في الصفقة")}</legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2" role="radiogroup">
@@ -409,6 +466,12 @@ function NewDeal() {
               onChange={(e) => setCounterpartyEmail(e.target.value)}
               placeholder="them@example.com"
             />
+            {(recent.data ?? []).length > 0 && (
+              <div data-no-localize className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                <span className="text-muted-foreground">{text("Recent:", "سابقاً:")}</span>
+                {(recent.data ?? []).map((e) => <button type="button" key={e} dir="ltr" onClick={() => setCounterpartyEmail(e)} className={`rounded-full border px-2.5 py-1 ${counterpartyEmail === e ? "border-primary bg-primary/5 text-primary" : "border-border hover:border-primary/50"}`}>{e}</button>)}
+              </div>
+            )}
           </div>
 
           </div>
@@ -428,7 +491,7 @@ function NewDeal() {
           {milestonesOn && (
             <div className="min-w-0 space-y-5" data-no-localize>
               <h2 className="font-semibold">{text("Milestones", "المراحل")}</h2>
-              <MilestoneEditor rows={rows} onChange={setRows} currency={currency} total={numericAmount} allowAdvance={dealType === "contracting"} />
+              <MilestoneEditor rows={rows} onChange={(r) => { setTemplatePct(null); setRows(r); }} currency={currency} total={numericAmount} allowAdvance={dealType === "contracting"} />
               {dealType === "contracting" && (
                 <fieldset className="min-w-0 space-y-3 border-t border-border pt-5">
                   <legend className="max-w-full text-sm font-semibold">{text("Do you want to retain a percentage as a guarantee after delivery?", "هل تريد حجز نسبة من المبلغ ضماناً بعد التسليم؟")}</legend>

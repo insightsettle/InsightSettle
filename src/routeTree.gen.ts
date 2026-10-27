@@ -30,10 +30,12 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SurveyRouteImport } from './routes/survey'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAuctionsRouteImport } from './routes/_authenticated/auctions'
+import { Route as AuthenticatedCardRouteImport } from './routes/_authenticated/card'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticated/disputes'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
+import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
@@ -57,6 +59,7 @@ import { Route as ConsoleRiskRouteImport } from './routes/console.risk'
 import { Route as ConsoleSupportRouteImport } from './routes/console.support'
 import { Route as ConsoleSurveyRouteImport } from './routes/console.survey'
 import { Route as ConsoleUsersRouteImport } from './routes/console.users'
+import { Route as DCodeRouteImport } from './routes/d.$code'
 import { Route as AuthenticatedAuctionsIdRouteImport } from './routes/_authenticated/auctions_.$id'
 import { Route as AuthenticatedDealsDealIdRouteImport } from './routes/_authenticated/deals.$dealId'
 import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticated/deals.new'
@@ -189,6 +192,11 @@ const AuthenticatedAuctionsRoute = AuthenticatedAuctionsRouteImport.update({
   path: '/auctions',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCardRoute = AuthenticatedCardRouteImport.update({
+  id: '/card',
+  path: '/card',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -207,6 +215,11 @@ const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
 const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
+  id: '/links',
+  path: '/links',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedVerificationRoute =
@@ -324,6 +337,11 @@ const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
   id: '/users',
   path: '/users',
   getParentRoute: () => ConsoleRoute,
+} as any)
+const DCodeRoute = DCodeRouteImport.update({
+  id: '/d/$code',
+  path: '/d/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAuctionsIdRoute = AuthenticatedAuctionsIdRouteImport.update({
   id: '/auctions_/$id',
@@ -495,10 +513,12 @@ export interface FileRoutesByFullPath {
   '/survey': typeof SurveyRoute
   '/terms': typeof TermsRoute
   '/auctions': typeof AuthenticatedAuctionsRoute
+  '/card': typeof AuthenticatedCardRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/invoices': typeof AuthenticatedInvoicesRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -521,6 +541,7 @@ export interface FileRoutesByFullPath {
   '/console/support': typeof ConsoleSupportRoute
   '/console/survey': typeof ConsoleSurveyRoute
   '/console/users': typeof ConsoleUsersRoute
+  '/d/$code': typeof DCodeRoute
   '/console/': typeof ConsoleIndexRoute
   '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
@@ -570,10 +591,12 @@ export interface FileRoutesByTo {
   '/survey': typeof SurveyRoute
   '/terms': typeof TermsRoute
   '/auctions': typeof AuthenticatedAuctionsRoute
+  '/card': typeof AuthenticatedCardRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/disputes': typeof AuthenticatedDisputesRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/invoices': typeof AuthenticatedInvoicesRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -595,6 +618,7 @@ export interface FileRoutesByTo {
   '/console/support': typeof ConsoleSupportRoute
   '/console/survey': typeof ConsoleSurveyRoute
   '/console/users': typeof ConsoleUsersRoute
+  '/d/$code': typeof DCodeRoute
   '/console': typeof ConsoleIndexRoute
   '/auctions/$id': typeof AuthenticatedAuctionsIdRoute
   '/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
@@ -646,10 +670,12 @@ export interface FileRoutesById {
   '/survey': typeof SurveyRoute
   '/terms': typeof TermsRoute
   '/_authenticated/auctions': typeof AuthenticatedAuctionsRoute
+  '/_authenticated/card': typeof AuthenticatedCardRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/disputes': typeof AuthenticatedDisputesRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
+  '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
@@ -672,6 +698,7 @@ export interface FileRoutesById {
   '/console/support': typeof ConsoleSupportRoute
   '/console/survey': typeof ConsoleSurveyRoute
   '/console/users': typeof ConsoleUsersRoute
+  '/d/$code': typeof DCodeRoute
   '/console/': typeof ConsoleIndexRoute
   '/_authenticated/auctions_/$id': typeof AuthenticatedAuctionsIdRoute
   '/_authenticated/deals/$dealId': typeof AuthenticatedDealsDealIdRoute
@@ -724,10 +751,12 @@ export interface FileRouteTypes {
     | '/survey'
     | '/terms'
     | '/auctions'
+    | '/card'
     | '/dashboard'
     | '/disputes'
     | '/documents'
     | '/invoices'
+    | '/links'
     | '/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
@@ -750,6 +779,7 @@ export interface FileRouteTypes {
     | '/console/support'
     | '/console/survey'
     | '/console/users'
+    | '/d/$code'
     | '/console/'
     | '/auctions/$id'
     | '/deals/$dealId'
@@ -799,10 +829,12 @@ export interface FileRouteTypes {
     | '/survey'
     | '/terms'
     | '/auctions'
+    | '/card'
     | '/dashboard'
     | '/disputes'
     | '/documents'
     | '/invoices'
+    | '/links'
     | '/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
@@ -824,6 +856,7 @@ export interface FileRouteTypes {
     | '/console/support'
     | '/console/survey'
     | '/console/users'
+    | '/d/$code'
     | '/console'
     | '/auctions/$id'
     | '/deals/$dealId'
@@ -874,10 +907,12 @@ export interface FileRouteTypes {
     | '/survey'
     | '/terms'
     | '/_authenticated/auctions'
+    | '/_authenticated/card'
     | '/_authenticated/dashboard'
     | '/_authenticated/disputes'
     | '/_authenticated/documents'
     | '/_authenticated/invoices'
+    | '/_authenticated/links'
     | '/_authenticated/verification'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
@@ -900,6 +935,7 @@ export interface FileRouteTypes {
     | '/console/support'
     | '/console/survey'
     | '/console/users'
+    | '/d/$code'
     | '/console/'
     | '/_authenticated/auctions_/$id'
     | '/_authenticated/deals/$dealId'
@@ -957,6 +993,7 @@ export interface RootRouteChildren {
   AuthCheckEmailRoute: typeof AuthCheckEmailRoute
   AuthConfirmedRoute: typeof AuthConfirmedRoute
   AuthResetRoute: typeof AuthResetRoute
+  DCodeRoute: typeof DCodeRoute
   ApiPublicAutoReleaseRoute: typeof ApiPublicAutoReleaseRoute
   ApiV1ActionRoute: typeof ApiV1ActionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -1114,6 +1151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAuctionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/card': {
+      id: '/_authenticated/card'
+      path: '/card'
+      fullPath: '/card'
+      preLoaderRoute: typeof AuthenticatedCardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -1140,6 +1184,13 @@ declare module '@tanstack/react-router' {
       path: '/invoices'
       fullPath: '/invoices'
       preLoaderRoute: typeof AuthenticatedInvoicesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/links': {
+      id: '/_authenticated/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof AuthenticatedLinksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/verification': {
@@ -1302,6 +1353,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/console/users'
       preLoaderRoute: typeof ConsoleUsersRouteImport
       parentRoute: typeof ConsoleRoute
+    }
+    '/d/$code': {
+      id: '/d/$code'
+      path: '/d/$code'
+      fullPath: '/d/$code'
+      preLoaderRoute: typeof DCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/auctions_/$id': {
       id: '/_authenticated/auctions_/$id'
@@ -1497,10 +1555,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuctionsRoute: typeof AuthenticatedAuctionsRoute
+  AuthenticatedCardRoute: typeof AuthenticatedCardRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDisputesRoute: typeof AuthenticatedDisputesRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
+  AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
   AuthenticatedAuctionsIdRoute: typeof AuthenticatedAuctionsIdRoute
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
@@ -1511,10 +1571,12 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuctionsRoute: AuthenticatedAuctionsRoute,
+  AuthenticatedCardRoute: AuthenticatedCardRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDisputesRoute: AuthenticatedDisputesRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
+  AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
   AuthenticatedAuctionsIdRoute: AuthenticatedAuctionsIdRoute,
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
@@ -1650,6 +1712,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCheckEmailRoute: AuthCheckEmailRoute,
   AuthConfirmedRoute: AuthConfirmedRoute,
   AuthResetRoute: AuthResetRoute,
+  DCodeRoute: DCodeRoute,
   ApiPublicAutoReleaseRoute: ApiPublicAutoReleaseRoute,
   ApiV1ActionRoute: ApiV1ActionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

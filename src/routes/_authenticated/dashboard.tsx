@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { rolesFor, the, to, type Roles } from "@/lib/roles";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { takeReturnTo } from "@/lib/return-to";
 import {
   AlertCircle,
   CheckCircle2,
@@ -61,6 +62,8 @@ function Dashboard() {
   useEffect(() => {
     if (isStaff) navigate({ to: "/console", replace: true });
   }, [isStaff, navigate]);
+  // Arrived here after confirming an email or signing in with Google: continue to a saved deal link or invitation.
+  useEffect(() => { const next = takeReturnTo(); if (next) navigate({ href: next, replace: true }); }, [navigate]);
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
   const { data: myActivity = [] } = useQuery({
     queryKey: ["my-activity"],

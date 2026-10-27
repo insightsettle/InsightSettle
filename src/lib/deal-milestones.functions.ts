@@ -41,7 +41,7 @@ async function record(admin: any, notify: any, dealId: string, actor: string | n
   await notify.notifyDealParties(admin, dealId, { title, body: note, kind: "deal" });
 }
 
-function snapshotOf(d: any, milestones: any[]) {
+export function snapshotOf(d: any, milestones: any[]) {
   return {
     title: d.title, amount: Number(d.amount), currency: d.currency, quantity: Number(d.quantity ?? 1), unit_price: d.unit_price,
     due_at: d.due_at, inspection_days: d.inspection_days, fee_payer: d.fee_payer, shipping_responsibility: d.shipping_responsibility,

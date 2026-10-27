@@ -7,6 +7,12 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "A buyer started a deal from your deal link": "بدأ مشترٍ صفقة من رابط صفقتك",
+  "Deal created from the seller's deal link": "أُنشئت الصفقة من رابط صفقة البائع",
+  "Buyer joined through the deal link — review and accept the terms": "انضم المشتري عبر رابط الصفقة: راجع الشروط ووافق عليها",
+  "Terms from the seller's deal link": "الشروط من رابط صفقة البائع",
+  "Deal links": "روابط الصفقات",
+  "My Insight card": "بطاقتي في إنسايت",
   "UAE dirham": "الدرهم الإماراتي",
   "Bahraini dinar": "الدينار البحريني",
   "Kuwaiti dinar": "الدينار الكويتي",
@@ -1170,7 +1176,7 @@ const dynamicTranslations: Array<[RegExp, (...matches: string[]) => string]> = [
   [/^Back to (.+)$/, (target) => `العودة إلى ${translations[target] ?? target}`],
 ];
 
-function translateText(value: string) {
+export function translateText(value: string) {
   const normalized = value.replace(/\s+/g, " ").trim();
   const exact = translations[normalized];
   if (exact) return value.replace(normalized, exact);

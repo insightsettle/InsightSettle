@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Handshake, Scale, ReceiptText as Receipt, FileText, UserRoundCheck, Plus, Gavel, UserRound } from "lucide-react";
+import { Home, Handshake, Scale, ReceiptText as Receipt, FileText, UserRoundCheck, Plus, Gavel, UserRound, Link2, IdCard } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { Button } from "@/components/ui/button";
@@ -31,16 +31,18 @@ export function ClientShell({ children }: { children: ReactNode }) {
   // Same action buckets shown by the existing customer dashboard, counted once per deal.
   const actionCount = deals.filter((d) => clientAction(d, user?.id, actionMilestones)).length;
   const onDeals = pathname.startsWith("/deals/") || hash === "saved-deals";
-  const title = pathname === "/deals/new" ? "New deal" : pathname.startsWith("/deals/") || onDeals ? "Deals" : pathname === "/disputes" ? "Disputes" : pathname === "/documents" ? "Deal documents" : pathname === "/invoices" || pathname.startsWith("/invoice/") ? "Tax invoices" : pathname === "/verification" ? "Account & verification" : "Home";
+  const title = pathname === "/deals/new" ? "New deal" : pathname.startsWith("/deals/") || onDeals ? "Deals" : pathname === "/disputes" ? "Disputes" : pathname === "/documents" ? "Deal documents" : pathname === "/invoices" || pathname.startsWith("/invoice/") ? "Tax invoices" : pathname === "/verification" ? "Account & verification" : pathname === "/links" ? "Deal links" : pathname === "/card" ? "My Insight card" : "Home";
   const nav = <>
     <Button asChild className="mb-5 h-10 w-full rounded-lg"><Link to="/deals/new"><Plus />{text("New deal")}</Link></Button>
     <nav className="space-y-1" aria-label={text("Navigation")}>
       <Link to="/dashboard" className={shellNavClass} activeProps={{ "data-status": onDeals ? "inactive" : "active" }}><Home className="size-4" />{text("Home")}<span className="ms-auto rounded-full bg-accent px-2 text-xs tabular-nums text-primary">{actionCount}</span></Link>
       {/* There is no /deals listing route: preserve the existing saved-deals destination. */}
       <Link to="/dashboard" hash="saved-deals" className={shellNavClass} data-status={onDeals ? "active" : "inactive"} activeOptions={{ exact: true, includeHash: true }} activeProps={{ "data-status": onDeals ? "active" : "inactive" }}><Handshake className="size-4" />{text("Deals")}</Link>
+      <Link to="/links" className={shellNavClass}><Link2 className="size-4" />{text("Deal links", "روابط الصفقات")}</Link>
       <Link to="/disputes" className={shellNavClass}><Scale className="size-4" />{text("Disputes")}</Link>
       <Link to="/documents" className={shellNavClass}><FileText className="size-4" />{text("Deal documents", "مستندات الصفقة")}</Link>
       <Link to="/invoices" className={shellNavClass} data-status={pathname === "/invoices" || pathname.startsWith("/invoice/") ? "active" : "inactive"}><Receipt className="size-4" />{text("Tax invoices", "الفواتير الضريبية")}</Link>
+      <Link to="/card" className={shellNavClass}><IdCard className="size-4" />{text("My Insight card", "بطاقتي في إنسايت")}</Link>
       <Link to="/verification" className={shellNavClass}><UserRoundCheck className="size-4" />{text("Account & verification")}</Link>
       {auctionsAccess?.visible && <Link to="/auctions" className={shellNavClass} data-status={pathname.startsWith('/auctions') ? 'active' : 'inactive'}><Gavel className="size-4" />{text("Auctions", "المزادات")}</Link>}
     </nav>

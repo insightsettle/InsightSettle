@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocale } from "@/lib/locale";
 import { lovable } from "@/integrations/lovable/index";
+import { takeReturnTo } from "@/lib/return-to";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { mode?: "signup" } =>
@@ -37,6 +38,8 @@ function AuthPage() {
   const { text } = useLocale();
   const navigate = useNavigate();
   const search = Route.useSearch();
+  // After sign-in, continue to a saved deal link or invitation if there is one.
+  const goOn = () => { const next = takeReturnTo(); if (next) navigate({ href: next, replace: true }); else navigate({ to: "/dashboard", replace: true }); };
   const [mode, setMode] = useState<"signin" | "signup">(
     search.mode === "signup" ? "signup" : "signin",
   );
@@ -55,7 +58,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/dashboard", replace: true });
+      if (data.user) goOn();
     });
   }, [navigate]);
 
@@ -77,14 +80,14 @@ function AuthPage() {
         });
         if (signUpError) throw signUpError;
         if (data.session) {
-          navigate({ to: "/dashboard", replace: true });
+          goOn();
         } else {
           navigate({ to: "/auth/check-email", replace: true });
         }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
-        navigate({ to: "/dashboard", replace: true });
+        goOn();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
@@ -133,7 +136,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/dashboard", replace: true });
+    goOn();
   }
 
   return (

@@ -34,6 +34,11 @@ export async function notifyUsers(admin: AdminClient, input: NotifyInput) {
   }));
   const { error } = await admin.from("notifications").insert(rows);
   if (error) throw error;
+  // WhatsApp copy for users who opted in (logged only until WhatsApp sending is configured).
+  if ((input.kind ?? "deal") === "deal") {
+    const { queueWhatsApp } = await import("@/lib/whatsapp.server");
+    await queueWhatsApp(admin, { userIds: unique, dealId: input.dealId ?? null, dealRef: input.dealRef ?? null, title: input.title });
+  }
   return { delivered: rows.length };
 }
 
