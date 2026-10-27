@@ -42,10 +42,17 @@ const SAFETY: Feature[] = [
 ];
 
 const FAQ: [T2, T2][] = [
-  [["Do I need a business account?", "هل أحتاج حساباً تجارياً؟"], ["No. A personal account and a verified identity are enough.", "لا. يكفي حساب شخصي وتوثيق هويتك."]],
-  [["What if the item is not as described?", "ماذا لو لم تطابق السلعة الوصف؟"], ["Open a dispute during the inspection period. The payout stops, both sides submit evidence, and a written decision is approved by two Insight staff members.", "افتح نزاعاً خلال مدة الفحص. يتوقف التحويل، ويقدّم الطرفان أدلتهما، ويصدر قرار مكتوب يعتمده موظفان في إنسايت."]],
-  [["When does the seller get the money?", "متى يستلم البائع المبلغ؟"], ["When you confirm receipt, or automatically when the agreed inspection period ends without an objection.", "حين تؤكد الاستلام، أو تلقائياً بانتهاء مدة الفحص المتفق عليها دون اعتراض."]],
-  [["Who pays the fee?", "من يدفع الرسوم؟"], ["You decide together: the buyer, the seller, or half each. Creating a deal is free; the fee is charged only when the deal is paid.", "تقرران معاً: المشتري أو البائع أو مناصفة. إنشاء الصفقة مجاني، والرسوم عند الدفع فقط."]],
+  [["Do I need a commercial registration to use Insight?", "هل أحتاج إلى سجل تجاري لاستخدام إنسايت؟"],
+   ["No. A personal account with a verified ID is enough to buy or sell.", "لا. يكفي حساب شخصي مع توثيق هويتك لتشتري أو تبيع."]],
+  [["What if the item is not as described?", "ماذا لو كانت السلعة مختلفة عن الوصف؟"],
+   ["Open a dispute before your checking time ends. The payout stops, both sides upload their evidence, and a written decision is approved by two Insight staff members.",
+    "افتح نزاعاً قبل انتهاء مدة الفحص. يتوقف تحويل المبلغ، ويرفع الطرفان أدلتهما، ويصدر قرار مكتوب يعتمده موظفان في إنسايت."]],
+  [["When does the seller receive the money?", "متى يستلم البائع المبلغ؟"],
+   ["As soon as you confirm you received what you agreed. If you do nothing, it is paid automatically when the agreed checking time ends with no dispute.",
+    "فور تأكيدك أنك استلمت ما اتفقتما عليه. وإن لم تفعل شيئاً، يُحوَّل تلقائياً عند انتهاء مدة الفحص المتفق عليها دون نزاع."]],
+  [["Who pays the fee, and how much is it?", "من يدفع الرسوم، وكم هي؟"],
+   ["You decide together: the buyer, the seller, or half each. Creating a deal is free; the fee, 2.5% with a minimum of BHD 6, is charged only when the deal is paid.",
+    "تقرران معاً: المشتري أو البائع أو مناصفة. إنشاء الصفقة مجاني، والرسوم 2.5% بحد أدنى 6 دنانير بحرينية، ولا تُحتسب إلا عند الدفع."]],
 ];
 
 function DealPreview() {
@@ -61,7 +68,7 @@ function DealPreview() {
         <div className="flex items-center gap-3"><IconTile icon={Car} size="sm" /><div><p className="text-xs text-muted-foreground">{text("Example deal", "مثال")}</p><h2 className="text-lg font-semibold">{text("Used sedan, 2021", "سيارة سيدان مستعملة 2021")}</h2></div></div>
         <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{text("Paid into the deal", "المبلغ محفوظ")}</span>
       </div>
-      <p className="mt-6 text-3xl font-bold tabular-nums"><bdi dir="ltr">{formatMoney(68000, "SAR")}</bdi></p>
+      <p className="mt-6 text-3xl font-bold tabular-nums"><bdi dir="ltr">{formatMoney(6800, "BHD")}</bdi></p>
       <div className="mt-6 space-y-3">{rows.map(([I, t]) => <div key={t[0]} className="flex items-center gap-3 rounded-xl bg-background p-3 text-sm"><I className="size-5 shrink-0 text-primary" /><span>{text(t[0], t[1])}</span></div>)}</div>
     </div>
   );
@@ -99,7 +106,7 @@ function IndividualsPage() {
       <div className="rounded-3xl border border-border bg-card p-8">
         <div className="flex items-center gap-3"><IconTile icon={Scale} /><h3 className="text-xl font-semibold">{text("If something goes wrong", "إن حدثت مشكلة")}</h3></div>
         <p className="mt-4 leading-8 text-muted-foreground">{text("Open a dispute in one tap. The payout stops, both sides submit their evidence, and the Insight team issues a written decision approved by two staff members.", "افتح نزاعاً بضغطة. يتوقف التحويل، ويقدّم الطرفان أدلتهما، ويصدر فريق إنسايت قراراً مكتوباً يعتمده موظفان.")}</p>
-        <div className="mt-6 flex items-center gap-3"><IconTile icon={Receipt} tone="soft" size="sm" /><p className="text-sm leading-7 text-muted-foreground">{text("Fees from USD 15, shown before you pay.", "رسوم تبدأ من 15 دولاراً، تظهر لك قبل الدفع.")} <Link to="/pricing" className="font-semibold text-primary">{text("Fee calculator", "حاسبة الرسوم")}</Link></p></div>
+        <div className="mt-6 flex items-center gap-3"><IconTile icon={Receipt} tone="soft" size="sm" /><p className="text-sm leading-7 text-muted-foreground">{text("Fees from BHD 6, shown before you pay.", "رسوم تبدأ من 6 دنانير بحرينية، تظهر لك قبل الدفع.")} <Link to="/pricing" className="font-semibold text-primary">{text("Fee calculator", "حاسبة الرسوم")}</Link></p></div>
       </div>
     </section>
 

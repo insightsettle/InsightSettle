@@ -64,13 +64,27 @@ function HomePage() {
     [Lock, "Funds with a licensed provider", "الأموال لدى مزوّد مرخّص", "At launch, funds are held by a licensed payment provider — never by Insight. This demo simulates the provider.", "عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، ولا تحتفظ بها إنسايت. هذه النسخة تحاكي المزوّد."],
   ];
   const faqs: [string, string, string, string][] = [
-    ["Where is the money during the deal?", "أين يكون المبلغ أثناء الصفقة؟", "At launch, funds will be held by a licensed payment provider, and Insight runs the deal rules and keeps the record. This version is a demo with a simulated payment provider: no real money moves.", "عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، وتدير إنسايت قواعد الصفقة وتحفظ سجلها. النسخة الحالية تجريبية بمزوّد دفع محاكى، ولا تتحرك فيها أموال حقيقية."],
-    ["What if the goods arrive damaged or incomplete?", "ماذا لو وصلت البضاعة تالفة أو ناقصة؟", "Open a dispute during the inspection period. The payout stops, the Insight team reviews both sides' evidence and issues a written decision approved by two staff members.", "افتح نزاعاً خلال مدة الفحص. يتوقف التحويل، ويراجع فريق إنسايت أدلة الطرفين ويصدر قراراً مكتوباً يعتمده موظفان."],
-    ["Can I pay in a different currency from the other side?", "هل أدفع بعملة غير عملة الطرف الآخر؟", "Yes. You pay in your currency and the other side is paid in theirs. You see the exchange rate, locked for 15 minutes, before you pay.", "نعم. تدفع بعملتك ويستلم الطرف الآخر بعملته، وترى سعر الصرف ثابتاً لمدة 15 دقيقة قبل الدفع."],
-    ["How much does it cost?", "كم تكلف الخدمة؟", "Creating a deal is free. The fee is charged only when the deal is paid, from USD 15 and never more than USD 3,500 per deal, and you choose who pays it.", "إنشاء الصفقة مجاني. تُحتسب الرسوم عند الدفع فقط، تبدأ من 15 دولاراً ولا تتجاوز 3,500 دولار للصفقة، وتختاران من يدفعها."],
-    ["Can I deal with a supplier outside the Gulf?", "هل أتعامل مع مورد خارج الخليج؟", "Yes. Choose \"Outside the Gulf\" as the supplier's country and set the deal in US dollars. You pay in your own currency and the supplier is paid in dollars. At launch, the countries a payout can reach depend on the licensed payment provider.", "نعم. اختر «خارج الخليج» دولةً للمورد وحدّد مبلغ الصفقة بالدولار الأمريكي. تدفع بعملتك ويستلم المورد بالدولار. عند الإطلاق تعتمد الدول التي يصلها التحويل على مزوّد الدفع المرخّص."],
-    ["What if the other side does not deliver?", "ماذا لو لم يُسلّم الطرف الآخر ما اتفقتما عليه؟", "Open a dispute. The amount stays in the deal and is not paid out until a decision is issued.", "افتح نزاعاً. يبقى المبلغ في الصفقة ولا يُحوَّل للطرف الآخر حتى يصدر القرار."],
-    ["Is it for businesses or individuals?", "هل الخدمة للأعمال أم للأفراد؟", "Both. A company buying stock from a factory, or a person hiring a designer, use the same steps: agree, pay, deliver, inspect.", "للاثنين. المنشأة التي تشتري بضاعة من مصنع، والشخص الذي يتعاقد مع مصمم، يمرّان بالخطوات نفسها: اتفاق، دفع، تسليم، فحص."],
+    ["Who holds my money while the deal is open?", "مَن يحتفظ بمبلغي طوال مدة الصفقة؟",
+      "Not the other party, and not Insight. At launch the amount is held by a licensed payment provider and is paid out only when the deal's conditions are met. This version is a demo: the payment provider is simulated and no real money moves.",
+      "لا الطرف الآخر ولا إنسايت. عند الإطلاق يُحفظ المبلغ لدى مزوّد دفع مرخّص، ولا يُحوَّل إلا عند تحقق شروط الصفقة. هذه النسخة تجريبية: مزوّد الدفع محاكى ولا تتحرك أموال حقيقية."],
+    ["What if what I receive is damaged, incomplete or not as agreed?", "ماذا لو استلمت شيئاً تالفاً أو ناقصاً أو مختلفاً عمّا اتفقنا عليه؟",
+      "Open a dispute before your checking time ends. The payout stops straight away, both sides upload their evidence, and the Insight team issues a written decision approved by two staff members.",
+      "افتح نزاعاً قبل انتهاء مدة الفحص. يتوقف تحويل المبلغ فوراً، ويرفع الطرفان أدلتهما، ويصدر فريق إنسايت قراراً مكتوباً يعتمده موظفان."],
+    ["Can I pay in one currency while the other side is paid in another?", "هل يمكن أن أدفع بعملة ويستلم الطرف الآخر بعملة أخرى؟",
+      "Yes. For example, you pay in Bahraini dinars and a supplier in Riyadh receives Saudi riyals. You see the exchange rate before you pay, and it stays fixed for 15 minutes.",
+      "نعم. مثلاً تدفع بالدينار البحريني ويستلم مورّد في الرياض بالريال السعودي. ترى سعر الصرف قبل أن تدفع، ويبقى ثابتاً لمدة 15 دقيقة."],
+    ["How much does Insight charge?", "كم رسوم إنسايت؟",
+      "Creating a deal is free. When the deal is paid, the fee is 2.5% of the deal value, with a minimum of BHD 6; paid by bank transfer, it never goes above BHD 1,300 per deal. You agree who pays it: the buyer, the seller, or half each. Example: a BHD 4,000 deal has a BHD 100 fee, plus VAT on the fee.",
+      "إنشاء الصفقة مجاني. عند الدفع تكون الرسوم 2.5% من قيمة الصفقة، بحد أدنى 6 دنانير بحرينية، وعند الدفع بتحويل بنكي لا تتجاوز 1,300 دينار للصفقة. وتتفقان على من يدفعها: المشتري أو البائع أو مناصفة. مثال: صفقة بـ 4,000 دينار رسومها 100 دينار، تُضاف إليها ضريبة القيمة المضافة على الرسوم فقط."],
+    ["My supplier is outside the Gulf, for example in China or Turkey. Can I still use Insight?", "المورّد خارج دول الخليج، مثلاً في الصين أو تركيا. هل أستطيع استخدام إنسايت؟",
+      "Yes. When you create the deal, choose \"Outside the Gulf\" as the supplier's country and set the amount in US dollars, the currency most foreign suppliers use. You pay in your own currency and the supplier is paid in dollars. At launch, the countries a payout can reach depend on the payment provider.",
+      "نعم. عند إنشاء الصفقة اختر «خارج الخليج» دولةً للمورّد، وحدّد المبلغ بالدولار الأمريكي لأنه العملة التي يتعامل بها أغلب الموردين في الخارج. تدفع أنت بعملتك ويستلم المورّد بالدولار. عند الإطلاق تحدد جهة الدفع الدول التي يمكن التحويل إليها."],
+    ["What if the other side never delivers?", "ماذا لو لم يُسلّم الطرف الآخر أبداً؟",
+      "Open a dispute. The amount stays in the deal and is not paid to them while the case is reviewed. If the decision is in your favour, the amount is refunded to you.",
+      "افتح نزاعاً. يبقى المبلغ في الصفقة ولا يُحوَّل له أثناء مراجعة الحالة، وإذا صدر القرار لصالحك يُعاد المبلغ إليك."],
+    ["Is Insight for companies or for individuals?", "هل إنسايت للشركات أم للأفراد؟",
+      "Both, with the same steps: agree, pay into the deal, deliver, check. A company importing stock from a factory and a person buying a used car from a stranger are protected the same way.",
+      "للاثنين، وبالخطوات نفسها: اتفاق، دفع في الصفقة، تسليم، فحص. الشركة التي تستورد بضاعة من مصنع، والشخص الذي يشتري سيارة مستعملة من شخص لا يعرفه، يحصلان على الحماية نفسها."],
   ];
 
   return <SiteShell><ContactPopup /><div data-no-localize>
@@ -96,10 +110,10 @@ function HomePage() {
           <ul aria-hidden="true" className="hero-float absolute -end-3 top-12 z-10 flex flex-col gap-3 sm:-end-5">{[Lock, Coins, Truck].map((I, k) => <li key={k} className="grid size-12 place-items-center rounded-full bg-card text-primary shadow-[0_12px_24px_-12px_rgb(12_42_34/0.5)] ring-1 ring-border"><I className="size-5" strokeWidth={1.9} /></li>)}</ul>
         <div className="me-8 rounded-3xl border border-border bg-card p-5 shadow-[0_30px_60px_-40px_rgb(12_42_34/0.45)] sm:me-10 sm:p-7">
           <div className="flex items-start justify-between gap-3">
-            <div><p className="text-xs text-muted-foreground">{text("Example deal", "مثال")} · {text("Jeddah – Shenzhen", "جدة – شنتشن")}</p><h2 className="mt-2 text-lg font-semibold">{text("Office chairs from a factory", "كراسي مكتبية من مصنع")}</h2></div>
+            <div><p className="text-xs text-muted-foreground">{text("Example deal", "مثال")} · {text("Manama – Shenzhen", "المنامة – شنتشن")}</p><h2 className="mt-2 text-lg font-semibold">{text("Office chairs from a factory", "كراسي مكتبية من مصنع")}</h2></div>
             <span className="shrink-0 whitespace-nowrap rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{text("Shipped", "تم الشحن")}</span>
           </div>
-          <p className="mt-6 text-3xl font-bold tabular-nums"><bdi dir="ltr">{formatMoney(12000, "USD")}</bdi></p>
+          <p className="mt-6 text-3xl font-bold tabular-nums"><bdi dir="ltr">{formatMoney(4500, "BHD")}</bdi></p>
           <div className="mt-6 grid grid-cols-4 gap-1.5" aria-hidden="true"><span className="h-2 rounded bg-brand-mint" /><span className="h-2 rounded bg-brand-mint" /><span className="gradient-brand checkout-sheen relative h-2 overflow-hidden rounded" /><span className="h-2 rounded bg-surface" /></div>
           <ol className="mt-2 grid grid-cols-4 gap-1.5 text-xs text-muted-foreground"><li>{text("Agreed", "الاتفاق")}</li><li>{text("Paid", "الدفع")}</li><li className="font-semibold text-primary">{text("Shipping", "الشحن")}</li><li>{text("Payout", "التحويل")}</li></ol>
           <div className="mt-6 space-y-3">{([[BadgeCheck, "Both parties verified", "الطرفان موثّقان"], [Truck, "Shipment on its way · DEMO-24817", "الشحنة في الطريق · DEMO-24817"], [Wallet, "Paid to the factory after a 5-day inspection", "يُحوَّل للمصنع بعد فحص 5 أيام"]] as const).map(([I, en, ar]) => <div key={en} className="flex items-center gap-3 rounded-xl bg-background p-3 text-sm"><I className="size-5 shrink-0 text-primary" /><span>{text(en, ar)}</span></div>)}</div>
@@ -114,7 +128,7 @@ function HomePage() {
     </section>
 
     {/* Currencies */}
-    <section className="border-b border-border bg-card"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-6"><p className="text-sm text-muted-foreground">{text("You pay in your currency. The other side is paid in theirs.", "أنت تدفع بعملتك، والطرف الآخر يستلم بعملته.")}</p><div className="flex flex-wrap gap-2" dir="ltr">{["SAR", "AED", "BHD", "KWD", "QAR", "OMR", "USD"].map(c => <span key={c} className="rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold">{c}</span>)}</div></div></section>
+    <section className="border-b border-border bg-card"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-6"><p className="text-sm text-muted-foreground">{text("You pay in your currency. The other side is paid in theirs.", "أنت تدفع بعملتك، والطرف الآخر يستلم بعملته.")}</p><div className="flex flex-wrap gap-2" dir="ltr">{["BHD", "SAR", "AED", "KWD", "QAR", "OMR", "USD"].map(c => <span key={c} className={`rounded-lg border px-3 py-2 text-xs font-semibold ${c === "BHD" ? "border-primary bg-accent text-primary" : "border-border bg-background"}`}>{c}</span>)}</div></div></section>
 
     {/* Pain points */}
     <section className="mx-auto max-w-7xl px-5 pt-16 lg:pt-20">

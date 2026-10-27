@@ -25,7 +25,7 @@ export function roundMoney(amount: number, currency: string, table?: Record<stri
 }
 
 /** Supported deal currencies shown to users. */
-export const SUPPORTED_CURRENCIES = ["SAR", "BHD", "AED", "QAR", "KWD", "OMR", "USD"] as const;
+export const SUPPORTED_CURRENCIES = ["BHD", "SAR", "AED", "QAR", "KWD", "OMR", "USD"] as const; // BHD first: Insight launches from Bahrain (D-69)
 
 /** Formats an amount in its own currency with that currency's minor units, e.g. "BHD 1,000.000". */
 export function formatMoney(amount: number, currency: string) {

@@ -24,8 +24,8 @@ export function FxCustomerQuote() {
     [settings.rates],
   );
   const [amount, setAmount] = useState<number | "">("");
-  const [supplier, setSupplier] = useState("AED");
-  const [buyer, setBuyer] = useState("SAR");
+  const [supplier, setSupplier] = useState("SAR");
+  const [buyer, setBuyer] = useState("BHD");
 
   const s = list.find((c) => c.code === supplier) ?? list[0];
   const b = list.find((c) => c.code === buyer) ?? list[0];

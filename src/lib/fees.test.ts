@@ -113,11 +113,22 @@ describe("pay-in currency cross rates (C09-D19)", () => {
 });
 
 describe("flat 2.5% schedule (D-64)", () => {
-  it("charges 2.5% with the USD 15 minimum and USD 3,500 cap", async () => {
-    const { feeUsd: f, PROVISIONAL_SCHEDULE: P } = await import("./fees");
+  it("keeps the earlier USD 15 minimum and USD 3,500 cap for history", async () => {
+    const { feeUsd: f, USD_SCHEDULE_D64: P } = await import("./fees");
     expect(f(100, P)).toBe(15);
     expect(f(1_000, P)).toBeCloseTo(25, 6);
     expect(f(10_000, P)).toBeCloseTo(250, 6);
     expect(f(200_000, P)).toBe(3_500);
+  });
+  it("D-69: charges 2.5% with the BHD 6 minimum and BHD 1,300 cap", async () => {
+    const { feeUsd: f, dealFee: d, PROVISIONAL_SCHEDULE: P } = await import("./fees");
+    expect(P.currency).toBe("BHD");
+    expect(f(100, P)).toBe(6);
+    expect(f(4_000, P)).toBeCloseTo(100, 6);
+    expect(f(100_000, P)).toBe(1_300);
+    // A SAR deal: 1 SAR = 0.376/3.75 BHD. SAR 1,000,000 hits the cap: BHD 1,300 in SAR.
+    const bhdPerSar = 1 / 9.9734;
+    expect(d(1_000_000, "SAR", bhdPerSar, P)).toBeCloseTo(1_300 / bhdPerSar, 1);
+    expect(d(100, "BHD", 1, P)).toBe(6);
   });
 });

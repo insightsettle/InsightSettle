@@ -14,8 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { FeePayer } from "@/lib/fees";
 import { METHOD_LABEL, PAYMENT_METHODS, type PaymentMethod } from "@/lib/payment-methods";
 
-export const publicPricingOptions = queryOptions({ queryKey: ["public-pricing"], queryFn: () => publicPricing({ data: { amount: 10000, currency: "USD", payer: "split", buyerCountry: "SA", supplierCountry: "BH", method: "mada" } }), staleTime: 60000 });
-const countries = [["SA", "Saudi Arabia", "السعودية"], ["BH", "Bahrain", "البحرين"], ["AE", "United Arab Emirates", "الإمارات"], ["KW", "Kuwait", "الكويت"], ["QA", "Qatar", "قطر"], ["OM", "Oman", "عُمان"]] as const;
+export const publicPricingOptions = queryOptions({ queryKey: ["public-pricing"], queryFn: () => publicPricing({ data: { amount: 4000, currency: "BHD", payer: "split", buyerCountry: "BH", supplierCountry: "SA", method: "bank_transfer" } }), staleTime: 60000 });
+const countries = [["BH", "Bahrain", "البحرين"], ["SA", "Saudi Arabia", "السعودية"], ["AE", "United Arab Emirates", "الإمارات"], ["KW", "Kuwait", "الكويت"], ["QA", "Qatar", "قطر"], ["OM", "Oman", "عُمان"]] as const;
 type Country = typeof countries[number][0];
 
 export function PublicPricing() {
@@ -25,11 +25,11 @@ export function PublicPricing() {
   const [result, setResult] = useState(initial);
   // Start with the example amount already shown in the result, so the first click never hits an empty required field.
   const [amount, setAmount] = useState(() => (initial.available && initial.breakdown ? String(initial.breakdown.amount) : ""));
-  const [currency, setCurrency] = useState<typeof SUPPORTED_CURRENCIES[number]>("USD");
+  const [currency, setCurrency] = useState<typeof SUPPORTED_CURRENCIES[number]>("BHD");
   const [payer, setPayer] = useState<FeePayer>("split");
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer");
-  const [buyerCountry, setBuyerCountry] = useState<Country>("SA");
-  const [supplierCountry, setSupplierCountry] = useState<Country>("BH");
+  const [buyerCountry, setBuyerCountry] = useState<Country>("BH");
+  const [supplierCountry, setSupplierCountry] = useState<Country>("SA");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [dirty, setDirty] = useState(false);

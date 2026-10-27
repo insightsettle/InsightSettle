@@ -65,7 +65,7 @@ function NewDeal() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("SAR");
+  const [currency, setCurrency] = useState("BHD"); // D-69: launch from Bahrain; every currency stays available
   const [role, setRole] = useState<"buyer" | "seller">("buyer");
   const [counterpartyEmail, setCounterpartyEmail] = useState("");
   const [dueAt, setDueAt] = useState("");
@@ -73,8 +73,8 @@ function NewDeal() {
   const [inspectionDays, setInspectionDays] = useState("3");
   const [shippingRequired, setShippingRequired] = useState(true);
   const [quantity, setQuantity] = useState("1");
-  const [supplierCountry, setSupplierCountry] = useState("SA");
-  const [deliveryCountry, setDeliveryCountry] = useState("SA");
+  const [supplierCountry, setSupplierCountry] = useState("BH");
+  const [deliveryCountry, setDeliveryCountry] = useState("BH");
   const [shippingResponsibility, setShippingResponsibility] = useState<"seller" | "buyer" | "none">("seller");
   const [acceptanceCriteria, setAcceptanceCriteria] = useState("");
   const [refundConditions, setRefundConditions] = useState("");

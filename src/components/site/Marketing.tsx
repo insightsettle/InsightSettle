@@ -119,7 +119,7 @@ export const COMPARE_ROWS: [T2, T2, T2, T2][] = [
   [["If the other side never delivers", "إن لم يُسلّم الطرف الآخر"], ["Your money may be gone", "قد يضيع مبلغك"], ["The bank pays only against shipping documents", "البنك يدفع مقابل مستندات الشحن فقط"], ["The amount stays in the deal and you can open a dispute", "يبقى المبلغ في الصفقة ويمكنك فتح نزاع"]],
   [["When the other side is paid", "متى يستلم الطرف الآخر المبلغ"], ["Before work starts", "قبل أن يبدأ"], ["On documents, before you inspect the goods", "عند تقديم المستندات، قبل أن تفحص البضاعة"], ["After you receive and inspect", "بعد أن تستلم وتفحص"]],
   [["What it takes", "ما تحتاجه"], ["A bank transfer", "تحويل بنكي فقط"], ["A bank facility, forms and documents", "تسهيلات بنكية ونماذج ومستندات"], ["A free account and one page of terms", "حساب مجاني وصفحة واحدة للاتفاق"]],
-  [["Small and mid-size deals", "الصفقات الصغيرة والمتوسطة"], ["Easy, but unprotected", "سهل، لكن بلا حماية"], ["Minimum bank charges make them costly", "الحد الأدنى لرسوم البنك يجعلها مكلفة"], ["Fees from USD 15", "رسوم تبدأ من 15 دولاراً"]],
+  [["Small and mid-size deals", "الصفقات الصغيرة والمتوسطة"], ["Easy, but unprotected", "سهل، لكن بلا حماية"], ["Minimum bank charges make them costly", "الحد الأدنى لرسوم البنك يجعلها مكلفة"], ["Fees from BHD 6", "رسوم تبدأ من 6 دنانير بحرينية"]],
   [["Work paid in stages", "أعمال تُدفع على مراحل"], ["Hard to control", "صعب التحكم"], ["Rarely a fit", "نادراً ما يناسب"], ["2 to 20 milestones", "من 2 إلى 20 مرحلة"]],
 ];
 

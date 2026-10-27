@@ -167,7 +167,7 @@ export function PayoutAccountCard() {
     enabled: !!uid,
     queryFn: async () => (await db.from("payout_accounts").select("*").eq("user_id", uid).maybeSingle()).data,
   });
-  const [f, setF] = useState({ account_name: "", bank_name: "", iban: "", country: "SA", currency: "SAR" });
+  const [f, setF] = useState({ account_name: "", bank_name: "", iban: "", country: "BH", currency: "BHD" });
   const [msg, setMsg] = useState<string | null>(null);
   useEffect(() => {
     if (q.data) setF({ account_name: q.data.account_name, bank_name: q.data.bank_name, iban: q.data.iban, country: q.data.country, currency: q.data.currency ?? COUNTRY_CURRENCY[q.data.country] ?? "SAR" });
@@ -191,7 +191,7 @@ export function PayoutAccountCard() {
           </Field>
           <Field id="pcur" label="Payout currency">
             <select id="pcur" className={sel} value={f.currency} onChange={(e) => setF({ ...f, currency: e.target.value })}>
-              {["SAR", "BHD", "AED", "QAR", "KWD", "OMR", "USD"].map((c) => <option key={c} value={c}>{c}</option>)}
+              {["BHD", "SAR", "AED", "QAR", "KWD", "OMR", "USD"].map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </Field>
         </div>

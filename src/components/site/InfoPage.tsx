@@ -4,10 +4,13 @@ import { Link } from "@tanstack/react-router";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
 
-export type InfoSection = { h: string; p: string; points?: string[] };
+/** A string is translated through the shared dictionary; a pair gives the English and Arabic text directly. */
+type Txt = string | readonly [string, string];
+export type InfoSection = { h: Txt; p: Txt; points?: Txt[] };
 
 export function InfoPage({ eyebrow, title, intro, sections }: { eyebrow: string; title: string; intro: string; sections: InfoSection[] }) {
-  const { text } = useLocale();
+  const { text: tr } = useLocale();
+  const text = (v: Txt) => (typeof v === "string" ? tr(v) : tr(v[0], v[1]));
   return (
     <SiteShell>
       <div data-no-localize className="reveal mx-auto max-w-4xl px-4 py-14">
@@ -32,11 +35,11 @@ export function InfoPage({ eyebrow, title, intro, sections }: { eyebrow: string;
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild>
             <Link to="/auth" search={{ mode: "signup" }}>
-              {text("Create account", "إنشاء حساب")}
+              {tr("Create account", "إنشاء حساب")}
             </Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/pricing">{text("Fee calculator", "حاسبة الرسوم")}</Link>
+            <Link to="/pricing">{tr("Fee calculator", "حاسبة الرسوم")}</Link>
           </Button>
         </div>
       </div>

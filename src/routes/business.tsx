@@ -39,10 +39,18 @@ const TOOLS: Feature[] = [
 ];
 
 const FAQ: [T2, T2][] = [
-  [["Can I use Insight with a supplier outside the Gulf?", "هل أستخدم إنسايت مع مورد خارج الخليج؟"], ["Yes. Choose \"Outside the Gulf\" as the supplier's country and set the deal in US dollars. At launch, the countries a payout can reach depend on the licensed payment provider.", "نعم. اختر «خارج الخليج» دولةً للمورد وحدّد الصفقة بالدولار. عند الإطلاق تعتمد الدول التي يصلها التحويل على مزوّد الدفع المرخّص."]],
-  [["How is VAT handled?", "كيف تُحتسب الضريبة؟"], ["VAT applies to the Insight fee only, at the rate of each party's own country, and appears on that party's tax invoice. The deal amount itself is not taxed by Insight.", "تُحتسب الضريبة على رسوم إنسايت فقط، بنسبة دولة كل طرف، وتظهر في فاتورته الضريبية. مبلغ الصفقة نفسه لا تفرض عليه إنسايت ضريبة."]],
-  [["Does the supplier need an account?", "هل يحتاج المورد إلى حساب؟"], ["Yes. You send one invitation link; the supplier joins, accepts the terms and adds a payout account.", "نعم. ترسل له رابط دعوة واحداً، فينضم ويقبل الشروط ويضيف حساب التحويل."]],
-  [["Where is the money during the deal?", "أين يكون المبلغ أثناء الصفقة؟"], ["At launch, funds will be held by a licensed payment provider, and Insight runs the deal rules and keeps the record. This version is a demo with a simulated provider: no real money moves.", "عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، وتدير إنسايت قواعد الصفقة وتحفظ سجلها. النسخة الحالية تجريبية بمزوّد محاكى، ولا تتحرك فيها أموال حقيقية."]],
+  [["My supplier is outside the Gulf, for example in China or Turkey. Can I still use Insight?", "المورّد خارج دول الخليج، مثلاً في الصين أو تركيا. هل أستطيع استخدام إنسايت؟"],
+   ["Yes. Choose \"Outside the Gulf\" as the supplier's country and set the amount in US dollars. You pay in Bahraini dinars or any supported currency; the supplier is paid in dollars. At launch, the countries a payout can reach depend on the payment provider.",
+    "نعم. اختر «خارج الخليج» دولةً للمورّد وحدّد المبلغ بالدولار الأمريكي. تدفع أنت بالدينار البحريني أو أي عملة مدعومة، ويستلم المورّد بالدولار. عند الإطلاق تحدد جهة الدفع الدول التي يمكن التحويل إليها."]],
+  [["Is VAT charged on the whole deal amount?", "هل تُحتسب ضريبة القيمة المضافة على كامل مبلغ الصفقة؟"],
+   ["No. VAT applies only to Insight's fee, at the rate of each party's own country (10% in Bahrain, for example), and it appears on that party's tax invoice. Insight adds no tax to the deal amount itself.",
+    "لا. تُحتسب الضريبة على رسوم إنسايت فقط، بنسبة دولة كل طرف (10% في البحرين مثلاً)، وتظهر في فاتورته الضريبية. ولا تضيف إنسايت أي ضريبة على مبلغ الصفقة نفسه."]],
+  [["Does my supplier need an Insight account?", "هل يحتاج المورّد إلى حساب في إنسايت؟"],
+   ["Yes, and it takes a few minutes. You send one invitation link; the supplier signs up, accepts the terms and adds the bank account to be paid into.",
+    "نعم، ويستغرق ذلك دقائق. ترسل له رابط دعوة واحداً، فيسجّل ويوافق على الشروط ويضيف الحساب البنكي الذي يستلم عليه."]],
+  [["Who holds the money while the deal is open?", "مَن يحتفظ بالمبلغ طوال مدة الصفقة؟"],
+   ["Not the supplier, and not Insight. At launch the amount is held by a licensed payment provider and paid out only when the deal's conditions are met. This version is a demo with a simulated provider: no real money moves.",
+    "لا المورّد ولا إنسايت. عند الإطلاق يُحفظ المبلغ لدى مزوّد دفع مرخّص، ولا يُحوَّل إلا عند تحقق شروط الصفقة. هذه النسخة تجريبية بمزوّد محاكى، ولا تتحرك فيها أموال حقيقية."]],
 ];
 
 function MilestonePreview() {

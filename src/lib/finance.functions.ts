@@ -121,7 +121,7 @@ async function simulateAll(db:any,state:{book:any;table:any;providers:any},data:
   const amount = Number(data.amount); const amountSar = amount*inputs.sarPerUnit;
   return PAYMENT_METHODS.map(method=>{
     const route = resolveRoute(state.book,state.table,{dealType:data.dealType,payerCountry:data.payerCountry,payInCurrency:data.currency,method,payeeCountry:data.payeeCountry,payoutCurrency:data.currency,amountSar,holdingDays:data.holdingDays},null,state.providers);
-    const feeSar = dealFee(amount,data.currency,inputs.usdPerUnit,scheduleForMethod(inputs.schedule,method))*inputs.sarPerUnit;
+    const feeSar = dealFee(amount,data.currency,inputs.basePerUnit,scheduleForMethod(inputs.schedule,method))*inputs.sarPerUnit;
     const check = checkMethod(method,amountSar,feeSar,route.provider?route.costSar:null);
     return { method, route, feeSar:Math.round(feeSar*100)/100, amountSar:Math.round(amountSar*100)/100, margin:check.margin, allowed:check.allowed, reason:check.reason };
   });

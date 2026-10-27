@@ -32,18 +32,21 @@ export function defaultPayCurrency(buyerCountry: string | null | undefined) {
  * (provisional until provider price lists, T-061). Same currency: rate 1, no spread.
  */
 export async function loadPricingInputs(admin: any, dealCurrency: string, payCurrency: string = PAY_IN_CURRENCY) {
-  const codes = Array.from(new Set(["USD", "SAR", dealCurrency, payCurrency]));
+  const codes = Array.from(new Set(["USD", "BHD", "SAR", dealCurrency, payCurrency]));
   const [{ data: rules }, { data: vat }, { data: rates }] = await Promise.all([
-    admin.from("fee_rules").select("*").eq("currency", "USD").order("amount_from"),
+    admin.from("fee_rules").select("*").in("currency", ["BHD", "USD"]).order("amount_from"),
     admin.from("vat_rates").select("country_code, rate"),
     admin.from("fx_rates").select("code, provider_rate, spread, active").in("code", codes),
   ]);
-  const schedule: FeeSchedule = rules?.length
+  // BHD rules win when present (D-69: launch from Bahrain); USD rules remain as a fallback.
+  const base: "BHD" | "USD" = (rules ?? []).some((r: any) => r.currency === "BHD") ? "BHD" : "USD";
+  const live = (rules ?? []).filter((r: any) => r.currency === base);
+  const schedule: FeeSchedule = live.length
     ? {
-        currency: "USD",
-        bands: rules.map((r: any) => ({ from: Number(r.amount_from), to: r.amount_to == null ? null : Number(r.amount_to), percent: Number(r.percent) })),
-        minFee: Math.max(...rules.map((r: any) => Number(r.min_fee ?? 0))),
-        maxFee: rules.some((r: any) => r.max_fee != null) ? Math.min(...rules.filter((r: any) => r.max_fee != null).map((r: any) => Number(r.max_fee))) : null,
+        currency: base,
+        bands: live.map((r: any) => ({ from: Number(r.amount_from), to: r.amount_to == null ? null : Number(r.amount_to), percent: Number(r.percent) })),
+        minFee: Math.max(...live.map((r: any) => Number(r.min_fee ?? 0))),
+        maxFee: live.some((r: any) => r.max_fee != null) ? Math.min(...live.filter((r: any) => r.max_fee != null).map((r: any) => Number(r.max_fee))) : null,
       }
     : PROVISIONAL_SCHEDULE;
   const vatTable: Record<string, number> = vat?.length
@@ -62,7 +65,11 @@ export async function loadPricingInputs(admin: any, dealCurrency: string, payCur
     { code: payCurrency, rate: Number(pay.provider_rate), spread: Number(pay.spread) },
   );
   const usdPerUnit = Number(deal.provider_rate) / Number(usd.provider_rate);
-  return { schedule, vatTable, providerRate, customerRate, usdPerUnit, sarPerUnit: Number(deal.provider_rate), payCurrency };
+  // Value of one deal-currency unit in the schedule currency, for the minimum and the cap.
+  const baseRow = row(schedule.currency);
+  if (!baseRow) throw new Error(`The ${schedule.currency} rate is not configured.`);
+  const basePerUnit = Number(deal.provider_rate) / Number(baseRow.provider_rate);
+  return { schedule, vatTable, providerRate, customerRate, usdPerUnit, basePerUnit, sarPerUnit: Number(deal.provider_rate), payCurrency };
 }
 
 async function partyCountries(admin: any, deal: any) {
@@ -118,8 +125,8 @@ export async function priceDeal(admin: any, deal: any, payCurrency?: string | nu
   const feeFor = (m: PaymentMethod) => {
     const schedule = scheduleForMethod(inputs.schedule, m);
     return auction
-      ? auctionFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, schedule, m === 'bank_transfer' ? auction : { ...auction, max_usd: null })
-      : dealFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, schedule, override);
+      ? auctionFee(Number(deal.amount), deal.currency, inputs.usdPerUnit, schedule, m === 'bank_transfer' ? auction : { ...auction, max_usd: null }, inputs.basePerUnit)
+      : dealFee(Number(deal.amount), deal.currency, inputs.basePerUnit, schedule, override);
   };
   const amountSar = Number(deal.amount) * inputs.sarPerUnit;
   const routes = await dealRoutes(admin, deal, countries, inputs.payCurrency, amountSar);

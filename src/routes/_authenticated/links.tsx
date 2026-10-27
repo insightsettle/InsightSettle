@@ -31,7 +31,7 @@ function LinksPage() {
   const activeFn = useServerFn(setDealLinkActive);
   const links = useQuery({ queryKey: ["my-deal-links"], queryFn: () => listFn() });
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ dealType: "goods", title: "", description: "", amount: "", currency: "SAR", feePayer: "buyer", inspectionDays: "3", deliveryDays: "7", shippingRequired: true, maxUses: "", expiresInDays: "30", acceptanceCriteria: "", refundConditions: "" });
+  const [f, setF] = useState({ dealType: "goods", title: "", description: "", amount: "", currency: "BHD", feePayer: "buyer", inspectionDays: "3", deliveryDays: "7", shippingRequired: true, maxUses: "", expiresInDays: "30", acceptanceCriteria: "", refundConditions: "" });
   const set = (k: keyof typeof f, v: string | boolean) => setF((p) => ({ ...p, [k]: v }));
   const create = useMutation({
     meta: { successToast: text("Your deal link is ready to share.", "رابط صفقتك جاهز للمشاركة.") },
@@ -72,7 +72,7 @@ function LinksPage() {
                 <Input id="dl-title" required minLength={3} maxLength={200} value={f.title} onChange={(e) => set("title", e.target.value)} placeholder={text("e.g. iPhone 15 Pro, 256 GB, used", "مثال: آيفون 15 برو 256 جيجا مستعمل")} /></div>
               <div className="space-y-2"><Label htmlFor="dl-amount">{text("Price", "السعر")}</Label>
                 <div className="flex gap-2"><Input id="dl-amount" required type="number" min="1" step="0.001" inputMode="decimal" dir="ltr" value={f.amount} onChange={(e) => set("amount", e.target.value)} />
-                  <select aria-label={text("Currency", "العملة")} className={`${sel} w-28`} value={f.currency} onChange={(e) => set("currency", e.target.value)}>{["SAR", "BHD", "AED", "KWD", "QAR", "OMR", "USD"].map((c) => <option key={c}>{c}</option>)}</select></div></div>
+                  <select aria-label={text("Currency", "العملة")} className={`${sel} w-28`} value={f.currency} onChange={(e) => set("currency", e.target.value)}>{["BHD", "SAR", "AED", "KWD", "QAR", "OMR", "USD"].map((c) => <option key={c}>{c}</option>)}</select></div></div>
               <div className="space-y-2"><Label htmlFor="dl-fee">{text("Who pays Insight's fee", "من يدفع رسوم إنسايت")}</Label>
                 <select id="dl-fee" className={sel} value={f.feePayer} onChange={(e) => set("feePayer", e.target.value)}>
                   <option value="buyer">{text("The buyer", "المشتري")}</option><option value="seller">{text("Me (the seller)", "أنا (البائع)")}</option><option value="split">{text("Split", "مناصفة")}</option>

@@ -24,39 +24,31 @@ export const Route = createFileRoute("/help")({
   component: HelpPage,
 });
 
-const faqs = [
-  {
-    q: "How does an Insight deal work?",
-    a: "One party creates the deal with the value, terms, inspection period and who pays the fee, then shares a secure invitation link. The other party reviews and accepts the terms, the buyer funds the deal, the seller delivers, and the funds are released once the buyer accepts or the inspection period ends.",
-  },
-  {
-    q: "When is my money safe?",
-    a: "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.",
-  },
-  {
-    q: "What is the inspection period?",
-    a: "A number of days, agreed when the deal is created, that starts when the seller confirms delivery. During it the buyer can accept, ask for a revision, or open a dispute. If the buyer does nothing, the funds release automatically.",
-  },
-  {
-    q: "How do refunds work?",
-    a: "A deal can be refunded in full or in part. Both sides can agree a partial settlement, or Insight can decide the split when a case is escalated. Every refund appears in the payment records of the deal.",
-  },
-  {
-    q: "What happens in a dispute?",
-    a: "Insight reviews both sides' evidence under the dispute policy and records the decision, approved by a second staff member. The payment provider handles any release or refund.",
-  },
-  {
-    q: "Why do I need to verify my identity?",
-    a: "Verification protects both sides and meets anti-money-laundering requirements. Upload an ID or commercial register from the verification page; only you and the Insight review team can open your files.",
-  },
-  {
-    q: "Which currencies can I use?",
-    a: "Deals are settled in Saudi riyals, and cross-currency deals are converted at a rate shown to you before you confirm. The final amount you see is the amount you pay.",
-  },
-  {
-    q: "How do I contact Insight about a specific deal?",
-    a: "Every deal page has a conversation with the other party and a private note box for the Insight team. Both create a record attached to that deal.",
-  },
+const faqs: { q: readonly [string, string]; a: readonly [string, string] }[] = [
+  { q: ["How does a deal on Insight work, step by step?", "كيف تسير الصفقة في إنسايت خطوة بخطوة؟"],
+    a: ["1) One side creates the deal: what is sold, the amount, the checking time and who pays the fee. 2) The other side opens the invitation link and accepts the terms. 3) The buyer pays into the deal. 4) The seller delivers. 5) The buyer checks and confirms, and the amount is paid out to the seller.",
+        "1) ينشئ أحد الطرفين الصفقة: ما يُباع، والمبلغ، ومدة الفحص، ومن يدفع الرسوم. 2) يفتح الطرف الآخر رابط الدعوة ويوافق على الشروط. 3) يدفع المشتري المبلغ في الصفقة. 4) يسلّم البائع. 5) يفحص المشتري ويؤكد، فيُحوَّل المبلغ للبائع."] },
+  { q: ["Who holds my money while the deal is open?", "مَن يحتفظ بمبلغي طوال مدة الصفقة؟"],
+    a: ["Not the other party, and not Insight. At launch the amount is held by a licensed payment provider. This version is a demo: the provider is simulated and no real money moves.",
+        "لا الطرف الآخر ولا إنسايت. عند الإطلاق يُحفظ المبلغ لدى مزوّد دفع مرخّص. هذه النسخة تجريبية: مزوّد الدفع محاكى ولا تتحرك أموال حقيقية."] },
+  { q: ["What is the checking time?", "ما هي مدة الفحص؟"],
+    a: ["The number of days you both agree when the deal is created. It starts when the seller confirms delivery. During it the buyer can confirm, ask for changes, or open a dispute. If the buyer does nothing, the amount is paid out automatically when it ends.",
+        "عدد الأيام الذي تتفقان عليه عند إنشاء الصفقة، ويبدأ عندما يؤكد البائع التسليم. خلالها يستطيع المشتري التأكيد أو طلب تعديل أو فتح نزاع، وإن لم يفعل شيئاً يُحوَّل المبلغ تلقائياً بانتهائها."] },
+  { q: ["Can I get my money back?", "هل يمكنني استرداد مبلغي؟"],
+    a: ["Yes, in full or in part. Both sides can agree a partial refund, or Insight decides the split when a dispute is escalated. Every refund appears in the deal's payment record.",
+        "نعم، كاملاً أو جزئياً. يمكن للطرفين الاتفاق على استرداد جزئي، أو تحدد إنسايت التقسيم عند تصعيد النزاع. ويظهر كل استرداد في سجل مدفوعات الصفقة."] },
+  { q: ["What happens if we disagree?", "ماذا يحدث إذا اختلفنا؟"],
+    a: ["Open a dispute from the deal page and the payout stops. Insight reviews both sides' evidence under the dispute policy, and a second staff member approves the written decision.",
+        "افتح نزاعاً من صفحة الصفقة فيتوقف التحويل. تراجع إنسايت أدلة الطرفين وفق سياسة النزاعات، ويعتمد موظف ثانٍ القرار المكتوب."] },
+  { q: ["Why do I need to verify my identity?", "لماذا يجب أن أوثّق هويتي؟"],
+    a: ["So both sides know who they are dealing with, and to meet anti-money-laundering rules. Upload your ID, or your commercial registration for a company, from the verification page. Only you and the Insight review team can see it.",
+        "ليعرف كل طرف مع من يتعامل، وللالتزام بأنظمة مكافحة غسل الأموال. ارفع هويتك، أو سجلك التجاري للشركات، من صفحة التحقق، ولا يطّلع عليها إلا أنت وفريق المراجعة في إنسايت."] },
+  { q: ["Which currencies can I use?", "ما العملات التي يمكنني استخدامها؟"],
+    a: ["The Bahraini dinar is the default, and you can choose any Gulf currency or the US dollar. If you pay in a different currency from the deal, you see the exchange rate and the exact amount before you confirm.",
+        "الدينار البحريني هو العملة الافتراضية، ويمكنك اختيار أي عملة خليجية أو الدولار الأمريكي. وإن دفعت بعملة غير عملة الصفقة، ترى سعر الصرف والمبلغ بالضبط قبل التأكيد."] },
+  { q: ["How do I contact Insight about a specific deal?", "كيف أتواصل مع إنسايت بشأن صفقة معيّنة؟"],
+    a: ["Every deal page has a chat with the other party and a private note box for the Insight team. Both are saved with that deal.",
+        "في كل صفحة صفقة محادثة مع الطرف الآخر، وخانة ملاحظة خاصة لفريق إنسايت، وكلاهما يُحفظ مع الصفقة."] },
 ];
 
 function HelpPage() {
@@ -71,10 +63,10 @@ function HelpPage() {
 
         <div className="reveal mt-8 space-y-3">
           {faqs.map((f) => (
-            <Card key={text(f.q)} className="lift">
+            <Card key={f.q[0]} className="lift">
               <CardContent className="p-6">
-                <h2 className="font-bold">{text(f.q)}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text(f.a)}</p>
+                <h2 className="font-bold">{text(f.q[0], f.q[1])}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text(f.a[0], f.a[1])}</p>
               </CardContent>
             </Card>
           ))}

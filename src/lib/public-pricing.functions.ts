@@ -18,14 +18,14 @@ export const publicPricing = createServerFn({ method: "GET" })
     } } });
     // Fail closed rather than let the existing loader's fallback look like live pricing.
     const checks = await Promise.all([
-      client.from("fee_rules").select("amount_from").eq("currency", "USD").limit(1),
+      client.from("fee_rules").select("amount_from").in("currency", ["BHD", "USD"]).limit(1),
       client.from("vat_rates").select("country_code").limit(1),
       client.from("fx_rates").select("code").eq("code", "USD").limit(1),
     ]);
     if (checks.some((r) => r.error || !r.data?.length)) return { available: false as const };
     const { loadPricingInputs } = await import("@/lib/pricing.server");
     const inputs = await loadPricingInputs(client, data.currency);
-    const fee = dealFee(data.amount, data.currency, inputs.usdPerUnit, scheduleForMethod(inputs.schedule, data.method));
+    const fee = dealFee(data.amount, data.currency, inputs.basePerUnit, scheduleForMethod(inputs.schedule, data.method));
     const check = checkMethod(data.method, data.amount * inputs.sarPerUnit, fee * inputs.sarPerUnit);
     const breakdown = splitFee({ amount: data.amount, currency: data.currency, fee, feePayer: data.payer, buyerCountry: data.buyerCountry, supplierCountry: data.supplierCountry, vatTable: inputs.vatTable });
     return { available: true as const, breakdown, method: data.method, methodAllowed: check.allowed, methodReason: check.reason };

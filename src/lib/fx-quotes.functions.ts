@@ -39,7 +39,7 @@ export type DealPricingView = {
 const QUOTE_MINUTES = 15;
 
 /** Currencies the buyer may pay in (C09-D19). Omitted = the buyer's country currency, else SAR. */
-export const PAY_CURRENCIES = ["SAR", "AED", "BHD", "KWD", "QAR", "OMR", "USD"] as const;
+export const PAY_CURRENCIES = ["BHD", "SAR", "AED", "KWD", "QAR", "OMR", "USD"] as const;
 const quoteInput = z.object({ dealId: z.string().uuid(), payCurrency: z.enum(PAY_CURRENCIES).optional(), method: z.enum(PAYMENT_METHODS).optional() });
 type QuoteInput = { dealId: string; payCurrency?: string | undefined; method?: string | undefined };
 

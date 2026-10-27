@@ -29,7 +29,7 @@ async function loadBands() {
   const { data, error } = await supabase
     .from("fee_rules")
     .select("id, label, amount_from, amount_to, percent, min_fee, max_fee, provisional")
-    .eq("currency", "USD")
+    .eq("currency", "BHD") // D-69: the live schedule is in Bahraini dinars
     .order("amount_from");
   if (error) throw error;
   return data ?? [];
@@ -37,11 +37,11 @@ async function loadBands() {
 
 function FeesPage() {
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ["usd-fee-bands"], queryFn: loadBands });
+  const q = useQuery({ queryKey: ["bhd-fee-bands"], queryFn: loadBands });
   const [bands, setBands] = useState<Band[]>([]);
-  const [minFee, setMinFee] = useState(15);
-  const [maxFee, setMaxFee] = useState<number | null>(3500);
-  const [test, setTest] = useState(1500);
+  const [minFee, setMinFee] = useState(6);
+  const [maxFee, setMaxFee] = useState<number | null>(1300);
+  const [test, setTest] = useState(4000);
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ function FeesPage() {
     }
   }, [q.data]);
 
-  const schedule: FeeSchedule = bands.length ? { currency: "USD", bands, minFee, maxFee } : PROVISIONAL_SCHEDULE;
+  const schedule: FeeSchedule = bands.length ? { currency: "BHD", bands, minFee, maxFee } : PROVISIONAL_SCHEDULE;
   const provisional = (q.data ?? []).some((r) => r.provisional);
   const patch = (id: string, changes: Partial<Band>) => setBands(bands.map((b) => (b.id === id ? { ...b, ...changes } : b)));
 
@@ -67,7 +67,7 @@ function FeesPage() {
       if (error) return setMsg(error.message);
     }
     setMsg("Saved. New quotes use these bands.");
-    qc.invalidateQueries({ queryKey: ["usd-fee-bands"] });
+    qc.invalidateQueries({ queryKey: ["bhd-fee-bands"] });
   }
 
   const fee = feeUsd(test, schedule);
@@ -79,10 +79,10 @@ function FeesPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold">
-                Platform fee bands (USD){provisional && <span className="ml-2 rounded-full bg-warning/15 px-2 py-0.5 text-xs text-warning">Provisional</span>}
+                Platform fee bands (BHD){provisional && <span className="ml-2 rounded-full bg-warning/15 px-2 py-0.5 text-xs text-warning">Provisional</span>}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Each band's percentage applies only to the part of the deal value inside that band, so the fee never falls as the value rises. The deal value is converted to USD at the quote's provider rate, and the fee is charged in the deal currency.
+                Each band's percentage applies only to the part of the deal value inside that band, so the fee never falls as the value rises. The deal value is converted to BHD at the quote's provider rate, and the fee is charged in the deal currency.
               </p>
             </div>
             <Button size="sm" onClick={save}>Save bands</Button>
@@ -93,8 +93,8 @@ function FeesPage() {
               <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-3 py-3 font-semibold">Band label</th>
-                  <th className="px-3 py-3 font-semibold">From (USD)</th>
-                  <th className="px-3 py-3 font-semibold">To (USD)</th>
+                  <th className="px-3 py-3 font-semibold">From (BHD)</th>
+                  <th className="px-3 py-3 font-semibold">To (BHD)</th>
                   <th className="px-3 py-3 font-semibold">Percent %</th>
                 </tr>
               </thead>
@@ -108,18 +108,18 @@ function FeesPage() {
                   </tr>
                 ))}
                 {bands.length === 0 && (
-                  <tr><td colSpan={4} className="px-3 py-4 text-muted-foreground">{q.isLoading ? "Loading…" : "No USD fee bands yet."}</td></tr>
+                  <tr><td colSpan={4} className="px-3 py-4 text-muted-foreground">{q.isLoading ? "Loading…" : "No BHD fee bands yet."}</td></tr>
                 )}
               </tbody>
             </table>
           </div>
           <div className="mt-4 grid max-w-md gap-3 sm:grid-cols-2">
             <div>
-              <Label htmlFor="minfee">Minimum fee (USD)</Label>
+              <Label htmlFor="minfee">Minimum fee (BHD)</Label>
               <Input id="minfee" type="number" value={minFee} onChange={(e) => setMinFee(Number(e.target.value))} />
             </div>
             <div>
-              <Label htmlFor="maxfee">Fee cap (USD)</Label>
+              <Label htmlFor="maxfee">Fee cap (BHD)</Label>
               <Input id="maxfee" type="number" value={maxFee ?? ""} placeholder="No cap" onChange={(e) => setMaxFee(e.target.value === "" ? null : Number(e.target.value))} />
             </div>
           </div>
@@ -129,10 +129,10 @@ function FeesPage() {
       <Card>
         <CardContent className="p-5">
           <h2 className="font-semibold">Try a deal value</h2>
-          <Label htmlFor="test" className="mt-3 block">Deal value (USD)</Label>
+          <Label htmlFor="test" className="mt-3 block">Deal value (BHD)</Label>
           <Input id="test" type="number" className="mt-1 max-w-xs" value={test} onChange={(e) => setTest(Number(e.target.value))} />
           <p className="mt-3 text-sm">
-            Fee <b dir="ltr">{formatMoney(fee, "USD")}</b> · effective rate {test > 0 ? ((fee / test) * 100).toFixed(2) : "0.00"}%
+            Fee <b dir="ltr">{formatMoney(fee, "BHD")}</b> · effective rate {test > 0 ? ((fee / test) * 100).toFixed(2) : "0.00"}%
           </p>
         </CardContent>
       </Card>

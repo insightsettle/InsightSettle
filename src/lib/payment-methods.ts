@@ -1,7 +1,7 @@
 /**
  * Payment methods and their effect on the Insight fee (founder decision D-66, 25 Oct 2026).
  *
- * - The USD 3,500 fee cap applies only to bank transfer, where the provider cost is a small flat amount.
+ * - The fee cap (BHD 1,300 since D-69; earlier USD 3,500) applies only to bank transfer, where the provider cost is a small flat amount.
  *   Card payments (mada, credit card) pay the full 2.5% with no cap, so a large card payment never costs
  *   Insight more than it earns.
  * - Credit cards are not offered above SAR 50,000.
@@ -62,7 +62,7 @@ export function checkMethod(method: PaymentMethod, amountSar: number, feeSar: nu
   const cost = routedCostSar === undefined ? providerCostSar(amountSar, method) : routedCostSar;
   const margin = amountSar > 0 && cost != null ? (feeSar - cost) / amountSar : 0;
   if (method === "credit_card" && amountSar > CREDIT_CARD_MAX_SAR)
-    return { method, allowed: false, feeSar, margin, reason: ["Credit cards are available up to SAR 50,000. Use a bank transfer or mada.", "البطاقة الائتمانية متاحة حتى 50,000 ريال. استخدم التحويل البنكي أو مدى."] };
+    return { method, allowed: false, feeSar, margin, reason: ["Credit cards are available up to about BHD 5,000 (SAR 50,000) per deal. Use a bank transfer or mada.", "البطاقة الائتمانية متاحة حتى نحو 5,000 دينار بحريني (50,000 ريال) للصفقة. استخدم التحويل البنكي أو مدى."] };
   if (cost == null || margin < MIN_MARGIN)
     return { method, allowed: false, feeSar, margin, reason: ["This payment method is not available for this amount. Choose another method.", "طريقة الدفع هذه غير متاحة لهذا المبلغ. اختر طريقة أخرى."] };
   return { method, allowed: true, feeSar, margin, reason: null };

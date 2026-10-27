@@ -6,16 +6,25 @@
 import { roundMoney } from "@/lib/money";
 
 export type FeeBand = { from: number; to: number | null; percent: number };
-export type FeeSchedule = { currency: "USD"; bands: FeeBand[]; minFee: number; maxFee: number | null };
+/** The schedule currency is the currency of the bands, the minimum and the cap. */
+export type FeeSchedule = { currency: "USD" | "BHD"; bands: FeeBand[]; minFee: number; maxFee: number | null };
 export type FeePayer = "buyer" | "seller" | "split";
 
-/** One flat Insight rate for every deal (founder decision D-64, 24 Oct 2026), live in fee_rules. Percent as a number, e.g. 2.5 = 2.5%. */
+/**
+ * One flat Insight rate for every deal (D-64, 24 Oct 2026), live in fee_rules. Percent as a number, e.g. 2.5 = 2.5%.
+ * Insight launches from Bahrain (D-69, 28 Oct 2026): the minimum and the cap are set in Bahraini dinars,
+ * BHD 6 and BHD 1,300 (rounded from the earlier USD 15 and USD 3,500). Deals in any currency are converted
+ * to BHD at the provider rate to apply them.
+ */
 export const PROVISIONAL_SCHEDULE: FeeSchedule = {
-  currency: "USD",
+  currency: "BHD",
   bands: [{ from: 0, to: null, percent: 2.5 }],
-  minFee: 15,
-  maxFee: 3_500,
+  minFee: 6,
+  maxFee: 1_300,
 };
+
+/** The earlier USD schedule (D-64 before D-69), kept for history and regression tests. */
+export const USD_SCHEDULE_D64: FeeSchedule = { currency: "USD", bands: [{ from: 0, to: null, percent: 2.5 }], minFee: 15, maxFee: 3_500 };
 
 /** The earlier marginal bands (C07 v0.3, D-48), kept only for history and regression tests. */
 export const BANDED_SCHEDULE_V03: FeeSchedule = {
@@ -47,7 +56,10 @@ export function normalizeCountry(country: string | null | undefined) {
   return c.length === 2 ? c : (COUNTRY_NAMES[c] ?? null);
 }
 
-/** Marginal band fee in USD: each band's percent applies only to the part inside it; then min and cap. */
+/**
+ * Marginal band fee in the schedule currency: each band's percent applies only to the part inside it; then min and cap.
+ * (Named feeUsd for history; the amount and the result are in schedule.currency.)
+ */
 export function feeUsd(amountUsd: number, schedule: FeeSchedule = PROVISIONAL_SCHEDULE) {
   let fee = 0;
   for (const b of [...schedule.bands].sort((a, z) => a.from - z.from)) {
@@ -62,7 +74,7 @@ export function feeUsd(amountUsd: number, schedule: FeeSchedule = PROVISIONAL_SC
 
 export type Override = { percent?: number | null; flat?: number | null };
 
-/** Fee in the deal currency. usdPerUnit = USD value of 1 unit of the deal currency (provider rate). */
+/** Fee in the deal currency. usdPerUnit = value of 1 unit of the deal currency in the schedule currency (provider rate); see basePerUnit in pricing.server. */
 export function dealFee(amount: number, currency: string, usdPerUnit: number, schedule = PROVISIONAL_SCHEDULE, override: Override = {}) {
   if (override.flat != null) return roundMoney(override.flat, currency);
   if (override.percent != null) return roundMoney((amount * override.percent) / 100, currency);
