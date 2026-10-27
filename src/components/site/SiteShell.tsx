@@ -230,10 +230,12 @@ function PublicMain({ children, className }: { children: React.ReactNode; classN
     }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
     const frame = requestAnimationFrame(() => {
       root.querySelectorAll("section").forEach((el) => {
-        if (el.classList.contains("sr")) return;
-        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return; // already visible: leave it alone
-        el.classList.add("sr");
-        io.observe(el);
+        if (el.classList.contains("sr-in")) return;
+        if (!el.classList.contains("sr")) {
+          if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return; // already visible: leave it alone
+          el.classList.add("sr");
+        }
+        io.observe(el); // a re-run (route change, dev double effect) re-observes anything still hidden
       });
     });
     return () => { cancelAnimationFrame(frame); io.disconnect(); };
