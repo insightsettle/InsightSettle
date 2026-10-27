@@ -23,7 +23,8 @@ export function PublicPricing() {
   const { data: initial } = useSuspenseQuery(publicPricingOptions);
   const calculate = useServerFn(publicPricing);
   const [result, setResult] = useState(initial);
-  const [amount, setAmount] = useState("");
+  // Start with the example amount already shown in the result, so the first click never hits an empty required field.
+  const [amount, setAmount] = useState(() => (initial.available && initial.breakdown ? String(initial.breakdown.amount) : ""));
   const [currency, setCurrency] = useState<typeof SUPPORTED_CURRENCIES[number]>("USD");
   const [payer, setPayer] = useState<FeePayer>("split");
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer");
