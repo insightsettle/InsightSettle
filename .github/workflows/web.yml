@@ -1,0 +1,32 @@
+name: Web app checks
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["mobile/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - name: Install
+        run: bun install --frozen-lockfile || bun install
+      - name: Typecheck
+        run: set -o pipefail; npx tsc --noEmit -p . 2>&1 | tee tsc.log
+      - name: Tests
+        run: set -o pipefail; npx vitest run --reporter=verbose 2>&1 | tee test.log
+      - name: Build
+        run: npx vite build 2>&1 | tail -40 | tee build.log
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Typecheck" >> $GITHUB_STEP_SUMMARY; (grep -c "error TS" tsc.log || true) >> $GITHUB_STEP_SUMMARY
+          echo "### Tests" >> $GITHUB_STEP_SUMMARY; grep -E "Test Files|Tests " test.log >> $GITHUB_STEP_SUMMARY || true
