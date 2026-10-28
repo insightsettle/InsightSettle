@@ -4,8 +4,8 @@
  * provider inside each deal. Wording avoids "balance" and "wallet" on purpose.
  * Pass builders prepare Apple Wallet / Google Wallet data; issuing needs the signing certificates later.
  */
-export type CardDeal = { id: string; amount: number; currency: string; status: string; buyer_id: string | null; seller_id: string | null };
-export type CardMilestone = { deal_id: string; amount: number; funded_at: string | null; status: string };
+export type CardDeal = { id: string; amount: number; currency: string; status: string; buyer_id: string | null; seller_id: string | null; retention_released_at?: string | null };
+export type CardMilestone = { deal_id: string; amount: number; funded_at: string | null; status: string; retention_amount?: number | null };
 export type CardRelease = { deal_id: string; amount: number; currency: string; created_at: string };
 export type CardTotals = { currency: string; heldForYourPurchases: number; awaitingYou: number; paidToYou12m: number };
 export type MemberCard = {
@@ -24,7 +24,12 @@ const round = (v: number, currency: string) => { const d = ["BHD", "KWD", "OMR"]
 /** Amount still held in a deal (deal currency). */
 export function heldInDeal(d: CardDeal, milestones: CardMilestone[], funded: boolean) {
   const ms = milestones.filter((m) => m.deal_id === d.id);
-  if (ms.length) return ms.filter((m) => m.funded_at && m.status !== "released" && m.status !== "refunded").reduce((a, m) => a + Number(m.amount), 0);
+  if (ms.length) {
+    const open = ms.filter((m) => m.funded_at && m.status !== "released" && m.status !== "refunded").reduce((a, m) => a + Number(m.amount), 0);
+    // Retention kept back from released milestones stays held in the deal until its period ends.
+    const retained = d.retention_released_at || d.status === "refunded" || d.status === "cancelled" ? 0 : ms.filter((m) => m.status === "released").reduce((a, m) => a + Number(m.retention_amount ?? 0), 0);
+    return open + retained;
+  }
   return funded && !TERMINAL.has(d.status) && d.status !== "pending_funding" ? Number(d.amount) : 0;
 }
 

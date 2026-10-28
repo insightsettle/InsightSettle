@@ -12,11 +12,11 @@ export const getMyCard = createServerFn({ method: "GET" })
     const uid = context.userId;
     const [{ data: p }, { data: deals }] = await Promise.all([
       db.from("profiles").select("full_name, verification_status, created_at").eq("id", uid).maybeSingle(),
-      db.from("deals").select("id, amount, currency, status, buyer_id, seller_id").or(`buyer_id.eq.${uid},seller_id.eq.${uid}`).limit(2000),
+      db.from("deals").select("id, amount, currency, status, buyer_id, seller_id, retention_released_at").or(`buyer_id.eq.${uid},seller_id.eq.${uid}`).limit(2000),
     ]);
     const ids = (deals ?? []).map((d: any) => d.id);
     const [{ data: ms }, { data: tx }] = ids.length ? await Promise.all([
-      db.from("deal_milestones").select("deal_id, amount, funded_at, status").in("deal_id", ids),
+      db.from("deal_milestones").select("deal_id, amount, funded_at, status, retention_amount").in("deal_id", ids),
       db.from("deal_transactions").select("deal_id, kind, status, amount, currency, created_at").in("deal_id", ids).eq("status", "succeeded").in("kind", ["funding", "release"]),
     ]) : [{ data: [] }, { data: [] }];
     return buildCard({
