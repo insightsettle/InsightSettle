@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../api.dart';
 import '../l10n.dart';
 import '../models.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/illustrations.dart';
 import 'deal_detail.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -43,12 +45,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ]),
               const SizedBox(height: 8),
               if (list.isEmpty)
-                Padding(padding: const EdgeInsets.all(32), child: Center(child: Text(tr('No notifications yet.')))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Column(children: [
+                    const Illustration(Ill.calm, width: 200),
+                    const SizedBox(height: 8),
+                    Text(tr('No notifications yet.'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(tr('We will tell you here the moment your deal moves.'), textAlign: TextAlign.center, style: const TextStyle(color: InsightColors.muted)),
+                  ]),
+                ),
               for (final n in list)
                 Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
-                    leading: Icon(n.read ? Icons.notifications_none : Icons.notifications_active, color: n.read ? InsightColors.muted : InsightColors.primary),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(color: n.read ? InsightColors.background : InsightColors.primarySubtle, borderRadius: BorderRadius.circular(12)),
+                      child: Center(child: PhosphorIcon(n.read ? PhosphorIconsDuotone.bellSimple : PhosphorIconsDuotone.bellRinging, size: 21, color: n.read ? InsightColors.muted : InsightColors.primary, duotoneSecondaryOpacity: 0.3)),
+                    ),
                     title: Text(tr(n.title), style: TextStyle(fontWeight: n.read ? FontWeight.w400 : FontWeight.w700)),
                     subtitle: n.body == null ? null : Text(tr(n.body!)),
                     trailing: Text(_ago(n.createdAt), style: const TextStyle(fontSize: 11, color: InsightColors.muted)),

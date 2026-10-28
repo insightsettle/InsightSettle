@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -7,6 +8,7 @@ import '../config.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/illustrations.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -70,8 +72,10 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Center(child: BrandLogo(height: 56)),
-                    const SizedBox(height: 28),
+                    const Center(child: BrandLogo(height: 52)),
+                    const SizedBox(height: 8),
+                    const Center(child: Illustration(Ill.held, width: 230)),
+                    const SizedBox(height: 8),
                     Text(tr('Sign in'), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     Text(tr('Clear rules for deals between people and businesses across the Gulf.'),
@@ -82,7 +86,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       keyboardType: TextInputType.emailAddress,
                       textDirection: TextDirection.ltr,
                       autofillHints: const [AutofillHints.email],
-                      decoration: InputDecoration(labelText: tr('Email')),
+                      decoration: InputDecoration(labelText: tr('Email'), prefixIcon: const PhosphorIcon(PhosphorIconsDuotone.envelopeSimple, color: InsightColors.primary)),
                     ),
                     const SizedBox(height: 12),
                     TextField(
@@ -90,7 +94,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       obscureText: true,
                       textDirection: TextDirection.ltr,
                       autofillHints: const [AutofillHints.password],
-                      decoration: InputDecoration(labelText: tr('Password')),
+                      decoration: InputDecoration(labelText: tr('Password'), prefixIcon: const PhosphorIcon(PhosphorIconsDuotone.lockKey, color: InsightColors.primary)),
                       onSubmitted: (_) => _busy ? null : _signIn(),
                     ),
                     if (_error != null) ...[

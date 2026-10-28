@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
@@ -11,8 +12,11 @@ import '../l10n.dart';
 import '../models.dart';
 import '../money.dart';
 import '../theme.dart';
+import '../widgets/celebrate.dart';
 import '../widgets/common.dart';
 import '../widgets/dialogs.dart';
+import '../widgets/illustrations.dart';
+import '../widgets/journey.dart';
 
 const kPayCurrencies = ['SAR', 'AED', 'BHD', 'KWD', 'QAR', 'OMR', 'USD'];
 
@@ -29,6 +33,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
   FxQuote? _quote;
   String? _payCurrency;
   Timer? _tick;
+  String _dealType = 'goods';
 
   @override
   void initState() {
@@ -58,11 +63,16 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
       if (!mounted) return;
       if (result is Map && result['ok'] == false) {
         showMessage(context, tr(result['message']?.toString() ?? 'The action could not be completed.'), error: true);
-      } else {
+        if (reload) _reload();
+        return;
+      }
+      final moment = _moment(action, body);
+      if (moment == null) {
         final msg = result is Map && result['message'] is String ? tr(result['message'] as String) : (done ?? tr('Done.'));
         showMessage(context, msg);
       }
       if (reload) _reload();
+      if (moment != null) await moment();
     } on ApiException catch (e) {
       if (mounted) showMessage(context, tr(e.message), error: true);
     } catch (_) {
@@ -70,6 +80,20 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// The big steps of a deal get a full-screen moment instead of a snackbar (same moments as the website).
+  Future<void> Function()? _moment(String action, Map<String, dynamic> body) {
+    final t = _dealType;
+    return switch (action) {
+      'accept-terms' => () => celebrate(context, art: Ill.agree, title: tr('Terms accepted'), body: partyText('Next, the {payer} pays into the deal. Nothing reaches the other party before delivery.', t), confetti: false),
+      'fund' when body['simulateDecline'] != true =>
+        () => celebrate(context, art: Ill.held, title: tr('Your money is in the deal'), body: tr('It stays held until delivery is received and checked. Demo: no real money moves.')),
+      'confirm-delivery' => () => celebrate(context, art: Ill.deliver, title: tr('Delivery confirmed'), body: partyText("The {payer}'s inspection period starts now.", t), confetti: false),
+      'approve-milestone' => () => celebrate(context, art: Ill.release, title: tr('Milestone approved'), body: partyText('The milestone amount less retention is released {payeeTo}.', t)),
+      'release' => () => celebrate(context, art: Ill.release, title: tr('Deal complete'), body: partyText('The payment is on its way {payeeTo}. Thank you for dealing with trust.', t)),
+      _ => null,
+    };
   }
 
   Future<void> _getQuote(Deal d, Pricing? p) async {
@@ -112,6 +136,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
 
   List<Widget> _content(DealBundle b) {
     final d = b.deal;
+    _dealType = d.dealType;
     final uid = currentUserId;
     final isBuyer = d.buyerId == uid;
     final actions = dealActions(d, b.milestones, uid);
@@ -119,15 +144,27 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
     final gap = const SizedBox(height: 14);
     return [
       // Header
-      UserText(d.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-      const SizedBox(height: 8),
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [InsightColors.brand1, InsightColors.primary], begin: AlignmentDirectional.topStart, end: AlignmentDirectional.bottomEnd),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Center(child: PhosphorIcon(dealTypeIcon(d.dealType), size: 26, color: Colors.white, duotoneSecondaryOpacity: 0.35)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: UserText(d.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700))),
+      ]),
+      const SizedBox(height: 10),
       Align(alignment: AlignmentDirectional.centerStart, child: StatusBadge(d.status)),
       const SizedBox(height: 6),
       Text('${dealTypeLabel(d.dealType)} · ${partyText(isBuyer ? 'You are the {payer}' : 'You are the {payee}', d.dealType)}',
           style: const TextStyle(color: InsightColors.muted)),
       if (d.description.isNotEmpty) ...[const SizedBox(height: 8), UserText(d.description)],
       gap,
-      _Stepper(deal: d),
+      DealJourney(deal: d),
       gap,
       if (d.frozen)
         _banner(tr('This deal is on hold by Insight. Contact Insight support.'), InsightColors.dangerSubtle, InsightColors.danger),
@@ -141,7 +178,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
         _banner('${tr('Next step')}: ${partyText(nextStep(d, b.milestones, uid)!, d.dealType)}', InsightColors.primarySubtle, InsightColors.primary),
       ],
       // Amount summary
-      SectionCard(title: tr('Amount summary'), icon: Icons.account_balance_wallet_outlined, children: [
+      SectionCard(title: tr('Amount summary'), icon: PhosphorIconsDuotone.wallet, children: [
         const CustodyNote(),
         const SizedBox(height: 8),
         InfoRow(tr('Deal amount'), formatMoney(d.amount, d.currency), strong: true),
@@ -174,7 +211,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
       // Invite link for the creator while the other party has not joined
       if (!d.bothJoined && d.inviteToken != null && d.createdBy == uid) ...[_invite(d), gap],
       // Actions
-      SectionCard(title: tr('Deal actions'), icon: Icons.bolt_outlined, children: [
+      SectionCard(title: tr('Deal actions'), icon: PhosphorIconsDuotone.lightning, children: [
         if (actions.isEmpty && b.milestones.every((m) => milestoneActions(d, m, uid).isEmpty))
           Text(tr('No action is needed from you right now.'), style: const TextStyle(color: InsightColors.muted)),
         if (actions.contains(DealAction.fund)) _funding(b),
@@ -213,7 +250,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
             style: const TextStyle(fontSize: 12, color: InsightColors.muted)),
         const SizedBox(height: 10),
         FilledButton.icon(
-          icon: const Icon(Icons.account_balance_wallet),
+          icon: const PhosphorIcon(PhosphorIconsBold.lockSimple, size: 20),
           label: Text(next != null ? trf('Fund milestone {n}', {'n': next.seq}) : tr('Fund the deal')),
           onPressed: _busy ? null : () => _run('fund', {'dealId': d.id, 'quoteId': q.id}),
         ),
@@ -304,7 +341,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
         );
       case DealAction.openDispute:
         return TextButton.icon(
-          icon: const Icon(Icons.report_gmailerrorred, color: InsightColors.danger),
+          icon: const PhosphorIcon(PhosphorIconsBold.warningCircle, color: InsightColors.danger, size: 20),
           label: Text(tr('Open a dispute'), style: const TextStyle(color: InsightColors.danger)),
           onPressed: _busy
               ? null
@@ -323,7 +360,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
     final uid = currentUserId;
     return SectionCard(
       title: tr('Milestones'),
-      icon: Icons.flag_outlined,
+      icon: PhosphorIconsDuotone.flag,
       trailing: d.retentionPercent > 0 ? Text('${tr('Retention')} ${d.retentionPercent.toStringAsFixed(d.retentionPercent % 1 == 0 ? 0 : 1)}%', style: const TextStyle(fontSize: 12, color: InsightColors.muted)) : null,
       children: [
         for (final m in b.milestones)
@@ -403,7 +440,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
     }
   }
 
-  Widget _shipping(Deal d) => SectionCard(title: tr('Shipping & delivery'), icon: Icons.local_shipping_outlined, children: [
+  Widget _shipping(Deal d) => SectionCard(title: tr('Shipping & delivery'), icon: PhosphorIconsDuotone.truck, children: [
         InfoRow(tr('Status'), tr(_shippingLabel(d.shippingStatus)), ltr: false),
         if (d.shippingCarrier != null) InfoRow(tr('Carrier'), d.shippingCarrier!),
         if (d.shippingTracking != null) InfoRow(tr('Tracking'), d.shippingTracking!),
@@ -411,13 +448,13 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
 
   Widget _invite(Deal d) {
     final link = '${AppConfig.siteUrl}/invite/${d.inviteToken}';
-    return SectionCard(title: tr('Invite the other party'), icon: Icons.link, children: [
+    return SectionCard(title: tr('Invite the other party'), icon: PhosphorIconsDuotone.linkSimple, children: [
       Text(tr('Share this link so the other party can review and accept the terms.'), style: const TextStyle(color: InsightColors.muted)),
       const SizedBox(height: 8),
       SelectableText(link, textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 13)),
       const SizedBox(height: 8),
       OutlinedButton.icon(
-        icon: const Icon(Icons.copy),
+        icon: const PhosphorIcon(PhosphorIconsBold.copy, size: 20),
         label: Text(tr('Copy link')),
         onPressed: () async {
           await Clipboard.setData(ClipboardData(text: link));
@@ -429,7 +466,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
 
   Widget _invoices(DealBundle b) => SectionCard(
         title: b.invoices.length > 1 ? tr('Tax invoices') : tr('Tax invoice'),
-        icon: Icons.receipt_long_outlined,
+        icon: PhosphorIconsDuotone.receipt,
         children: [
           for (final i in b.invoices)
             InfoRow(
@@ -443,7 +480,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
         ],
       );
 
-  Widget _money(DealBundle b) => SectionCard(title: tr('Money movements'), icon: Icons.swap_horiz, children: [
+  Widget _money(DealBundle b) => SectionCard(title: tr('Money movements'), icon: PhosphorIconsDuotone.arrowsLeftRight, children: [
         for (final t in b.transactions)
           InfoRow(
             '${tr(_txLabel(t.kind))} · ${tr(_txStatus(t.status))}',
@@ -451,12 +488,12 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
           ),
       ]);
 
-  Widget _timeline(DealBundle b) => SectionCard(title: tr('Deal history'), icon: Icons.history, children: [
+  Widget _timeline(DealBundle b) => SectionCard(title: tr('Deal history'), icon: PhosphorIconsDuotone.clockCounterClockwise, children: [
         for (final e in b.events.take(15))
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Padding(padding: EdgeInsets.only(top: 6), child: Icon(Icons.circle, size: 8, color: InsightColors.primary)),
+              const Padding(padding: EdgeInsets.only(top: 5), child: PhosphorIcon(PhosphorIconsFill.circle, size: 9, color: InsightColors.brand1)),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -469,43 +506,6 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
             ]),
           ),
       ]);
-}
-
-/// Five-step progress (Agree → Fund → Deliver → Inspect → Release), as on the website.
-class _Stepper extends StatelessWidget {
-  const _Stepper({required this.deal});
-  final Deal deal;
-
-  int get _step {
-    final s = deal.status;
-    if (s == 'pending_funding') return deal.termsStatus == 'agreed' ? 1 : 0;
-    if (s == 'held' || s == 'in_progress') return 2;
-    if (s == 'delivered' || s == 'under_review' || s == 'disputed') return 3;
-    return 5;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final labels = [tr('Terms accepted'), tr('Funded'), tr('Delivered'), tr('Inspection'), tr('Released')];
-    final step = _step;
-    return Row(children: [
-      for (var i = 0; i < labels.length; i++)
-        Expanded(
-          child: Column(children: [
-            Container(
-              height: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                color: i < step ? InsightColors.primary : (i == step ? InsightColors.brand1 : InsightColors.border),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(labels[i], textAlign: TextAlign.center, style: TextStyle(fontSize: 10.5, color: i <= step ? InsightColors.ink : InsightColors.muted)),
-          ]),
-        ),
-    ]);
-  }
 }
 
 String _shippingLabel(String? s) => switch (s) {

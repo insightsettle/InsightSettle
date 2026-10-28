@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../api.dart';
 import '../deal_rules.dart';
@@ -7,11 +8,14 @@ import '../models.dart';
 import '../money.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/illustrations.dart';
+import '../widgets/journey.dart';
 import 'account.dart';
 import 'deal_detail.dart';
 import 'join_deal.dart';
 import 'new_deal.dart';
 import 'notifications.dart';
+import 'welcome.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -24,6 +28,34 @@ class _HomeShellState extends State<HomeShell> {
   final _dealsKey = GlobalKey<DealsScreenState>();
 
   @override
+  void initState() {
+    super.initState();
+    // The story is shown once, after the first sign-in on this device.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (await welcomeSeen()) return;
+      if (!mounted) return;
+      final choice = await Navigator.of(context).push<WelcomeChoice>(
+        PageRouteBuilder(
+          fullscreenDialog: true,
+          transitionDuration: const Duration(milliseconds: 380),
+          pageBuilder: (_, __, ___) => const WelcomeScreen(),
+          transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: a, child: child),
+        ),
+      );
+      await markWelcomeSeen();
+      if (choice == WelcomeChoice.newDeal && mounted) await _newDeal();
+    });
+  }
+
+  Future<void> _newDeal() async {
+    final ref = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const NewDealScreen()));
+    if (ref != null && mounted) {
+      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => DealDetailScreen(dealRef: ref)));
+    }
+    _dealsKey.currentState?.reload();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final pages = [DealsScreen(key: _dealsKey), const NotificationsScreen(), const AccountScreen()];
     return Scaffold(
@@ -33,7 +65,7 @@ class _HomeShellState extends State<HomeShell> {
           if (_tab == 0)
             IconButton(
               tooltip: tr('Join a deal'),
-              icon: const Icon(Icons.link),
+              icon: const PhosphorIcon(PhosphorIconsBold.linkSimple),
               onPressed: () async {
                 final ref = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const JoinDealScreen()));
                 if (ref != null && context.mounted) {
@@ -49,24 +81,18 @@ class _HomeShellState extends State<HomeShell> {
           ? FloatingActionButton.extended(
               backgroundColor: InsightColors.primary,
               foregroundColor: Colors.white,
-              icon: const Icon(Icons.add),
+              icon: const PhosphorIcon(PhosphorIconsBold.plus),
               label: Text(tr('New deal')),
-              onPressed: () async {
-                final ref = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const NewDealScreen()));
-                if (ref != null && context.mounted) {
-                  await Navigator.of(context).push(MaterialPageRoute(builder: (_) => DealDetailScreen(dealRef: ref)));
-                }
-                _dealsKey.currentState?.reload();
-              },
+              onPressed: _newDeal,
             )
           : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),
         destinations: [
-          NavigationDestination(icon: const Icon(Icons.handshake_outlined), selectedIcon: const Icon(Icons.handshake), label: tr('Deals')),
-          NavigationDestination(icon: const Icon(Icons.notifications_none), selectedIcon: const Icon(Icons.notifications), label: tr('Notifications')),
-          NavigationDestination(icon: const Icon(Icons.person_outline), selectedIcon: const Icon(Icons.person), label: tr('Account')),
+          NavigationDestination(icon: const PhosphorIcon(PhosphorIconsRegular.handshake), selectedIcon: const PhosphorIcon(PhosphorIconsDuotone.handshake, duotoneSecondaryOpacity: 0.3), label: tr('Deals')),
+          NavigationDestination(icon: const PhosphorIcon(PhosphorIconsRegular.bell), selectedIcon: const PhosphorIcon(PhosphorIconsDuotone.bell, duotoneSecondaryOpacity: 0.3), label: tr('Notifications')),
+          NavigationDestination(icon: const PhosphorIcon(PhosphorIconsRegular.userCircle), selectedIcon: const PhosphorIcon(PhosphorIconsDuotone.userCircle, duotoneSecondaryOpacity: 0.3), label: tr('Account')),
         ],
       ),
     );
@@ -95,24 +121,26 @@ class DealsScreenState extends State<DealsScreen> {
     return FutureBuilder<(List<Deal>, Map<String, List<Milestone>>)>(
       future: _future,
       builder: (context, snap) {
-        if (snap.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
+        if (snap.connectionState != ConnectionState.done) return const Padding(padding: EdgeInsets.all(16), child: ListSkeleton());
         if (snap.hasError) return ErrorView(message: tr('The deals could not be loaded.'), onRetry: reload);
         final (deals, ms) = snap.data!;
         final uid = currentUserId;
         final action = deals.where((d) => needsMyAction(d, ms[d.id] ?? const [], uid)).toList();
         final open = deals.where((d) => !isClosed(d) && !action.contains(d)).toList();
         final closed = deals.where(isClosed).toList();
+        var n = 0; // order of appearance, for the staggered entrance
+        Widget enter(Widget child) => Appear(index: n++, child: child);
         return RefreshIndicator(
           onRefresh: () async => reload(),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
-              const CustodyNote(),
+              enter(const CustodyNote()),
               const SizedBox(height: 16),
-              if (deals.isEmpty) _empty(context),
-              if (action.isNotEmpty) ..._section(tr('Needs your action'), action, ms, highlight: true),
-              if (open.isNotEmpty) ..._section(tr('Active deals'), open, ms),
-              if (closed.isNotEmpty) ..._section(tr('Closed deals'), closed, ms),
+              if (deals.isEmpty) enter(_empty(context)),
+              if (action.isNotEmpty) ..._section(tr('Needs your action'), action, ms, enter, highlight: true),
+              if (open.isNotEmpty) ..._section(tr('Active deals'), open, ms, enter),
+              if (closed.isNotEmpty) ..._section(tr('Closed deals'), closed, ms, enter),
             ],
           ),
         );
@@ -121,10 +149,10 @@ class DealsScreenState extends State<DealsScreen> {
   }
 
   Widget _empty(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 48),
+        padding: const EdgeInsets.symmetric(vertical: 24),
         child: Column(children: [
-          const Icon(Icons.handshake_outlined, size: 48, color: InsightColors.muted),
-          const SizedBox(height: 12),
+          const Illustration(Ill.empty, width: 220),
+          const SizedBox(height: 8),
           Text(tr('No deals yet'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Text(tr('Create a deal or join one with the invitation link you received.'),
@@ -132,20 +160,29 @@ class DealsScreenState extends State<DealsScreen> {
         ]),
       );
 
-  List<Widget> _section(String title, List<Deal> deals, Map<String, List<Milestone>> ms, {bool highlight = false}) => [
-        Padding(
+  List<Widget> _section(String title, List<Deal> deals, Map<String, List<Milestone>> ms, Widget Function(Widget) enter, {bool highlight = false}) => [
+        enter(Padding(
           padding: const EdgeInsets.only(bottom: 8, top: 4),
-          child: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: highlight ? InsightColors.primary : InsightColors.ink)),
-        ),
+          child: Row(children: [
+            if (highlight) ...[const PhosphorIcon(PhosphorIconsDuotone.bellRinging, size: 18, color: InsightColors.primary), const SizedBox(width: 6)],
+            Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: highlight ? InsightColors.primary : InsightColors.ink)),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+              decoration: BoxDecoration(color: highlight ? InsightColors.primary : InsightColors.border, borderRadius: BorderRadius.circular(99)),
+              child: Text('${deals.length}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: highlight ? Colors.white : InsightColors.muted)),
+            ),
+          ]),
+        )),
         for (final d in deals) ...[
-          DealCard(
+          enter(DealCard(
             deal: d,
             next: nextStep(d, ms[d.id] ?? const [], currentUserId),
             onTap: () async {
               await Navigator.of(context).push(MaterialPageRoute(builder: (_) => DealDetailScreen(dealRef: d.ref)));
               reload();
             },
-          ),
+          )),
           const SizedBox(height: 10),
         ],
         const SizedBox(height: 8),
@@ -161,19 +198,26 @@ class DealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isBuyer = deal.buyerId == currentUserId;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
+    return Pressable(
+      onTap: onTap,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(color: InsightColors.primarySubtle, borderRadius: BorderRadius.circular(12)),
+                child: Center(child: PhosphorIcon(dealTypeIcon(deal.dealType), size: 22, color: InsightColors.primary, duotoneSecondaryOpacity: 0.3)),
+              ),
+              const SizedBox(width: 10),
               Expanded(child: UserText(deal.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15))),
               const SizedBox(width: 8),
               StatusBadge(deal.status),
             ]),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text('${deal.ref} · ${dealTypeLabel(deal.dealType)} · ${partyText(isBuyer ? 'You are the {payer}' : 'You are the {payee}', deal.dealType)}',
                 style: const TextStyle(color: InsightColors.muted, fontSize: 12.5)),
             const SizedBox(height: 10),
@@ -185,6 +229,8 @@ class DealCard extends StatelessWidget {
               ),
               Text(formatMoney(deal.amount, deal.currency), textDirection: TextDirection.ltr, style: const TextStyle(fontWeight: FontWeight.w700)),
             ]),
+            const SizedBox(height: 10),
+            MiniJourney(deal: deal),
           ]),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter/services.dart';
 
 import '../api.dart';
@@ -152,8 +153,8 @@ class _NewDealScreenState extends State<NewDealScreen> {
         child: ListView(padding: const EdgeInsets.all(16), children: [
           SegmentedButton<String>(
             segments: [
-              ButtonSegment(value: 'goods', label: Text(tr('Goods')), icon: const Icon(Icons.inventory_2_outlined)),
-              ButtonSegment(value: 'services', label: Text(tr('Services')), icon: const Icon(Icons.design_services_outlined)),
+              ButtonSegment(value: 'goods', label: Text(tr('Goods')), icon: const PhosphorIcon(PhosphorIconsDuotone.package, size: 20)),
+              ButtonSegment(value: 'services', label: Text(tr('Services')), icon: const PhosphorIcon(PhosphorIconsDuotone.briefcase, size: 20)),
             ],
             selected: {_type},
             onSelectionChanged: (s) => setState(() {
@@ -252,7 +253,7 @@ class _NewDealScreenState extends State<NewDealScreen> {
                     IconButton(
                       tooltip: tr('Remove milestone'),
                       onPressed: _rows.length <= 2 ? null : () => setState(() => _rows.removeAt(i)),
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const PhosphorIcon(PhosphorIconsBold.trash, size: 20),
                     ),
                   ]),
                 ),
@@ -260,7 +261,7 @@ class _NewDealScreenState extends State<NewDealScreen> {
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton.icon(
                   onPressed: _rows.length >= 20 ? null : () => setState(() => _rows.add(_MilestoneRow())),
-                  icon: const Icon(Icons.add),
+                  icon: const PhosphorIcon(PhosphorIconsBold.plus, size: 20),
                   label: Text(tr('Add milestone')),
                 ),
               ),

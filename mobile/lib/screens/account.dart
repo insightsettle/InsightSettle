@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
@@ -30,7 +31,7 @@ class _AccountScreenState extends State<AccountScreen> {
             final verified = p?['verification_status'] == 'verified';
             return Card(
               child: ListTile(
-                leading: const CircleAvatar(backgroundColor: InsightColors.primarySubtle, child: Icon(Icons.person, color: InsightColors.primary)),
+                leading: const CircleAvatar(backgroundColor: InsightColors.primarySubtle, child: PhosphorIcon(PhosphorIconsDuotone.user, color: InsightColors.primary, duotoneSecondaryOpacity: 0.3)),
                 title: Text((p?['full_name'] as String?)?.isNotEmpty == true ? p!['full_name'] as String : email),
                 subtitle: Text(email, textDirection: TextDirection.ltr),
                 trailing: Text(verified ? tr('Verified') : tr('Not verified yet'),
@@ -43,7 +44,7 @@ class _AccountScreenState extends State<AccountScreen> {
         Card(
           child: Column(children: [
             ListTile(
-              leading: const Icon(Icons.translate),
+              leading: const PhosphorIcon(PhosphorIconsDuotone.translate, color: InsightColors.primary),
               title: Text(tr('Language')),
               trailing: SegmentedButton<String>(
                 segments: const [ButtonSegment(value: 'ar', label: Text('العربية')), ButtonSegment(value: 'en', label: Text('English'))],
@@ -53,35 +54,35 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.verified_user_outlined),
+              leading: const PhosphorIcon(PhosphorIconsDuotone.identificationCard, color: InsightColors.primary),
               title: Text(tr('Identity and payout account')),
               subtitle: Text(tr('Managed on the website')),
-              trailing: const Icon(Icons.open_in_new, size: 18),
+              trailing: const PhosphorIcon(PhosphorIconsBold.arrowSquareOut, size: 18, color: InsightColors.muted),
               onTap: () => _open('/verification'),
             ),
             ListTile(
-              leading: const Icon(Icons.help_outline),
+              leading: const PhosphorIcon(PhosphorIconsDuotone.question, color: InsightColors.primary),
               title: Text(tr('Help')),
-              trailing: const Icon(Icons.open_in_new, size: 18),
+              trailing: const PhosphorIcon(PhosphorIconsBold.arrowSquareOut, size: 18, color: InsightColors.muted),
               onTap: () => _open('/help'),
             ),
             ListTile(
-              leading: const Icon(Icons.description_outlined),
+              leading: const PhosphorIcon(PhosphorIconsDuotone.fileText, color: InsightColors.primary),
               title: Text(tr('Terms of service')),
-              trailing: const Icon(Icons.open_in_new, size: 18),
+              trailing: const PhosphorIcon(PhosphorIconsBold.arrowSquareOut, size: 18, color: InsightColors.muted),
               onTap: () => _open('/terms'),
             ),
             ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined),
+              leading: const PhosphorIcon(PhosphorIconsDuotone.shieldCheck, color: InsightColors.primary),
               title: Text(tr('Privacy policy')),
-              trailing: const Icon(Icons.open_in_new, size: 18),
+              trailing: const PhosphorIcon(PhosphorIconsBold.arrowSquareOut, size: 18, color: InsightColors.muted),
               onTap: () => _open('/privacy'),
             ),
           ]),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
-          icon: const Icon(Icons.logout, color: InsightColors.danger),
+          icon: const PhosphorIcon(PhosphorIconsBold.signOut, color: InsightColors.danger, size: 20),
           label: Text(tr('Sign out'), style: const TextStyle(color: InsightColors.danger)),
           onPressed: () => sb.auth.signOut(),
         ),
