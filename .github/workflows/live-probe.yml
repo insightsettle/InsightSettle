@@ -1,0 +1,20 @@
+name: Live site probe
+
+# Manual check that the published site answers (status and time per page), run from GitHub's network.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe pages
+        run: |
+          for p in / /auth /pricing /faq /help /how-it-works /welcome /robots.txt; do
+            r=$(curl -sS -m 45 -o /tmp/body -w "%{http_code} %{time_total}s %{size_download}B" "https://insightsettle.com$p" 2>&1 || true)
+            echo "::notice title=$p::$r $(head -c 160 /tmp/body 2>/dev/null | tr '\n' ' ' | sed 's/[<>]//g')"
+          done
