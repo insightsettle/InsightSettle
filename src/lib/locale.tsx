@@ -7,6 +7,18 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "Auction lot": "قطعة مزاد",
+  "Your auction offer is ready": "عرض المزاد جاهز لك",
+  "Pay within 24 hours to secure the lot. If you do not pay, the offer moves to the next bidder.": "ادفع خلال 24 ساعة لتثبيت القطعة. إن لم تدفع، ينتقل العرض للمزايد التالي.",
+  "Auction offer sent": "أُرسل عرض المزاد",
+  "Offer sent to the winning bidder. They have 24 hours to pay.": "أُرسل العرض للفائز، ولديه 24 ساعة للدفع.",
+  "Offer moved to the next backup bidder. They have 24 hours to pay.": "انتقل العرض للمزايد الاحتياطي التالي، ولديه 24 ساعة للدفع.",
+  "Auction offer ended": "انتهى عرض المزاد",
+  "The bidder declined. No payment was charged.": "رفض المزايد العرض، ولم يُخصم أي مبلغ.",
+  "The payment time ran out. No payment was charged.": "انتهت مهلة الدفع، ولم يُخصم أي مبلغ.",
+  "Your auction offer ended": "انتهى عرض المزاد الخاص بك",
+  "No payment charged.": "لم يُخصم أي مبلغ.",
+  "Auction lot unsold": "لم تُبع قطعة المزاد",
   "Item not received": "لم يصل المنتج",
   "Wrong item": "منتج غير المتفق عليه",
   "Damaged item": "منتج تالف",
