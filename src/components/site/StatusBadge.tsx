@@ -12,14 +12,14 @@ const toneClass = {
   gold: "bg-gold-subtle text-gold-foreground",
 };
 const statusTones: Record<string, keyof typeof toneClass> = {
-  released: "success", completed: "success", resolved: "success", refunded: "neutral",
+  released: "success", completed: "success", resolved: "success", supplier_notified: "warning", evidence_required: "warning", refunded: "neutral",
   pending_acceptance: "warning", pending_funding: "warning", awaiting_action: "warning", under_review: "warning", partially_refunded: "warning",
   disputed: "danger", failed: "danger", rejected: "danger",
   shipped: "info", delivered: "info", in_inspection: "info", in_progress: "info",
   draft: "neutral", cancelled: "neutral", held: "brand", milestones: "gold", auctions: "gold",
 };
-const additionalLabels: Record<string, string> = { pending_acceptance: "Pending acceptance", awaiting_action: "Awaiting action", shipped: "Shipped", in_inspection: "In inspection", draft: "Draft", failed: "Failed", milestones: "Milestones", auctions: "Auctions", resolved: "Resolved", open: "Open", responded: "Responded" };
-const extraArabic: Record<string, string> = { pending_acceptance: "بانتظار القبول", awaiting_action: "بانتظار إجراء", shipped: "تم الشحن", in_inspection: "قيد الفحص", draft: "مسودة", failed: "فشل", milestones: "مراحل", auctions: "مزادات", resolved: "حُسم", open: "مفتوح", responded: "تم الرد" };
+const additionalLabels: Record<string, string> = { pending_acceptance: "Pending acceptance", awaiting_action: "Awaiting action", shipped: "Shipped", in_inspection: "In inspection", draft: "Draft", failed: "Failed", milestones: "Milestones", auctions: "Auctions", resolved: "Resolved", open: "Open", responded: "Responded", supplier_notified: "Seller notified", evidence_required: "Evidence requested" };
+const extraArabic: Record<string, string> = { pending_acceptance: "بانتظار القبول", awaiting_action: "بانتظار إجراء", shipped: "تم الشحن", in_inspection: "قيد الفحص", draft: "مسودة", failed: "فشل", milestones: "مراحل", auctions: "مزادات", resolved: "حُسم", open: "مفتوح", responded: "تم الرد", supplier_notified: "أُبلغ البائع", evidence_required: "مطلوب إثبات" };
 const arabicLabels: Record<DealStatus, string> = {
   pending_funding: "بانتظار الدفع", held: "المبلغ محفوظ", delivered: "تم التسليم", under_review: "قيد المراجعة", released: "تم التحويل للمورد", refunded: "تم الاسترداد", disputed: "متنازع عليها", in_progress: "قيد التنفيذ", completed: "مكتملة", cancelled: "ملغاة", rejected: "مرفوضة", partially_refunded: "مستردة جزئياً",
 };
