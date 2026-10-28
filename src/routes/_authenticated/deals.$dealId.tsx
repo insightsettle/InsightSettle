@@ -819,14 +819,14 @@ function OrdinaryDealPage() {
                   <h2 className="font-bold">{text("Payment records")}</h2>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Funding, payouts, and refunds with the exact status both parties can see.
+                  {text("Funding, payouts, and refunds with the exact status both parties can see.", "الدفع والتحويلات والاستردادات بالحالة نفسها التي يراها الطرفان.")}
                 </p>
                 <div className="mt-4 space-y-3">
                   {(transactions.data ?? []).map((t) => (
                     <div key={t.id} className="rounded-md border border-border p-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-sm font-semibold capitalize">
-                          {t.kind} · <bdi dir="ltr">{money(t.amount, t.currency)}</bdi>
+                        <p className="text-sm font-semibold">
+                          {({ funding: text("Payment", "دفع"), release: text("Payout", "تحويل للبائع"), refund: text("Refund", "استرداد للمشتري"), partial_refund: text("Partial refund", "استرداد جزئي") } as Record<string, string>)[t.kind] ?? t.kind} · <bdi dir="ltr">{money(t.amount, t.currency)}</bdi>
                         </p>
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${
