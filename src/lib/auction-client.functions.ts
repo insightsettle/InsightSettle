@@ -42,7 +42,8 @@ export const getAuctionDealView = createServerFn({ method: 'GET' })
     const { data: deal } = await supabaseAdmin.from('deals').select('*').eq('ref', data.ref).eq('deal_type', 'auction').maybeSingle();
     if (!deal?.auction_lot_id) return null;
     const { data: allowed } = await context.supabase.from('auction_lots').select('id').eq('id', deal.auction_lot_id).maybeSingle();
-    if (!allowed) throw new Error('This lot is not accessible.');
+    // A bidder whose offer ended (declined or expired) keeps read access to their own deal record.
+    if (!allowed && deal.buyer_id !== context.userId) throw new Error('This lot is not accessible.');
     const { data: lot } = await supabaseAdmin.from('auction_lots').select('*').eq('id', deal.auction_lot_id).single();
     if (!lot) return null;
     const { data: auction } = await supabaseAdmin.from('auctions').select('*').eq('id', lot.auction_id).single();
