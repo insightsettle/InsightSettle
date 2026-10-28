@@ -212,7 +212,7 @@ export function ContractDashboard(props: {
               {openId === m.id && (
                 <div className="mt-3 space-y-2">
                   <Textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)}
-                    placeholder={mode === "submit" ? "Describe the completed work and list the photos/files uploaded under Files" : mode === "revision" ? "What still needs to change" : "Describe the problem (at least 10 characters)"} />
+                    placeholder={mode === "submit" ? text("Describe the completed work and list the photos/files uploaded under Files", "اشرح العمل المنجز واذكر الصور والملفات المرفوعة في ملفات الصفقة") : mode === "revision" ? text("What still needs to change", "ما الذي يحتاج إلى تعديل") : text("Describe the problem (at least 10 characters)", "اشرح المشكلة (10 أحرف على الأقل)")} />
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" disabled={act.isPending || note.trim().length < (mode === "dispute" ? 10 : 3)}
                       onClick={() => act.mutate(() =>
