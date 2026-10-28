@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { SiteNotice } from "@/components/site/SiteNotice";
 import { useQueryClient } from "@tanstack/react-query";
-import { Menu, Search, Settings, LogOut } from "lucide-react";
+import { Menu, Search, Settings, LogOut } from "@/components/icons";
 import { ConsoleSearch } from "@/components/site/ConsoleSearch";
 import { BrandLogo } from "@/components/site/BrandLogo";
 import { createContext, useState, type ReactNode } from "react";

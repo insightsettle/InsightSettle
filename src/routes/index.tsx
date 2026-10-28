@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowUpRight, BadgeCheck, BriefcaseBusiness, Building2, Check, CircleAlert, Coins, FileCheck2, Gavel, Globe, HardHat, Lock, Package, PenTool, Receipt, Scale, ShieldCheck, Truck, Users, Wallet,
-} from "lucide-react";
+} from "@/components/icons";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PublicPricing, publicPricingOptions } from "@/components/site/PublicPricing";
 import { CompareTable, CtaBand, FaqList, IconTile, StepsFlow } from "@/components/site/Marketing";

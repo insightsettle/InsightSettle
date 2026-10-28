@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Handshake, Scale, ReceiptText as Receipt, FileText, UserRoundCheck, Plus, Gavel, UserRound, Link2, IdCard } from "lucide-react";
+import { Home, Handshake, Scale, ReceiptText as Receipt, FileText, UserRoundCheck, Plus, Gavel, UserRound, Link2, IdCard } from "@/components/icons";
 import { useEffect, type ReactNode } from "react";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { Button } from "@/components/ui/button";

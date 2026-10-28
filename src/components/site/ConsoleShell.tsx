@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, ClipboardList, Inbox, SlidersHorizontal, Coins, FileBarChart, FileCheck, Gavel, History, LayoutDashboard, Percent, ScanSearch, Users, Wallet } from "lucide-react";
+import { AlertTriangle, ClipboardList, Inbox, SlidersHorizontal, Coins, FileBarChart, FileCheck, Gavel, History, LayoutDashboard, Percent, ScanSearch, Users, Wallet } from "@/components/icons";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { useLocale } from "@/lib/locale";
 

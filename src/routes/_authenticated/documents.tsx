@@ -4,7 +4,7 @@ import { formatMoney } from "@/lib/money";
 import { supabase } from "@/integrations/supabase/client";
 import { cap, rolesFor } from "@/lib/roles";
 import { createFileRoute } from "@tanstack/react-router";
-import { FileSearch, FileUp, LoaderCircle, ScrollText, ShieldAlert, X } from "lucide-react";
+import { FileSearch, FileUp, LoaderCircle, ScrollText, ShieldAlert, X } from "@/components/icons";
 import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 

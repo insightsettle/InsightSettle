@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, Brain, Loader2, ShieldAlert, Square } from "lucide-react";
+import { AlertTriangle, Brain, Loader2, ShieldAlert, Square } from "@/components/icons";
 import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 

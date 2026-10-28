@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Info, TriangleAlert } from "lucide-react";
+import { Info, TriangleAlert } from "@/components/icons";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocale } from "@/lib/locale";
 import { activeNotice, type PlatformSettings } from "@/lib/platform-switches";

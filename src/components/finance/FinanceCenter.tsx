@@ -2,7 +2,7 @@ import { useState, Suspense } from 'react';
 import { Link } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
-import { Download, RefreshCw, ShieldCheck, Upload, ArrowRight } from 'lucide-react';
+import { Download, RefreshCw, ShieldCheck, Upload, ArrowRight } from '@/components/icons';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

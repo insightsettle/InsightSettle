@@ -1,4 +1,4 @@
-import { Check, ShieldCheck } from "lucide-react";
+import { Check, ShieldCheck } from "@/components/icons";
 import { useLocale } from "@/lib/locale";
 import { Card, CardContent } from "@/components/ui/card";
 

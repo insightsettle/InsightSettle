@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import type { LucideIcon } from "lucide-react";
-import { ArrowUpRight, Check, ChevronDown } from "lucide-react";
+import type { LucideIcon } from "@/components/icons";
+import { ArrowUpRight, Check, ChevronDown } from "@/components/icons";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";

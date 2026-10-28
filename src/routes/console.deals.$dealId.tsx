@@ -3,7 +3,7 @@ import { StaffDealActions } from "@/components/site/StaffOps";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, MessageSquare, Percent, Receipt, Send, Users } from "lucide-react";
+import { ArrowLeft, MessageSquare, Percent, Receipt, Send, Users } from "@/components/icons";
 import { useState } from "react";
 
 import { StatusBadge } from "@/components/site/StatusBadge";

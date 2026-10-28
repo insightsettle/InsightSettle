@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Lock } from "lucide-react";
+import { Lock } from "@/components/icons";
 
 import { ConsoleShell } from "@/components/site/ConsoleShell";
 import { SiteShell } from "@/components/site/SiteShell";

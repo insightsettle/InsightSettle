@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
 import { useQueryClient } from '@tanstack/react-query';
-import { Truck, CheckCircle2 } from 'lucide-react';
+import { Truck, CheckCircle2 } from '@/components/icons';
 import { updateShipping, confirmDelivery } from '@/lib/deal-party.functions';
 import { requestFundsRelease } from '@/lib/payments.functions';
 import { auctionCompletionState } from '@/lib/auction-completion';

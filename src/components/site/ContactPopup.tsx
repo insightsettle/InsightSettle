@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ArrowUpRight, Check, LoaderCircle, Mail, MessageCircle, X } from "lucide-react";
+import { ArrowUpRight, Check, LoaderCircle, Mail, MessageCircle, X } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

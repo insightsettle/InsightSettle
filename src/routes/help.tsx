@@ -1,6 +1,6 @@
 import { useLocale } from "@/lib/locale";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { LifeBuoy } from "lucide-react";
+import { LifeBuoy } from "@/components/icons";
 
 import { SiteShell } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";

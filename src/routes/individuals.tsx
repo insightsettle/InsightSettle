@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BadgeCheck, Car, CircleCheckBig, Eye, Gavel, Hammer, KeyRound, Link2, PenTool, Receipt, Scale, ShieldCheck, Smartphone, Wallet, Watch } from "lucide-react";
+import { BadgeCheck, Car, CircleCheckBig, Eye, Gavel, Hammer, KeyRound, Link2, PenTool, Receipt, Scale, ShieldCheck, Smartphone, Wallet, Watch } from "@/components/icons";
 
 import { CtaBand, FaqList, FeatureGrid, IconTile, PageHero, SectionHeader, StepsFlow, type Feature, type T2 } from "@/components/site/Marketing";
 import { SiteShell } from "@/components/site/SiteShell";

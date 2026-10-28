@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck } from "@/components/icons";
 
 import { AuthShell } from "@/components/site/AuthShell";
 import { useLocale } from "@/lib/locale";

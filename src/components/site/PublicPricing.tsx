@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Calculator, RefreshCw } from "lucide-react";
+import { Calculator, RefreshCw } from "@/components/icons";
 import { publicPricing } from "@/lib/public-pricing.functions";
 import { useLocale } from "@/lib/locale";
 import { formatMoney, moneyInputStep, SUPPORTED_CURRENCIES } from "@/lib/money";

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Search } from "lucide-react";
+import { Download, Search } from "@/components/icons";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";

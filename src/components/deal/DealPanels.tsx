@@ -1,6 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Circle, FileCheck2, HardHat, Laptop, Package, Plus, ShieldCheck, Trash2, Truck, Wrench } from "lucide-react";
+import { CheckCircle2, Circle, FileCheck2, HardHat, Laptop, Package, Plus, ShieldCheck, Trash2, Truck, Wrench } from "@/components/icons";
 import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";

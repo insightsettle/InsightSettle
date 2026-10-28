@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import QRCode from "qrcode";
-import { BadgeCheck, Info, Wallet } from "lucide-react";
+import { BadgeCheck, Info, Wallet } from "@/components/icons";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";

@@ -1,4 +1,4 @@
-import { Globe2 } from "lucide-react";
+import { Globe2 } from "@/components/icons";
 import { useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";

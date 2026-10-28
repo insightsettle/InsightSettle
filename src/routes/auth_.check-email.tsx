@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { MailCheck } from "lucide-react";
+import { MailCheck } from "@/components/icons";
 
 import { AuthShell } from "@/components/site/AuthShell";
 import { useLocale } from "@/lib/locale";

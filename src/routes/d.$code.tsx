@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { BadgeCheck, Clock, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import { BadgeCheck, Clock, PackageCheck, ShieldCheck, Truck } from "@/components/icons";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
 

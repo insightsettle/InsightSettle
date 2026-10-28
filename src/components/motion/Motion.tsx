@@ -3,7 +3,7 @@
  * Everything here is presentation only and respects the viewer's reduced-motion setting.
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "@/components/icons";
 
 import { cn } from "@/lib/utils";
 

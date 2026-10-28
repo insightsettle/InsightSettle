@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
+import { Plus, RefreshCw, RotateCcw, Trash2 } from "@/components/icons";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 

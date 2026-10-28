@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
-import { Gavel, Clock3, Truck, ShieldCheck, Wallet, CheckCircle2 } from 'lucide-react';
+import { Gavel, Clock3, Truck, ShieldCheck, Wallet, CheckCircle2 } from '@/components/icons';
 import { getAuctionDealView } from '@/lib/auction-client.functions';
 import { getDealPricing, requestFxQuote } from '@/lib/fx-quotes.functions';
 import { startDealFunding } from '@/lib/payments.functions';

@@ -1,4 +1,4 @@
-import { Building2, Copy, CreditCard, Lock, ShieldCheck } from "lucide-react";
+import { Building2, Copy, CreditCard, Lock, ShieldCheck } from "@/components/icons";
 import type { ReactNode } from "react";
 
 import { METHOD_BRANDS, PaymentMark, PaymentMarks, type PaymentBrand } from "@/components/checkout/PaymentMarks";

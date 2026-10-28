@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, BadgeCheck, FileUp, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, FileUp, ShieldCheck, Trash2 } from "@/components/icons";
 import { useState } from "react";
 
 import { AccountSummary } from "@/components/site/AccountProgress";

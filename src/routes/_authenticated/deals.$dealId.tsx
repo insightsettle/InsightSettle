@@ -1,6 +1,6 @@
 import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
 import { DEFAULT_METHOD, METHOD_LABEL, PAYMENT_METHODS, type PaymentMethod } from "@/lib/payment-methods";
-import { CalendarClock as CalendarIcon, Check as CheckIcon, Coins as CoinsIcon, Copy as CopyIcon, Eye as EyeIcon } from "lucide-react";
+import { CalendarClock as CalendarIcon, Check as CheckIcon, Coins as CoinsIcon, Copy as CopyIcon, Eye as EyeIcon } from "@/components/icons";
 import { PayoutPlan } from "@/components/deal/PayoutPlan";
 import { planDealPayouts } from "@/lib/payout-planner";
 import { getAuctionDealView } from "@/lib/auction-client.functions";
@@ -46,7 +46,7 @@ import {
   Send,
   Users,
   Wallet,
-} from "lucide-react";
+} from "@/components/icons";
 import { useEffect, useState } from "react";
 
 import { SiteShell } from "@/components/site/SiteShell";

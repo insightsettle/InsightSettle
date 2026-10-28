@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Wallet,
   ArrowLeft,
-} from "lucide-react";
+} from "@/components/icons";
 
 import { FxCustomerQuote } from "@/components/site/FxCustomerQuote";
 import { CustodyNote } from "@/components/deal/DealPresentation";

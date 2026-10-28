@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, ChevronLeft, ChevronRight, CircleAlert, Clock3, Landmark, MapPin, ShieldAlert, UserRound } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight, CircleAlert, Clock3, Landmark, MapPin, ShieldAlert, UserRound } from "@/components/icons";
 
 import { useStaffAccess } from "@/hooks/use-staff";
 import { useSessionUser } from "@/hooks/use-session";

@@ -2,7 +2,7 @@ import { useLocale } from "@/lib/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveDisputes } from "@/components/site/StaffOps";
 import { createFileRoute } from "@tanstack/react-router";
-import { Gavel, LoaderCircle, RotateCcw, Sparkles, Timer } from "lucide-react";
+import { Gavel, LoaderCircle, RotateCcw, Sparkles, Timer } from "@/components/icons";
 import { useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 

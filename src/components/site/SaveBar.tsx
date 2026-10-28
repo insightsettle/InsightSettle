@@ -1,4 +1,4 @@
-import { Save, Undo2 } from "lucide-react";
+import { Save, Undo2 } from "@/components/icons";
 import { useState } from "react";
 import { toast } from "sonner";
 

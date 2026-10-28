@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, Building2, Check, CreditCard, Lock, PackageCheck, Printer, RotateCcw, SearchCheck, ShieldCheck, Truck, Wallet, XCircle } from "lucide-react";
+import { ArrowRight, Building2, Check, CreditCard, Lock, PackageCheck, Printer, RotateCcw, SearchCheck, ShieldCheck, Truck, Wallet, XCircle } from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { METHOD_BRANDS, PaymentMarks } from "@/components/checkout/PaymentMarks";

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Upload } from 'lucide-react';
+import { Plus, Upload } from '@/components/icons';
 const selectClass='h-10 w-full rounded-md border border-input bg-card px-3 text-sm';
 export function AuctionForm({ kind, auction, lots=[], onDone, onClose }: { kind:'auction'|'lot'|'winner'; auction?: Auction; lots?: AuctionLot[]; onDone: (id?:string)=>void; onClose:()=>void }) {
  const { text }=useLocale(); const { user }=useSessionUser(); const record=useServerFn(recordAuctionWinner); const resolve=useServerFn(resolveAuctionOwner);

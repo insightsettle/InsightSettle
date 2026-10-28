@@ -1,6 +1,6 @@
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck } from "@/components/icons";
 import { IconTile } from "@/components/site/Marketing";
-import { PackageCheck, Wallet } from "lucide-react";
+import { PackageCheck, Wallet } from "@/components/icons";
 import { cap, feePayerLabel, rolesFor } from "@/lib/roles";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";

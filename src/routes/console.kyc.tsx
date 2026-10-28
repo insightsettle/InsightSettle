@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { BadgeCheck, FileText, UserX } from "lucide-react";
+import { BadgeCheck, FileText, UserX } from "@/components/icons";
 import { useLocale } from "@/lib/locale";
 import { useState } from "react";
 

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { STAFF_LEVELS, STAFF_LEVEL_LABEL, type StaffLevel } from "@/lib/staff-levels";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { BadgeCheck, Search, ShieldCheck, UserX } from "lucide-react";
+import { BadgeCheck, Search, ShieldCheck, UserX } from "@/components/icons";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";

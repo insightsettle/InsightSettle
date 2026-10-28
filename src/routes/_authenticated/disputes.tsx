@@ -3,7 +3,7 @@ import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
-import { FileUp, LoaderCircle, Scale, ShieldCheck, Sparkles, X } from "lucide-react";
+import { FileUp, LoaderCircle, Scale, ShieldCheck, Sparkles, X } from "@/components/icons";
 import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 

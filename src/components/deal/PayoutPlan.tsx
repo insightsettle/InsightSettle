@@ -1,4 +1,4 @@
-import { CalendarClock } from "lucide-react";
+import { CalendarClock } from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";

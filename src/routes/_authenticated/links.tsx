@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Link2, Plus } from "lucide-react";
+import { Link2, Plus } from "@/components/icons";
 import { useState } from "react";
 
 import { ShareLink } from "@/components/share/ShareLink";

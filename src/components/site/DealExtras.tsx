@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertCircle, FileText, History, Lock, Paperclip, Receipt, Scale, XCircle } from "lucide-react";
+import { AlertCircle, FileText, History, Lock, Paperclip, Receipt, Scale, XCircle } from "@/components/icons";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";

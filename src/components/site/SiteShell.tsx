@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { SiteNotice } from "@/components/site/SiteNotice";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Menu, ShieldAlert } from "lucide-react";
+import { Menu, ShieldAlert } from "@/components/icons";
 import { BrandLogo } from "@/components/site/BrandLogo";
 import { useContext, useEffect, useRef, useState } from "react";
 import { InAppShell } from "@/components/site/AppShell";

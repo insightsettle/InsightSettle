@@ -10,6 +10,9 @@ concurrency:
   group: web-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -19,6 +22,16 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Install
         run: bun install --frozen-lockfile || bun install
+      # When a dependency was added without its lockfile entry (no registry access in the authoring session),
+      # commit the refreshed bun.lock so Lovable and later runs install exactly the same versions.
+      - name: Commit refreshed lockfile
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if ! git diff --quiet -- bun.lock; then
+            git config user.name "insight-ci"; git config user.email "ci@insightsettle.com"
+            git add bun.lock && git commit -m "chore: refresh bun.lock after dependency change" && git push
+            echo "::notice title=lockfile::bun.lock refreshed and committed"
+          fi
       - name: Typecheck
         run: set -o pipefail; npx tsc --noEmit -p . 2>&1 | tee tsc.log
       - name: Tests

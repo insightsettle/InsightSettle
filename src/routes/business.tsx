@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BadgeCheck, Building2, Coins, Factory, FileCheck2, FileText, Gavel, HardHat, Handshake, Layers, Package, Receipt, Scale, Truck, Users, Wallet } from "lucide-react";
+import { BadgeCheck, Building2, Coins, Factory, FileCheck2, FileText, Gavel, HardHat, Handshake, Layers, Package, Receipt, Scale, Truck, Users, Wallet } from "@/components/icons";
 
 import { CompareTable, CtaBand, FaqList, FeatureGrid, IconTile, PageHero, SectionHeader, StepsFlow, type Feature, type T2 } from "@/components/site/Marketing";
 import { SiteShell } from "@/components/site/SiteShell";

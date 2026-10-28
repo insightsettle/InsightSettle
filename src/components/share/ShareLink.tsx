@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import { Check, Copy, MessageCircle, QrCode } from "lucide-react";
+import { Check, Copy, MessageCircle, QrCode } from "@/components/icons";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowUpRight, Search } from "lucide-react";
+import { ArrowUpRight, Search } from "@/components/icons";
 import { useState } from "react";
 
 import { StatusBadge } from "@/components/site/StatusBadge";

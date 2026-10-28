@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRightLeft, Check, CircleDollarSign, Layers3, Scale } from "lucide-react";
+import { ArrowRightLeft, Check, CircleDollarSign, Layers3, Scale } from "@/components/icons";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

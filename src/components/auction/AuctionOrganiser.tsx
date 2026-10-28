@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Gavel, Plus, Trophy, Wallet, Clock3, ArrowLeftRight, Copy, Bell, Radio } from 'lucide-react';
+import { Gavel, Plus, Trophy, Wallet, Clock3, ArrowLeftRight, Copy, Bell, Radio } from '@/components/icons';
 import { useLocale } from '@/lib/locale';
 import { formatMoney } from '@/lib/money';
 import { listAuctions, loadAuction, auctionAccess, lotCategory, type AuctionLot } from '@/lib/auction-client';
