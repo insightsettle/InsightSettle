@@ -7,6 +7,17 @@ const originalText = new WeakMap<Node, string>();
 const originalAttributes = new WeakMap<Element, Map<string, string>>();
 
 const translations: Record<string, string> = {
+  "Item not received": "لم يصل المنتج",
+  "Wrong item": "منتج غير المتفق عليه",
+  "Damaged item": "منتج تالف",
+  "Quantity mismatch": "الكمية غير مطابقة",
+  "Quality issue": "مشكلة في الجودة",
+  "Late delivery": "تأخر التسليم",
+  "Other": "أخرى",
+  "Preparing the shipment": "قيد تجهيز الشحنة",
+  "In transit": "في الطريق",
+  "Out for delivery": "خرجت للتسليم",
+  "No shipping needed": "لا يحتاج شحناً",
   "A buyer started a deal from your deal link": "بدأ مشترٍ صفقة من رابط صفقتك",
   "Deal created from the seller's deal link": "أُنشئت الصفقة من رابط صفقة البائع",
   "Buyer joined through the deal link — review and accept the terms": "انضم المشتري عبر رابط الصفقة: راجع الشروط ووافق عليها",

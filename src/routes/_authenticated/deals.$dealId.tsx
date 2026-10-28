@@ -341,7 +341,7 @@ function OrdinaryDealPage() {
                       <p className="text-sm font-semibold">
                         {inspectionExpired
                           ? text("The inspection period has ended", "انتهت مدة الفحص")
-                          : text(`Inspection period ends in ${hoursLeft} minute(s)`, `تنتهي مدة الفحص خلال ${hoursLeft} دقيقة`)}
+                          : text(`Inspection period ends in ${remainingEn(hoursLeft ?? 0)}`, `تنتهي مدة الفحص خلال ${remainingAr(hoursLeft ?? 0)}`)}
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {inspectionExpired
@@ -433,9 +433,8 @@ function OrdinaryDealPage() {
                   </div>
                   <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                     <p className="rounded-lg bg-muted p-3">
-                      <span className="text-muted-foreground">Status: </span>
-                      {shippingStatusLabels[deal.shipping_status ?? "preparing"] ??
-                        deal.shipping_status}
+                      <span className="text-muted-foreground">{text("Status: ", "الحالة: ")}</span>
+                      {text(shippingStatusLabels[deal.shipping_status ?? "preparing"] ?? deal.shipping_status ?? "")}
                     </p>
                     <p>
                       <span className="text-muted-foreground">Carrier: </span>
@@ -476,7 +475,7 @@ function OrdinaryDealPage() {
                           .filter(([key]) => !["not_required", "delivered"].includes(key))
                           .map(([key, label]) => (
                             <option key={key} value={key}>
-                              {label}
+                              {text(label)}
                             </option>
                           ))}
                       </select>
@@ -1029,4 +1028,22 @@ function RefChip({ value }: { value: string }) {
   return <button type="button" onClick={() => { void navigator.clipboard?.writeText(value).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600); }); }} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary" aria-label={text(`Copy deal reference ${value}`, `انسخ رقم الصفقة ${value}`)}>
     <bdi dir="ltr" className="tabular-nums">{value}</bdi>{copied ? <CheckIcon className="size-3.5 text-primary" /> : <CopyIcon className="size-3.5" />}
   </button>;
+}
+
+/** Remaining time from minutes, in the largest sensible units ("4 days 23 hours", "3 hours 10 minutes"). */
+function remainingEn(min: number) {
+  const d = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60), m = min % 60;
+  const u = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+  if (d > 0) return h > 0 ? `${u(d, "day")} ${u(h, "hour")}` : u(d, "day");
+  if (h > 0) return m > 0 ? `${u(h, "hour")} ${u(m, "minute")}` : u(h, "hour");
+  return u(Math.max(1, m), "minute");
+}
+function remainingAr(min: number) {
+  const d = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60), m = min % 60;
+  const day = (n: number) => (n === 1 ? "يوم واحد" : n === 2 ? "يومين" : n <= 10 ? `${n} أيام` : `${n} يوماً`);
+  const hour = (n: number) => (n === 1 ? "ساعة واحدة" : n === 2 ? "ساعتين" : n <= 10 ? `${n} ساعات` : `${n} ساعة`);
+  const minute = (n: number) => (n === 1 ? "دقيقة واحدة" : n === 2 ? "دقيقتين" : n <= 10 ? `${n} دقائق` : `${n} دقيقة`);
+  if (d > 0) return h > 0 ? `${day(d)} و${hour(h)}` : day(d);
+  if (h > 0) return m > 0 ? `${hour(h)} و${minute(m)}` : hour(h);
+  return minute(Math.max(1, m));
 }

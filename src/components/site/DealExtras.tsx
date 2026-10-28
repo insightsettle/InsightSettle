@@ -97,9 +97,9 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
         </div>
         <p className="mt-1 text-muted-foreground">{d.details}</p>
         <div className="mt-3 grid gap-1 text-xs text-muted-foreground sm:grid-cols-3">
-          <span>Response by: {fmt(d.response_deadline)}</span>
-          <span>Evidence by: {fmt(d.evidence_deadline)}</span>
-          <span>Decision by: {fmt(d.resolution_deadline)}</span>
+          <span>{text("Response by: ", "الرد قبل: ")}{fmt(d.response_deadline)}</span>
+          <span>{text("Evidence by: ", "الإثباتات قبل: ")}{fmt(d.evidence_deadline)}</span>
+          <span>{text("Decision by: ", "القرار قبل: ")}{fmt(d.resolution_deadline)}</span>
         </div>
         {d.status !== "resolved" && isParty && (
           <div className="mt-3 space-y-2">
@@ -137,10 +137,10 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
     <div className="mt-4 rounded-md border border-warning/40 bg-warning/5 p-4">
       <div className="flex items-center gap-2">
         <Scale className="size-4 text-warning" />
-        <p className="text-sm font-semibold">Open a dispute</p>
+        <p className="text-sm font-semibold">{text("Open a dispute", "فتح نزاع")}</p>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        The funds are frozen immediately. The other party has 48 hours to respond and both sides have 72 hours to add evidence.
+        {text("The funds are frozen immediately. The other party has 48 hours to respond and both sides have 72 hours to add evidence.", "يُجمَّد المبلغ فوراً. لدى الطرف الآخر 48 ساعة للرد، ولدى الطرفين 72 ساعة لإضافة الإثباتات.")}
       </p>
       <select
         value={reason}
@@ -161,7 +161,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
         disabled={details.trim().length < 10 || act.isPending}
         onClick={() => act.mutate(() => open({ data: { dealId: deal.id, reason, details: details.trim() } }))}
       >
-        Open a dispute
+        {text("Open a dispute", "فتح نزاع")}
       </Button>
       {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
     </div>
