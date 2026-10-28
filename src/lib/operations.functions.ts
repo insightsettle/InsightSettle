@@ -278,7 +278,7 @@ export const resolveDisputeCase = createServerFn({ method: "POST" })
     });
     await notify.notifyDealParties(db, deal.id, {
       title: `Dispute decision on ${deal.ref}`,
-      body: `${label}. ${data.note}`.slice(0, 300),
+      body: data.note.slice(0, 300),
       kind: "dispute",
     });
     await simConfirm(db, notify, createdIds);

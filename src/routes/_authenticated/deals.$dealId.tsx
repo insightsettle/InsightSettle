@@ -1,4 +1,5 @@
 import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
+import { logAr } from "@/lib/log-i18n";
 import { DEFAULT_METHOD, METHOD_LABEL, PAYMENT_METHODS, type PaymentMethod } from "@/lib/payment-methods";
 import { CalendarClock as CalendarIcon, Check as CheckIcon, Coins as CoinsIcon, Copy as CopyIcon, Eye as EyeIcon } from "@/components/icons";
 import { PayoutPlan } from "@/components/deal/PayoutPlan";
@@ -398,7 +399,7 @@ function OrdinaryDealPage() {
                   <h4 className="text-sm font-semibold text-primary">{text("What you agreed", "ما اتفقتما عليه")}</h4>
                   <dl className="mt-3 space-y-3 text-sm">
                     {deal.acceptance_criteria && <Info label={text("Accepted when", "متى يُقبل التسليم")} value={deal.acceptance_criteria} />}
-                    <Info label={text("Inspection period", "مدة الفحص")} value={text(`${deal.inspection_days} day(s) after delivery`, `${deal.inspection_days} يوم بعد التسليم`)} />
+                    <Info label={text("Inspection period", "مدة الفحص")} value={text(`${deal.inspection_days} ${deal.inspection_days === 1 ? "day" : "days"} after delivery`, `${deal.inspection_days === 1 ? "يوم واحد" : deal.inspection_days === 2 ? "يومان" : deal.inspection_days <= 10 ? `${deal.inspection_days} أيام` : `${deal.inspection_days} يوماً`} بعد التسليم`)} />
                     <Info label={text("Automatic payout", "التحويل التلقائي")} value={deal.auto_release_enabled ? text("On, at the end of the inspection period", "مفعّل عند نهاية مدة الفحص") : text(`Off — ${payerT[0]} confirms`, `غير مفعّل، يؤكد ${payerT[1]}`)} />
                     <Info label={text("Quantity", "الكمية")} value={String(deal.quantity ?? 1)} />
                     {deal.unit_price != null && <Info label={text("Unit price", "سعر الوحدة")} value={money(Number(deal.unit_price))} />}
@@ -737,7 +738,7 @@ function OrdinaryDealPage() {
                       disabled={reviewNote.trim().length < 3}
                       onClick={() => action.mutate(() => reviewFn({ data: { dealId: deal.id, note: reviewNote.trim() } }))}
                     >
-                      Ask for a revision
+                      {text("Ask for a revision", "اطلب تعديلاً")}
                     </Button>
                   </div>
                 )}
@@ -931,21 +932,21 @@ function OrdinaryDealPage() {
               <CardContent className="p-6">
                 <h2 className="font-bold">{text("Deal log", "سجل الصفقة")}</h2>
                 {timeline.isLoading ? (
-                  <p className="mt-3 text-sm text-muted-foreground">Loading activity…</p>
+                  <p className="mt-3 text-sm text-muted-foreground">{text("Loading activity…", "جارٍ تحميل السجل…")}</p>
                 ) : (
                   <ol className="mt-5 space-y-5 border-s border-border ps-5">
                     {(timeline.data ?? []).map((e) => (
                       <li key={e.id} className="relative">
                         <span className="absolute -start-[1.6rem] top-1 size-3 rounded-full border-2 border-card bg-primary" />
-                        <p className="text-sm font-medium" data-no-localize>{text(e.title)}</p>
+                        <p className="text-sm font-medium" data-no-localize>{(() => { const ar = logAr(e.title); return ar ? text(e.title, ar) : text(e.title); })()}</p>
                         <p className="text-xs text-muted-foreground" data-no-localize>
                           {formatDate(e.created_at)}
-                          {e.note ? ` · ${(() => { const corrected = paymentEventNote(e.note, transactions.data ?? []); return corrected ? text(corrected[0], corrected[1]) : text(e.note.includes("Funds are held by a licensed payment provider") ? "Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record." : e.note); })()}` : ""}
+                          {e.note ? ` · ${(() => { const corrected = paymentEventNote(e.note, transactions.data ?? []); if (corrected) return text(corrected[0], corrected[1]); if (e.note.includes("Funds are held by a licensed payment provider")) return text("Escrow demo. The payment provider is simulated and no real money moves. At launch, funds will be held by a licensed payment provider; Insight runs the deal rules and keeps the record.", "نسخة تجريبية: مزوّد الدفع محاكى ولا تتحرك أموال حقيقية. عند الإطلاق تُحفظ الأموال لدى مزوّد دفع مرخّص، وتدير إنسايت قواعد الصفقة وتحفظ سجلها."); const ar = logAr(e.note); return ar ? text(e.note, ar) : text(e.note); })()}` : ""}
                         </p>
                       </li>
                     ))}
                     {(timeline.data ?? []).length === 0 && (
-                      <li className="text-sm text-muted-foreground">No activity yet.</li>
+                      <li className="text-sm text-muted-foreground">{text("No activity yet.", "لا يوجد نشاط بعد.")}</li>
                     )}
                   </ol>
                 )}

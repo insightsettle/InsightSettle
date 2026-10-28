@@ -290,6 +290,7 @@ export function AttachmentsCard({ deal, isParty }: { deal: DealRow; isParty: boo
 }
 
 export function TermVersionsCard({ deal }: { deal: DealRow }) {
+  const { text } = useLocale();
   const versions = useQuery({ queryKey: ["deal-terms", deal.id, deal.terms_version], queryFn: () => listTermVersions(deal.id) });
   if (!versions.data?.length) return null;
   return (
@@ -297,7 +298,7 @@ export function TermVersionsCard({ deal }: { deal: DealRow }) {
       <CardContent className="p-6">
         <div className="flex items-center gap-2">
           <History className="size-5 text-primary" />
-          <h2 className="font-bold">Terms history</h2>
+          <h2 className="font-bold">{text("Terms history", "سجل الشروط")}</h2>
         </div>
         <ol className="mt-3 space-y-3 text-sm">
           {versions.data.map((v) => {
@@ -305,12 +306,12 @@ export function TermVersionsCard({ deal }: { deal: DealRow }) {
             return (
               <li key={v.id} className="rounded-md border p-3">
                 <p className="font-semibold">
-                  Version {v.version}
-                  {v.version === deal.terms_version && " · current"}
+                  {text("Version", "النسخة")} {v.version}
+                  {v.version === deal.terms_version && text(" · current", " · الحالية")}
                 </p>
-                <p className="mt-1 text-muted-foreground" dir="ltr">
-                  {formatMoney(Number(s["amount"]), s["currency"] ?? deal.currency)} · qty {s["quantity"] ?? 1} · inspection {s["inspection_days"]}d
-                  {s["due_at"] ? ` · due ${s["due_at"]}` : ""}
+                <p className="mt-1 text-muted-foreground">
+                  <bdi>{formatMoney(Number(s["amount"]), s["currency"] ?? deal.currency)}</bdi> · {text("Qty", "الكمية")} {s["quantity"] ?? 1} · {text("Inspection", "الفحص")} {text(`${s["inspection_days"]} days`, `${s["inspection_days"]} أيام`)}
+                  {s["due_at"] ? text(` · due ${s["due_at"]}`, ` · التسليم قبل ${s["due_at"]}`) : ""}
                 </p>
                 {v.note && <p className="mt-1 text-xs">{v.note}</p>}
                 <p className="mt-1 text-xs text-muted-foreground">{fmt(v.created_at)}</p>
@@ -335,14 +336,13 @@ export function InvoiceCard({ deal }: { deal: DealRow }) {
           <h2 className="font-bold">{inv.data.length > 1 ? text("Insight fee invoices", "فواتير رسوم إنسايت") : text("Insight fee invoice", "فاتورة رسوم إنسايت")}</h2>
         </div>
         {inv.data.map((i) => (
-          <p key={i.invoice_number} className="mt-2 text-sm" dir="ltr">
-            {i.invoice_number} · fee {formatMoney(Number(i.fee), i.currency)} + {Number(i.vat_rate) === 0 ? text("No VAT", "لا توجد ضريبة") : `${text("VAT", "الضريبة")} ${(Number(i.vat_rate) * 100).toFixed(0)}%`} {formatMoney(Number(i.vat), i.currency)} ={" "}
-            <b>{formatMoney(Number(i.total), i.currency)}</b>
+          <p key={i.invoice_number} className="mt-2 text-sm">
+            <bdi>{i.invoice_number}</bdi> · {text("Fee", "الرسوم")} <bdi>{formatMoney(Number(i.fee), i.currency)}</bdi> + {Number(i.vat_rate) === 0 ? text("No VAT", "لا توجد ضريبة") : <>{text("VAT", "الضريبة")} <bdi>{(Number(i.vat_rate) * 100).toFixed(0)}%</bdi></>} <bdi>{formatMoney(Number(i.vat), i.currency)}</bdi> = <b><bdi>{formatMoney(Number(i.total), i.currency)}</bdi></b>
           </p>
         ))}
         <Button asChild variant="outline" size="sm" className="mt-3">
           <a href={`/invoice/${deal.ref}`} target="_blank" rel="noreferrer">
-            Open printable invoice
+            {text("Open printable invoice", "فتح الفاتورة للطباعة")}
           </a>
         </Button>
       </CardContent>

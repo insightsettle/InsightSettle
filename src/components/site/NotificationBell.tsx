@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { logAr } from "@/lib/log-i18n";
 import { Bell } from "@/components/icons";
 
 import { Button } from "@/components/ui/button";
@@ -62,8 +63,8 @@ export function NotificationBell() {
               key={n.id}
               className={`border-b border-border/60 px-4 py-3 last:border-0 ${n.read_at ? "" : "bg-primary/5"}`}
             >
-              <p className="text-sm font-medium">{n.title}</p>
-              {n.body && <p className="mt-1 text-xs text-muted-foreground">{n.body}</p>}
+              <p className="text-sm font-medium">{logAr(n.title) ? text(n.title, logAr(n.title)!) : text(n.title)}</p>
+              {n.body && <p className="mt-1 text-xs text-muted-foreground">{logAr(n.body) ? text(n.body, logAr(n.body)!) : text(n.body)}</p>}
               <p className="mt-1 text-[11px] text-muted-foreground">{formatDate(n.created_at)}</p>
             </div>
           ))}
