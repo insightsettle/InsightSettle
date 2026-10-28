@@ -26,7 +26,7 @@ function InvitePage() {
   const accept = useServerFn(acceptDealInvite);
   const navigate = useNavigate();
   const { text } = useLocale();
-  const [message, setMessage] = useState("Joining the deal…");
+  const [message, setMessage] = useState<[string, string]>(["Joining the deal…", "جارٍ ضمّك إلى الصفقة…"]);
 
   useEffect(() => {
     let active = true;
@@ -39,12 +39,12 @@ function InvitePage() {
         }
         setMessage(
           result.reason === "not_found"
-            ? "This invitation link is not valid any more."
-            : "This deal already has both parties.",
+            ? ["This invitation link is not valid any more.", "رابط الدعوة هذا لم يعد صالحاً."]
+            : ["This deal already has both parties.", "هذه الصفقة مكتملة الطرفين."],
         );
       })
       .catch(() => {
-        if (active) setMessage("We could not join you to this deal. Please try again.");
+        if (active) setMessage(["We could not join you to this deal. Please try again.", "تعذّر ضمّك إلى الصفقة. حاول مرة أخرى."]);
       });
     return () => {
       active = false;
@@ -55,9 +55,9 @@ function InvitePage() {
     <SiteShell>
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <h1 className="text-2xl font-bold">{text('Deal invitation', 'دعوة صفقة')}</h1>
-        <p className="mt-3 text-muted-foreground">{message}</p>
+        <p className="mt-3 text-muted-foreground">{text(message[0], message[1])}</p>
         <Button asChild className="mt-6">
-          <Link to="/dashboard">Go to dashboard</Link>
+          <Link to="/dashboard">{text("Go to dashboard", "اذهب إلى لوحتي")}</Link>
         </Button>
       </div>
     </SiteShell>
