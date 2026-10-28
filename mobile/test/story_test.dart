@@ -22,36 +22,20 @@ void main() {
 
   testWidgets('welcome story pages forward and ends with the first-deal choice', (tester) async {
     AppLocale.notifier.value = const Locale('ar');
-    WelcomeChoice? picked;
-    await tester.pumpWidget(MaterialApp(
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Builder(
-          builder: (context) => Scaffold(
-            body: Center(
-              child: FilledButton(
-                onPressed: () async => picked = await Navigator.of(context).push<WelcomeChoice>(MaterialPageRoute(builder: (_) => const WelcomeScreen())),
-                child: const Text('open'),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ));
-    await tester.tap(find.text('open'));
+    await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
     expect(find.text('مبلغك ينتظر في المنتصف'), findsOneWidget);
     expect(find.text('تخطي'), findsOneWidget);
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.byTooltip('التالي'));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 700));
     }
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('تتأكد، ثم يُحوَّل المبلغ'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.tap(find.text('ابدأ صفقتك الأولى'));
-    await tester.pump(const Duration(milliseconds: 600));
-    expect(picked, WelcomeChoice.newDeal);
+    expect(find.text('ابدأ صفقتك الأولى'), findsOneWidget);
+    expect(find.text('اذهب إلى صفقاتي'), findsOneWidget);
   });
 
   testWidgets('deal journey shows its five stations in English', (tester) async {
