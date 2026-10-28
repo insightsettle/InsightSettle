@@ -5,6 +5,7 @@ import { ArrowRight, Building2, Check, CreditCard, Lock, PackageCheck, Printer, 
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { METHOD_BRANDS, PaymentMarks } from "@/components/checkout/PaymentMarks";
+import { Confetti } from "@/components/motion/Celebrate";
 import { AcceptedBadges, SecureFields } from "@/components/checkout/SecureFields";
 import { useMilestones } from "@/components/deal/DealPanels";
 import { Button } from "@/components/ui/button";
@@ -351,7 +352,7 @@ function ResultScreen({ r, q, dealRef, dealTitle, method, onRetry }: { r: Paymen
     { icon: PackageCheck, t: text("Paid out to the other party", "يُحوَّل للطرف الآخر"), d: text("Only after you confirm, or the checking time ends", "بعد تأكيدك فقط، أو انتهاء مدة الفحص"), done: false },
   ];
   return (
-    <div data-no-localize><div className="mx-auto max-w-xl py-6">
+    <div data-no-localize><Confetti /><div className="mx-auto max-w-xl py-6">
       <div className="text-center">
         <div className="relative mx-auto grid size-24 place-items-center">
           <span className="checkout-pulse absolute inset-0 rounded-full bg-primary/25" />

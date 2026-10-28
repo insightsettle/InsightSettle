@@ -3,6 +3,7 @@ import type { LucideIcon } from "@/components/icons";
 import { ArrowUpRight, Check, ChevronDown } from "@/components/icons";
 import type { ReactNode } from "react";
 
+import { IllAgree, IllDeliver, IllHeld, IllRelease } from "@/components/illustrations/Illustrations";
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/lib/locale";
 import { cn } from "@/lib/utils";
@@ -98,6 +99,9 @@ export const DEAL_STEPS: [T2, T2][] = [
   [["Check, then pay out", "تتأكد ثم يُحوَّل"], ["You confirm, and the amount is paid out to the other side. A problem? Open a dispute in one tap.", "تؤكد الاستلام فيُحوَّل المبلغ للطرف الآخر. هناك مشكلة؟ افتح نزاعاً بضغطة."]],
 ];
 
+/** The four deal steps, each with its line illustration. */
+const STEP_ART = [<IllAgree key="a" />, <IllHeld key="h" />, <IllDeliver key="d" />, <IllRelease key="r" />];
+
 /** Numbered steps joined by a line on wide screens. */
 export function StepsFlow({ steps = DEAL_STEPS }: { steps?: [T2, T2][] }) {
   const { text } = useLocale();
@@ -107,6 +111,7 @@ export function StepsFlow({ steps = DEAL_STEPS }: { steps?: [T2, T2][] }) {
       {steps.map(([title, body], i) => (
         <li key={title[0]} className="relative rounded-2xl border border-border bg-card p-6">
           <span aria-hidden="true" className="gradient-brand relative grid size-11 place-items-center rounded-full text-lg font-bold text-white ring-4 ring-card">{i + 1}</span>
+          {steps === DEAL_STEPS && STEP_ART[i] && <div className="mx-auto mt-3 w-full max-w-[220px]">{STEP_ART[i]}</div>}
           <h3 className="mt-5 text-lg font-semibold">{text(title[0], title[1])}</h3>
           <p className="mt-2 leading-7 text-muted-foreground">{text(body[0], body[1])}</p>
         </li>

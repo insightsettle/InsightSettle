@@ -77,6 +77,8 @@ import {
   type PaymentResult,
 } from "@/lib/payments.functions";
 import { AnimatedNumber, PageSkeleton } from "@/components/motion/Motion";
+import { Celebrate } from "@/components/motion/Celebrate";
+import { IllAgree, IllDeliver, IllRelease } from "@/components/illustrations/Illustrations";
 
 /** Insight's own payment reference. Customers never see the provider's name or reference format (founder, 27 Oct). */
 const insightRef = (id: string) => `PAY-${id.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
@@ -174,6 +176,8 @@ function OrdinaryDealPage() {
   const [ratingScore, setRatingScore] = useState("5");
   const [ratingComment, setRatingComment] = useState("");
   const [paymentNotice, setPaymentNotice] = useState<PaymentResult | null>(null);
+  // Full-screen moments for the big steps (founder, 28 Oct): terms agreed, delivery confirmed, deal completed.
+  const [moment, setMoment] = useState<null | "agreed" | "delivered" | "release">(null);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["deal", dealId] });
@@ -306,15 +310,21 @@ function OrdinaryDealPage() {
   });
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   const onNextStep = (a: NextStepAction) => {
-    if (a === "accept-terms") action.mutate(() => agreeFn({ data: { dealId: deal.id } }));
-    else if (a === "deliver") action.mutate(() => deliverFn({ data: { dealId: deal.id } }));
-    else if (a === "release") payment.mutate(() => release({ data: { dealId: deal.id } }));
+    if (a === "accept-terms") action.mutate(() => agreeFn({ data: { dealId: deal.id } }), { onSuccess: () => setMoment("agreed") });
+    else if (a === "deliver") action.mutate(() => deliverFn({ data: { dealId: deal.id } }), { onSuccess: () => setMoment("delivered") });
+    else if (a === "release") payment.mutate(() => release({ data: { dealId: deal.id } }), { onSuccess: (r) => { if (r.ok) setMoment("release"); } });
     else if (a === "scroll-pay" && canFund) void navigate({ to: "/pay/$dealId", params: { dealId: deal.ref } });
     else scrollTo(a === "scroll-pay" ? "deal-actions" : a === "scroll-ship" ? "shipping" : a === "scroll-terms" ? "terms" : a === "scroll-milestones" ? "milestones" : "dispute");
   };
 
   return (
     <SiteShell>
+      <Celebrate open={moment === "agreed"} onClose={() => setMoment(null)} art={<IllAgree />} confetti={false}
+        title={text("You agreed the terms", "اتفقتما على الشروط")} body={text("Next: the amount is paid into the deal, where it stays held until delivery and the checking time.", "الخطوة التالية: يُدفع المبلغ في الصفقة، ويبقى محفوظاً حتى التسليم ومدة الفحص.")} action={text("Continue", "تابع")} />
+      <Celebrate open={moment === "delivered"} onClose={() => setMoment(null)} art={<IllDeliver />} confetti={false}
+        title={text("Delivery confirmed", "تم تأكيد التسليم")} body={text("The checking time has started. The amount is paid out once the other party confirms, or when the checking time ends.", "بدأت مدة الفحص. يُحوَّل المبلغ بعد تأكيد الطرف الآخر، أو بانتهاء المدة.")} action={text("Continue", "تابع")} />
+      <Celebrate open={moment === "release"} onClose={() => setMoment(null)} art={<IllRelease />}
+        title={text("Deal complete", "اكتملت الصفقة")} body={text("You confirmed receipt and the amount is on its way to the other party. Thank you for dealing safely.", "أكّدت الاستلام، والمبلغ في طريقه للطرف الآخر. شكراً لأنك تعاملت بأمان.")} action={text("Done", "تم")} />
       <div className="reveal min-w-0">
         <nav className="mb-5 flex items-center gap-2 text-xs text-muted-foreground" data-no-localize><Link to="/dashboard" hash="saved-deals">{text("Deals", "الصفقات")}</Link><span>‹</span><bdi>{deal.ref}</bdi></nav>
         <header className="grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]" data-no-localize>
@@ -530,7 +540,7 @@ function OrdinaryDealPage() {
                         placeholder="Optional: what should change before you accept?"
                       />
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <Button onClick={() => action.mutate(() => agreeFn({ data: { dealId: deal.id } }))}>
+                        <Button onClick={() => action.mutate(() => agreeFn({ data: { dealId: deal.id } }), { onSuccess: () => setMoment("agreed") })}>
                           <BadgeCheck /> {text(ACCEPT_LABEL[0], ACCEPT_LABEL[1])}
                         </Button>
                         <Button
@@ -680,7 +690,7 @@ function OrdinaryDealPage() {
                   {isSeller && ["held", "under_review"].includes(status) && !deal.frozen && (
                     <Button
                       onClick={() =>
-                        action.mutate(() => deliverFn({ data: { dealId: deal.id } }))
+                        action.mutate(() => deliverFn({ data: { dealId: deal.id } }), { onSuccess: () => setMoment("delivered") })
                       }
                     >
                       <BadgeCheck /> {text(DELIVER_LABEL[0], DELIVER_LABEL[1])}
@@ -689,7 +699,7 @@ function OrdinaryDealPage() {
                   {isBuyer && !deal.frozen && (status === "delivered" || status === "under_review") && (
                     <Button
                       onClick={() =>
-                        payment.mutate(() => release({ data: { dealId: deal.id } }))
+                        payment.mutate(() => release({ data: { dealId: deal.id } }), { onSuccess: (r) => { if (r.ok) setMoment("release"); } })
                       }
                       disabled={payment.isPending}
                     >

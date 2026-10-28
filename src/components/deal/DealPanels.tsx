@@ -1,6 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Circle, FileCheck2, HardHat, Laptop, Package, Plus, ShieldCheck, Trash2, Truck, Wrench } from "@/components/icons";
+import { Check, CheckCircle2, Circle, Coins, FileCheck2, Handshake, HardHat, Laptop, Lock, Package, Plus, SearchCheck, ShieldCheck, Trash2, Truck, Wrench } from "@/components/icons";
 import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -58,23 +58,34 @@ export function useMilestones(dealId: string | undefined) {
 }
 
 const STEPS: [string, string][] = [["Agreed", "الاتفاق"], ["Paid", "الدفع"], ["Delivered", "التسليم"], ["Inspection", "الفحص"], ["Paid out", "التحويل للمورد"]];
+const STEP_ICONS = [Handshake, Lock, Truck, SearchCheck, Coins] as const;
 
+/** The deal's journey: five stations on one road. Done stations fill in, the current one breathes, the road draws itself. */
 export function EscrowStepper({ status, termsStatus }: { status: string; termsStatus: string }) {
   const { text } = useLocale();
   const current = escrowStep(status, termsStatus);
   const done = ["released", "completed", "refunded"].includes(status);
   return (
-    <Card data-no-localize><CardContent className="p-5">
-      <ol className="grid grid-cols-5 gap-2 sm:gap-3" aria-label="Escrow steps">
+    <Card data-no-localize className="overflow-hidden"><CardContent className="p-4 sm:p-6">
+      <ol className="flex items-start" aria-label={text("Deal steps", "خطوات الصفقة")}>
         {STEPS.map((s, i) => {
           const state = done || i < current ? "done" : i === current ? "current" : "next";
+          const Icon = STEP_ICONS[i]!;
+          const nextDone = done || i + 1 < current;
           return (
-            <li key={s[0]} aria-current={state === "current" ? "step" : undefined} className="flex min-w-0 flex-col gap-2">
-              <span aria-hidden="true" className="relative h-2 overflow-hidden rounded-full bg-surface">{state !== "next" && <span className={`checkout-progress absolute inset-0 rounded-full ${state === "done" ? "bg-brand-mint" : "gradient-brand checkout-sheen"}`} style={{ ["--dur" as string]: "0.6s", animationDelay: `${i * 120}ms`, animationFillMode: "both" }} />}</span>
-              <span className={`flex min-w-0 items-start gap-1 text-xs leading-5 sm:text-sm ${state === "current" ? "font-bold text-primary" : state === "done" ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                {state === "done" && <CheckCircle2 className="checkout-pop mt-0.5 hidden size-3.5 shrink-0 text-primary sm:block" />}{state === "current" && <span className="relative mt-1.5 hidden size-2 shrink-0 sm:flex"><span className="absolute inset-0 rounded-full bg-primary opacity-60 motion-safe:animate-ping" /><span className="relative size-2 rounded-full bg-primary" /></span>}
-                <span className="min-w-0 break-words">{text(s[0], s[1])}</span>
+            <li key={s[0]} aria-current={state === "current" ? "step" : undefined} className="relative flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
+              {i < STEPS.length - 1 && (
+                <span aria-hidden className="absolute top-[22px] start-[calc(50%+26px)] end-[calc(-50%+26px)] h-[3px] overflow-hidden rounded-full sm:top-[26px] sm:start-[calc(50%+30px)] sm:end-[calc(-50%+30px)]" style={{ backgroundImage: "repeating-linear-gradient(90deg, var(--border) 0 6px, transparent 6px 11px)" }}>
+                  {nextDone && <span className="checkout-progress absolute inset-0 rounded-full bg-brand-mint" style={{ ["--dur" as string]: "0.55s", animationDelay: `${150 + i * 180}ms`, animationFillMode: "both" }} />}
+                </span>
+              )}
+              <span className={`relative grid size-11 shrink-0 place-items-center rounded-2xl transition-colors sm:size-[52px] ${state === "done" ? "bg-primary text-primary-foreground shadow-[0_10px_22px_-12px_rgb(19_128_101/0.9)]" : state === "current" ? "bg-accent text-primary ring-2 ring-primary" : "bg-muted text-muted-foreground"}`}
+                style={{ animation: `checkout-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) ${i * 180}ms both` }}>
+                {state === "current" && <span className="absolute inset-0 rounded-2xl bg-primary/25 motion-safe:animate-ping [animation-duration:2.2s]" />}
+                <Icon className="relative size-5 sm:size-6" weight={state === "done" ? "fill" : "duotone"} />
+                {state === "done" && <span className="absolute -bottom-1 -end-1 grid size-4 place-items-center rounded-full bg-brand-mint text-white ring-2 ring-card"><Check className="size-2.5" /></span>}
               </span>
+              <span className={`min-w-0 px-0.5 text-[11px] leading-4 sm:text-sm sm:leading-5 ${state === "current" ? "font-bold text-primary" : state === "done" ? "font-medium text-foreground" : "text-muted-foreground"}`}>{text(s[0], s[1])}</span>
             </li>
           );
         })}

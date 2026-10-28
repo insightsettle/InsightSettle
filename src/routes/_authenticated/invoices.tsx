@@ -9,6 +9,7 @@ import { listMyFeeInvoices } from "@/lib/fee-invoice.functions";
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { ListSkeleton } from "@/components/motion/Motion";
+import { IllEmpty } from "@/components/illustrations/Illustrations";
 
 export const Route = createFileRoute("/_authenticated/invoices")({
   head: () => ({ meta: [
@@ -36,7 +37,7 @@ function InvoicesPage() {
         {q.isError && <div role="alert" className="mt-6 text-destructive">{text("Invoices could not be loaded.", "تعذّر تحميل الفواتير.")} <Button variant="outline" onClick={() => void q.refetch()}>{text("Try again", "حاول مرة أخرى")}</Button></div>}
         {q.data && q.data.length === 0 && (
           <div className="mt-8 rounded-2xl border border-dashed border-border p-8 text-center">
-            <Receipt className="mx-auto size-8 text-muted-foreground" />
+            <div className="mx-auto w-44"><IllEmpty /></div>
             <p className="mt-3 font-medium">{text("No tax invoices yet", "لا توجد فواتير ضريبية بعد")}</p>
             <p className="mt-1 text-sm text-muted-foreground">{text("An invoice is issued automatically when you pay a deal's fee.", "تصدر الفاتورة تلقائياً عند دفع رسوم الصفقة.")}</p>
           </div>

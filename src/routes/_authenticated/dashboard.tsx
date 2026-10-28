@@ -3,6 +3,7 @@ import { rolesFor, the, to, type Roles } from "@/lib/roles";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { takeReturnTo } from "@/lib/return-to";
+import { welcomeSeen } from "@/lib/welcome";
 import {
   AlertCircle,
   CheckCircle2,
@@ -34,6 +35,7 @@ import { listNotifications } from "@/lib/notifications";
 import { escrowStep } from "@/lib/milestones";
 import { clientAction } from "@/lib/deal-display";
 import { useLocale } from "@/lib/locale";
+import { IllCalm, IllEmpty } from "@/components/illustrations/Illustrations";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -65,7 +67,8 @@ function Dashboard() {
     if (isStaff) navigate({ to: "/console", replace: true });
   }, [isStaff, navigate]);
   // Arrived here after confirming an email or signing in with Google: continue to a saved deal link or invitation.
-  useEffect(() => { const next = takeReturnTo(); if (next) navigate({ href: next, replace: true }); }, [navigate]);
+  // A first visit with nothing to continue to opens the four-step welcome story once (per browser).
+  useEffect(() => { const next = takeReturnTo(); if (next) navigate({ href: next, replace: true }); else if (!isStaff && !welcomeSeen()) navigate({ to: "/welcome", replace: true }); }, [navigate, isStaff]);
   const { data: myDeals = [] } = useQuery({ queryKey: ["my-deals"], queryFn: listMyDeals });
   const { data: myActivity = [] } = useQuery({
     queryKey: ["my-activity"],
@@ -134,7 +137,7 @@ function Dashboard() {
         <section aria-labelledby="next-steps" className="space-y-4">
           <h3 id="next-steps" className="text-lg font-bold">{text("Your next steps", "خطوتك التالية")}</h3>
           {n === 0 ? (
-            <Card><CardContent className="flex flex-wrap items-center gap-4 p-6"><CheckCircle2 className="size-8 shrink-0 text-primary" /><div className="min-w-0 flex-1"><p className="font-semibold">{text("You are all caught up", "كل شيء على ما يرام")}</p><p className="mt-1 text-sm text-muted-foreground">{text("We will notify you as soon as a deal needs you.", "سنخبرك فور احتياج أي صفقة لإجراء منك.")}</p></div><Button asChild variant="outline"><Link to="/deals/new"><Users />{text("Start a new deal", "ابدأ صفقة جديدة")}</Link></Button></CardContent></Card>
+            <Card><CardContent className="flex flex-wrap items-center gap-4 p-6"><div className="w-24 shrink-0"><IllCalm /></div><div className="min-w-0 flex-1"><p className="font-semibold">{text("You are all caught up", "كل شيء على ما يرام")}</p><p className="mt-1 text-sm text-muted-foreground">{text("We will notify you as soon as a deal needs you.", "سنخبرك فور احتياج أي صفقة لإجراء منك.")}</p></div><Button asChild variant="outline"><Link to="/deals/new"><Users />{text("Start a new deal", "ابدأ صفقة جديدة")}</Link></Button></CardContent></Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {actionDeals.map(({ deal, action: next }) => {
@@ -162,10 +165,10 @@ function Dashboard() {
               <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="break-words font-semibold">{d.title}</p><p className="mt-1 break-all text-xs text-muted-foreground">{d.counterparty_email ?? text("Other party", "الطرف الآخر")}</p><p className="mt-0.5 break-words text-xs text-muted-foreground"><bdi>{d.ref}</bdi> · {d.buyer_id === uid ? text(`You are the ${R.payer.en}`, `أنت ${R.payer.ar}`) : text(`You are the ${R.payee.en}`, `أنت ${R.payee.ar}`)}</p></div><StatusBadge status={d.status as never} /></div>
               <div className="mt-4 flex items-end justify-between gap-4"><div className="flex flex-1 gap-1" aria-label={text(`Step ${st + 1} of 5`, `الخطوة ${st + 1} من 5`)}>{[0, 1, 2, 3, 4].map((k) => <span key={k} className={`h-1.5 flex-1 rounded transition-colors duration-500 ${k < st ? "bg-brand-mint" : k === st ? "gradient-brand" : "bg-surface"}`} />)}</div><p className="text-lg font-bold tabular-nums text-primary"><bdi dir="ltr">{formatMoney(Number(d.amount), d.currency)}</bdi></p></div>
             </Link></li>; })}
-              {!active.length && <li className="p-6 text-center text-sm text-muted-foreground">{text("No active deals yet. Create your first one in a few minutes.", "لا توجد صفقات جارية بعد. أنشئ صفقتك الأولى في دقائق.")}</li>}</ul>
+              {!active.length && <li className="flex flex-col items-center gap-2 p-6 text-center text-sm text-muted-foreground"><div className="w-40"><IllEmpty /></div><p className="font-semibold text-foreground">{text("A blank page", "صفحتك بيضاء")}</p><p>{text("No active deals yet. Create your first one in a few minutes.", "لا توجد صفقات جارية بعد. أنشئ صفقتك الأولى في دقائق.")}</p><Button asChild size="sm" className="mt-1"><Link to="/deals/new"><Plus />{text("New deal", "صفقة جديدة")}</Link></Button></li>}</ul>
             <div className="hidden overflow-x-auto md:block"><table className="w-full min-w-[560px] text-start text-sm"><thead className="bg-muted text-xs text-muted-foreground"><tr>{[text("Deal", "الصفقة"), text("Amount", "المبلغ"), text("Status", "الحالة"), text("Progress", "المرحلة")].map((l) => <th className="px-5 py-3 text-start font-medium" key={l}>{l}</th>)}</tr></thead>
               <tbody>{active.map((d) => { const st = escrowStep(d.status, d.terms_status); return <tr className="border-t" key={d.id}><td className="p-4"><Link className="font-semibold hover:text-primary" to="/deals/$dealId" params={{ dealId: d.ref }}>{d.title}</Link><p className="mt-1 break-all text-xs text-muted-foreground">{d.counterparty_email ?? text("Other party", "الطرف الآخر")}</p><p className="mt-1 text-xs text-muted-foreground"><bdi>{d.ref}</bdi> · {(d.buyer_id === uid ? text(`You are the ${rolesFor((d as any).deal_type).payer.en}`, `أنت ${rolesFor((d as any).deal_type).payer.ar}`) : text(`You are the ${rolesFor((d as any).deal_type).payee.en}`, `أنت ${rolesFor((d as any).deal_type).payee.ar}`))}</p></td><td className="p-4 font-semibold tabular-nums"><bdi dir="ltr">{formatMoney(Number(d.amount), d.currency)}</bdi></td><td className="p-4"><StatusBadge status={d.status as never} /></td><td className="w-32 p-4"><div className="flex gap-1" aria-label={text(`Step ${st + 1} of 5`, `الخطوة ${st + 1} من 5`)}>{[0, 1, 2, 3, 4].map((k) => <span key={k} className={`h-1.5 flex-1 rounded transition-colors duration-500 ${k < st ? "bg-brand-mint" : k === st ? "gradient-brand" : "bg-surface"}`} />)}</div></td></tr>; })}
-                {!active.length && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{text("No active deals yet. Create your first one in a few minutes.", "لا توجد صفقات جارية بعد. أنشئ صفقتك الأولى في دقائق.")}</td></tr>}</tbody></table></div>
+                {!active.length && <tr><td colSpan={4} className="p-8 text-center text-muted-foreground"><div className="mx-auto w-44"><IllEmpty /></div><p className="mt-2 font-semibold text-foreground">{text("A blank page", "صفحتك بيضاء")}</p><p className="mt-1">{text("No active deals yet. Create your first one in a few minutes.", "لا توجد صفقات جارية بعد. أنشئ صفقتك الأولى في دقائق.")}</p><Button asChild size="sm" className="mt-3"><Link to="/deals/new"><Plus />{text("New deal", "صفقة جديدة")}</Link></Button></td></tr>}</tbody></table></div>
           </CardContent></Card>
           <Card><CardContent className="p-6"><h3 className="text-lg font-bold">{text("Latest updates", "آخر التحديثات")}</h3><ol className="mt-5 space-y-5 border-s ps-5">{myActivity.map((item, i) => <li className="relative" key={item.id}><span className="absolute -start-[25px] top-1.5 flex size-2">{i === 0 && <span className="absolute inset-0 rounded-full bg-brand-mint opacity-70 motion-safe:animate-ping" />}<span className="relative size-2 rounded-full bg-brand-mint" /></span><p className="text-sm font-medium">{text(item.title)}</p>{item.body && <p className="mt-1 text-xs leading-5 text-muted-foreground">{text(item.body)}</p>}<p className="mt-1 text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString(locale === "ar" ? "ar-SA" : "en-GB", { dateStyle: "medium", timeStyle: "short" })}</p></li>)}{!myActivity.length && <li className="text-sm text-muted-foreground">{text("No updates yet.", "لا توجد تحديثات بعد.")}</li>}</ol></CardContent></Card>
         </div>

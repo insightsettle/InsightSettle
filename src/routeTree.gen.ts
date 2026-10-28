@@ -37,6 +37,7 @@ import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
+import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
 import { Route as ApiDisputeAnalysisRouteImport } from './routes/api/dispute-analysis'
 import { Route as ApiDocumentReviewRouteImport } from './routes/api/document-review'
@@ -229,6 +230,11 @@ const AuthenticatedVerificationRoute =
     path: '/verification',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiDealRiskRoute = ApiDealRiskRouteImport.update({
   id: '/api/deal-risk',
   path: '/api/deal-risk',
@@ -526,6 +532,7 @@ export interface FileRoutesByFullPath {
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/links': typeof AuthenticatedLinksRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
@@ -605,6 +612,7 @@ export interface FileRoutesByTo {
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/links': typeof AuthenticatedLinksRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
@@ -685,6 +693,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
   '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
+  '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
   '/api/dispute-analysis': typeof ApiDisputeAnalysisRoute
   '/api/document-review': typeof ApiDocumentReviewRoute
@@ -767,6 +776,7 @@ export interface FileRouteTypes {
     | '/invoices'
     | '/links'
     | '/verification'
+    | '/welcome'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
@@ -846,6 +856,7 @@ export interface FileRouteTypes {
     | '/invoices'
     | '/links'
     | '/verification'
+    | '/welcome'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
@@ -925,6 +936,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices'
     | '/_authenticated/links'
     | '/_authenticated/verification'
+    | '/_authenticated/welcome'
     | '/api/deal-risk'
     | '/api/dispute-analysis'
     | '/api/document-review'
@@ -1210,6 +1222,13 @@ declare module '@tanstack/react-router' {
       path: '/verification'
       fullPath: '/verification'
       preLoaderRoute: typeof AuthenticatedVerificationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/welcome': {
+      id: '/_authenticated/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/deal-risk': {
@@ -1581,6 +1600,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
   AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
+  AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedAuctionsIdRoute: typeof AuthenticatedAuctionsIdRoute
   AuthenticatedDealsDealIdRoute: typeof AuthenticatedDealsDealIdRoute
   AuthenticatedDealsNewRoute: typeof AuthenticatedDealsNewRoute
@@ -1598,6 +1618,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
   AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
+  AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedAuctionsIdRoute: AuthenticatedAuctionsIdRoute,
   AuthenticatedDealsDealIdRoute: AuthenticatedDealsDealIdRoute,
   AuthenticatedDealsNewRoute: AuthenticatedDealsNewRoute,

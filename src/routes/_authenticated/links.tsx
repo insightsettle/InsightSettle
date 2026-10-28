@@ -15,6 +15,7 @@ import { dealLinkUrl, LINK_STATE_TEXT, shareText, type DealLinkInput } from "@/l
 import { useLocale } from "@/lib/locale";
 import { formatMoney } from "@/lib/money";
 import { ListSkeleton } from "@/components/motion/Motion";
+import { IllLink } from "@/components/illustrations/Illustrations";
 
 export const Route = createFileRoute("/_authenticated/links")({
   head: () => ({ meta: [{ title: "Deal links | Insight" }, { name: "description", content: "Create a link for your offer and share it with buyers." }] }),
@@ -99,7 +100,7 @@ function LinksPage() {
         : links.isError ? <p role="alert" className="text-destructive">{text("Your links could not be loaded.", "تعذّر تحميل روابطك.")}</p>
         : (links.data ?? []).length === 0 ? (
           <Card><CardContent className="flex flex-col items-center gap-3 p-10 text-center">
-            <Link2 className="size-8 text-primary" />
+            <div className="w-48"><IllLink /></div>
             <p className="font-medium">{text("No deal links yet", "لا توجد روابط بعد")}</p>
             <p className="max-w-md text-sm text-muted-foreground">{text("Create one for something you sell, then paste it in your Instagram bio or send it on WhatsApp.", "أنشئ رابطاً لشيء تبيعه، ثم ضعه في حسابك على إنستغرام أو أرسله عبر واتساب.")}</p>
           </CardContent></Card>
