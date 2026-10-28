@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write  # only to push screenshots to the separate live-screens branch (never main)
 
 jobs:
   probe:
@@ -41,3 +41,11 @@ jobs:
           name: live-screens
           path: shots/*.png
           retention-days: 7
+      - name: Publish screenshots branch (never main)
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd shots && rm -rf node_modules package*.json shot.mjs
+          git init -q && git checkout -q -b live-screens && git add -A
+          git -c user.name="Insight CI" -c user.email="ci@insightsettle.com" commit -qm "Live screenshots ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" live-screens
