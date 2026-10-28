@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,6 +8,7 @@ import '../l10n.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/illustrations.dart';
+import '../widgets/phosphor.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../config.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import '../widgets/phosphor.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});

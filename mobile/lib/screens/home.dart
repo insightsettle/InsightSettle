@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../api.dart';
 import '../deal_rules.dart';
@@ -10,6 +9,7 @@ import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/illustrations.dart';
 import '../widgets/journey.dart';
+import '../widgets/phosphor.dart';
 import 'account.dart';
 import 'deal_detail.dart';
 import 'join_deal.dart';

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/illustrations.dart';
+import '../widgets/phosphor.dart';
 
 const _welcomeKey = 'insight.welcome.v1';
 

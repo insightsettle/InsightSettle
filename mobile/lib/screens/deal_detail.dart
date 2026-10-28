@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
@@ -17,6 +16,7 @@ import '../widgets/common.dart';
 import '../widgets/dialogs.dart';
 import '../widgets/illustrations.dart';
 import '../widgets/journey.dart';
+import '../widgets/phosphor.dart';
 
 const kPayCurrencies = ['SAR', 'AED', 'BHD', 'KWD', 'QAR', 'OMR', 'USD'];
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../l10n.dart';
 import '../theme.dart';
+import 'phosphor.dart';
 
 /// Direction of user-entered text: right-to-left when its first letter is Arabic, otherwise left-to-right,
 /// so English titles and notes keep their punctuation in place inside the Arabic app.
@@ -112,7 +112,7 @@ class SectionCard extends StatelessWidget {
   const SectionCard({super.key, required this.title, required this.children, this.icon, this.trailing});
   final String title;
   final List<Widget> children;
-  final IconData? icon;
+  final Object? icon;
   final Widget? trailing;
 
   @override
@@ -195,7 +195,7 @@ class ErrorView extends StatelessWidget {
 }
 
 /// Phosphor icon for each kind of deal, the same family as the website.
-IconData dealTypeIcon(String type) => switch (type) {
+DuotoneIconData dealTypeIcon(String type) => switch (type) {
       'services' => PhosphorIconsDuotone.briefcase,
       'contracting' => PhosphorIconsDuotone.hammer,
       'freelance' => PhosphorIconsDuotone.laptop,

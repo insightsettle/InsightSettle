@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter/services.dart';
 
 import '../api.dart';
@@ -8,6 +7,7 @@ import '../l10n.dart';
 import '../money.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/phosphor.dart';
 
 const kDealCurrencies = ['SAR', 'BHD', 'AED', 'QAR', 'KWD', 'OMR', 'USD'];
 const kCountries = {'SA': 'Saudi Arabia', 'BH': 'Bahrain', 'AE': 'United Arab Emirates', 'KW': 'Kuwait', 'QA': 'Qatar', 'OM': 'Oman'};

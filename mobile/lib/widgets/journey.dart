@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../l10n.dart';
 import '../models.dart';
 import '../theme.dart';
+import 'phosphor.dart';
 
 /// Index of the current station (0 Agree … 4 Release); 5 when the deal has finished.
 int journeyStep(Deal deal) {

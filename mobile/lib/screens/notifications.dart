@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../api.dart';
 import '../l10n.dart';
@@ -7,6 +6,7 @@ import '../models.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/illustrations.dart';
+import '../widgets/phosphor.dart';
 import 'deal_detail.dart';
 
 class NotificationsScreen extends StatefulWidget {
