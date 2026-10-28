@@ -1,8 +1,8 @@
 /**
  * Payment methods and their effect on the Insight fee (founder decision D-66, 25 Oct 2026).
  *
- * - The fee cap (BHD 1,300 since D-69; earlier USD 3,500) applies only to bank transfer, where the provider cost is a small flat amount.
- *   Card payments (mada, credit card) pay the full 2.5% with no cap, so a large card payment never costs
+ * - The fee cap (BHD 1,500 since D-71; BHD 1,300 under D-69; earlier USD 3,500) applies only to bank transfer, where the provider cost is a small flat amount.
+ *   Card payments (mada, credit card) pay the full 3% with no cap, so a large card payment never costs
  *   Insight more than it earns.
  * - Credit cards are not offered above SAR 50,000.
  * - A method is offered only if Insight keeps at least 0.5% of the deal value after the provider cost.

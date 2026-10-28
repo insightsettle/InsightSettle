@@ -11,17 +11,20 @@ export type FeeSchedule = { currency: "USD" | "BHD"; bands: FeeBand[]; minFee: n
 export type FeePayer = "buyer" | "seller" | "split";
 
 /**
- * One flat Insight rate for every deal (D-64, 24 Oct 2026), live in fee_rules. Percent as a number, e.g. 2.5 = 2.5%.
- * Insight launches from Bahrain (D-69, 28 Oct 2026): the minimum and the cap are set in Bahraini dinars,
- * BHD 6 and BHD 1,300 (rounded from the earlier USD 15 and USD 3,500). Deals in any currency are converted
- * to BHD at the provider rate to apply them.
+ * One flat Insight rate for every deal, live in fee_rules. Percent as a number, e.g. 3 = 3%.
+ * D-71 (founder, 28 Oct 2026): 3% of the deal value, minimum BHD 15, cap BHD 1,500 (the cap applies to bank
+ * transfer only, D-66). Auctions are priced separately at 1% (auction_fee_settings).
+ * Deals in any currency are converted to BHD at the provider rate to apply the minimum and the cap.
  */
 export const PROVISIONAL_SCHEDULE: FeeSchedule = {
   currency: "BHD",
-  bands: [{ from: 0, to: null, percent: 2.5 }],
-  minFee: 6,
-  maxFee: 1_300,
+  bands: [{ from: 0, to: null, percent: 3 }],
+  minFee: 15,
+  maxFee: 1_500,
 };
+
+/** The D-69 schedule (2.5%, BHD 6, BHD 1,300), kept for history and regression tests. */
+export const BHD_SCHEDULE_D69: FeeSchedule = { currency: "BHD", bands: [{ from: 0, to: null, percent: 2.5 }], minFee: 6, maxFee: 1_300 };
 
 /** The earlier USD schedule (D-64 before D-69), kept for history and regression tests. */
 export const USD_SCHEDULE_D64: FeeSchedule = { currency: "USD", bands: [{ from: 0, to: null, percent: 2.5 }], minFee: 15, maxFee: 3_500 };

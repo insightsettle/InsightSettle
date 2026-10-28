@@ -112,7 +112,7 @@ async function dealRoutes(admin: any, deal: any, countries: { buyerCountry: stri
 }
 
 /** The one place a deal is priced. The fee depends on the payment method: the cap applies to bank transfer only (D-66). */
-export async function priceDeal(admin: any, deal: any, payCurrency?: string | null, method: PaymentMethod = DEFAULT_METHOD): Promise<DealPricing> {
+export async function priceDeal(admin: any, deal: any, payCurrency?: string | null, requested?: PaymentMethod): Promise<DealPricing> {
   const countries = await partyCountries(admin, deal);
   const inputs = await loadPricingInputs(admin, deal.currency, payCurrency || defaultPayCurrency(countries.buyerCountry));
   const auctionSettings = deal.deal_type === 'auction' ? await admin.from('auction_fee_settings').select('*').eq('id',true).single() : null;
@@ -131,6 +131,8 @@ export async function priceDeal(admin: any, deal: any, payCurrency?: string | nu
   const amountSar = Number(deal.amount) * inputs.sarPerUnit;
   const routes = await dealRoutes(admin, deal, countries, inputs.payCurrency, amountSar);
   const methods = PAYMENT_METHODS.map((m) => checkMethod(m, amountSar, feeFor(m) * inputs.sarPerUnit, routes ? (routes[m]?.provider ? routes[m]!.costSar : null) : undefined));
+  // No method chosen yet: the default when it is offered, else the first offered method (auctions at 1% are often bank transfer only, D-71).
+  const method: PaymentMethod = requested ?? (methods.find((x) => x.method === DEFAULT_METHOD && x.allowed) ?? methods.find((x) => x.allowed))?.method ?? DEFAULT_METHOD;
   const fee = feeFor(method);
   const breakdown = splitFee({
     amount: Number(deal.amount), currency: deal.currency, fee, feePayer: deal.deal_type === 'auction' ? 'buyer' : deal.fee_payer, ...countries, vatTable: inputs.vatTable,

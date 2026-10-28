@@ -40,7 +40,7 @@ function FeesPage() {
   const q = useQuery({ queryKey: ["bhd-fee-bands"], queryFn: loadBands });
   const [bands, setBands] = useState<Band[]>([]);
   const [minFee, setMinFee] = useState(6);
-  const [maxFee, setMaxFee] = useState<number | null>(1300);
+  const [maxFee, setMaxFee] = useState<number | null>(1500);
   const [test, setTest] = useState(4000);
   const [msg, setMsg] = useState<string | null>(null);
 

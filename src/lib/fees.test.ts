@@ -121,7 +121,7 @@ describe("flat 2.5% schedule (D-64)", () => {
     expect(f(200_000, P)).toBe(3_500);
   });
   it("D-69: charges 2.5% with the BHD 6 minimum and BHD 1,300 cap", async () => {
-    const { feeUsd: f, dealFee: d, PROVISIONAL_SCHEDULE: P } = await import("./fees");
+    const { feeUsd: f, dealFee: d, BHD_SCHEDULE_D69: P } = await import("./fees");
     expect(P.currency).toBe("BHD");
     expect(f(100, P)).toBe(6);
     expect(f(4_000, P)).toBeCloseTo(100, 6);
@@ -130,5 +130,19 @@ describe("flat 2.5% schedule (D-64)", () => {
     const bhdPerSar = 1 / 9.9734;
     expect(d(1_000_000, "SAR", bhdPerSar, P)).toBeCloseTo(1_300 / bhdPerSar, 1);
     expect(d(100, "BHD", 1, P)).toBe(6);
+  });
+});
+
+describe("flat 3% schedule (D-71)", () => {
+  it("charges 3% with the BHD 15 minimum and BHD 1,500 cap", async () => {
+    const { feeUsd: f, dealFee: d, PROVISIONAL_SCHEDULE: P } = await import("./fees");
+    expect(P.currency).toBe("BHD");
+    expect(f(100, P)).toBe(15);
+    expect(f(1_850, P)).toBeCloseTo(55.5, 6);
+    expect(f(12_000, P)).toBeCloseTo(360, 6);
+    expect(f(100_000, P)).toBe(1_500);
+    const bhdPerSar = 1 / 9.9734;
+    expect(d(1_000_000, "SAR", bhdPerSar, P)).toBeCloseTo(1_500 / bhdPerSar, 1);
+    expect(d(100, "BHD", 1, P)).toBe(15);
   });
 });
