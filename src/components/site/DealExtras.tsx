@@ -93,7 +93,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
       <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
         <div className="flex items-center gap-2">
           <AlertCircle className="size-4 text-destructive" />
-          <p className="font-semibold">Dispute: {reasonLabels[d.reason] ?? d.reason}</p>
+          <p className="font-semibold">{text("Dispute: ", "نزاع: ")}{text(reasonLabels[d.reason] ?? d.reason)}</p>
         </div>
         <p className="mt-1 text-muted-foreground">{d.details}</p>
         <div className="mt-3 grid gap-1 text-xs text-muted-foreground sm:grid-cols-3">
@@ -111,7 +111,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
               disabled={(!note.trim() && !file) || act.isPending}
               onClick={() => act.mutate(() => addDisputeEvidence(deal.id, d.id, note.trim(), file))}
             >
-              Submit evidence
+              {text("Submit evidence", "إرسال الإثبات")}
             </Button>
           </div>
         )}
