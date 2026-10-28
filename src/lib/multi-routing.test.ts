@@ -51,7 +51,7 @@ describe('routing rules', () => {
   it('cheapest eligible uses the cap: at SAR 100,000 lite mada (200) beats Geidea (900)', () => {
     const t: RoutingTable = { version: 't', rules: [{ id: 'C', priority: 1, enabled: true, action: { strategy: 'cheapest' } }] };
     // Hypothetical: Geidea re-enabled for mada, to test the cap logic only.
-    const list = SEED_PROVIDERS.map(p => p.code === 'geidea' ? { ...p, status: 'not_connected' as const, jobs: { ...p.jobs, payin: { ...p.jobs.payin, mada: { ...p.jobs.payin.mada, on: true } }, payout: { ...p.jobs.payout, on: true } } } : p);
+    const list = SEED_PROVIDERS.map(p => p.code === 'geidea' ? { ...p, status: 'not_connected' as const, jobs: { ...p.jobs, payin: { ...p.jobs.payin, mada: { on: true, countries: ['SA'], currencies: ['SAR'], minAmount: null, maxAmount: null, maxHoldDays: null } }, payout: { ...p.jobs.payout, on: true, countries: ['SA'], currencies: ['SAR'] } } } : p);
     expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000), null, list)).toMatchObject({ provider: 'lite', costSar: 200 });
     expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000, 30), null, list)).toMatchObject({ provider: 'geidea', costSar: 900 });
   });
