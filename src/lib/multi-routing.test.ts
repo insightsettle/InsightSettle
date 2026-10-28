@@ -79,7 +79,7 @@ describe('routing_mode=simulated_only keeps today', () => {
   it('checkMethod without a routed cost equals the previous PROVIDER_COST behaviour', () => {
     for (const m of PAYMENT_METHODS) for (const a of [1000, 20000, 60000, 550000]) {
       const prev = checkMethod(m, a, fee(a, m));
-      const costOld = m === 'bank_transfer' ? 10 : m === 'mada' ? a * 0.0175 + 1 : a * 0.0275 + 1;
+      const costOld = m === 'bank_transfer' ? 5 : m === 'mada' ? a * 0.008 + 1 : a * 0.019 + 1;
       expect(prev.margin).toBeCloseTo((fee(a, m) - costOld) / a, 9);
     }
   });

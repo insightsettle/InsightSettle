@@ -11,14 +11,14 @@ describe("payment methods (D-66)", () => {
     expect(sarFee(1_000_000, "bank_transfer")).toBeCloseTo(1_500 * SAR_PER_BHD, 2);
     expect(sarFee(1_000_000, "mada")).toBeCloseTo(30_000, 2);
   });
-  it("SAR 550,000 at 3% (D-71): bank keeps about SAR 14,950; mada about SAR 6,874; credit card refused", () => {
+  it("SAR 550,000 at 3% (D-71): bank keeps about SAR 14,955; mada about SAR 12,099; credit card refused above SAR 50,000", () => {
     const bank = checkMethod("bank_transfer", 550_000, sarFee(550_000, "bank_transfer"));
     const mada = checkMethod("mada", 550_000, sarFee(550_000, "mada"));
     const credit = checkMethod("credit_card", 550_000, sarFee(550_000, "credit_card"));
     expect(bank.allowed).toBe(true);
-    expect(bank.feeSar - providerCostSar(550_000, "bank_transfer")).toBeCloseTo(1_500 * SAR_PER_BHD - 10, 0);
+    expect(bank.feeSar - providerCostSar(550_000, "bank_transfer")).toBeCloseTo(1_500 * SAR_PER_BHD - 5, 0);
     expect(mada.allowed).toBe(true);
-    expect(mada.feeSar - providerCostSar(550_000, "mada")).toBeCloseTo(6_874, 0);
+    expect(mada.feeSar - providerCostSar(550_000, "mada")).toBeCloseTo(12_099, 0);
     expect(credit.allowed).toBe(false);
   });
   it("never offers a method below the minimum margin", () => {
@@ -32,7 +32,8 @@ describe("payment methods (D-66)", () => {
 });
 
 describe("credit card under D-71", () => {
-  it("stays below the 0.5% minimum margin at 3% once the minimum fee no longer applies", () => {
-    for (const amount of [10_000, 20_000, 49_000]) expect(checkMethod("credit_card", amount, sarFee(amount, "credit_card")).allowed).toBe(false);
+  it("is offered up to SAR 50,000 at 3% with the temporary AFS costs", () => {
+    for (const amount of [500, 10_000, 20_000, 49_000]) expect(checkMethod("credit_card", amount, sarFee(amount, "credit_card")).allowed).toBe(true);
+    expect(checkMethod("credit_card", 60_000, sarFee(60_000, "credit_card")).allowed).toBe(false);
   });
 });

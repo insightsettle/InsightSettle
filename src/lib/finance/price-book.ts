@@ -27,7 +27,7 @@ const V = '2026-10-26';
 const SIM = (method: RouteMethod, percent: number, fixed: number): PriceRow[] =>
   ['SA', 'BH', 'AE', 'KW', 'OM', 'QA', 'OTHER'].flatMap(country => ['SAR', 'BHD', 'AED', 'KWD', 'OMR', 'QAR', 'USD'].map(currency => ({
     provider: 'manual', method, country, currency, percent, fixed, cap: null, maxPerPayment: null, maxHoldDays: null, validFrom: V,
-    source: 'reference' as const, evidence: 'Simulated provider: same values as the previous single PROVIDER_COST so the demo is unchanged.',
+    source: 'reference' as const, evidence: 'Simulated provider: same values as PROVIDER_COST (D-71 temporary optimistic AFS assumption).',
   })));
 
 export const SEED_PRICE_BOOK: PriceRow[] = [
@@ -43,7 +43,7 @@ export const SEED_PRICE_BOOK: PriceRow[] = [
     provider: 'afs', method, country, currency: country === 'BH' ? 'BHD' : ({ AE: 'AED', KW: 'KWD', OM: 'OMR', QA: 'QAR' } as Record<string, string>)[country]!,
     percent: null, fixed: 0, cap: null, maxPerPayment: null, maxHoldDays: null, validFrom: V, source: 'reference' as const, evidence: 'AFS: awaiting quote and specifications.',
   }))),
-  ...SIM('bank_transfer', 0, 10), ...SIM('mada', 1.75, 1), ...SIM('credit_card', 2.75, 1),
+  ...SIM('bank_transfer', 0, 5), ...SIM('mada', 0.8, 1), ...SIM('credit_card', 1.9, 1),
 ];
 
 export type RouteRule = {

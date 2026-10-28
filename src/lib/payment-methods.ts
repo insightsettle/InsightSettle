@@ -7,7 +7,7 @@
  * - Credit cards are not offered above SAR 50,000.
  * - A method is offered only if Insight keeps at least 0.5% of the deal value after the provider cost.
  *
- * Provider costs are Tap reference prices (C07, 24 Oct) until Insight has a written quote; staff can change
+ * Provider costs are a temporary optimistic AFS assumption (D-71) until Insight has a written quote; staff can change
  * them here in one place.
  */
 import type { FeeSchedule } from "@/lib/fees";
@@ -23,10 +23,13 @@ export const METHOD_LABEL: Record<PaymentMethod, readonly [en: string, ar: strin
 };
 
 /** Simulated provider cost per payment (routing_mode=simulated_only). Real candidates live in the versioned price book (src/lib/finance/price-book.ts). */
+/** D-71 (founder, 28 Oct 2026): temporary optimistic AFS assumption until AFS sends its prices: debit card (mada/BENEFIT)
+ *  0.8% + BHD 0.1, credit card 1.9% + BHD 0.1, bank transfer BHD 0.5 flat (BHD 0.1 ≈ SAR 1, BHD 0.5 ≈ SAR 5).
+ *  Earlier Tap reference prices: bank SAR 10, mada 1.75% + SAR 1, credit card 2.75% + SAR 1. */
 export const PROVIDER_COST: Record<PaymentMethod, { percent: number; fixedSar: number }> = {
-  bank_transfer: { percent: 0, fixedSar: 10 },
-  mada: { percent: 1.75, fixedSar: 1 },
-  credit_card: { percent: 2.75, fixedSar: 1 },
+  bank_transfer: { percent: 0, fixedSar: 5 },
+  mada: { percent: 0.8, fixedSar: 1 },
+  credit_card: { percent: 1.9, fixedSar: 1 },
 };
 
 export const CREDIT_CARD_MAX_SAR = 50_000;
