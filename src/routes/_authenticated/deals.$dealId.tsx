@@ -258,7 +258,7 @@ function OrdinaryDealPage() {
         <div className="mx-auto max-w-4xl px-4 py-20 text-center">
           {dealQuery.isLoading ? <PageSkeleton label={text("Loading deal…", "جارٍ تحميل الصفقة…")} /> : <h1 className="text-3xl font-bold">{text("Deal not found", "الصفقة غير موجودة")}</h1>}
           <Button asChild className="mt-6">
-            <Link to="/dashboard">Back to dashboard</Link>
+            <Link to="/dashboard">{text("Back to dashboard", "العودة إلى لوحتي")}</Link>
           </Button>
         </div>
       </SiteShell>
@@ -460,12 +460,12 @@ function OrdinaryDealPage() {
                       <Input
                         value={carrier}
                         onChange={(e) => setCarrier(e.target.value)}
-                        placeholder="Carrier (e.g. Aramex)"
+                        placeholder={text("Carrier (e.g. Aramex)", "شركة الشحن (مثل أرامكس)")}
                       />
                       <Input
                         value={tracking}
                         onChange={(e) => setTracking(e.target.value)}
-                        placeholder="Tracking number"
+                        placeholder={text("Tracking number", "رقم التتبع")}
                       />
                       <select
                         className="h-10 rounded-md border border-input bg-background px-3 text-sm"
@@ -504,7 +504,7 @@ function OrdinaryDealPage() {
                           )
                         }
                       >
-                        Update shipping
+                        {text("Update shipping", "تحديث الشحن")}
                       </Button>
                     </div>
                   )}
@@ -537,7 +537,7 @@ function OrdinaryDealPage() {
                         onChange={(e) => setTermsNote(e.target.value)}
                         rows={2}
                         className="mt-3"
-                        placeholder="Optional: what should change before you accept?"
+                        placeholder={text("Optional: what should change before you accept?", "اختياري: ما الذي يجب تغييره قبل موافقتك؟")}
                       />
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button onClick={() => action.mutate(() => agreeFn({ data: { dealId: deal.id } }), { onSuccess: () => setMoment("agreed") })}>
@@ -730,7 +730,7 @@ function OrdinaryDealPage() {
                       onChange={(e) => setReviewNote(e.target.value)}
                       rows={3}
                       className="mt-2"
-                      placeholder="Describe what still needs to change"
+                      placeholder={text("Describe what still needs to change", "اشرح ما يحتاج إلى تعديل")}
                     />
                     <Button
                       variant="outline"
@@ -783,7 +783,7 @@ function OrdinaryDealPage() {
                         value={ratingComment}
                         onChange={(e) => setRatingComment(e.target.value)}
                         rows={2}
-                        placeholder="Optional comment about this trade"
+                        placeholder={text("Optional comment about this trade", "تعليق اختياري عن هذه الصفقة")}
                       />
                       <Button
                         variant="outline"
@@ -892,7 +892,7 @@ function OrdinaryDealPage() {
                   onChange={(e) => setMessage(e.target.value)}
                   rows={3}
                   className="mt-4"
-                  placeholder="Write a message"
+                  placeholder={text("Write a message", "اكتب رسالة")}
                 />
                 <Button
                   className="mt-3"

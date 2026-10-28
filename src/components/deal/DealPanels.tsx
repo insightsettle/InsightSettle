@@ -269,7 +269,7 @@ function VariationForm({ deal, milestones, onDone }: { deal: any; milestones: Mi
     <div className="mt-3 space-y-3 rounded-md border border-border p-4">
       <p className="text-sm font-semibold">{text('Variation', 'أمر تغيير')}</p>
       <MilestoneEditor rows={rows} onChange={setRows} currency={deal.currency} total={Number(deal.amount)} allowAdvance={deal.deal_type === "contracting"} />
-      <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Reason for the variation" />
+      <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder={text("Reason for the variation", "سبب التعديل")} />
       <div className="flex flex-wrap gap-2">
         <Button size="sm" disabled={m.isPending || note.trim().length < 3} onClick={() => m.mutate()}>{text('Send variation for acceptance', 'إرسال أمر التغيير للموافقة')}</Button>
         <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>{text('Cancel', 'إلغاء')}</Button>

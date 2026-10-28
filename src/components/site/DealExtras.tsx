@@ -103,7 +103,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
         </div>
         {d.status !== "resolved" && isParty && (
           <div className="mt-3 space-y-2">
-            <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add your response or evidence note" />
+            <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder={text("Add your response or evidence note", "أضف ردك أو ملاحظة الإثبات")} />
             <input type="file" accept="image/*,video/*,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="w-full min-w-0 text-xs" />
             <Button
               size="sm"
@@ -154,7 +154,7 @@ export function DisputePanel({ deal, isParty }: { deal: DealRow & { deal_type?: 
         ))}
         {auctionDisputeOptions(deal.deal_type ?? '').map(o => <option key={o.value} value={o.value}>{text(o.en,o.ar)}</option>)}
       </select>
-      <Textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} className="mt-2" placeholder="Explain the problem in detail" />
+      <Textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} className="mt-2" placeholder={text("Explain the problem in detail", "اشرح المشكلة بالتفصيل")} />
       <Button
         variant="outline"
         className="mt-3"
