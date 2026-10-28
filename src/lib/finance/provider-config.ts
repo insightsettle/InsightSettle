@@ -37,8 +37,9 @@ export const SEED_PROVIDERS: ProviderConfig[] = [
       payout: { on: true, countries: [...GCC, 'OTHER'], currencies: [...GCC_CUR, 'USD'] }, refunds: { full: true, partial: true }, holding: 'simulated', splitPayouts: true, milestones: true }, limits: noLimits },
   { code: 'lite', nameEn: 'lite', nameAr: 'لايت', adapter: 'lite', country: 'SA', status: 'not_connected', contact: '', notes: 'Founder: mada only for now; cards may be enabled if the card price improves.', priceSource: 'verbal',
     jobs: candidateJobs({ ...allOff(), mada: sa(true, 14), credit_card: { ...sa(false), note: 'Off by founder decision' }, bank_transfer: sa(true) }, ['SA'], ['SAR']), limits: { ...noLimits, maxHoldDays: { mada: 14 } } },
-  { code: 'geidea', nameEn: 'Geidea', nameAr: 'جيديا', adapter: 'geidea', country: 'SA', status: 'not_connected', contact: '', notes: '', priceSource: 'written',
-    jobs: candidateJobs({ ...allOff(), credit_card: sa(true), mada: sa(false) }, ['SA'], ['SAR']), limits: noLimits },
+  // Closed by the founder on 28 Oct 2026: a basic gateway with no split payouts (C07 RFQ log). Kept archived for history; never routed.
+  { code: 'geidea', nameEn: 'Geidea', nameAr: 'جيديا', adapter: 'geidea', country: 'SA', status: 'archived', contact: '', notes: 'Closed 28 Oct 2026 (founder): basic gateway, no split payouts, settles to one merchant account (D-21).', priceSource: 'written',
+    jobs: candidateJobs(allOff('Provider closed'), ['SA'], ['SAR'], false), limits: noLimits },
   { code: 'tap', nameEn: 'Tap Payments', nameAr: 'تاب', adapter: 'tap', country: 'SA', status: 'not_connected', contact: '', notes: 'Candidate; waiting for the integration meeting.', priceSource: 'reference',
     jobs: candidateJobs(allOff('Waiting for integration meeting'), ['SA'], ['SAR'], false), limits: noLimits },
   { code: 'afs', nameEn: 'AFS · Arab Financial Services', nameAr: 'الخدمات المالية العربية (AFS)', adapter: 'afs', country: 'BH', status: 'not_connected', contact: '', notes: 'Bahrain and GCC candidate.', priceSource: 'awaiting quote',

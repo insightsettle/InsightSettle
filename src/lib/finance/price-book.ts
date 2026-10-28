@@ -99,6 +99,8 @@ export function eligibility(book: PriceRow[], provider: string, i: RouteInput, l
   // A funded deal keeps its provider: job switches and rule changes never re-route it.
   if (funded) return { reasons: [], row, unverified: p.status !== 'simulated' };
   reasons.push(...jobReasons(p, i));
+  // Disabled or archived providers (for example Geidea, closed 28 Oct) are never routed to.
+  if (p.status === 'disabled' || p.status === 'archived') reasons.push('provider_' + p.status);
   if (!row) reasons.push('payin_method_country_currency_not_supported');
   else if (row.offered === false) reasons.push('method_not_offered');
   else if (row.percent == null) reasons.push('awaiting_quote');

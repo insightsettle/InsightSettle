@@ -61,7 +61,9 @@ describe('provider configuration', () => {
     expect(SEED_PROVIDERS.map(p => p.code)).toEqual(['manual', 'lite', 'geidea', 'tap', 'afs']);
     const by = (c: string) => SEED_PROVIDERS.find(p => p.code === c)!;
     expect([by('lite').jobs.payin.mada.on, by('lite').jobs.payin.credit_card.on, by('lite').jobs.payin.bank_transfer.on]).toEqual([true, false, true]);
-    expect([by('geidea').jobs.payin.credit_card.on, by('geidea').jobs.payin.mada.on]).toEqual([true, false]);
+    // Geidea closed by the founder on 28 Oct: archived, nothing switched on.
+    expect(by('geidea').status).toBe('archived');
+    expect(Object.values(by('geidea').jobs.payin).some(j => j.on)).toBe(false);
     expect(Object.values(by('tap').jobs.payin).some(j => j.on)).toBe(false);
     expect(Object.values(by('afs').jobs.payin).some(j => j.on)).toBe(false);
   });

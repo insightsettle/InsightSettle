@@ -3,7 +3,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { checkMethod, PAYMENT_METHODS } from '@/lib/payment-methods';
 import { SEED_PROVIDERS } from './finance/provider-config';
-import { resolveRoute, rowCost, SEED_PRICE_BOOK, SEED_ROUTING, holdingDaysFor, effectiveConfig, type RouteInput, type RoutingTable } from './finance/price-book';
+import { eligibility, resolveRoute, rowCost, SEED_PRICE_BOOK, SEED_ROUTING, holdingDaysFor, effectiveConfig, type RouteInput, type RoutingTable } from './finance/price-book';
 
 const sa = (method: RouteInput['method'], amountSar: number, holdingDays = 7, dealType: RouteInput['dealType'] = 'goods'): RouteInput =>
   ({ dealType, payerCountry: 'SA', payInCurrency: 'SAR', method, payeeCountry: 'SA', payoutCurrency: 'SAR', amountSar, holdingDays });
@@ -16,10 +16,11 @@ describe('founder test cases', () => {
     expect(route(sa('mada', 2000))).toMatchObject({ provider: 'lite', ruleId: 'R1', costSar: 17 });
     expect(margin(sa('mada', 2000))).toMatchObject({ allowed: true }); expect(margin(sa('mada', 2000)).margin).toBeCloseTo(0.0165, 6);
   });
-  it('SAR 20,000 credit card → lite cards are Off, so cheapest is Geidea 2.40% + 1 (481); margin 0.095% fails the 0.5% rule', () => {
-    expect(route(sa('credit_card', 20000))).toMatchObject({ provider: 'geidea', ruleId: 'R2', costSar: 481 });
-    expect(route(sa('credit_card', 20000)).rejected.find(x => x.provider === 'lite')?.reasons).toContain('job_off');
-    const m = margin(sa('credit_card', 20000)); expect(m.allowed).toBe(false); expect(m.margin).toBeCloseTo(19 / 20000, 6);
+  it('SAR 20,000 credit card → lite cards are Off and Geidea is closed (28 Oct), so no real provider takes cards', () => {
+    const r = route(sa('credit_card', 20000));
+    expect(r.provider).not.toBe('geidea'); expect(r.provider).not.toBe('lite');
+    expect(eligibility(SEED_PRICE_BOOK, 'geidea', sa('credit_card', 20000)).reasons).toContain('provider_archived');
+    expect(eligibility(SEED_PRICE_BOOK, 'lite', sa('credit_card', 20000)).reasons).toContain('job_off');
   });
   it('SAR 550,000 bank transfer → lite wallet 0%, fee capped at SAR 13,125', () => {
     expect(route(sa('bank_transfer', 550000))).toMatchObject({ provider: 'lite', costSar: 0 });
@@ -49,7 +50,8 @@ describe('routing rules', () => {
   });
   it('cheapest eligible uses the cap: at SAR 100,000 lite mada (200) beats Geidea (900)', () => {
     const t: RoutingTable = { version: 't', rules: [{ id: 'C', priority: 1, enabled: true, action: { strategy: 'cheapest' } }] };
-    const list = SEED_PROVIDERS.map(p => p.code === 'geidea' ? { ...p, jobs: { ...p.jobs, payin: { ...p.jobs.payin, mada: { ...p.jobs.payin.mada, on: true } } } } : p);
+    // Hypothetical: Geidea re-enabled for mada, to test the cap logic only.
+    const list = SEED_PROVIDERS.map(p => p.code === 'geidea' ? { ...p, status: 'not_connected' as const, jobs: { ...p.jobs, payin: { ...p.jobs.payin, mada: { ...p.jobs.payin.mada, on: true } }, payout: { ...p.jobs.payout, on: true } } } : p);
     expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000), null, list)).toMatchObject({ provider: 'lite', costSar: 200 });
     expect(resolveRoute(SEED_PRICE_BOOK, t, sa('mada', 100000, 30), null, list)).toMatchObject({ provider: 'geidea', costSar: 900 });
   });
