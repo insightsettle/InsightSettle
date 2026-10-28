@@ -9,8 +9,9 @@ import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/phosphor.dart';
 
-const kDealCurrencies = ['SAR', 'BHD', 'AED', 'QAR', 'KWD', 'OMR', 'USD'];
-const kCountries = {'SA': 'Saudi Arabia', 'BH': 'Bahrain', 'AE': 'United Arab Emirates', 'KW': 'Kuwait', 'QA': 'Qatar', 'OM': 'Oman'};
+// Bahrain is the launch market (D-69): BHD first and the default; every currency stays available.
+const kDealCurrencies = ['BHD', 'SAR', 'AED', 'QAR', 'KWD', 'OMR', 'USD'];
+const kCountries = {'BH': 'Bahrain', 'SA': 'Saudi Arabia', 'AE': 'United Arab Emirates', 'KW': 'Kuwait', 'QA': 'Qatar', 'OM': 'Oman'};
 const kPayeeCountries = {...kCountries, 'OTHER': 'Outside the Gulf'};
 
 class _MilestoneRow {
@@ -29,10 +30,10 @@ class _NewDealScreenState extends State<NewDealScreen> {
   final _form = GlobalKey<FormState>();
   String _type = 'goods';
   String _role = 'seller';
-  String _currency = 'SAR';
+  String _currency = 'BHD';
   String _feePayer = 'split';
-  String _supplierCountry = 'SA';
-  String _deliveryCountry = 'SA';
+  String _supplierCountry = 'BH';
+  String _deliveryCountry = 'BH';
   bool _shipping = true;
   bool _useMilestones = false;
   String _fundingMode = 'upfront';

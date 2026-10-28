@@ -18,7 +18,7 @@ import '../widgets/illustrations.dart';
 import '../widgets/journey.dart';
 import '../widgets/phosphor.dart';
 
-const kPayCurrencies = ['SAR', 'AED', 'BHD', 'KWD', 'QAR', 'OMR', 'USD'];
+const kPayCurrencies = ['BHD', 'SAR', 'AED', 'KWD', 'QAR', 'OMR', 'USD'];
 
 class DealDetailScreen extends StatefulWidget {
   const DealDetailScreen({super.key, required this.dealRef});
@@ -99,7 +99,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
   Future<void> _getQuote(Deal d, Pricing? p) async {
     setState(() => _busy = true);
     try {
-      final q = await api.action('quote', {'dealId': d.id, 'payCurrency': _payCurrency ?? p?.payCurrency ?? 'SAR'});
+      final q = await api.action('quote', {'dealId': d.id, 'payCurrency': _payCurrency ?? p?.payCurrency ?? 'BHD'});
       if (mounted) setState(() => _quote = FxQuote((q as Map).cast<String, dynamic>()));
     } on ApiException catch (e) {
       if (mounted) showMessage(context, tr(e.message), error: true);
@@ -235,7 +235,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
     final d = b.deal;
     final q = _quote;
     final next = nextMilestoneToFund(d, b.milestones);
-    final pay = _payCurrency ?? b.pricing?.payCurrency ?? 'SAR';
+    final pay = _payCurrency ?? b.pricing?.payCurrency ?? 'BHD';
     if (q != null && !q.expired) {
       final m = q.milestone;
       return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -271,7 +271,7 @@ class _DealDetailScreenState extends State<DealDetailScreen> {
       Wrap(spacing: 10, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
         Text(tr('Pay in')),
         DropdownButton<String>(
-          value: kPayCurrencies.contains(pay) ? pay : 'SAR',
+          value: kPayCurrencies.contains(pay) ? pay : 'BHD',
           items: [for (final c in kPayCurrencies) DropdownMenuItem(value: c, child: Text(c))],
           onChanged: (v) => setState(() {
             _payCurrency = v;
