@@ -17,7 +17,29 @@ export const Route = createFileRoute("/api/public/ad-media")({
         const db = supabaseAdmin as any;
         let name = "";
         try {
-          name = String(((await request.json()) as { name?: string }).name ?? "").slice(0, 60);
+          const body = (await request.json()) as { name?: string; kind?: string; path?: string; payload?: unknown };
+          name = String(body.name ?? "").slice(0, 60);
+          const key0 = process.env["LOVABLE_API_KEY"];
+          if (body.kind === "raw" && key0) {
+            // Pass a request straight to the AI gateway (path + JSON payload); store a binary reply in the bucket.
+            const res = await fetch(`https://ai.gateway.lovable.dev${String(body.path ?? "/v1/models")}`, {
+              method: body.payload ? "POST" : "GET",
+              headers: { Authorization: `Bearer ${key0}`, "Lovable-API-Key": key0, "Content-Type": "application/json" },
+              body: body.payload ? JSON.stringify(body.payload) : undefined,
+            });
+            const type = res.headers.get("content-type") ?? "";
+            if (type.includes("json") || type.startsWith("text")) {
+              const text = await res.text();
+              let stored: string | null = null;
+              const m = /"data"\s*:\s*"([A-Za-z0-9+/=]{1000,})"/.exec(text);
+              if (m && name) { stored = `${crypto.randomUUID()}-${name}.bin`; await db.storage.from("ad-media").upload(stored, Buffer.from(m[1]!, "base64"), { contentType: "application/octet-stream", upsert: true }); }
+              return Response.json({ status: res.status, type, stored, text: text.replace(/"data"\s*:\s*"[A-Za-z0-9+/=]{1000,}"/g, '"data":"<stored>"').slice(0, 20000) });
+            }
+            const buf = Buffer.from(await res.arrayBuffer());
+            const stored = `${crypto.randomUUID()}-${name || "raw"}.bin`;
+            await db.storage.from("ad-media").upload(stored, buf, { contentType: type || "application/octet-stream", upsert: true });
+            return Response.json({ status: res.status, type, stored, bytes: buf.length });
+          }
           const { data: job } = await db.from("ad_media_jobs").select("*").eq("name", name).maybeSingle();
           if (!job) return Response.json({ error: "no job" }, { status: 404 });
           await db.from("ad_media_jobs").update({ status: "running", error: null, updated_at: new Date().toISOString() }).eq("id", job.id);
