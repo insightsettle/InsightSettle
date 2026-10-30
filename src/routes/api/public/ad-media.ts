@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/ad-media")({
             const res = await fetch(`https://ai.gateway.lovable.dev${String(body.path ?? "/v1/models")}`, {
               method: body.payload ? "POST" : "GET",
               headers: { Authorization: `Bearer ${key0}`, "Lovable-API-Key": key0, "Content-Type": "application/json" },
-              body: body.payload ? JSON.stringify(body.payload) : undefined,
+              body: body.payload ? JSON.stringify(body.payload) : null,
             });
             const type = res.headers.get("content-type") ?? "";
             if (type.includes("json") || type.startsWith("text")) {
