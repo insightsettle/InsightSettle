@@ -111,6 +111,14 @@ function BusinessPage() {
       <StepsFlow />
     </div></section>
 
+    <section className="mx-auto max-w-7xl px-5 pb-16 lg:pb-20">
+      <div className="flex flex-col items-start gap-4 rounded-3xl border border-border bg-card p-6 sm:flex-row sm:items-center sm:p-8">
+        <div className="min-w-0 flex-1"><p className="text-lg font-bold">{text("Sell online? Connect your store or platform", "تبيع عبر الإنترنت؟ اربط متجرك أو منصتك")}</p>
+          <p className="mt-1 text-sm leading-7 text-muted-foreground">{text("Every order becomes a protected deal: your customer pays on Insight, and you are paid after delivery.", "كل طلب يصبح صفقة محمية: يدفع عميلك في إنسايت، وتستلم بعد التسليم.")}</p></div>
+        <Link to="/business-api" className="font-semibold text-primary">{text("See how it works", "اعرف كيف يعمل")}</Link>
+      </div>
+    </section>
+
     <section className="mx-auto max-w-4xl px-5 pb-16 lg:pb-20">
       <SectionHeader title={["Questions from companies", "أسئلة أصحاب الأعمال"]} />
       <FaqList items={FAQ} />

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BusinessRouteImport } from './routes/business'
+import { Route as BusinessApiRouteImport } from './routes/business-api'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as DevelopersRouteImport } from './routes/developers'
 import { Route as DisputePolicyRouteImport } from './routes/dispute-policy'
@@ -38,6 +39,7 @@ import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
+import { Route as AuthenticatedPartnerGuideRouteImport } from './routes/_authenticated/partner-guide'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
@@ -111,6 +113,11 @@ const AuthRoute = AuthRouteImport.update({
 const BusinessRoute = BusinessRouteImport.update({
   id: '/business',
   path: '/business',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessApiRoute = BusinessApiRouteImport.update({
+  id: '/business-api',
+  path: '/business-api',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsoleRoute = ConsoleRouteImport.update({
@@ -238,6 +245,12 @@ const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
   path: '/partner',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPartnerGuideRoute =
+  AuthenticatedPartnerGuideRouteImport.update({
+    id: '/partner-guide',
+    path: '/partner-guide',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedVerificationRoute =
   AuthenticatedVerificationRouteImport.update({
     id: '/verification',
@@ -533,6 +546,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
+  '/business-api': typeof BusinessApiRoute
   '/console': typeof ConsoleRouteWithChildren
   '/developers': typeof DevelopersRoute
   '/dispute-policy': typeof DisputePolicyRoute
@@ -558,6 +572,7 @@ export interface FileRoutesByFullPath {
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/links': typeof AuthenticatedLinksRoute
   '/partner': typeof AuthenticatedPartnerRoute
+  '/partner-guide': typeof AuthenticatedPartnerGuideRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
@@ -618,6 +633,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
+  '/business-api': typeof BusinessApiRoute
   '/developers': typeof DevelopersRoute
   '/dispute-policy': typeof DisputePolicyRoute
   '/faq': typeof FaqRoute
@@ -642,6 +658,7 @@ export interface FileRoutesByTo {
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/links': typeof AuthenticatedLinksRoute
   '/partner': typeof AuthenticatedPartnerRoute
+  '/partner-guide': typeof AuthenticatedPartnerGuideRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
@@ -702,6 +719,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
+  '/business-api': typeof BusinessApiRoute
   '/console': typeof ConsoleRouteWithChildren
   '/developers': typeof DevelopersRoute
   '/dispute-policy': typeof DisputePolicyRoute
@@ -727,6 +745,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
   '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/partner': typeof AuthenticatedPartnerRoute
+  '/_authenticated/partner-guide': typeof AuthenticatedPartnerGuideRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
@@ -789,6 +808,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/business'
+    | '/business-api'
     | '/console'
     | '/developers'
     | '/dispute-policy'
@@ -814,6 +834,7 @@ export interface FileRouteTypes {
     | '/invoices'
     | '/links'
     | '/partner'
+    | '/partner-guide'
     | '/verification'
     | '/welcome'
     | '/api/deal-risk'
@@ -874,6 +895,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/business'
+    | '/business-api'
     | '/developers'
     | '/dispute-policy'
     | '/faq'
@@ -898,6 +920,7 @@ export interface FileRouteTypes {
     | '/invoices'
     | '/links'
     | '/partner'
+    | '/partner-guide'
     | '/verification'
     | '/welcome'
     | '/api/deal-risk'
@@ -957,6 +980,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/business'
+    | '/business-api'
     | '/console'
     | '/developers'
     | '/dispute-policy'
@@ -982,6 +1006,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices'
     | '/_authenticated/links'
     | '/_authenticated/partner'
+    | '/_authenticated/partner-guide'
     | '/_authenticated/verification'
     | '/_authenticated/welcome'
     | '/api/deal-risk'
@@ -1044,6 +1069,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BusinessRoute: typeof BusinessRoute
+  BusinessApiRoute: typeof BusinessApiRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
   DevelopersRoute: typeof DevelopersRoute
   DisputePolicyRoute: typeof DisputePolicyRoute
@@ -1106,6 +1132,13 @@ declare module '@tanstack/react-router' {
       path: '/business'
       fullPath: '/business'
       preLoaderRoute: typeof BusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business-api': {
+      id: '/business-api'
+      path: '/business-api'
+      fullPath: '/business-api'
+      preLoaderRoute: typeof BusinessApiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/console': {
@@ -1281,6 +1314,13 @@ declare module '@tanstack/react-router' {
       path: '/partner'
       fullPath: '/partner'
       preLoaderRoute: typeof AuthenticatedPartnerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/partner-guide': {
+      id: '/_authenticated/partner-guide'
+      path: '/partner-guide'
+      fullPath: '/partner-guide'
+      preLoaderRoute: typeof AuthenticatedPartnerGuideRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/verification': {
@@ -1680,6 +1720,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
   AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRoute
+  AuthenticatedPartnerGuideRoute: typeof AuthenticatedPartnerGuideRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedAuctionsIdRoute: typeof AuthenticatedAuctionsIdRoute
@@ -1699,6 +1740,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
   AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedPartnerRoute: AuthenticatedPartnerRoute,
+  AuthenticatedPartnerGuideRoute: AuthenticatedPartnerGuideRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedAuctionsIdRoute: AuthenticatedAuctionsIdRoute,
@@ -1814,6 +1856,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BusinessRoute: BusinessRoute,
+  BusinessApiRoute: BusinessApiRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
   DevelopersRoute: DevelopersRoute,
   DisputePolicyRoute: DisputePolicyRoute,

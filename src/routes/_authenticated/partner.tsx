@@ -71,7 +71,7 @@ function PartnerPage() {
       <p className="mt-2 max-w-2xl leading-7 text-muted-foreground">{text(
         "Connect your store or platform to Insight. Your system creates the deal, your customer accepts the terms and pays on Insight, and you receive an event at every step. Payouts follow Insight's rules only.",
         "اربط متجرك أو منصتك بإنسايت. نظامك ينشئ الصفقة، وعميلك يوافق على الشروط ويدفع في صفحة إنسايت، وتصلك إشعارات بكل خطوة. تحويل المبالغ يتم وفق قواعد إنسايت فقط.")}{" "}
-        <Link to="/developers" className="font-semibold text-primary">{text("Read the API guide", "اقرأ دليل الربط")}</Link></p>
+        <Link to="/partner-guide" className="font-semibold text-primary">{text("Technical guide for your developer", "الدليل التقني لمطوّرك")}</Link></p>
 
       {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-4 text-sm ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>}
 
