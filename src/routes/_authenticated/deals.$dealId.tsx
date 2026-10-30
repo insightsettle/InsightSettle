@@ -1,4 +1,5 @@
 import { getDealPricing, requestFxQuote, PAY_CURRENCIES, type FxQuote } from "@/lib/fx-quotes.functions";
+import { PartnerBanner } from "@/components/deal/PartnerBanner";
 import { logAr } from "@/lib/log-i18n";
 import { DEFAULT_METHOD, METHOD_LABEL, PAYMENT_METHODS, type PaymentMethod } from "@/lib/payment-methods";
 import { CalendarClock as CalendarIcon, Check as CheckIcon, Coins as CoinsIcon, Copy as CopyIcon, Eye as EyeIcon } from "@/components/icons";
@@ -353,6 +354,7 @@ function OrdinaryDealPage() {
                   </div>
                 )}
         <div data-no-localize className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">{([[EyeIcon, text("Inspection", "مدة الفحص"), text(`${deal.inspection_days} day(s)`, `${deal.inspection_days} أيام`)], [CalendarIcon, text("Delivery by", "التسليم قبل"), deal.due_at ? formatDate(deal.due_at) : text("Not set", "غير محدد")], [CoinsIcon, text("Currency", "العملة"), deal.currency]] as const).map(([I, label, value]) => <div key={label} className="flex items-center gap-2.5 rounded-2xl border border-border bg-card p-3 sm:p-4"><span className="hidden size-9 shrink-0 place-items-center rounded-xl bg-accent text-primary sm:grid"><I className="size-4" /></span><div className="min-w-0"><p className="truncate text-[11px] text-muted-foreground sm:text-xs">{label}</p><p className="truncate text-sm font-semibold sm:text-base"><bdi>{value}</bdi></p></div></div>)}</div>
+        <PartnerBanner dealId={deal.id} status={deal.status} />
         {(action.error || paymentNotice) && <div className="mt-3" data-no-localize>{action.error && <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{(action.error as Error).message}</p>}{paymentNotice && <p role="status" className={`rounded-xl border p-4 text-sm ${paymentNotice.ok ? "border-primary/40 bg-accent" : "border-destructive/40 bg-destructive/5"}`}><b>{paymentNotice.ok ? text("Payment recorded", "تم تسجيل الدفع") : text("Payment could not be completed", "تعذّر إكمال الدفع")}</b> · {paymentNotice.message}</p>}</div>}
         {(milestonesQ.data?.length ?? 0) > 0 && <div id="milestones" className="mt-6 scroll-mt-24"><ContractDashboard deal={deal} milestones={milestonesQ.data ?? []} isBuyer={isBuyer} isSeller={isSeller} termVersions={termsQ.data ?? []} onDone={refresh} /></div>}
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">

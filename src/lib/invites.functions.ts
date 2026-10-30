@@ -33,6 +33,14 @@ export const acceptDealInvite = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "already_joined" as const };
     }
 
+    // A deal created through the partner API may be joined only by the buyer email the partner sent.
+    if ((deal as { partner_id?: string | null }).partner_id && deal.counterparty_email) {
+      const { data: me } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+      if ((me?.user?.email ?? "").toLowerCase() !== String(deal.counterparty_email).toLowerCase()) {
+        return { ok: false as const, reason: "email_mismatch" as const };
+      }
+    }
+
     const patch = deal.buyer_id ? { seller_id: context.userId } : { buyer_id: context.userId };
     const { error: updateError } = await supabaseAdmin
       .from("deals")

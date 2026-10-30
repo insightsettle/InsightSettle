@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Handshake, Scale, ReceiptText as Receipt, FileText, UserRoundCheck, Plus, Gavel, UserRound, Link2, IdCard } from "@/components/icons";
+import { Home, Handshake, Scale, ReceiptText as Receipt, FileText, UserRoundCheck, Plus, Gavel, UserRound, Link2, IdCard, KeyRound } from "@/components/icons";
 import { useEffect, type ReactNode } from "react";
 import { AppShell, shellNavClass } from "@/components/site/AppShell";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,7 @@ export function ClientShell({ children }: { children: ReactNode }) {
       <Link to="/card" className={shellNavClass}><IdCard className="size-4" />{text("My Insight card", "بطاقتي في إنسايت")}</Link>
       <Link to="/verification" className={shellNavClass}><UserRoundCheck className="size-4" />{text("Account & verification")}</Link>
       {auctionsAccess?.visible && <Link to="/auctions" className={shellNavClass} data-status={pathname.startsWith('/auctions') ? 'active' : 'inactive'}><Gavel className="size-4" />{text("Auctions", "المزادات")}</Link>}
+      {auctionsAccess?.eligible && <Link to="/partner" className={shellNavClass}><KeyRound className="size-4" />{text("Partner API", "واجهة الربط")}</Link>}
     </nav>
   </>;
   // Phone tab bar: hidden on a single deal page, which carries its own sticky action instead.

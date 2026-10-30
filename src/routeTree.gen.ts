@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ConsoleRouteImport } from './routes/console'
+import { Route as DevelopersRouteImport } from './routes/developers'
 import { Route as DisputePolicyRouteImport } from './routes/dispute-policy'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ForBuyersRouteImport } from './routes/for-buyers'
@@ -36,6 +37,7 @@ import { Route as AuthenticatedDisputesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
+import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiDealRiskRouteImport } from './routes/api/deal-risk'
@@ -114,6 +116,11 @@ const BusinessRoute = BusinessRouteImport.update({
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/console',
   path: '/console',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevelopersRoute = DevelopersRouteImport.update({
+  id: '/developers',
+  path: '/developers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DisputePolicyRoute = DisputePolicyRouteImport.update({
@@ -224,6 +231,11 @@ const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
 const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
   id: '/links',
   path: '/links',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedVerificationRoute =
@@ -522,6 +534,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
+  '/developers': typeof DevelopersRoute
   '/dispute-policy': typeof DisputePolicyRoute
   '/faq': typeof FaqRoute
   '/for-buyers': typeof ForBuyersRoute
@@ -544,6 +557,7 @@ export interface FileRoutesByFullPath {
   '/documents': typeof AuthenticatedDocumentsRoute
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/links': typeof AuthenticatedLinksRoute
+  '/partner': typeof AuthenticatedPartnerRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
@@ -604,6 +618,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
+  '/developers': typeof DevelopersRoute
   '/dispute-policy': typeof DisputePolicyRoute
   '/faq': typeof FaqRoute
   '/for-buyers': typeof ForBuyersRoute
@@ -626,6 +641,7 @@ export interface FileRoutesByTo {
   '/documents': typeof AuthenticatedDocumentsRoute
   '/invoices': typeof AuthenticatedInvoicesRoute
   '/links': typeof AuthenticatedLinksRoute
+  '/partner': typeof AuthenticatedPartnerRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
@@ -687,6 +703,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/console': typeof ConsoleRouteWithChildren
+  '/developers': typeof DevelopersRoute
   '/dispute-policy': typeof DisputePolicyRoute
   '/faq': typeof FaqRoute
   '/for-buyers': typeof ForBuyersRoute
@@ -709,6 +726,7 @@ export interface FileRoutesById {
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
   '/_authenticated/links': typeof AuthenticatedLinksRoute
+  '/_authenticated/partner': typeof AuthenticatedPartnerRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/deal-risk': typeof ApiDealRiskRoute
@@ -772,6 +790,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/console'
+    | '/developers'
     | '/dispute-policy'
     | '/faq'
     | '/for-buyers'
@@ -794,6 +813,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/invoices'
     | '/links'
+    | '/partner'
     | '/verification'
     | '/welcome'
     | '/api/deal-risk'
@@ -854,6 +874,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/business'
+    | '/developers'
     | '/dispute-policy'
     | '/faq'
     | '/for-buyers'
@@ -876,6 +897,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/invoices'
     | '/links'
+    | '/partner'
     | '/verification'
     | '/welcome'
     | '/api/deal-risk'
@@ -936,6 +958,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/console'
+    | '/developers'
     | '/dispute-policy'
     | '/faq'
     | '/for-buyers'
@@ -958,6 +981,7 @@ export interface FileRouteTypes {
     | '/_authenticated/documents'
     | '/_authenticated/invoices'
     | '/_authenticated/links'
+    | '/_authenticated/partner'
     | '/_authenticated/verification'
     | '/_authenticated/welcome'
     | '/api/deal-risk'
@@ -1021,6 +1045,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BusinessRoute: typeof BusinessRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
+  DevelopersRoute: typeof DevelopersRoute
   DisputePolicyRoute: typeof DisputePolicyRoute
   FaqRoute: typeof FaqRoute
   ForBuyersRoute: typeof ForBuyersRoute
@@ -1088,6 +1113,13 @@ declare module '@tanstack/react-router' {
       path: '/console'
       fullPath: '/console'
       preLoaderRoute: typeof ConsoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/developers': {
+      id: '/developers'
+      path: '/developers'
+      fullPath: '/developers'
+      preLoaderRoute: typeof DevelopersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dispute-policy': {
@@ -1242,6 +1274,13 @@ declare module '@tanstack/react-router' {
       path: '/links'
       fullPath: '/links'
       preLoaderRoute: typeof AuthenticatedLinksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/partner': {
+      id: '/_authenticated/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof AuthenticatedPartnerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/verification': {
@@ -1640,6 +1679,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
   AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
+  AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedAuctionsIdRoute: typeof AuthenticatedAuctionsIdRoute
@@ -1658,6 +1698,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
   AuthenticatedLinksRoute: AuthenticatedLinksRoute,
+  AuthenticatedPartnerRoute: AuthenticatedPartnerRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedAuctionsIdRoute: AuthenticatedAuctionsIdRoute,
@@ -1774,6 +1815,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BusinessRoute: BusinessRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
+  DevelopersRoute: DevelopersRoute,
   DisputePolicyRoute: DisputePolicyRoute,
   FaqRoute: FaqRoute,
   ForBuyersRoute: ForBuyersRoute,

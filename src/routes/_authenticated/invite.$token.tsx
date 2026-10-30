@@ -40,7 +40,9 @@ function InvitePage() {
         setMessage(
           result.reason === "not_found"
             ? ["This invitation link is not valid any more.", "رابط الدعوة هذا لم يعد صالحاً."]
-            : ["This deal already has both parties.", "هذه الصفقة مكتملة الطرفين."],
+            : result.reason === "email_mismatch"
+              ? ["This deal was sent to another email address. Sign in with the email the seller used for your order.", "أُرسلت هذه الصفقة إلى بريد آخر. سجّل الدخول بالبريد الذي استخدمه البائع لطلبك."]
+              : ["This deal already has both parties.", "هذه الصفقة مكتملة الطرفين."],
         );
       })
       .catch(() => {
