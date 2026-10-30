@@ -71,6 +71,7 @@ import { Route as AuthenticatedDealsNewRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedInvoiceRefRouteImport } from './routes/_authenticated/invoice.$ref'
 import { Route as AuthenticatedPayDealIdRouteImport } from './routes/_authenticated/pay.$dealId'
+import { Route as ApiPublicAdMediaRouteImport } from './routes/api/public/ad-media'
 import { Route as ApiPublicAutoReleaseRouteImport } from './routes/api/public/auto-release'
 import { Route as ApiPublicPartnerWebhooksRouteImport } from './routes/api/public/partner-webhooks'
 import { Route as ApiV1ActionRouteImport } from './routes/api/v1/$action'
@@ -409,6 +410,11 @@ const AuthenticatedPayDealIdRoute = AuthenticatedPayDealIdRouteImport.update({
   path: '/pay/$dealId',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicAdMediaRoute = ApiPublicAdMediaRouteImport.update({
+  id: '/api/public/ad-media',
+  path: '/api/public/ad-media',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAutoReleaseRoute = ApiPublicAutoReleaseRouteImport.update({
   id: '/api/public/auto-release',
   path: '/api/public/auto-release',
@@ -604,6 +610,7 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/pay/$dealId': typeof AuthenticatedPayDealIdRoute
+  '/api/public/ad-media': typeof ApiPublicAdMediaRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/public/partner-webhooks': typeof ApiPublicPartnerWebhooksRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
@@ -689,6 +696,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/pay/$dealId': typeof AuthenticatedPayDealIdRoute
+  '/api/public/ad-media': typeof ApiPublicAdMediaRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/public/partner-webhooks': typeof ApiPublicPartnerWebhooksRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
@@ -777,6 +785,7 @@ export interface FileRoutesById {
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/_authenticated/pay/$dealId': typeof AuthenticatedPayDealIdRoute
+  '/api/public/ad-media': typeof ApiPublicAdMediaRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
   '/api/public/partner-webhooks': typeof ApiPublicPartnerWebhooksRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
@@ -866,6 +875,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/invoice/$ref'
     | '/pay/$dealId'
+    | '/api/public/ad-media'
     | '/api/public/auto-release'
     | '/api/public/partner-webhooks'
     | '/api/v1/$action'
@@ -951,6 +961,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/invoice/$ref'
     | '/pay/$dealId'
+    | '/api/public/ad-media'
     | '/api/public/auto-release'
     | '/api/public/partner-webhooks'
     | '/api/v1/$action'
@@ -1038,6 +1049,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invite/$token'
     | '/_authenticated/invoice/$ref'
     | '/_authenticated/pay/$dealId'
+    | '/api/public/ad-media'
     | '/api/public/auto-release'
     | '/api/public/partner-webhooks'
     | '/api/v1/$action'
@@ -1094,6 +1106,7 @@ export interface RootRouteChildren {
   AuthConfirmedRoute: typeof AuthConfirmedRoute
   AuthResetRoute: typeof AuthResetRoute
   DCodeRoute: typeof DCodeRoute
+  ApiPublicAdMediaRoute: typeof ApiPublicAdMediaRoute
   ApiPublicAutoReleaseRoute: typeof ApiPublicAutoReleaseRoute
   ApiPublicPartnerWebhooksRoute: typeof ApiPublicPartnerWebhooksRoute
   ApiV1ActionRoute: typeof ApiV1ActionRoute
@@ -1540,6 +1553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPayDealIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/ad-media': {
+      id: '/api/public/ad-media'
+      path: '/api/public/ad-media'
+      fullPath: '/api/public/ad-media'
+      preLoaderRoute: typeof ApiPublicAdMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/auto-release': {
       id: '/api/public/auto-release'
       path: '/api/public/auto-release'
@@ -1881,6 +1901,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthConfirmedRoute: AuthConfirmedRoute,
   AuthResetRoute: AuthResetRoute,
   DCodeRoute: DCodeRoute,
+  ApiPublicAdMediaRoute: ApiPublicAdMediaRoute,
   ApiPublicAutoReleaseRoute: ApiPublicAutoReleaseRoute,
   ApiPublicPartnerWebhooksRoute: ApiPublicPartnerWebhooksRoute,
   ApiV1ActionRoute: ApiV1ActionRoute,
