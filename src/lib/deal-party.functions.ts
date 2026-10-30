@@ -152,7 +152,11 @@ export const updateShipping = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }) => updateShippingAs(context.userId, data));
+
+/** Shipping update by the seller; shared by the web app and the partner API. */
+export async function updateShippingAs(userId: string, data: { dealId: string; carrier: string; tracking: string; status: "preparing" | "shipped" | "in_transit" | "out_for_delivery"; eta?: string | null | undefined }) {
+    const context = { userId };
     const { admin, notify, deal, isSeller } = await load(context, data.dealId, true);
     if (!isSeller) throw new Error("Only the seller can update shipping.");
     if (deal.status !== "held") throw new Error("Shipping can be updated once the funds are held.");
@@ -171,13 +175,17 @@ export const updateShipping = createServerFn({ method: "POST" })
     const note = `${data.carrier || "Carrier"} · ${data.tracking || "no tracking number"} · ${data.status}`;
     await record(admin, notify, deal.id, context.userId, "Shipping details updated", note);
     return { ok: true };
-  });
+}
 
 /** Seller confirms delivery; the inspection period (from the agreed terms) starts on the server clock. */
 export const confirmDelivery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { dealId: string }) => idOnly.parse(i))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }) => confirmDeliveryAs(context.userId, data));
+
+/** Delivery confirmation by the seller; shared by the web app and the partner API. */
+export async function confirmDeliveryAs(userId: string, data: { dealId: string }) {
+    const context = { userId };
     const { admin, notify, deal, isSeller } = await load(context, data.dealId, true);
     if (!isSeller) throw new Error("Only the seller can confirm delivery.");
     if (deal.status !== "held" && deal.status !== "under_review") throw new Error("Delivery can be confirmed only while the funds are held.");
@@ -196,7 +204,7 @@ export const confirmDelivery = createServerFn({ method: "POST" })
     if (error) throw error;
     await record(admin, notify, deal.id, context.userId, deal.status === "under_review" ? "Seller resubmitted the delivery — a new full inspection period started" : "Seller confirmed delivery", `Buyer inspection period ends ${autoRelease.toISOString().slice(0, 10)}`);
     return { ok: true };
-  });
+}
 
 export const requestRevision = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

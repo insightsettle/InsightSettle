@@ -55,7 +55,7 @@ export function snapshotOf(d: any, milestones: any[]) {
   };
 }
 
-const createSchema = z.object({
+export const createSchema = z.object({
   dealType: z.enum(DEAL_TYPES),
   title: z.string().trim().min(3).max(200),
   description: z.string().trim().max(5000),
@@ -86,7 +86,11 @@ const createSchema = z.object({
 export const createTypedDeal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: z.input<typeof createSchema>) => createSchema.parse(i))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }) => createTypedDealAs(context.userId, data));
+
+/** The deal creation itself, shared by the web app and the partner API (`extra` adds partner columns). */
+export async function createTypedDealAs(userId: string, data: z.output<typeof createSchema>, extra: Record<string, unknown> = {}) {
+    const context = { userId };
     const { admin } = await deps();
     const { data: me, error: accountError } = await admin.from("profiles").select("account_state").eq("id", context.userId).maybeSingle();
     if (accountError) throw accountError;
@@ -117,6 +121,7 @@ export const createTypedDeal = createServerFn({ method: "POST" })
         retention_percent: isContract ? data.retentionPercent : 0,
         defects_liability_days: isContract ? data.defectsLiabilityDays : 0,
         funding_mode: ms.length ? data.fundingMode : "upfront",
+        ...extra,
       })
       .select("*")
       .single();
@@ -138,7 +143,7 @@ export const createTypedDeal = createServerFn({ method: "POST" })
       deal_id: deal.id, version: 1, snapshot: snapshotOf(deal, ms), note: "Initial terms", created_by: context.userId,
     });
     return { id: deal.id as string, ref: deal.ref as string, invite_token: deal.invite_token as string };
-  });
+}
 
 /** Variation / أمر تغيير: a new milestone plan becomes a new terms version that the other party must accept. */
 export const proposeVariation = createServerFn({ method: "POST" })

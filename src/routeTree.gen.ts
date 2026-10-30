@@ -68,6 +68,7 @@ import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenti
 import { Route as AuthenticatedInvoiceRefRouteImport } from './routes/_authenticated/invoice.$ref'
 import { Route as AuthenticatedPayDealIdRouteImport } from './routes/_authenticated/pay.$dealId'
 import { Route as ApiPublicAutoReleaseRouteImport } from './routes/api/public/auto-release'
+import { Route as ApiPublicPartnerWebhooksRouteImport } from './routes/api/public/partner-webhooks'
 import { Route as ApiV1ActionRouteImport } from './routes/api/v1/$action'
 import { Route as ConsoleDealsIndexRouteImport } from './routes/console.deals.index'
 import { Route as ConsoleDealsDealIdRouteImport } from './routes/console.deals.$dealId'
@@ -81,6 +82,7 @@ import { Route as ConsoleFinanceReportsRouteImport } from './routes/console.fina
 import { Route as ConsoleFinanceRoutingRouteImport } from './routes/console.finance.routing'
 import { Route as ConsoleFinanceTransactionsRouteImport } from './routes/console.finance.transactions'
 import { Route as ConsoleUsersUserIdRouteImport } from './routes/console.users_.$userId'
+import { Route as ApiPartnerV1SplatRouteImport } from './routes/api/partner/v1/$'
 import { Route as ConsoleFinanceProvidersIndexRouteImport } from './routes/console.finance.providers.index'
 import { Route as ConsoleFinanceProvidersProviderIdRouteImport } from './routes/console.finance.providers.$providerId'
 import { Route as ConsoleFinanceTransactionsIndexRouteImport } from './routes/console.finance.transactions.index'
@@ -387,6 +389,12 @@ const ApiPublicAutoReleaseRoute = ApiPublicAutoReleaseRouteImport.update({
   path: '/api/public/auto-release',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPartnerWebhooksRoute =
+  ApiPublicPartnerWebhooksRouteImport.update({
+    id: '/api/public/partner-webhooks',
+    path: '/api/public/partner-webhooks',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiV1ActionRoute = ApiV1ActionRouteImport.update({
   id: '/api/v1/$action',
   path: '/api/v1/$action',
@@ -456,6 +464,11 @@ const ConsoleUsersUserIdRoute = ConsoleUsersUserIdRouteImport.update({
   id: '/users_/$userId',
   path: '/users/$userId',
   getParentRoute: () => ConsoleRoute,
+} as any)
+const ApiPartnerV1SplatRoute = ApiPartnerV1SplatRouteImport.update({
+  id: '/api/partner/v1/$',
+  path: '/api/partner/v1/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ConsoleFinanceProvidersIndexRoute =
   ConsoleFinanceProvidersIndexRouteImport.update({
@@ -563,6 +576,7 @@ export interface FileRoutesByFullPath {
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/pay/$dealId': typeof AuthenticatedPayDealIdRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
+  '/api/public/partner-webhooks': typeof ApiPublicPartnerWebhooksRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
@@ -576,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/console/finance/': typeof ConsoleFinanceIndexRoute
+  '/api/partner/v1/$': typeof ApiPartnerV1SplatRoute
   '/console/finance/providers/$providerId': typeof ConsoleFinanceProvidersProviderIdRoute
   '/console/finance/transactions/$transactionId': typeof ConsoleFinanceTransactionsTransactionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -642,6 +657,7 @@ export interface FileRoutesByTo {
   '/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/pay/$dealId': typeof AuthenticatedPayDealIdRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
+  '/api/public/partner-webhooks': typeof ApiPublicPartnerWebhooksRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
@@ -654,6 +670,7 @@ export interface FileRoutesByTo {
   '/console/users/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals': typeof ConsoleDealsIndexRoute
   '/console/finance': typeof ConsoleFinanceIndexRoute
+  '/api/partner/v1/$': typeof ApiPartnerV1SplatRoute
   '/console/finance/providers/$providerId': typeof ConsoleFinanceProvidersProviderIdRoute
   '/console/finance/transactions/$transactionId': typeof ConsoleFinanceTransactionsTransactionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -724,6 +741,7 @@ export interface FileRoutesById {
   '/_authenticated/invoice/$ref': typeof AuthenticatedInvoiceRefRoute
   '/_authenticated/pay/$dealId': typeof AuthenticatedPayDealIdRoute
   '/api/public/auto-release': typeof ApiPublicAutoReleaseRoute
+  '/api/public/partner-webhooks': typeof ApiPublicPartnerWebhooksRoute
   '/api/v1/$action': typeof ApiV1ActionRoute
   '/console/deals/$dealId': typeof ConsoleDealsDealIdRoute
   '/console/finance/monitoring': typeof ConsoleFinanceMonitoringRoute
@@ -737,6 +755,7 @@ export interface FileRoutesById {
   '/console/users_/$userId': typeof ConsoleUsersUserIdRoute
   '/console/deals/': typeof ConsoleDealsIndexRoute
   '/console/finance/': typeof ConsoleFinanceIndexRoute
+  '/api/partner/v1/$': typeof ApiPartnerV1SplatRoute
   '/console/finance/providers/$providerId': typeof ConsoleFinanceProvidersProviderIdRoute
   '/console/finance/transactions/$transactionId': typeof ConsoleFinanceTransactionsTransactionIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -807,6 +826,7 @@ export interface FileRouteTypes {
     | '/invoice/$ref'
     | '/pay/$dealId'
     | '/api/public/auto-release'
+    | '/api/public/partner-webhooks'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/finance/monitoring'
@@ -820,6 +840,7 @@ export interface FileRouteTypes {
     | '/console/users/$userId'
     | '/console/deals/'
     | '/console/finance/'
+    | '/api/partner/v1/$'
     | '/console/finance/providers/$providerId'
     | '/console/finance/transactions/$transactionId'
     | '/lovable/email/auth/preview'
@@ -886,6 +907,7 @@ export interface FileRouteTypes {
     | '/invoice/$ref'
     | '/pay/$dealId'
     | '/api/public/auto-release'
+    | '/api/public/partner-webhooks'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/finance/monitoring'
@@ -898,6 +920,7 @@ export interface FileRouteTypes {
     | '/console/users/$userId'
     | '/console/deals'
     | '/console/finance'
+    | '/api/partner/v1/$'
     | '/console/finance/providers/$providerId'
     | '/console/finance/transactions/$transactionId'
     | '/lovable/email/auth/preview'
@@ -967,6 +990,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoice/$ref'
     | '/_authenticated/pay/$dealId'
     | '/api/public/auto-release'
+    | '/api/public/partner-webhooks'
     | '/api/v1/$action'
     | '/console/deals/$dealId'
     | '/console/finance/monitoring'
@@ -980,6 +1004,7 @@ export interface FileRouteTypes {
     | '/console/users_/$userId'
     | '/console/deals/'
     | '/console/finance/'
+    | '/api/partner/v1/$'
     | '/console/finance/providers/$providerId'
     | '/console/finance/transactions/$transactionId'
     | '/lovable/email/auth/preview'
@@ -1019,7 +1044,9 @@ export interface RootRouteChildren {
   AuthResetRoute: typeof AuthResetRoute
   DCodeRoute: typeof DCodeRoute
   ApiPublicAutoReleaseRoute: typeof ApiPublicAutoReleaseRoute
+  ApiPublicPartnerWebhooksRoute: typeof ApiPublicPartnerWebhooksRoute
   ApiV1ActionRoute: typeof ApiV1ActionRoute
+  ApiPartnerV1SplatRoute: typeof ApiPartnerV1SplatRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -1441,6 +1468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAutoReleaseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/partner-webhooks': {
+      id: '/api/public/partner-webhooks'
+      path: '/api/public/partner-webhooks'
+      fullPath: '/api/public/partner-webhooks'
+      preLoaderRoute: typeof ApiPublicPartnerWebhooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/$action': {
       id: '/api/v1/$action'
       path: '/api/v1/$action'
@@ -1531,6 +1565,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/console/users/$userId'
       preLoaderRoute: typeof ConsoleUsersUserIdRouteImport
       parentRoute: typeof ConsoleRoute
+    }
+    '/api/partner/v1/$': {
+      id: '/api/partner/v1/$'
+      path: '/api/partner/v1/$'
+      fullPath: '/api/partner/v1/$'
+      preLoaderRoute: typeof ApiPartnerV1SplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/console/finance/providers/': {
       id: '/console/finance/providers/'
@@ -1756,7 +1797,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetRoute: AuthResetRoute,
   DCodeRoute: DCodeRoute,
   ApiPublicAutoReleaseRoute: ApiPublicAutoReleaseRoute,
+  ApiPublicPartnerWebhooksRoute: ApiPublicPartnerWebhooksRoute,
   ApiV1ActionRoute: ApiV1ActionRoute,
+  ApiPartnerV1SplatRoute: ApiPartnerV1SplatRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
